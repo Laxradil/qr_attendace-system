@@ -171,21 +171,6 @@
         .btn-login:active {
             transform: translateY(0);
         }
-        .alert {
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-        }
-        .alert-danger {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-        }
-        .alert-danger ul {
-            padding-left: 1rem;
-            margin-bottom: 0;
-        }
     </style>
 </head>
 <body>
@@ -198,23 +183,13 @@
             <h2>Welcome Back</h2>
             <p>Please enter your details to sign in</p>
         </div>
-
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
         
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <div class="input-wrapper">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" value="{{ old('email') }}" required>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
                     <i class="fas fa-envelope"></i>
                 </div>
             </div>
@@ -242,6 +217,13 @@
                 Sign In
             </button>
         </form>
+        
+        <div class="register-link" style="text-align: center; margin-top: 1.5rem;">
+            <p style="color: #6b7280; font-size: 0.9rem;">
+                Don't have an account? 
+                <a href="{{ route('register') }}" style="color: #3d7ab5; text-decoration: none; font-weight: 600;">Create one</a>
+            </p>
+        </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

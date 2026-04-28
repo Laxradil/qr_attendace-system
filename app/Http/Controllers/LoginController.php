@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -23,6 +21,12 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            
+            // Check user role and redirect accordingly
+            $user = Auth::user();
+            if ($user->role === 'admin') {
+                return redirect()->intended('/admin');
+            }
             return redirect()->intended('/dashboard');
         }
 
@@ -37,5 +41,25 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/login');
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = \App\Models\User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => 'student',
+            'username' => strtolower(str_replace(' ', '_', $request->name)),
+        ]);
+
+        Auth::login($user);
+        return redirect('/dashboard');
     }
 }
