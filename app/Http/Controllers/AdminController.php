@@ -132,4 +132,61 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Schedule created successfully!');
     }
+
+    public function showUser($id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return redirect('/dashboard');
+        }
+        
+        $user = User::findOrFail($id);
+        return response()->json($user);
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return redirect('/dashboard');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'role' => 'required|in:admin,professor,student',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update($request->all());
+
+        return redirect()->back()->with('success', 'User updated successfully!');
+    }
+
+    public function deleteUser($id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return redirect('/dashboard');
+        }
+
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return response()->json(['success' => true, 'message' => 'User deleted successfully!']);
+    }
+
+    public function resetPassword(Request $request, $id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return redirect('/dashboard');
+        }
+
+        $newPassword = substr(md5(time()), 0, 8);
+        $user = User::findOrFail($id);
+        $user->update(['password' => bcrypt($newPassword)]);
+
+        return response()->json(['success' => true, 'new_password' => $newPassword]);
+    }
 }
