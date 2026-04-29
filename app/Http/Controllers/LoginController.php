@@ -27,6 +27,9 @@ class LoginController extends Controller
             if ($user->role === 'admin') {
                 return redirect('/admin')->with('success', 'Welcome back, Admin!');
             }
+            if ($user->role === 'professor') {
+                return redirect('/dashboard')->with('success', 'Welcome back, Professor!');
+            }
             return redirect()->intended('/dashboard');
         }
 
