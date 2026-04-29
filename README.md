@@ -26,57 +26,6 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 <p align="center">
 
 ## Supabase Setup
-## Developer setup with Laravel Sail (recommended)
-
-This repository includes Laravel Sail scaffolding configured for `pgsql` and `redis` to provide a reproducible development environment for the team.
-
-Prerequisites:
-- Docker Desktop (or another Docker engine) installed and running on your machine.
-
-Quick start (Windows PowerShell):
-
-```powershell
-# start containers (detached)
-vendor\bin\sail up -d
-
-# run migrations (uses the container environment)
-vendor\bin\sail artisan migrate --force
-
-# stop containers when done
-vendor\bin\sail down
-```
-
-Quick start (macOS / Linux):
-
-```bash
-# start containers (detached)
-./vendor/bin/sail up -d
-
-# run migrations (uses the container environment)
-./vendor/bin/sail artisan migrate --force
-
-# stop containers when done
-./vendor/bin/sail down
-```
-
-Use Supabase as a shared remote database by setting the `DB_URL` or `DB_HOST`/`DB_USERNAME`/`DB_PASSWORD` in your local `.env` (do not commit `.env`).
-
-If you prefer not to use Docker, you can enable `pdo_pgsql` locally (XAMPP) and run the same artisan commands directly on your host.
-
-## Local cleanup commands (runtime artifacts)
-
-If you need to remove generated runtime files (safe to run locally, not committed):
-
-```powershell
-# Windows PowerShell
-Remove-Item -Recurse -Force storage\framework\views\* ; php artisan view:clear ; php artisan cache:clear
-```
-
-```bash
-# macOS / Linux
-rm -rf storage/framework/views/* && php artisan view:clear && php artisan cache:clear
-```
-
 
 This project is configured to use Supabase PostgreSQL as the shared database for the team.
 
@@ -84,6 +33,39 @@ This project is configured to use Supabase PostgreSQL as the shared database for
 2. Fill in the PostgreSQL values in `.env` from `.env.example`.
 3. Run `composer setup` after the database credentials are in place.
 4. Keep Laravel auth, roles, sessions, cache, and queues in this app; only the data lives in Supabase.
+
+## Shared database only
+
+You do not need Laravel Sail for this repository if you only want a shared database.
+
+Use one of these setups on each developer machine:
+
+```env
+DB_CONNECTION=pgsql
+DB_URL=postgresql://postgres:YOUR_PASSWORD@db.xcofziseyxlkzygqnahv.supabase.co:5432/postgres
+DB_SSLMODE=require
+```
+
+or
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=db.xcofziseyxlkzygqnahv.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=YOUR_PASSWORD
+DB_SSLMODE=require
+```
+
+Run migrations once against the shared Supabase database:
+
+```bash
+php artisan config:clear
+php artisan migrate --force
+```
+
+If your machine does not have the PostgreSQL PHP driver enabled, install/enable `pdo_pgsql` in your local PHP environment.
 
 ## Learning Laravel
 
