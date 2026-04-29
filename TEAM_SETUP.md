@@ -87,6 +87,98 @@ If the team lead pushes new migrations to `branch_pelep`:
 2. Run migrations again: `php artisan migrate --force`
 3. New tables/columns will be added to Supabase
 
+## Migration Guidelines - What to Migrate and What NOT to Migrate
+
+### ✅ DO MIGRATE (Schema Changes)
+
+These **must** be migrations and pushed to `branch_pelep`:
+
+- **New tables** — Use `Schema::create()`
+- **New columns** — Use `Schema::table()` with `$table->addColumn()`
+- **Indexes** — Foreign keys, indexes, unique constraints
+- **Rename/Drop columns** — Schema modifications that affect all team members
+- **Change data types** — Altering column definitions
+
+**Example migration file to commit:**
+```php
+public function up(): void
+{
+    Schema::create('schedules', function (Blueprint $table) {
+        $table->id();
+        $table->string('subject_code');
+        $table->foreignId('professor_id')->constrained('users');
+        $table->timestamps();
+    });
+}
+```
+
+### ❌ DO NOT MIGRATE (Data Seeding)
+
+These should **NOT** be in migrations (don't push to the branch):
+
+- **Test/demo data** — Fake users you create locally for testing only
+- **Development-specific records** — Data that's different for each developer
+- **Temporary data** — Anything you're just experimenting with
+- **Duplicate test accounts** — Don't seed the same test user for everyone
+
+**Why?** If you seed test data in a migration, every team member gets duplicate test accounts when they run `php artisan migrate --force`.
+
+### ✅ IMPORTANT: Production User Accounts DO Go to Supabase
+
+**Real users who will use your website** should absolutely be stored in Supabase:
+- Website users registering via the `/register` page
+- Admin accounts you create for staff
+- Any actual data from real people using the app
+
+These are NOT test data — they're the actual app data that should be shared.
+
+**How to add test data locally instead:**
+```bash
+# Create test data without committing it
+php artisan tinker
+
+# Inside tinker:
+User::create(['name' => 'Test Admin', 'email' => 'admin@test.local', 'role' => 'admin']);
+Schedule::create(['subject_code' => 'CS101', 'professor_id' => 1]);
+```
+
+This creates data only in YOUR database, not in the shared Supabase for everyone.
+
+### Shared Data (Team Should Migrate)
+
+If the team needs to populate the same initial data (like system administrators):
+
+1. Create a migration with a database `insert` statement
+2. Include a check to prevent duplicates:
+   ```php
+   public function up(): void
+   {
+       DB::table('users')->insert([
+           'name' => 'System Admin',
+           'email' => 'admin@system.local',
+           'role' => 'admin',
+           'created_at' => now(),
+       ]);
+   }
+   
+   public function down(): void
+   {
+       DB::table('users')->where('email', 'admin@system.local')->delete();
+   }
+   ```
+
+### Quick Reference Table
+
+| What | Migrate? | How |
+|------|----------|-----|
+| New table | ✅ YES | `Schema::create()` in migration |
+| New column | ✅ YES | `Schema::table()` in migration |
+| Index/Foreign Key | ✅ YES | Migration with `$table->foreign()` |
+| Test user account | ❌ NO | Create locally with `php artisan tinker` |
+| Demo data | ❌ NO | Create locally, don't commit |
+| System-wide initial data | ✅ YES | Migration with `DB::insert()` |
+| Bulk production data | ❌ NO | Use seeders with `php artisan db:seed` (local only) |
+
 ## Troubleshooting
 
 ### "Network is unreachable" or "Unknown host"
