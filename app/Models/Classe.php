@@ -53,7 +53,7 @@ class Classe extends Model
      */
     public function qrCodes(): HasMany
     {
-        return $this->hasMany(QRCode::class);
+        return $this->hasMany(QRCode::class, 'class_id');
     }
 
     /**
@@ -61,7 +61,7 @@ class Classe extends Model
      */
     public function attendanceRecords(): HasMany
     {
-        return $this->hasMany(AttendanceRecord::class);
+        return $this->hasMany(AttendanceRecord::class, 'class_id');
     }
 
     /**
@@ -69,6 +69,6 @@ class Classe extends Model
      */
     public function schedules(): HasMany
     {
-        return $this->hasMany(Schedule::class);
+        return $this->hasMany(Schedule::class, 'class_id');
     }
 }
