@@ -21,6 +21,15 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Supabase Setup
+
+This project is configured to use Supabase PostgreSQL as the shared database for the team.
+
+1. Create a Supabase project and copy the database connection details.
+2. Fill in the PostgreSQL values in `.env` from `.env.example`.
+3. Run `composer setup` after the database credentials are in place.
+4. Keep Laravel auth, roles, sessions, cache, and queues in this app; only the data lives in Supabase.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
