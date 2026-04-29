@@ -21,7 +21,62 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+
+<p align="center">
+
 ## Supabase Setup
+## Developer setup with Laravel Sail (recommended)
+
+This repository includes Laravel Sail scaffolding configured for `pgsql` and `redis` to provide a reproducible development environment for the team.
+
+Prerequisites:
+- Docker Desktop (or another Docker engine) installed and running on your machine.
+
+Quick start (Windows PowerShell):
+
+```powershell
+# start containers (detached)
+vendor\bin\sail up -d
+
+# run migrations (uses the container environment)
+vendor\bin\sail artisan migrate --force
+
+# stop containers when done
+vendor\bin\sail down
+```
+
+Quick start (macOS / Linux):
+
+```bash
+# start containers (detached)
+./vendor/bin/sail up -d
+
+# run migrations (uses the container environment)
+./vendor/bin/sail artisan migrate --force
+
+# stop containers when done
+./vendor/bin/sail down
+```
+
+Use Supabase as a shared remote database by setting the `DB_URL` or `DB_HOST`/`DB_USERNAME`/`DB_PASSWORD` in your local `.env` (do not commit `.env`).
+
+If you prefer not to use Docker, you can enable `pdo_pgsql` locally (XAMPP) and run the same artisan commands directly on your host.
+
+## Local cleanup commands (runtime artifacts)
+
+If you need to remove generated runtime files (safe to run locally, not committed):
+
+```powershell
+# Windows PowerShell
+Remove-Item -Recurse -Force storage\framework\views\* ; php artisan view:clear ; php artisan cache:clear
+```
+
+```bash
+# macOS / Linux
+rm -rf storage/framework/views/* && php artisan view:clear && php artisan cache:clear
+```
+
 
 This project is configured to use Supabase PostgreSQL as the shared database for the team.
 
