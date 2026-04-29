@@ -23,45 +23,33 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 
 ## Supabase Setup
 
-This project is configured to use Supabase PostgreSQL as the shared database for the team.
+This project is configured to use **Supabase PostgreSQL Session Pooler** as the shared database for the team.
 
-1. Create a Supabase project and copy the database connection details.
-2. Fill in the PostgreSQL values in `.env` from `.env.example`.
-3. Run `composer setup` after the database credentials are in place.
-4. Keep Laravel auth, roles, sessions, cache, and queues in this app; only the data lives in Supabase.
+### For Team Members
 
-## Shared database only
+1. Pull the latest code from `branch_pelep`
+2. Copy `.env.example` to `.env`
+3. Get the Supabase Session Pooler credentials from your team lead and fill in:
+   - `DB_HOST`: Your pooler host (e.g., `region.pooler.supabase.com`)
+   - `DB_PORT`: `5432`
+   - `DB_DATABASE`: `postgres`
+   - `DB_USERNAME`: `postgres.your-project-id` (full username with project ID suffix)
+   - `DB_PASSWORD`: Your Supabase database password
+4. Run migrations (one time only, shared database):
+   ```bash
+   php artisan config:clear
+   php artisan migrate --force
+   ```
+5. Ensure you have PostgreSQL PHP driver enabled: `php --ri pdo_pgsql`
 
-You do not need Laravel Sail for this repository if you only want a shared database.
+### Connection Details
 
-Use one of these setups on each developer machine:
+Use the **Session Pooler** connection from Supabase (not the direct host):
+- Location: Supabase Project Settings > Database > Connection Pooling > Session mode
+- Pooler hostname format: `region.pooler.supabase.com`
+- Note: Username must include the full format: `postgres.project-id`
 
-```env
-DB_CONNECTION=pgsql
-DB_URL=postgresql://postgres:YOUR_PASSWORD@db.xcofziseyxlkzygqnahv.supabase.co:5432/postgres
-DB_SSLMODE=require
-```
-
-or
-
-```env
-DB_CONNECTION=pgsql
-DB_HOST=db.xcofziseyxlkzygqnahv.supabase.co
-DB_PORT=5432
-DB_DATABASE=postgres
-DB_USERNAME=postgres
-DB_PASSWORD=YOUR_PASSWORD
-DB_SSLMODE=require
-```
-
-Run migrations once against the shared Supabase database:
-
-```bash
-php artisan config:clear
-php artisan migrate --force
-```
-
-If your machine does not have the PostgreSQL PHP driver enabled, install/enable `pdo_pgsql` in your local PHP environment.
+The configuration uses individual connection fields (no DB_URL) to work with the pooler correctly.
 
 ## Learning Laravel
 
