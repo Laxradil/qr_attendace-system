@@ -4,16 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Schedule;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth']);
-    }
-
     public function index()
     {
         $user = Auth::user();
@@ -82,21 +79,30 @@ class AdminController extends Controller
             return redirect('/dashboard');
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'username' => 'nullable|string|max:255|unique:users,username',
             'role' => 'required|in:admin,professor,student',
             'password' => 'required|string|min:6',
         ]);
 
-        // Generate username from name if not provided
-        $username = $request->username ?: strtolower(str_replace(' ', '_', $request->name));
+        // Generate a unique username if one was not provided.
+        $baseUsername = $validated['username'] ?: Str::slug($validated['name'], '_');
+        $username = $baseUsername;
+        $counter = 1;
+
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . '_' . $counter;
+            $counter++;
+        }
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email ?? $username . '@example.com',
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'username' => $username,
-            'role' => $request->role,
-            'password' => bcrypt($request->password),
+            'role' => $validated['role'],
+            'password' => Hash::make($validated['password']),
         ]);
 
         return redirect()->back()->with('success', 'Account created successfully!');
