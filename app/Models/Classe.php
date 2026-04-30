@@ -1,6 +1,19 @@
 <?php
 
+
 namespace App\Models;
+
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string|null $description
+ * @property int $professor_id
+ * @property int $student_count
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

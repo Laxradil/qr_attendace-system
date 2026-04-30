@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
 {
@@ -22,38 +23,62 @@ class AdminController extends Controller
 
     public function dashboard(): View
     {
-        // Combine all user counts into single query instead of 3 separate queries
-        $userStats = User::selectRaw("
-            COUNT(*) as total,
-            SUM(CASE WHEN role = 'professor' THEN 1 ELSE 0 END) as professors,
-            SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students
-        ")->first();
+        // Cache totals for 10 minutes to save Supabase resources
+        $stats = Cache::remember('admin_stats', 600, function () {
+            // Combine all user counts into single query instead of 3 separate queries
+            $userStats = User::selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN role = 'professor' THEN 1 ELSE 0 END) as professors,
+                SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students
+            ")->first();
 
-        $totalUsers = $userStats->total;
-        $totalProfessors = $userStats->professors ?? 0;
-        $totalStudents = $userStats->students ?? 0;
-        $totalClasses = Classe::count();
-        $totalAttendance = AttendanceRecord::count();
+            $totalUsers = $userStats->total;
+            $totalProfessors = $userStats->professors ?? 0;
+            $totalStudents = $userStats->students ?? 0;
+            $totalClasses = Classe::count();
 
-        $recentLogs = SystemLog::with('user')
-            ->latest()
-            ->limit(10)
-            ->get();
+            // Combine attendance counts into a single query
+            $attendanceCounts = AttendanceRecord::selectRaw('
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = \'present\' THEN 1 END) as present,
+                COUNT(CASE WHEN status = \'late\' THEN 1 END) as late,
+                COUNT(CASE WHEN status = \'absent\' THEN 1 END) as absent
+            ')->first();
 
-        return view('admin.dashboard', [
-            'totalUsers' => $totalUsers,
-            'totalProfessors' => $totalProfessors,
-            'totalStudents' => $totalStudents,
-            'totalClasses' => $totalClasses,
-            'totalAttendance' => $totalAttendance,
-            'recentLogs' => $recentLogs,
-        ]);
+            // Get QR codes and today records
+            $activeQRCodes = QRCode::where('is_used', false)->count();
+            $todayRecords = AttendanceRecord::whereDate('recorded_at', now())->count();
+
+            return [
+                'totalUsers' => $totalUsers,
+                'totalProfessors' => $totalProfessors,
+                'totalStudents' => $totalStudents,
+                'totalClasses' => $totalClasses,
+                'totalAttendance' => $attendanceCounts->total ?? 0,
+                'presentCount' => $attendanceCounts->present ?? 0,
+                'lateCount' => $attendanceCounts->late ?? 0,
+                'absentCount' => $attendanceCounts->absent ?? 0,
+                'activeQRCodes' => $activeQRCodes,
+                'todayRecords' => $todayRecords,
+            ];
+        });
+
+        // Cache recent logs for 1 minute
+        $recentLogs = Cache::remember('admin_recent_logs', 60, function () {
+            return SystemLog::with('user')->latest()->limit(10)->get();
+        });
+
+        return view('admin.dashboard', array_merge($stats, ['recentLogs' => $recentLogs]));
     }
 
     // Users Management
+
     public function users(): View
     {
-        $users = User::paginate(20);
+        // Cache users for 1 minute
+        $users = Cache::remember('admin_users_page_' . request('page', 1), 60, function () {
+            return User::with('classes', 'attendanceRecords')->paginate(20);
+        });
         return view('admin.users', ['users' => $users]);
     }
 
@@ -132,9 +157,9 @@ class AdminController extends Controller
     }
 
     public function deleteUser(User $user): RedirectResponse
-    {
-        $name = $user->name;
-        $user->delete();
+    { 
+         $name = $user->name; 
+         $user->delete();
 
         SystemLog::create([
             'user_id' => auth()->id(),
@@ -148,23 +173,34 @@ class AdminController extends Controller
     }
 
     // Professors Management
+
     public function professors(): View
     {
-        $professors = User::where('role', 'professor')->paginate(20);
+        // Cache professors for 1 minute
+        $professors = Cache::remember('admin_professors_page_' . request('page', 1), 60, function () {
+            return User::with('classes')->where('role', 'professor')->paginate(20);
+        });
         return view('admin.professors', ['professors' => $professors]);
     }
 
     // Students Management
+
     public function students(): View
     {
-        $students = User::where('role', 'student')->paginate(20);
+        // Cache students for 1 minute
+        $students = Cache::remember('admin_students_page_' . request('page', 1), 60, function () {
+            return User::with('attendanceRecords', 'enrolledClasses')->where('role', 'student')->paginate(20);
+        });
         return view('admin.students', ['students' => $students]);
     }
 
     // Classes Management
     public function classes(): View
     {
-        $classes = Classe::with('professor', 'students')->paginate(20);
+        // Cache classes for 1 minute
+        $classes = Cache::remember('admin_classes_page_' . request('page', 1), 60, function () {
+            return Classe::with('professor', 'students')->paginate(20);
+        });
         return view('admin.classes', ['classes' => $classes]);
     }
 
@@ -243,17 +279,13 @@ class AdminController extends Controller
 
     // QR Code Management
     public function qrCodes(): View
-    {
-        $qrCodes = QRCode::with('classe', 'professor')
-            ->paginate(20);
+{
+    // Add 'professor' if you display who generated it
+    $qrCodes = QRCode::with(['classe', 'professor'])->paginate(20);
+    $classes = Classe::orderBy('name')->get();
 
-        $classes = Classe::orderBy('name')->get();
-
-        return view('admin.qr-codes', [
-            'qrCodes' => $qrCodes,
-            'classes' => $classes,
-        ]);
-    }
+    return view('admin.qr-codes', compact('qrCodes', 'classes'));
+}
 
     public function generateQRCode(Request $request): RedirectResponse
     {
@@ -294,11 +326,15 @@ class AdminController extends Controller
     // Reports
     public function reports(): View
     {
+        // Optimize: Get all attendance stats in a single query
+        $attendanceStats = AttendanceRecord::selectRaw(
+            'COUNT(*) as total_records, 
+             SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count,
+             SUM(CASE WHEN status = "late" THEN 1 ELSE 0 END) as late_count,
+             SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent_count'
+        )->first();
+
         $totalStudents = User::where('role', 'student')->count();
-        $totalRecords = AttendanceRecord::count();
-        $presentCount = AttendanceRecord::where('status', 'present')->count();
-        $lateCount = AttendanceRecord::where('status', 'late')->count();
-        $absentCount = AttendanceRecord::where('status', 'absent')->count();
 
         $topClasses = Classe::with('professor')
             ->withCount([
@@ -313,10 +349,10 @@ class AdminController extends Controller
 
         return view('admin.reports', [
             'totalStudents' => $totalStudents,
-            'totalRecords' => $totalRecords,
-            'presentCount' => $presentCount,
-            'lateCount' => $lateCount,
-            'absentCount' => $absentCount,
+            'totalRecords' => $attendanceStats->total_records,
+            'presentCount' => $attendanceStats->present_count,
+            'lateCount' => $attendanceStats->late_count,
+            'absentCount' => $attendanceStats->absent_count,
             'topClasses' => $topClasses,
         ]);
     }
@@ -324,9 +360,10 @@ class AdminController extends Controller
     // System Logs
     public function logs(): View
     {
-        $logs = SystemLog::with('user')
-            ->latest()
-            ->paginate(20);
+        // Cache logs for 1 minute
+        $logs = Cache::remember('admin_logs_page_' . request('page', 1), 60, function () {
+            return SystemLog::with('user')->latest()->paginate(20);
+        });
         return view('admin.logs', ['logs' => $logs]);
     }
 }

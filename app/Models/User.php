@@ -1,6 +1,19 @@
 <?php
 
+
 namespace App\Models;
+
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $username
+ * @property string $email
+ * @property string $password
+ * @property string $role
+ * @property string|null $student_id
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ */
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
