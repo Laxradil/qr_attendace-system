@@ -10,7 +10,7 @@ use App\Models\SystemLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-use Str;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -239,7 +239,13 @@ class AdminController extends Controller
     {
         $qrCodes = QRCode::with('classe', 'professor')
             ->paginate(20);
-        return view('admin.qr-codes', ['qrCodes' => $qrCodes]);
+
+        $classes = Classe::orderBy('name')->get();
+
+        return view('admin.qr-codes', [
+            'qrCodes' => $qrCodes,
+            'classes' => $classes,
+        ]);
     }
 
     public function generateQRCode(Request $request): RedirectResponse
@@ -281,7 +287,31 @@ class AdminController extends Controller
     // Reports
     public function reports(): View
     {
-        return view('admin.reports');
+        $totalStudents = User::where('role', 'student')->count();
+        $totalRecords = AttendanceRecord::count();
+        $presentCount = AttendanceRecord::where('status', 'present')->count();
+        $lateCount = AttendanceRecord::where('status', 'late')->count();
+        $absentCount = AttendanceRecord::where('status', 'absent')->count();
+
+        $topClasses = Classe::with('professor')
+            ->withCount([
+                'attendanceRecords as total_records',
+                'attendanceRecords as present_records' => function ($query) {
+                    $query->where('status', 'present');
+                },
+            ])
+            ->orderByDesc('present_records')
+            ->limit(5)
+            ->get();
+
+        return view('admin.reports', [
+            'totalStudents' => $totalStudents,
+            'totalRecords' => $totalRecords,
+            'presentCount' => $presentCount,
+            'lateCount' => $lateCount,
+            'absentCount' => $absentCount,
+            'topClasses' => $topClasses,
+        ]);
     }
 
     // System Logs

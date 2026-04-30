@@ -1,77 +1,93 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Dashboard - Admin')
-@section('header', 'Admin Dashboard')
+@section('title', 'Admin Dashboard')
+@section('header', 'Dashboard')
+@section('subheader', "Welcome back, Admin! Here's what's happening in the system.")
 
 @section('content')
-<div class="p-6 space-y-6">
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <p class="text-gray-400 text-sm">Total Users</p>
-            <p class="text-3xl font-bold text-white mt-2">{{ $totalUsers }}</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <p class="text-gray-400 text-sm">Professors</p>
-            <p class="text-3xl font-bold text-purple-400 mt-2">{{ $totalProfessors }}</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <p class="text-gray-400 text-sm">Students</p>
-            <p class="text-3xl font-bold text-blue-400 mt-2">{{ $totalStudents }}</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <p class="text-gray-400 text-sm">Classes</p>
-            <p class="text-3xl font-bold text-green-400 mt-2">{{ $totalClasses }}</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <p class="text-gray-400 text-sm">Attendance Records</p>
-            <p class="text-3xl font-bold text-amber-400 mt-2">{{ $totalAttendance }}</p>
-        </div>
-    </div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.users') }}">
+        <div class="stat-val">{{ $totalUsers }}</div>
+        <div class="stat-label">Total Users</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.professors') }}">
+        <div class="stat-val">{{ $totalProfessors }}</div>
+        <div class="stat-label">Professors</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.students') }}">
+        <div class="stat-val">{{ $totalStudents }}</div>
+        <div class="stat-label">Students</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.classes') }}">
+        <div class="stat-val">{{ $totalClasses }}</div>
+        <div class="stat-label">Classes</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
+    </a>
+</div>
 
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <a href="{{ route('admin.users.create') }}" class="bg-purple-600 hover:bg-purple-700 text-white p-6 rounded-lg text-center font-semibold transition transform hover:scale-105">
-            <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-            </svg>
-            Add User
-        </a>
-        <a href="{{ route('admin.classes.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-lg text-center font-semibold transition transform hover:scale-105">
-            <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Add Class
-        </a>
-        <a href="{{ route('admin.qr-codes') }}" class="bg-green-600 hover:bg-green-700 text-white p-6 rounded-lg text-center font-semibold transition transform hover:scale-105">
-            <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            QR Codes
-        </a>
-        <a href="{{ route('admin.logs') }}" class="bg-red-600 hover:bg-red-700 text-white p-6 rounded-lg text-center font-semibold transition transform hover:scale-105">
-            <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            System Logs
-        </a>
-    </div>
+<div class="g-6-4">
+    <div>
+        <div class="sh">Attendance Overview</div>
+        <div class="card">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--green);">{{ \App\Models\AttendanceRecord::where('status', 'present')->count() }}</div>
+                    <div class="stat-label">Present</div>
+                </div>
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--amber);">{{ \App\Models\AttendanceRecord::where('status', 'late')->count() }}</div>
+                    <div class="stat-label">Late</div>
+                </div>
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--red);">{{ \App\Models\AttendanceRecord::where('status', 'absent')->count() }}</div>
+                    <div class="stat-label">Absent</div>
+                </div>
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--blue);">{{ $totalAttendance }}</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+            </div>
+            <a class="btn btn-sm" href="{{ route('admin.reports') }}" style="width:100%;justify-content:center;margin-top:8px;">View Full Report -></a>
+        </div>
 
-    <!-- Recent Activity -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <h2 class="text-xl font-bold text-white mb-4">Recent Activity</h2>
-        <div class="space-y-3">
+        <div class="sh">Recent Activities</div>
+        <div class="card">
             @forelse($recentLogs as $log)
-                <div class="flex items-start justify-between p-3 hover:bg-gray-800/50 rounded transition">
-                    <div>
-                        <p class="text-white text-sm font-semibold">{{ $log->user->name ?? 'System' }}</p>
-                        <p class="text-gray-400 text-xs">{{ ucfirst(str_replace('_', ' ', $log->action)) }}</p>
+                <div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border2);align-items:flex-start;">
+                    <div style="width:26px;height:26px;border-radius:6px;background:var(--purple-glow);display:flex;align-items:center;justify-content:center;font-size:10px;">{{ strtoupper(substr($log->action, 0, 1)) }}</div>
+                    <div style="font-size:11px;flex:1;">
+                        <strong>{{ $log->user->name ?? 'System' }}</strong> {{ str_replace('_', ' ', $log->action) }}
+                        @if($log->description)
+                            <div style="font-size:10px;color:var(--text2);margin-top:1px;">{{ $log->description }}</div>
+                        @endif
                     </div>
-                    <span class="text-gray-500 text-xs">{{ $log->created_at->diffForHumans() }}</span>
+                    <div style="font-size:9px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace;">{{ $log->created_at?->format('h:i A') }}</div>
                 </div>
             @empty
-                <p class="text-gray-400 text-sm">No recent activity</p>
+                <div style="color:var(--text2);font-size:11px;">No recent activity.</div>
             @endforelse
+            <a class="btn btn-sm" href="{{ route('admin.logs') }}" style="width:100%;justify-content:center;margin-top:6px;">View All Activities -></a>
+        </div>
+    </div>
+
+    <div>
+        <div class="sh">System Overview</div>
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Active QR Codes</span><span style="font-size:13px;font-weight:700;color:var(--green);">{{ \App\Models\QRCode::where('is_used', false)->count() }}</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Today's Records</span><span style="font-size:13px;font-weight:700;">{{ \App\Models\AttendanceRecord::whereDate('recorded_at', now())->count() }}</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Total Classes</span><span style="font-size:13px;font-weight:700;">{{ $totalClasses }}</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;"><span style="font-size:11px;">System Status</span><span class="badge bg">All Systems Operational</span></div>
+        </div>
+
+        <div class="sh">Quick Actions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            <a class="btn" href="{{ route('admin.users.create') }}" style="justify-content:center;">Add User</a>
+            <a class="btn" href="{{ route('admin.classes.create') }}" style="justify-content:center;">Add Class</a>
+            <a class="btn" href="{{ route('admin.students') }}" style="justify-content:center;">Manage Students</a>
+            <a class="btn" href="{{ route('admin.qr-codes') }}" style="justify-content:center;">Generate QR</a>
         </div>
     </div>
 </div>
