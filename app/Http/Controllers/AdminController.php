@@ -84,7 +84,7 @@ class AdminController extends Controller
 
         SystemLog::create([
             'user_id' => auth()->id(),
-            'action' => 'create_user',
+            'action' => 'other',
             'description' => 'Created new user: ' . $validated['name'],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
