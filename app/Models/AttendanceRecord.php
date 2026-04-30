@@ -1,5 +1,17 @@
 <?php
 
+
+/**
+ * @property int $id
+ * @property int $class_id
+ * @property int $student_id
+ * @property int $qr_code_id
+ * @property string $status
+ * @property int|null $minutes_late
+ * @property \Illuminate\Support\Carbon|null $recorded_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
