@@ -249,7 +249,6 @@
             <a href="{{ route('admin.classes') }}" class="sb-item {{ request()->routeIs('admin.classes*') ? 'active' : '' }}">Classes</a>
             <a href="{{ route('admin.qr-codes') }}" class="sb-item {{ request()->routeIs('admin.qr-codes*') ? 'active' : '' }}">QR Code Mgmt</a>
             <a href="{{ route('admin.attendance-records') }}" class="sb-item {{ request()->routeIs('admin.attendance-records') ? 'active' : '' }}">Attendance Records</a>
-            <a href="{{ route('admin.reports') }}" class="sb-item {{ request()->routeIs('admin.reports') ? 'active' : '' }}">Reports</a>
             <a href="{{ route('admin.logs') }}" class="sb-item {{ request()->routeIs('admin.logs') ? 'active' : '' }}">System Logs</a>
 
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto;">

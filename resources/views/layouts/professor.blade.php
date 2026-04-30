@@ -193,7 +193,6 @@
             <a href="{{ route('professor.scan-qr') }}" class="sb-item {{ request()->routeIs('professor.scan-qr') ? 'active' : '' }}">Scan QR</a>
             <a href="{{ route('professor.attendance-records') }}" class="sb-item {{ request()->routeIs('professor.attendance-records*') ? 'active' : '' }}">Attendance Records</a>
             <a href="{{ route('professor.schedules') }}" class="sb-item {{ request()->routeIs('professor.schedules') ? 'active' : '' }}">Schedules</a>
-            <a href="{{ route('professor.reports') }}" class="sb-item {{ request()->routeIs('professor.reports') ? 'active' : '' }}">Reports</a>
             <a href="{{ route('professor.students') }}" class="sb-item {{ request()->routeIs('professor.students') ? 'active' : '' }}">Students</a>
             <a href="{{ route('professor.logs') }}" class="sb-item {{ request()->routeIs('professor.logs') ? 'active' : '' }}">Logs</a>
             <a href="{{ route('professor.settings') }}" class="sb-item {{ request()->routeIs('professor.settings*') ? 'active' : '' }}">Settings</a>
