@@ -36,6 +36,8 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::get('/scan-qr', [ProfessorController::class, 'scanQR'])->name('professor.scan-qr');
     Route::post('/attendance', [ProfessorController::class, 'recordAttendance'])->name('professor.attendance.store');
     Route::get('/attendance-records', [ProfessorController::class, 'attendanceRecords'])->name('professor.attendance-records');
+    Route::get('/attendance-records/{attendanceRecord}/edit', [ProfessorController::class, 'editAttendanceRecord'])->name('professor.attendance-records.edit');
+    Route::put('/attendance-records/{attendanceRecord}', [ProfessorController::class, 'updateAttendanceRecord'])->name('professor.attendance-records.update');
     Route::get('/schedules', [ProfessorController::class, 'schedules'])->name('professor.schedules');
     Route::get('/reports', [ProfessorController::class, 'reports'])->name('professor.reports');
     Route::get('/students', [ProfessorController::class, 'students'])->name('professor.students');
@@ -73,6 +75,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // QR Code management
     Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('admin.qr-codes');
     Route::post('/qr-codes/generate', [AdminController::class, 'generateQRCode'])->name('admin.qr-codes.generate');
+    Route::get('/qr-codes/{uuid}/image', [AdminController::class, 'qrCodeImage'])->name('admin.qr-codes.image');
+    Route::get('/qr-codes/{uuid}/download', [AdminController::class, 'downloadQRCode'])->name('admin.qr-codes.download');
     
     // Attendance records
     Route::get('/attendance-records', [AdminController::class, 'attendanceRecords'])->name('admin.attendance-records');

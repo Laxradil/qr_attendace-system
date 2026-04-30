@@ -1,5 +1,17 @@
 <?php
 
+
+/**
+ * @property int $id
+ * @property string $uuid
+ * @property int $class_id
+ * @property int $professor_id
+ * @property bool $is_used
+ * @property \Illuminate\Support\Carbon|null $used_at
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;

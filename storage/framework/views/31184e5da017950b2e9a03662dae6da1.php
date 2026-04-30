@@ -32,15 +32,15 @@
         <div class="card">
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
                 <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--green);"><?php echo e(\App\Models\AttendanceRecord::where('status', 'present')->count()); ?></div>
+                    <div class="stat-val" style="font-size:18px;color:var(--green);"><?php echo e($presentCount); ?></div>
                     <div class="stat-label">Present</div>
                 </div>
                 <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--amber);"><?php echo e(\App\Models\AttendanceRecord::where('status', 'late')->count()); ?></div>
+                    <div class="stat-val" style="font-size:18px;color:var(--amber);"><?php echo e($lateCount); ?></div>
                     <div class="stat-label">Late</div>
                 </div>
                 <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--red);"><?php echo e(\App\Models\AttendanceRecord::where('status', 'absent')->count()); ?></div>
+                    <div class="stat-val" style="font-size:18px;color:var(--red);"><?php echo e($absentCount); ?></div>
                     <div class="stat-label">Absent</div>
                 </div>
                 <div>
@@ -75,8 +75,8 @@
     <div>
         <div class="sh">System Overview</div>
         <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Active QR Codes</span><span style="font-size:13px;font-weight:700;color:var(--green);"><?php echo e(\App\Models\QRCode::where('is_used', false)->count()); ?></span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Today's Records</span><span style="font-size:13px;font-weight:700;"><?php echo e(\App\Models\AttendanceRecord::whereDate('recorded_at', now())->count()); ?></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Active QR Codes</span><span style="font-size:13px;font-weight:700;color:var(--green);"><?php echo e($activeQRCodes); ?></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Today's Records</span><span style="font-size:13px;font-weight:700;"><?php echo e($todayRecords); ?></span></div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Total Classes</span><span style="font-size:13px;font-weight:700;"><?php echo e($totalClasses); ?></span></div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;"><span style="font-size:11px;">System Status</span><span class="badge bg">All Systems Operational</span></div>
         </div>

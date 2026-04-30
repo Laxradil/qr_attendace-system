@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Table already exists in database - skipping
+        Schema::table('attendance_and_pivot', function (Blueprint $table) {
+            //
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('schedules');
+        Schema::table('attendance_and_pivot', function (Blueprint $table) {
+            //
+        });
     }
 };
