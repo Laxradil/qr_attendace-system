@@ -2,42 +2,62 @@
 
 @section('title', 'Activity Logs - Professor')
 @section('header', 'My Activity Logs')
+@section('subheader', 'Track your recent system activities')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <!-- Logs List -->
-    <div class="space-y-3">
+<div class="content">
+    <div style="display:grid;gap:8px;">
         @forelse($logs as $log)
-            <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <span class="inline-block px-3 py-1 bg-purple-900/30 text-purple-300 text-xs rounded-full font-semibold">
-                            {{ ucfirst(str_replace('_', ' ', $log->action)) }}
-                        </span>
-                    </div>
-                    <span class="text-gray-500 text-sm">{{ $log->created_at->diffForHumans() }}</span>
+            <div class="card" style="margin-bottom:0;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                    <span class="badge bp" style="font-size:9px;">{{ ucfirst(str_replace('_', ' ', $log->action)) }}</span>
+                    <span style="font-size:9px;color:var(--text3);">{{ $log->created_at->diffForHumans() }}</span>
                 </div>
                 @if($log->description)
-                    <p class="text-gray-300 text-sm mt-2">{{ $log->description }}</p>
+                    <div style="font-size:11px;color:var(--text);margin-bottom:8px;line-height:1.4;">{{ $log->description }}</div>
                 @endif
-                <div class="flex gap-4 text-gray-500 text-xs mt-3 pt-3 border-t border-gray-800">
+                <div style="display:flex;gap:12px;font-size:9px;color:var(--text3);padding-top:8px;border-top:1px solid var(--border2);">
                     @if($log->ip_address)
-                        <span>IP: {{ $log->ip_address }}</span>
+                        <span class="td-mono">IP: {{ $log->ip_address }}</span>
                     @endif
-                    <span>{{ $log->created_at->format('M d, Y H:i:s') }}</span>
+                    <span class="td-mono">{{ $log->created_at->format('M d, Y H:i:s') }}</span>
                 </div>
             </div>
         @empty
-            <div class="bg-gray-900 border border-gray-800 rounded-lg p-12 text-center">
-                <p class="text-gray-400">No activity logs yet</p>
+            <div style="text-align:center;padding:40px;color:var(--text2);">
+                <div style="font-size:24px;margin-bottom:8px;">📋</div>
+                <div style="font-size:12px;">No activity logs yet</div>
             </div>
         @endforelse
     </div>
 
     <!-- Pagination -->
     @if($logs->hasPages())
-        <div class="flex justify-center">
-            {{ $logs->links() }}
+        <div style="display:flex;justify-content:center;margin-top:18px;">
+            <div class="pag" style="width:100%;max-width:400px;border-top:1px solid var(--border);border-radius:0;padding:12px;">
+                <span style="font-size:10px;color:var(--text2);">Showing {{ $logs->firstItem() }} to {{ $logs->lastItem() }} of {{ $logs->total() }}</span>
+                <div class="pag-btns">
+                    @if($logs->onFirstPage())
+                        <button class="pb" disabled style="opacity:0.5;cursor:not-allowed;">←</button>
+                    @else
+                        <a href="{{ $logs->previousPageUrl() }}" class="pb">←</a>
+                    @endif
+                    
+                    @foreach ($logs->getUrlRange(1, $logs->lastPage()) as $page => $url)
+                        @if ($page == $logs->currentPage())
+                            <button class="pb active">{{ $page }}</button>
+                        @else
+                            <a href="{{ $url }}" class="pb">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                    
+                    @if($logs->hasMorePages())
+                        <a href="{{ $logs->nextPageUrl() }}" class="pb">→</a>
+                    @else
+                        <button class="pb" disabled style="opacity:0.5;cursor:not-allowed;">→</button>
+                    @endif
+                </div>
+            </div>
         </div>
     @endif
 </div>

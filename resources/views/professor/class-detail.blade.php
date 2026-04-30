@@ -2,68 +2,47 @@
 
 @section('title', $classe->name . ' - Class Detail')
 @section('header', $classe->name)
+@section('subheader', 'View class details, students, and schedules')
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="content">
     <!-- Class Header -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <div class="flex justify-between items-start">
+    <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
-                <h1 class="text-3xl font-bold text-white">{{ $classe->name }}</h1>
-                <p class="text-gray-400 mt-2">{{ $classe->code }}</p>
+                <div style="font-size:18px;font-weight:700;margin-bottom:2px;">{{ $classe->name }}</div>
+                <div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;">{{ $classe->code }}</div>
                 @if($classe->description)
-                    <p class="text-gray-300 mt-3">{{ $classe->description }}</p>
+                    <div style="font-size:11px;color:var(--text);margin-top:8px;line-height:1.4;">{{ $classe->description }}</div>
                 @endif
             </div>
-            <span class="inline-block px-4 py-2 bg-green-900/30 text-green-300 rounded-lg font-semibold">
-                {{ $classe->is_active ? 'Active' : 'Inactive' }}
-            </span>
+            <span class="badge {{ $classe->is_active ? 'bg' : 'br' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span>
         </div>
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg">
-            <p class="text-gray-400 text-sm">Total Students</p>
-            <p class="text-3xl font-bold text-white mt-2">{{ $classe->students->count() }}</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg">
-            <p class="text-gray-400 text-sm">Schedules</p>
-            <p class="text-3xl font-bold text-white mt-2">{{ $classe->schedules->count() }}</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg">
-            <p class="text-gray-400 text-sm">Attendance Records</p>
-            <p class="text-3xl font-bold text-white mt-2">{{ $classe->attendanceRecords()->count() }}</p>
-        </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+        <div class="stat stat-row"><div class="stat-icon" style="background:var(--blue-bg);"></div><div><div class="stat-val">{{ $classe->students->count() }}</div><div class="stat-label">Students</div></div></div>
+        <div class="stat stat-row"><div class="stat-icon" style="background:var(--purple-glow);"></div><div><div class="stat-val">{{ $classe->schedules->count() }}</div><div class="stat-label">Schedules</div></div></div>
+        <div class="stat stat-row"><div class="stat-icon" style="background:var(--green-bg);"></div><div><div class="stat-val">{{ $classe->attendanceRecords()->count() }}</div><div class="stat-label">Records</div></div></div>
     </div>
 
     <!-- Students List -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-        <div class="border-b border-gray-800 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Enrolled Students</h2>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-800">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Student ID</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Name</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Email</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Enrolled</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-800">
+    <div style="margin-bottom:12px;">
+        <div class="sh">Enrolled Students ({{ $classe->students->count() }})</div>
+        <div class="tbl-wrap">
+            <table>
+                <thead><tr><th>Student ID</th><th>Name</th><th>Email</th><th>Enrolled</th></tr></thead>
+                <tbody>
                     @forelse($classe->students as $student)
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4 text-white">{{ $student->student_id ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-white">{{ $student->name }}</td>
-                            <td class="px-6 py-4 text-gray-400">{{ $student->email }}</td>
-                            <td class="px-6 py-4 text-gray-400">{{ $student->pivot->enrolled_at->format('M d, Y') }}</td>
+                        <tr>
+                            <td class="td-mono">{{ $student->student_id ?? 'N/A' }}</td>
+                            <td>{{ $student->name }}</td>
+                            <td style="color:var(--text2);">{{ $student->email }}</td>
+                            <td style="color:var(--text2);">{{ $student->pivot->enrolled_at->format('M d, Y') }}</td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-400">No students enrolled yet</td>
-                        </tr>
+                        <tr><td colspan="4" style="text-align:center;color:var(--text2);">No students enrolled yet</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -72,21 +51,24 @@
 
     <!-- Schedules -->
     @if($classe->schedules->count() > 0)
-    <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-        <div class="border-b border-gray-800 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Class Schedules</h2>
+        <div>
+            <div class="sh">Class Schedules ({{ $classe->schedules->count() }})</div>
+            <div class="tbl-wrap">
+                <table>
+                    <thead><tr><th>Days</th><th>Time</th><th>Room</th><th>Professor</th></tr></thead>
+                    <tbody>
+                        @foreach($classe->schedules as $schedule)
+                            <tr>
+                                <td style="font-weight:600;">{{ $schedule->days }}</td>
+                                <td>{{ $schedule->time }}</td>
+                                <td style="text-align:center;">{{ $schedule->room }}</td>
+                                <td style="color:var(--text2);">{{ $schedule->professor }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="divide-y divide-gray-800">
-            @foreach($classe->schedules as $schedule)
-                <div class="px-6 py-4 flex justify-between items-center hover:bg-gray-800/50 transition">
-                    <div>
-                        <p class="text-white font-semibold">{{ $schedule->days }}</p>
-                        <p class="text-gray-400 text-sm">{{ $schedule->time }} • Room {{ $schedule->room }}</p>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
     @endif
 </div>
 @endsection
