@@ -45,6 +45,10 @@ class AdminController extends Controller
                 COUNT(CASE WHEN status = \'absent\' THEN 1 END) as absent
             ')->first();
 
+            // Get QR codes and today records
+            $activeQRCodes = QRCode::where('is_used', false)->count();
+            $todayRecords = AttendanceRecord::whereDate('recorded_at', now())->count();
+
             return [
                 'totalUsers' => $totalUsers,
                 'totalProfessors' => $totalProfessors,
@@ -54,6 +58,8 @@ class AdminController extends Controller
                 'presentCount' => $attendanceCounts->present ?? 0,
                 'lateCount' => $attendanceCounts->late ?? 0,
                 'absentCount' => $attendanceCounts->absent ?? 0,
+                'activeQRCodes' => $activeQRCodes,
+                'todayRecords' => $todayRecords,
             ];
         });
 
