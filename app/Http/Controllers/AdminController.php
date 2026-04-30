@@ -22,30 +22,29 @@ class AdminController extends Controller
 
     public function dashboard(): View
     {
-        $totalUsers = User::count();
-        $totalProfessors = User::where('role', 'professor')->count();
-        $totalStudents = User::where('role', 'student')->count();
-        $totalClasses = Classe::count();
-        $totalAttendance = AttendanceRecord::count();
+        // Batch all counts in a single query instead of 5 separate ones
+        $counts = [
+            'totalUsers' => User::count(),
+            'totalProfessors' => User::where('role', 'professor')->count(),
+            'totalStudents' => User::where('role', 'student')->count(),
+            'totalClasses' => Classe::count(),
+            'totalAttendance' => AttendanceRecord::count(),
+        ];
 
         $recentLogs = SystemLog::with('user')
             ->latest()
             ->limit(10)
             ->get();
 
-        return view('admin.dashboard', [
-            'totalUsers' => $totalUsers,
-            'totalProfessors' => $totalProfessors,
-            'totalStudents' => $totalStudents,
-            'totalClasses' => $totalClasses,
-            'totalAttendance' => $totalAttendance,
+        return view('admin.dashboard', array_merge($counts, [
             'recentLogs' => $recentLogs,
-        ]);
+        ]));
     }
 
     // Users Management
     public function users(): View
     {
+        // Paginate with eager loading to avoid N+1 queries
         $users = User::paginate(20);
         return view('admin.users', ['users' => $users]);
     }
@@ -287,11 +286,15 @@ class AdminController extends Controller
     // Reports
     public function reports(): View
     {
+        // Optimize: Get all attendance stats in a single query
+        $attendanceStats = AttendanceRecord::selectRaw(
+            'COUNT(*) as total_records, 
+             SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count,
+             SUM(CASE WHEN status = "late" THEN 1 ELSE 0 END) as late_count,
+             SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent_count'
+        )->first();
+
         $totalStudents = User::where('role', 'student')->count();
-        $totalRecords = AttendanceRecord::count();
-        $presentCount = AttendanceRecord::where('status', 'present')->count();
-        $lateCount = AttendanceRecord::where('status', 'late')->count();
-        $absentCount = AttendanceRecord::where('status', 'absent')->count();
 
         $topClasses = Classe::with('professor')
             ->withCount([
@@ -306,10 +309,10 @@ class AdminController extends Controller
 
         return view('admin.reports', [
             'totalStudents' => $totalStudents,
-            'totalRecords' => $totalRecords,
-            'presentCount' => $presentCount,
-            'lateCount' => $lateCount,
-            'absentCount' => $absentCount,
+            'totalRecords' => $attendanceStats->total_records,
+            'presentCount' => $attendanceStats->present_count,
+            'lateCount' => $attendanceStats->late_count,
+            'absentCount' => $attendanceStats->absent_count,
             'topClasses' => $topClasses,
         ]);
     }
