@@ -1,48 +1,46 @@
-@extends('layouts.app')
+@extends('layouts.professor')
 
 @section('title', 'Schedules - Professor')
 @section('header', 'Class Schedules')
+@section('subheader', 'View all your scheduled classes (read-only)')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="content">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;">
         @forelse($schedules as $schedule)
-            <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                <div class="flex justify-between items-start mb-4">
+            <div class="card" style="margin-bottom:0;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
                     <div>
-                        <h3 class="text-xl font-bold text-white">{{ $schedule->subject_name }}</h3>
-                        <p class="text-gray-400 text-sm mt-1">{{ $schedule->subject_code }}</p>
+                        <div style="font-size:13px;font-weight:700;">{{ $schedule->subject_name }}</div>
+                        <div style="font-size:10px;color:var(--text2);margin-top:2px;font-family:'JetBrains Mono',monospace;">{{ $schedule->subject_code }}</div>
                     </div>
-                    <span class="text-gray-500 text-2xl font-bold">{{ $schedule->room }}</span>
+                    <div style="font-size:18px;font-weight:700;color:var(--blue);">{{ $schedule->room }}</div>
                 </div>
                 
-                <div class="space-y-3 border-t border-gray-700 pt-4">
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Days:</span>
-                        <span class="text-white font-semibold">{{ $schedule->days }}</span>
+                <div style="display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--border);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;">
+                        <span style="color:var(--text2);">📅 Days:</span>
+                        <span style="font-weight:600;color:var(--text);">{{ $schedule->days }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Time:</span>
-                        <span class="text-white font-semibold">{{ $schedule->time }}</span>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;">
+                        <span style="color:var(--text2);">⏰ Time:</span>
+                        <span style="font-weight:600;color:var(--text);">{{ $schedule->time }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Professor:</span>
-                        <span class="text-white font-semibold">{{ $schedule->professor }}</span>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;">
+                        <span style="color:var(--text2);">👨‍🏫 Professor:</span>
+                        <span style="font-weight:600;color:var(--text);">{{ $schedule->professor }}</span>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-4 border-t border-gray-700 flex gap-3">
-                    <button class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-semibold transition">
-                        View Details
-                    </button>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:9px;color:var(--text3);">View-only</span>
                 </div>
             </div>
         @empty
-            <div class="col-span-full bg-gray-900 border border-gray-800 rounded-lg p-12 text-center">
-                <svg class="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <p class="text-gray-400">No schedules available</p>
+            <div style="grid-column:1 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;">
+                <div style="width:60px;height:60px;border-radius:50%;background:var(--navy3);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:24px;">📅</div>
+                <div style="font-size:13px;color:var(--text2);">No schedules available</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:4px;">Your class schedules will appear here</div>
             </div>
         @endforelse
     </div>

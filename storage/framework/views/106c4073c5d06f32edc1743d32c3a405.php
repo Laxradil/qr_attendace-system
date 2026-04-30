@@ -249,7 +249,6 @@
             <a href="<?php echo e(route('admin.classes')); ?>" class="sb-item <?php echo e(request()->routeIs('admin.classes*') ? 'active' : ''); ?>">Classes</a>
             <a href="<?php echo e(route('admin.qr-codes')); ?>" class="sb-item <?php echo e(request()->routeIs('admin.qr-codes*') ? 'active' : ''); ?>">QR Code Mgmt</a>
             <a href="<?php echo e(route('admin.attendance-records')); ?>" class="sb-item <?php echo e(request()->routeIs('admin.attendance-records') ? 'active' : ''); ?>">Attendance Records</a>
-            <a href="<?php echo e(route('admin.reports')); ?>" class="sb-item <?php echo e(request()->routeIs('admin.reports') ? 'active' : ''); ?>">Reports</a>
             <a href="<?php echo e(route('admin.logs')); ?>" class="sb-item <?php echo e(request()->routeIs('admin.logs') ? 'active' : ''); ?>">System Logs</a>
 
             <form method="POST" action="<?php echo e(route('logout')); ?>" style="margin-top:auto;">

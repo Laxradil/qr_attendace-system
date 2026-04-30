@@ -1,45 +1,40 @@
 <?php $__env->startSection('title', 'My Classes - Professor'); ?>
 <?php $__env->startSection('header', 'My Classes'); ?>
+<?php $__env->startSection('subheader', 'View and manage your assigned classes'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="p-6 space-y-6">
-    <!-- Classes Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="content">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
         <?php $__empty_1 = true; $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $classe): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-purple-500 transition">
-                <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-4">
-                    <h3 class="text-xl font-bold text-white"><?php echo e($classe->code); ?></h3>
-                    <p class="text-gray-200 text-sm mt-1"><?php echo e($classe->name); ?></p>
+            <div class="card" style="margin-bottom:0;padding:0;overflow:hidden;display:flex;flex-direction:column;">
+                <div style="background:linear-gradient(135deg,var(--purple),var(--blue));padding:14px;border-bottom:1px solid var(--border);">
+                    <div style="font-size:14px;font-weight:700;"><?php echo e($classe->code); ?></div>
+                    <div style="font-size:11px;color:var(--purple-light);margin-top:2px;"><?php echo e($classe->name); ?></div>
                 </div>
-                <div class="p-4 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400 text-sm">Students:</span>
-                        <span class="text-white font-semibold"><?php echo e($classe->students_count); ?></span>
+                <div style="padding:12px;flex:1;display:flex;flex-direction:column;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11px;">
+                        <span style="color:var(--text2);">Students:</span>
+                        <span style="font-weight:600;color:var(--text);"><?php echo e($classe->students_count); ?></span>
                     </div>
                     <?php if($classe->description): ?>
-                        <p class="text-gray-400 text-sm line-clamp-2"><?php echo e($classe->description); ?></p>
+                        <div style="font-size:10px;color:var(--text2);margin-bottom:8px;line-height:1.4;"><?php echo e(substr($classe->description, 0, 80)); ?><?php echo e(strlen($classe->description) > 80 ? '...' : ''); ?></div>
                     <?php endif; ?>
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-800">
-                        <span class="inline-block px-3 py-1 bg-green-900/30 text-green-300 text-xs rounded-full">
-                            <?php echo e($classe->is_active ? 'Active' : 'Inactive'); ?>
-
-                        </span>
-                        <a href="<?php echo e(route('professor.class-detail', $classe)); ?>" class="text-purple-500 hover:text-purple-400 font-semibold text-sm">
-                            View →
-                        </a>
+                    <div style="flex:1;"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border);margin-top:8px;">
+                        <span class="badge <?php echo e($classe->is_active ? 'bg' : 'br'); ?>" style="font-size:9px;"><?php echo e($classe->is_active ? 'Active' : 'Inactive'); ?></span>
+                        <a href="<?php echo e(route('professor.class-detail', $classe)); ?>" class="btn btn-sm" style="text-decoration:none;">View →</a>
                     </div>
                 </div>
             </div>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-            <div class="col-span-full bg-gray-900 border border-gray-800 rounded-lg p-12 text-center">
-                <svg class="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17.5S6.5 28.747 12 28.747s10-4.745 10-10.247S17.5 6.253 12 6.253z"></path>
-                </svg>
-                <p class="text-gray-400">No classes assigned yet</p>
+            <div style="grid-column:1 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;">
+                <div style="width:60px;height:60px;border-radius:50%;background:var(--navy3);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:24px;">📚</div>
+                <div style="font-size:13px;color:var(--text2);">No classes assigned yet</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:4px;">Your assigned classes will appear here</div>
             </div>
         <?php endif; ?>
     </div>
 </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\dashboard\Attendance-System\resources\views/professor/classes.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.professor', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\dashboard\Attendance-System\resources\views/professor/classes.blade.php ENDPATH**/ ?>

@@ -1,5 +1,15 @@
 <?php
 
+
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $action
+ * @property string $description
+ * @property string $ip_address
+ * @property string $user_agent
+ * @property \Illuminate\Support\Carbon|null $created_at
+ */
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;

@@ -1,116 +1,115 @@
-@extends('layouts.app')
+@extends('layouts.professor')
 
 @section('title', 'Dashboard - Professor')
+@section('header', 'Dashboard')
+@section('subheader', 'Welcome back, ' . auth()->user()->name . '. Here is your class activity overview.')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.classes') }}">
+        <div class="stat-val">{{ $totalClasses }}</div>
+        <div class="stat-label">Total Classes</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View classes -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.students') }}">
+        <div class="stat-val">{{ $totalStudents }}</div>
+        <div class="stat-label">Students</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View students -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.attendance-records') }}">
+        <div class="stat-val">{{ $totalRecords }}</div>
+        <div class="stat-label">Attendance Records</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View records -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.reports') }}">
+        <div class="stat-val">{{ $attendanceRate }}%</div>
+        <div class="stat-label">Attendance Rate</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View reports -></div>
+    </a>
+</div>
+
+<div class="g-6-4">
+    <div>
+        <div class="sh">Attendance Overview</div>
+        <div class="card">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--green);">{{ $presentCount }}</div>
+                    <div class="stat-label">Present</div>
+                </div>
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--amber);">{{ $lateCount }}</div>
+                    <div class="stat-label">Late</div>
+                </div>
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--red);">{{ $absentCount }}</div>
+                    <div class="stat-label">Absent</div>
+                </div>
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--blue);">{{ $totalRecords }}</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+            </div>
+            <a class="btn btn-sm" href="{{ route('professor.attendance-records') }}" style="width:100%;justify-content:center;margin-top:8px;">Manage Attendance -></a>
+        </div>
+
+        <div class="sh">Recent Activities</div>
+        <div class="card">
+            @forelse($recentLogs as $log)
+                <div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border2);align-items:flex-start;">
+                    <div style="width:26px;height:26px;border-radius:6px;background:var(--purple-glow);display:flex;align-items:center;justify-content:center;font-size:10px;">{{ strtoupper(substr($log->action, 0, 1)) }}</div>
+                    <div style="font-size:11px;flex:1;">
+                        <strong>{{ $log->user->name ?? 'System' }}</strong> {{ str_replace('_', ' ', $log->action) }}
+                        @if($log->description)
+                            <div style="font-size:10px;color:var(--text2);margin-top:1px;">{{ $log->description }}</div>
+                        @endif
+                    </div>
+                    <div style="font-size:9px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace;">{{ $log->created_at?->format('h:i A') }}</div>
+                </div>
+            @empty
+                <div style="color:var(--text2);font-size:11px;">No recent activity.</div>
+            @endforelse
+            <a class="btn btn-sm" href="{{ route('professor.logs') }}" style="width:100%;justify-content:center;margin-top:6px;">View All Activities -></a>
+        </div>
+    </div>
+
+    <div>
+        <div class="sh">Today's Schedule</div>
+        <div class="card">
+            @forelse($todaySchedules as $schedule)
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);gap:12px;">
+                    <div>
+                        <div style="font-size:11px;font-weight:600;">{{ $schedule->subject_name }}</div>
+                        <div style="font-size:10px;color:var(--text2);">{{ $schedule->subject_code }} · Room {{ $schedule->room }}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:11px;font-weight:700;">{{ $schedule->time }}</div>
+                        <div style="font-size:9px;color:var(--text3);">{{ $schedule->days }}</div>
+                    </div>
+                </div>
+            @empty
+                <div style="color:var(--text2);font-size:11px;">No classes scheduled for today.</div>
+            @endforelse
+        </div>
+
+        <div class="sh">Quick Actions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            <a class="btn" href="{{ route('professor.scan-qr') }}" style="justify-content:center;">Scan QR</a>
+            <a class="btn" href="{{ route('professor.attendance-records') }}" style="justify-content:center;">Attendance</a>
+            <a class="btn" href="{{ route('professor.classes') }}" style="justify-content:center;">My Classes</a>
+            <a class="btn" href="{{ route('professor.reports') }}" style="justify-content:center;">Reports</a>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top:14px;background:linear-gradient(135deg,var(--purple2),var(--blue));border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <div>
-            <h1 class="text-3xl font-bold text-white">Professor Dashboard</h1>
-            <p class="text-gray-400 mt-2">Welcome back, {{ auth()->user()->name }}</p>
-        </div>
-        <a href="{{ route('professor.scan-qr') }}" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition">
-            Scan QR Code
-        </a>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Total Classes -->
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm">Total Classes</p>
-                    <p class="text-3xl font-bold text-white mt-2">{{ $totalClasses }}</p>
-                </div>
-                <svg class="w-12 h-12 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17.5S6.5 28.747 12 28.747s10-4.745 10-10.247S17.5 6.253 12 6.253z"></path>
-                </svg>
-            </div>
-        </div>
-
-        <!-- Total Students -->
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm">Total Students</p>
-                    <p class="text-3xl font-bold text-white mt-2">{{ $totalStudents }}</p>
-                </div>
-                <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM12.93 12H0v7a6 6 0 0015.806-1M16 16a2 2 0 100-4 2 2 0 000 4z"></path>
-                </svg>
-            </div>
-        </div>
-
-        <!-- Attendance Rate -->
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm">Avg Attendance</p>
-                    <p class="text-3xl font-bold text-white mt-2">{{ isset($attendanceStats['present']) ? round(($attendanceStats['present'] / (($attendanceStats['present'] ?? 0) + ($attendanceStats['late'] ?? 0) + ($attendanceStats['absent'] ?? 0))) * 100) : 0 }}%</p>
-                </div>
-                <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-        </div>
-
-        <!-- Today's Classes -->
-        <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm">Today's Classes</p>
-                    <p class="text-3xl font-bold text-white mt-2">{{ count($todaySchedules) }}</p>
-                </div>
-                <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-            </div>
+            <div style="font-weight:600;color:#fff;font-size:12px;">Ready to take attendance?</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.7);">Scan a student QR code and record attendance instantly.</div>
         </div>
     </div>
-
-    <!-- Today's Schedule -->
-    @if(count($todaySchedules) > 0)
-    <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <h2 class="text-xl font-bold text-white mb-4">Today's Schedule</h2>
-        <div class="space-y-3">
-            @foreach($todaySchedules as $schedule)
-            <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg border border-gray-700">
-                <div>
-                    <p class="text-white font-semibold">{{ $schedule->subject_name }}</p>
-                    <p class="text-gray-400 text-sm">{{ $schedule->subject_code }} • Room {{ $schedule->room }}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-white font-semibold">{{ $schedule->time }}</p>
-                    <p class="text-gray-400 text-sm">{{ $schedule->days }}</p>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a href="{{ route('professor.classes') }}" class="bg-purple-600 hover:bg-purple-700 text-white p-6 rounded-lg text-center font-semibold transition transform hover:scale-105">
-            <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17.5S6.5 28.747 12 28.747s10-4.745 10-10.247S17.5 6.253 12 6.253z"></path>
-            </svg>
-            My Classes
-        </a>
-        <a href="{{ route('professor.attendance-records') }}" class="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-lg text-center font-semibold transition transform hover:scale-105">
-            <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Attendance Records
-        </a>
-        <a href="{{ route('professor.reports') }}" class="bg-green-600 hover:bg-green-700 text-white p-6 rounded-lg text-center font-semibold transition transform hover:scale-105">
-            <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-            Reports
-        </a>
-    </div>
+    <a class="btn" href="{{ route('professor.scan-qr') }}" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25);color:#fff;">Start Scanning →</a>
 </div>
 @endsection

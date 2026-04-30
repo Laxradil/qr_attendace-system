@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Classe;
 use App\Models\QRCode;
 use App\Models\AttendanceRecord;
+use App\Models\SystemLog;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -29,11 +31,20 @@ class ProfessorController extends Controller
         
         $totalClasses = $classes->count();
         $totalStudents = $classes->sum('students_count'); // Use the counted value, not a new query
-        
-        $attendanceStats = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->pluck('count', 'status');
+
+        $attendanceSummary = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
+            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count")
+            ->first();
+
+        $totalRecords = (int) ($attendanceSummary->total_records ?? 0);
+        $presentCount = (int) ($attendanceSummary->present_count ?? 0);
+        $lateCount = (int) ($attendanceSummary->late_count ?? 0);
+        $absentCount = (int) ($attendanceSummary->absent_count ?? 0);
+
+        $recentLogs = $user->logs()
+            ->latest()
+            ->limit(5)
+            ->get();
 
         $todaySchedules = $user->classes()
             ->with('schedules')
@@ -44,7 +55,12 @@ class ProfessorController extends Controller
         return view('professor.dashboard', [
             'totalClasses' => $totalClasses,
             'totalStudents' => $totalStudents,
-            'attendanceStats' => $attendanceStats,
+            'totalRecords' => $totalRecords,
+            'presentCount' => $presentCount,
+            'lateCount' => $lateCount,
+            'absentCount' => $absentCount,
+            'attendanceRate' => $totalRecords > 0 ? round(($presentCount / $totalRecords) * 100) : 0,
+            'recentLogs' => $recentLogs,
             'todaySchedules' => $todaySchedules,
         ]);
     }
@@ -83,7 +99,10 @@ class ProfessorController extends Controller
             'student_id' => 'required|exists:users,id',
         ]);
 
+        abort_unless(auth()->user()->classes()->whereKey($validated['class_id'])->exists(), 403);
+
         $qrCode = QRCode::where('uuid', $validated['qr_code'])->firstOrFail();
+        $student = User::findOrFail($validated['student_id']);
         
         if (!$qrCode->isValid()) {
             return back()->with('error', 'Invalid or expired QR code');
@@ -98,6 +117,14 @@ class ProfessorController extends Controller
         ]);
 
         $qrCode->update(['is_used' => true, 'used_at' => now()]);
+
+        SystemLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'scan_qr',
+            'description' => 'Scanned QR and recorded attendance for ' . $student->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return back()->with('success', 'Attendance recorded successfully');
     }
@@ -118,6 +145,11 @@ class ProfessorController extends Controller
             $query->whereDate('recorded_at', $date);
         }
 
+        $summaryQuery = clone $query;
+        $summary = $summaryQuery
+            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count")
+            ->first();
+
         $records = $query->with('student', 'classe')
             ->orderBy('recorded_at', 'desc')
             ->paginate(20);
@@ -125,6 +157,10 @@ class ProfessorController extends Controller
         return view('professor.attendance-records', [
             'records' => $records,
             'classes' => $classes,
+            'totalRecords' => (int) ($summary->total_records ?? 0),
+            'presentCount' => (int) ($summary->present_count ?? 0),
+            'lateCount' => (int) ($summary->late_count ?? 0),
+            'absentCount' => (int) ($summary->absent_count ?? 0),
         ]);
     }
 
@@ -147,11 +183,12 @@ class ProfessorController extends Controller
 
         if ($classId) {
             $classe = $classes->find($classId);
+            abort_unless($classe, 403);
             $students = $classe->students;
             
             // Get ALL attendance data in ONE query (not per-student loops)
             $allStats = AttendanceRecord::where('class_id', $classe->id)
-                ->selectRaw('student_id, COUNT(*) as total, SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present')
+                ->selectRaw("student_id, COUNT(*) as total, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present")
                 ->groupBy('student_id')
                 ->get()
                 ->keyBy('student_id');
@@ -209,6 +246,47 @@ class ProfessorController extends Controller
         return view('professor.settings', [
             'user' => auth()->user(),
         ]);
+    }
+
+    public function editAttendanceRecord(AttendanceRecord $attendanceRecord): View
+    {
+        abort_unless(auth()->user()->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
+
+        return view('professor.edit-attendance', [
+            'record' => $attendanceRecord->load('student', 'classe'),
+        ]);
+    }
+
+    public function updateAttendanceRecord(Request $request, AttendanceRecord $attendanceRecord): RedirectResponse
+    {
+        abort_unless(auth()->user()->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
+
+        $validated = $request->validate([
+            'status' => 'required|in:present,late,absent',
+            'recorded_at' => 'required|date',
+            'minutes_late' => 'nullable|integer|min:0',
+        ]);
+
+        $minutesLate = $validated['status'] === 'late'
+            ? (int) ($validated['minutes_late'] ?? 0)
+            : 0;
+
+        $attendanceRecord->update([
+            'status' => $validated['status'],
+            'minutes_late' => $minutesLate,
+            'recorded_at' => Carbon::parse($validated['recorded_at']),
+        ]);
+
+        SystemLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'attendance_record',
+            'description' => 'Updated attendance for ' . $attendanceRecord->student->name . ' in ' . $attendanceRecord->classe->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('professor.attendance-records', ['class_id' => $attendanceRecord->class_id])
+            ->with('success', 'Attendance updated successfully');
     }
 
     public function updateSettings(Request $request): RedirectResponse
