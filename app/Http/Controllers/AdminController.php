@@ -22,9 +22,16 @@ class AdminController extends Controller
 
     public function dashboard(): View
     {
-        $totalUsers = User::count();
-        $totalProfessors = User::where('role', 'professor')->count();
-        $totalStudents = User::where('role', 'student')->count();
+        // Combine all user counts into single query instead of 3 separate queries
+        $userStats = User::selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN role = "professor" THEN 1 ELSE 0 END) as professors,
+            SUM(CASE WHEN role = "student" THEN 1 ELSE 0 END) as students
+        ')->first();
+
+        $totalUsers = $userStats->total;
+        $totalProfessors = $userStats->professors ?? 0;
+        $totalStudents = $userStats->students ?? 0;
         $totalClasses = Classe::count();
         $totalAttendance = AttendanceRecord::count();
 
