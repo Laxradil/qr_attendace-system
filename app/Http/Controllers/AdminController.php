@@ -329,9 +329,9 @@ class AdminController extends Controller
         // Optimize: Get all attendance stats in a single query
         $attendanceStats = AttendanceRecord::selectRaw(
             'COUNT(*) as total_records, 
-             SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count,
-             SUM(CASE WHEN status = "late" THEN 1 ELSE 0 END) as late_count,
-             SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent_count'
+               SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as present_count,
+               SUM(CASE WHEN status = \'late\' THEN 1 ELSE 0 END) as late_count,
+               SUM(CASE WHEN status = \'absent\' THEN 1 ELSE 0 END) as absent_count'
         )->first();
 
         $totalStudents = User::where('role', 'student')->count();

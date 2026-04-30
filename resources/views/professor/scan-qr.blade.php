@@ -2,122 +2,166 @@
 
 @section('title', 'Scan QR Code - Professor')
 @section('header', 'QR Code Scanner')
+@section('subheader', 'Scan QR codes to record student attendance')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="content">
+    <div class="g-6-4" style="gap:18px;">
         <!-- Scanner -->
-        <div class="lg:col-span-2">
-            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-                <div class="aspect-video bg-black flex items-center justify-center relative">
-                    <video id="qr-scanner" class="w-full h-full object-cover"></video>
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="w-64 h-64 border-2 border-purple-500 rounded-lg"></div>
+        <div>
+            <div class="card" style="margin-bottom:0;padding:0;border-radius:var(--radius-lg);overflow:hidden;">
+                <div style="width:100%;padding-top:56.25%;position:relative;background:var(--navy3);">
+                    <video id="qr-scanner" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;"></video>
+                    <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                        <div style="width:250px;height:250px;border:2px solid var(--purple);border-radius:var(--radius-lg);box-shadow:0 0 20px rgba(108,92,231,0.3);"></div>
                     </div>
                 </div>
             </div>
-            <div class="mt-4 flex gap-3">
-                <button id="start-scan" onclick="startScanner()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-semibold transition">
-                    Start Scanner
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+                <button id="start-scan" onclick="startScanner()" class="btn btn-p" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;">
+                    ▶ Start Scanner
                 </button>
-                <button id="stop-scan" onclick="stopScanner()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold transition" disabled>
-                    Stop Scanner
+                <button id="stop-scan" onclick="stopScanner()" class="btn btn-d" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;opacity:0.5;cursor:not-allowed;" disabled>
+                    ⏹ Stop Scanner
                 </button>
             </div>
         </div>
 
         <!-- Attendance Form -->
-        <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-4">
-            <h2 class="text-xl font-bold text-white">Record Attendance</h2>
-            
-            <form id="attendance-form" action="{{ route('professor.attendance.store') }}" method="POST" class="space-y-4">
-                @csrf
+        <div>
+            <div class="card">
+                <div class="sh" style="margin-top:0;">Record Attendance</div>
                 
-                <!-- Class Selection -->
-                <div>
-                    <label class="block text-gray-300 text-sm font-semibold mb-2">Select Class</label>
-                    <select name="class_id" required class="w-full bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:border-purple-500 outline-none">
-                        <option value="">Choose a class...</option>
-                        @foreach($classes as $classe)
-                            <option value="{{ $classe->id }}">{{ $classe->code }} - {{ $classe->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <form id="attendance-form" action="{{ route('professor.attendance.store') }}" method="POST">
+                    @csrf
+                    
+                    <!-- Class Selection -->
+                    <div style="margin-bottom:12px;">
+                        <label class="fl">Select Class</label>
+                        <select name="class_id" required class="fi">
+                            <option value="">Choose a class...</option>
+                            @foreach($classes as $classe)
+                                <option value="{{ $classe->id }}">{{ $classe->code }} - {{ $classe->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <!-- Student Selection -->
-                <div>
-                    <label class="block text-gray-300 text-sm font-semibold mb-2">Student</label>
-                    <select name="student_id" required class="w-full bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:border-purple-500 outline-none">
-                        <option value="">Select a student...</option>
-                    </select>
-                </div>
+                    <!-- Student Selection -->
+                    <div style="margin-bottom:12px;">
+                        <label class="fl">Student</label>
+                        <select name="student_id" required class="fi">
+                            <option value="">Select a student...</option>
+                        </select>
+                    </div>
 
-                <!-- QR Code Input -->
-                <div>
-                    <label class="block text-gray-300 text-sm font-semibold mb-2">QR Code</label>
-                    <input type="text" name="qr_code" id="qr-input" placeholder="QR code will appear here..." class="w-full bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:border-purple-500 outline-none" required>
-                </div>
+                    <!-- QR Code Input -->
+                    <div style="margin-bottom:12px;">
+                        <label class="fl">QR Code</label>
+                        <input type="text" name="qr_code" id="qr-input" placeholder="QR code will appear here..." class="fi" required>
+                    </div>
 
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition">
-                    Record Attendance
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-g" style="width:100%;padding:10px 12px;justify-content:center;margin-bottom:12px;">
+                        ✓ Record Attendance
+                    </button>
+                </form>
 
-            <!-- Recent Scans -->
-            <div class="pt-4 border-t border-gray-700">
-                <h3 class="text-white font-semibold mb-3">Recent Scans</h3>
-                <div id="recent-scans" class="space-y-2 max-h-48 overflow-y-auto">
-                    <p class="text-gray-400 text-sm">No scans yet</p>
+                <!-- Recent Scans -->
+                <div style="padding-top:12px;border-top:1px solid var(--border);margin-top:12px;">
+                    <div class="sh" style="margin-top:0;margin-bottom:8px;">Recent Scans</div>
+                    <div id="recent-scans" style="font-size:10px;max-height:200px;overflow-y:auto;">
+                        <div style="color:var(--text2);padding:8px 0;">No scans yet</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    #qr-scanner {
+        display: block;
+    }
+    
+    #recent-scans > div {
+        background: var(--navy3);
+        padding: 8px 10px;
+        border-radius: var(--radius);
+        margin-bottom: 6px;
+        border: 1px solid var(--border);
+        color: var(--text);
+    }
+    
+    #recent-scans > div .scan-code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        word-break: break-all;
+        margin-bottom: 3px;
+    }
+    
+    #recent-scans > div .scan-time {
+        font-size: 9px;
+        color: var(--text2);
+    }
+</style>
+
 <script>
-    let scanner;
     const recentScans = [];
 
     async function startScanner() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            document.getElementById('qr-scanner').srcObject = stream;
+            const video = document.getElementById('qr-scanner');
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+            video.srcObject = stream;
+            video.play();
             document.getElementById('start-scan').disabled = true;
+            document.getElementById('start-scan').style.opacity = '0.5';
+            document.getElementById('start-scan').style.cursor = 'not-allowed';
             document.getElementById('stop-scan').disabled = false;
+            document.getElementById('stop-scan').style.opacity = '1';
+            document.getElementById('stop-scan').style.cursor = 'pointer';
         } catch (err) {
             alert('Unable to access camera: ' + err.message);
         }
     }
 
     function stopScanner() {
-        const stream = document.getElementById('qr-scanner').srcObject;
-        stream.getTracks().forEach(track => track.stop());
-        document.getElementById('start-scan').disabled = false;
-        document.getElementById('stop-scan').disabled = true;
-    }
-
-    // Simulate QR code scanning
-    document.getElementById('qr-scanner').addEventListener('change', (e) => {
-        if (e.target.value) {
-            document.getElementById('qr-input').value = e.target.value;
-            const time = new Date().toLocaleTimeString();
-            recentScans.unshift({ code: e.target.value, time });
-            updateRecentScans();
+        const video = document.getElementById('qr-scanner');
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
         }
-    });
+        document.getElementById('start-scan').disabled = false;
+        document.getElementById('start-scan').style.opacity = '1';
+        document.getElementById('start-scan').style.cursor = 'pointer';
+        document.getElementById('stop-scan').disabled = true;
+        document.getElementById('stop-scan').style.opacity = '0.5';
+        document.getElementById('stop-scan').style.cursor = 'not-allowed';
+    }
 
     function updateRecentScans() {
         const container = document.getElementById('recent-scans');
         if (recentScans.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-sm">No scans yet</p>';
+            container.innerHTML = '<div style="color:var(--text2);padding:8px 0;">No scans yet</div>';
             return;
         }
         container.innerHTML = recentScans.slice(0, 5).map(scan => 
-            `<div class="bg-gray-800 p-2 rounded text-xs text-gray-300">
-                <div class="font-mono truncate">${scan.code}</div>
-                <div class="text-gray-500">${scan.time}</div>
+            `<div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="scan-code">${scan.code}</div>
+                <div class="scan-time">${scan.time}</div>
             </div>`
         ).join('');
     }
+
+    // Simulate manual QR code input (for testing without QR scanner library)
+    document.getElementById('qr-input').addEventListener('change', (e) => {
+        if (e.target.value) {
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            recentScans.unshift({ code: e.target.value, time });
+            updateRecentScans();
+            e.target.value = '';
+        }
+    });
 </script>
 @endsection
