@@ -21,9 +21,14 @@ class ProfessorController extends Controller
     public function dashboard(): View
     {
         $user = auth()->user();
-        $classes = $user->classes()->with('students')->get();
+        // Use withCount() to get student counts in the initial query instead of calling count() in loop
+        $classes = $user->classes()
+            ->withCount('students')
+            ->with('students')
+            ->get();
+        
         $totalClasses = $classes->count();
-        $totalStudents = $classes->sum(fn($c) => $c->students()->count());
+        $totalStudents = $classes->sum('students_count'); // Use the counted value, not a new query
         
         $attendanceStats = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
             ->selectRaw('status, COUNT(*) as count')
@@ -144,15 +149,18 @@ class ProfessorController extends Controller
             $classe = $classes->find($classId);
             $students = $classe->students;
             
-            $attendanceData = $students->map(function($student) use ($classe) {
-                $total = AttendanceRecord::where('class_id', $classe->id)
-                    ->where('student_id', $student->id)
-                    ->count();
-                
-                $present = AttendanceRecord::where('class_id', $classe->id)
-                    ->where('student_id', $student->id)
-                    ->where('status', 'present')
-                    ->count();
+            // Get ALL attendance data in ONE query (not per-student loops)
+            $allStats = AttendanceRecord::where('class_id', $classe->id)
+                ->selectRaw('student_id, COUNT(*) as total, SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present')
+                ->groupBy('student_id')
+                ->get()
+                ->keyBy('student_id');
+
+            // Map students with their attendance stats
+            $attendanceData = $students->map(function($student) use ($allStats) {
+                $stats = $allStats[$student->id] ?? null;
+                $total = $stats?->total ?? 0;
+                $present = $stats?->present ?? 0;
 
                 return [
                     'student' => $student,

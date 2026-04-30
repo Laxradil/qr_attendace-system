@@ -22,23 +22,32 @@ class AdminController extends Controller
 
     public function dashboard(): View
     {
-        // Batch all counts in a single query instead of 5 separate ones
-        $counts = [
-            'totalUsers' => User::count(),
-            'totalProfessors' => User::where('role', 'professor')->count(),
-            'totalStudents' => User::where('role', 'student')->count(),
-            'totalClasses' => Classe::count(),
-            'totalAttendance' => AttendanceRecord::count(),
-        ];
+        // Combine all user counts into single query instead of 3 separate queries
+        $userStats = User::selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN role = 'professor' THEN 1 ELSE 0 END) as professors,
+            SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students
+        ")->first();
+
+        $totalUsers = $userStats->total;
+        $totalProfessors = $userStats->professors ?? 0;
+        $totalStudents = $userStats->students ?? 0;
+        $totalClasses = Classe::count();
+        $totalAttendance = AttendanceRecord::count();
 
         $recentLogs = SystemLog::with('user')
             ->latest()
             ->limit(10)
             ->get();
 
-        return view('admin.dashboard', array_merge($counts, [
+        return view('admin.dashboard', [
+            'totalUsers' => $totalUsers,
+            'totalProfessors' => $totalProfessors,
+            'totalStudents' => $totalStudents,
+            'totalClasses' => $totalClasses,
+            'totalAttendance' => $totalAttendance,
             'recentLogs' => $recentLogs,
-        ]));
+        ]);
     }
 
     // Users Management
