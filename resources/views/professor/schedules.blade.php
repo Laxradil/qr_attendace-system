@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.professor')
 
 @section('title', 'Schedules - Professor')
 @section('header', 'Class Schedules')
@@ -31,8 +31,9 @@
                     </div>
                 </div>
 
-                <div class="mt-4 pt-4 border-t border-gray-700 flex gap-3">
-                    <button class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-semibold transition">
+                <div class="mt-4 pt-4 border-t border-gray-700 flex items-center justify-between gap-3">
+                    <span class="text-gray-500 text-sm">View-only for professors</span>
+                    <button class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded font-semibold transition">
                         View Details
                     </button>
                 </div>

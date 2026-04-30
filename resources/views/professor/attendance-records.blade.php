@@ -1,79 +1,78 @@
-@extends('layouts.app')
+@extends('layouts.professor')
 
 @section('title', 'Attendance Records - Professor')
 @section('header', 'Attendance Records')
+@section('subheader', 'View and update attendance records for your classes.')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <!-- Filters -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg p-4">
-        <form class="flex gap-4 flex-wrap">
-            <div class="flex-1 min-w-48">
-                <select name="class_id" class="w-full bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:border-purple-500 outline-none">
-                    <option value="">All Classes</option>
-                    @foreach($classes as $classe)
-                        <option value="{{ $classe->id }}" {{ request('class_id') == $classe->id ? 'selected' : '' }}>
-                            {{ $classe->code }} - {{ $classe->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex-1 min-w-48">
-                <input type="date" name="date" value="{{ request('date') }}" class="w-full bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:border-purple-500 outline-none">
-            </div>
-            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded font-semibold transition">
-                Filter
-            </button>
-        </form>
-    </div>
+<div class="stats stats-4" style="margin-bottom:12px;">
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--blue-bg);"></div><div><div class="stat-val">{{ $totalRecords }}</div><div class="stat-label">Total Records</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--green-bg);"></div><div><div class="stat-val" style="color:var(--green);">{{ $presentCount }}</div><div class="stat-label">Present</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--amber-bg);"></div><div><div class="stat-val" style="color:var(--amber);">{{ $lateCount }}</div><div class="stat-label">Late</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--red-bg);"></div><div><div class="stat-val" style="color:var(--red);">{{ $absentCount }}</div><div class="stat-label">Absent</div></div></div>
+</div>
 
-    <!-- Records Table -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-800">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Student</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Class</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Date & Time</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Status</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Minutes Late</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-800">
-                    @forelse($records as $record)
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4 text-white">{{ $record->student->name }}</td>
-                            <td class="px-6 py-4 text-gray-400">{{ $record->classe->code }}</td>
-                            <td class="px-6 py-4 text-gray-400">{{ $record->recorded_at->format('M d, Y H:i') }}</td>
-                            <td class="px-6 py-4">
-                                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
-                                    {{ $record->status === 'present' ? 'bg-green-900/30 text-green-300' : '' }}
-                                    {{ $record->status === 'late' ? 'bg-amber-900/30 text-amber-300' : '' }}
-                                    {{ $record->status === 'absent' ? 'bg-red-900/30 text-red-300' : '' }}
-                                ">
-                                    {{ ucfirst($record->status) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-gray-400">
-                                {{ $record->status === 'late' ? $record->minutes_late . ' min' : '-' }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-gray-400">No attendance records found</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<div class="card">
+    <form method="GET" class="g2" style="gap:10px;align-items:end;">
+        <div>
+            <label class="fl" for="class_id">Class</label>
+            <select id="class_id" name="class_id" class="fi">
+                <option value="">All Classes</option>
+                @foreach($classes as $classe)
+                    <option value="{{ $classe->id }}" {{ request('class_id') == $classe->id ? 'selected' : '' }}>{{ $classe->code }} - {{ $classe->name }}</option>
+                @endforeach
+            </select>
         </div>
-    </div>
+        <div>
+            <label class="fl" for="date">Date</label>
+            <input id="date" type="date" name="date" value="{{ request('date') }}" class="fi">
+        </div>
+        <div style="grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-p">Filter</button>
+            <a href="{{ route('professor.attendance-records') }}" class="btn">Reset</a>
+        </div>
+    </form>
+</div>
 
-    <!-- Pagination -->
-    @if($records->hasPages())
-        <div class="flex justify-center">
-            {{ $records->links() }}
-        </div>
-    @endif
+<div class="tbl-wrap">
+    <table>
+        <thead><tr><th>Date & Time</th><th>Student</th><th>Class</th><th>Status</th><th>Minutes Late</th><th>Actions</th></tr></thead>
+        <tbody>
+            @forelse($records as $record)
+                <tr>
+                    <td class="td-mono">{{ $record->recorded_at?->format('M d, Y h:i A') }}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <div class="log-av">{{ strtoupper(substr($record->student->name ?? 'ST', 0, 2)) }}</div>
+                            <div>
+                                <div style="font-size:11px;font-weight:500;">{{ $record->student->name ?? 'Unknown' }}</div>
+                                <div class="td-mono" style="font-size:9px;">{{ $record->student->student_id ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size:11px;font-weight:500;">{{ $record->classe->name ?? 'N/A' }}</div>
+                        <div style="font-size:9px;color:var(--text2);">{{ $record->classe->code ?? '-' }}</div>
+                    </td>
+                    <td>
+                        @if($record->status === 'present')
+                            <span class="badge bg">Present</span>
+                        @elseif($record->status === 'late')
+                            <span class="badge ba">Late</span>
+                        @else
+                            <span class="badge br">Absent</span>
+                        @endif
+                    </td>
+                    <td>{{ $record->status === 'late' ? (int) $record->minutes_late . ' min' : '-' }}</td>
+                    <td>
+                        <a href="{{ route('professor.attendance-records.edit', $record) }}" class="btn btn-sm">Edit</a>
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="6" style="text-align:center;color:var(--text2);">No attendance records found.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+    <div class="pag"><span>Showing {{ $records->firstItem() ?? 0 }} to {{ $records->lastItem() ?? 0 }} of {{ $records->total() }} records</span><div>{{ $records->links() }}</div></div>
 </div>
 @endsection
