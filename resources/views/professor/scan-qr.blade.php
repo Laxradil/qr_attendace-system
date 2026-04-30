@@ -6,24 +6,50 @@
 
 @section('content')
 <div class="content">
+    <!-- Mode Toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button id="mode-camera" onclick="setMode('camera')" class="btn btn-p" style="flex:1;padding:10px 12px;font-size:12px;justify-content:center;">
+            📷 Camera Mode
+        </button>
+        <button id="mode-hardware" onclick="setMode('hardware')" class="btn" style="flex:1;padding:10px 12px;font-size:12px;justify-content:center;">
+            🔧 Hardware Scanner
+        </button>
+    </div>
+
     <div class="g-6-4" style="gap:18px;">
         <!-- Scanner -->
         <div>
-            <div class="card" style="margin-bottom:0;padding:0;border-radius:var(--radius-lg);overflow:hidden;">
-                <div style="width:100%;padding-top:56.25%;position:relative;background:var(--navy3);">
-                    <video id="qr-scanner" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;"></video>
-                    <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-                        <div style="width:250px;height:250px;border:2px solid var(--purple);border-radius:var(--radius-lg);box-shadow:0 0 20px rgba(108,92,231,0.3);"></div>
+            <!-- Camera Mode -->
+            <div id="camera-section">
+                <div class="card" style="margin-bottom:0;padding:0;border-radius:var(--radius-lg);overflow:hidden;">
+                    <div style="width:100%;padding-top:56.25%;position:relative;background:var(--navy3);">
+                        <video id="qr-scanner" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;"></video>
+                        <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                            <div style="width:250px;height:250px;border:2px solid var(--purple);border-radius:var(--radius-lg);box-shadow:0 0 20px rgba(108,92,231,0.3);"></div>
+                        </div>
                     </div>
                 </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+                    <button id="start-scan" onclick="startScanner()" class="btn btn-p" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;">
+                        ▶ Start Camera
+                    </button>
+                    <button id="stop-scan" onclick="stopScanner()" class="btn btn-d" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;opacity:0.5;cursor:not-allowed;" disabled>
+                        ⏹ Stop Camera
+                    </button>
+                </div>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
-                <button id="start-scan" onclick="startScanner()" class="btn btn-p" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;">
-                    ▶ Start Scanner
-                </button>
-                <button id="stop-scan" onclick="stopScanner()" class="btn btn-d" style="width:100%;padding:10px 12px;font-size:12px;justify-content:center;opacity:0.5;cursor:not-allowed;" disabled>
-                    ⏹ Stop Scanner
-                </button>
+
+            <!-- Hardware Scanner Mode -->
+            <div id="hardware-section" style="display:none;">
+                <div class="card">
+                    <div class="sh" style="margin-top:0;">🔧 Hardware Scanner</div>
+                    <div class="info" style="margin-bottom:12px;">Hold your hardware scanner device ready. Focus will automatically be on the input field below.</div>
+                    <div style="margin-bottom:12px;">
+                        <label class="fl">Scan QR Code</label>
+                        <input type="text" id="hardware-input" placeholder="Point scanner at QR code..." class="fi" style="font-size:14px;padding:12px 10px;">
+                        <div style="font-size:9px;color:var(--text3);margin-top:4px;">📌 Field is auto-focused for hardware scanner input</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -106,6 +132,36 @@
 
 <script>
     const recentScans = [];
+    let currentMode = 'camera';
+
+    function setMode(mode) {
+        currentMode = mode;
+        const cameraBtn = document.getElementById('mode-camera');
+        const hardwareBtn = document.getElementById('mode-hardware');
+        const cameraSection = document.getElementById('camera-section');
+        const hardwareSection = document.getElementById('hardware-section');
+
+        if (mode === 'camera') {
+            cameraBtn.classList.add('btn-p');
+            cameraBtn.classList.remove('btn');
+            hardwareBtn.classList.remove('btn-p');
+            hardwareBtn.classList.add('btn');
+            cameraSection.style.display = 'block';
+            hardwareSection.style.display = 'none';
+            document.getElementById('qr-input').focus();
+        } else {
+            cameraBtn.classList.remove('btn-p');
+            cameraBtn.classList.add('btn');
+            hardwareBtn.classList.add('btn-p');
+            hardwareBtn.classList.remove('btn');
+            cameraSection.style.display = 'none';
+            hardwareSection.style.display = 'block';
+            document.getElementById('hardware-input').focus();
+        }
+    }
+
+    // Initialize with camera mode
+    setMode('camera');
 
     async function startScanner() {
         try {
@@ -154,13 +210,44 @@
         ).join('');
     }
 
-    // Simulate manual QR code input (for testing without QR scanner library)
+    // Camera mode - Manual QR code input
     document.getElementById('qr-input').addEventListener('change', (e) => {
-        if (e.target.value) {
+        if (e.target.value && currentMode === 'camera') {
             const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             recentScans.unshift({ code: e.target.value, time });
             updateRecentScans();
             e.target.value = '';
+        }
+    });
+
+    // Hardware Scanner Mode - Capture scanned input
+    document.getElementById('hardware-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && e.target.value && currentMode === 'hardware') {
+            const scannedCode = e.target.value.trim();
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            // Add to recent scans
+            recentScans.unshift({ code: scannedCode, time });
+            updateRecentScans();
+            
+            // Auto-populate the main QR input field for form submission
+            document.getElementById('qr-input').value = scannedCode;
+            
+            // Clear hardware input and keep focus
+            e.target.value = '';
+            e.target.focus();
+            
+            // Optional: Log to console for debugging
+            console.log('Hardware scanner detected:', scannedCode);
+        }
+    });
+
+    // Keep hardware input focused when in hardware mode
+    document.getElementById('hardware-input').addEventListener('blur', () => {
+        if (currentMode === 'hardware') {
+            setTimeout(() => {
+                document.getElementById('hardware-input').focus();
+            }, 100);
         }
     });
 </script>
