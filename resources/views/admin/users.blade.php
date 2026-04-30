@@ -1,72 +1,69 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Users Management - Admin')
-@section('header', 'Users Management')
+@section('title', 'Users')
+@section('header', 'Users')
+@section('subheader', 'Manage all system users and their access.')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <!-- Header with Add Button -->
-    <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold text-white">All Users</h2>
-        <a href="{{ route('admin.users.create') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition">
-            + Add User
-        </a>
-    </div>
+<div class="stats stats-4" style="margin-bottom:12px;">
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--blue-bg);"></div><div><div class="stat-val">{{ $users->total() }}</div><div class="stat-label">Total Users</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--red-bg);"></div><div><div class="stat-val">{{ \App\Models\User::where('role', 'admin')->count() }}</div><div class="stat-label">Administrators</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--purple-glow);"></div><div><div class="stat-val">{{ \App\Models\User::where('role', 'professor')->count() }}</div><div class="stat-label">Professors</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--green-bg);"></div><div><div class="stat-val">{{ \App\Models\User::where('role', 'student')->count() }}</div><div class="stat-label">Students</div></div></div>
+</div>
 
-    <!-- Users Table -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-800">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Name</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Email</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Username</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Role</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Status</th>
-                        <th class="px-6 py-3 text-left text-gray-300 font-semibold text-sm">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-800">
-                    @forelse($users as $user)
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4 text-white">{{ $user->name }}</td>
-                            <td class="px-6 py-4 text-gray-400">{{ $user->email }}</td>
-                            <td class="px-6 py-4 text-gray-400">{{ $user->username }}</td>
-                            <td class="px-6 py-4">
-                                <span class="inline-block px-3 py-1 bg-purple-900/30 text-purple-300 text-xs rounded-full font-semibold capitalize">
-                                    {{ $user->role }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-block px-3 py-1 {{ $user->is_active ? 'bg-green-900/30 text-green-300' : 'bg-red-900/30 text-red-300' }} text-xs rounded-full font-semibold">
-                                    {{ $user->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 flex gap-2">
-                                <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-400 hover:text-blue-300 font-semibold text-sm">Edit</a>
-                                <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-400 hover:text-red-300 font-semibold text-sm">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-gray-400">No users found</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+    <a href="{{ route('admin.users.create') }}" class="btn btn-sm btn-p">+ Add User</a>
+</div>
 
-    <!-- Pagination -->
-    @if($users->hasPages())
-        <div class="flex justify-center">
-            {{ $users->links() }}
-        </div>
-    @endif
+<div class="tbl-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Date Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($users as $user)
+                <tr>
+                    <td class="td-mono">USR-{{ str_pad((string) $user->id, 4, '0', STR_PAD_LEFT) }}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:7px;">
+                            <div class="log-av">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+                            <span style="font-weight:500;">{{ $user->name }}</span>
+                        </div>
+                    </td>
+                    <td style="font-size:10px;color:var(--text2);">{{ $user->email }}</td>
+                    <td>
+                        <span class="badge {{ $user->role === 'admin' ? 'br' : ($user->role === 'professor' ? 'bp' : 'bx') }}">{{ ucfirst($user->role) }}</span>
+                    </td>
+                    <td>
+                        <span class="badge {{ $user->is_active ? 'bg' : 'ba' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
+                    </td>
+                    <td class="td-mono">{{ $user->created_at?->format('M d, Y') }}</td>
+                    <td style="display:flex;gap:4px;">
+                        <a class="btn btn-sm" href="{{ route('admin.users.edit', $user) }}">Edit</a>
+                        <form action="{{ route('admin.users.delete', $user) }}" method="POST" onsubmit="return confirm('Delete this user?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-d">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="7" style="text-align:center;color:var(--text2);">No users found.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+    <div class="pag">
+        <span>Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ $users->total() }} users</span>
+        <div>{{ $users->links() }}</div>
+    </div>
 </div>
 @endsection
