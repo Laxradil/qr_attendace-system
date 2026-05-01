@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -5,6 +6,12 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\ScheduleController;
+
+// Student: Get students in a class (AJAX)
+Route::get('/student/class/{id}/students', [App\Http\Controllers\StudentController::class, 'getClassStudents'])->name('student.class.students');
+
+// Professor: Get students in a class (AJAX)
+Route::get('/professor/class/{id}/students', [App\Http\Controllers\ProfessorController::class, 'getClassStudents'])->name('professor.class.students');
 
 // Auth routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -46,6 +53,7 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::get('/logs', [ProfessorController::class, 'logs'])->name('professor.logs');
     Route::get('/settings', [ProfessorController::class, 'settings'])->name('professor.settings');
     Route::put('/settings', [ProfessorController::class, 'updateSettings'])->name('professor.settings.update');
+    Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
 });
 
 // Admin routes
@@ -108,4 +116,5 @@ Route::prefix('student')->middleware(['auth', 'role:student'])->group(function (
     Route::get('/dashboard', [App\Http\Controllers\StudentController::class, 'dashboard'])->name('student.dashboard');
     Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
     Route::get('/classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.classes');
+    Route::get('/qr-code/{classId}', [App\Http\Controllers\StudentController::class, 'generateStudentQR'])->name('student.qr-code');
 });

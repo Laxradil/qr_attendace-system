@@ -6,63 +6,56 @@
 
 @section('content')
 <!-- Stats Overview -->
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
-    <div class="stat">
-        <div class="stat-val" style="font-size:24px;color:var(--green);">{{ $totalPresent }}</div>
-        <div class="stat-label">Present</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin-bottom:24px;">
+    <div class="stat card" style="padding:18px 0;text-align:center;">
+        <div class="stat-val" style="font-size:28px;color:var(--green);font-weight:700;">{{ $totalPresent }}</div>
+        <div class="stat-label" style="font-size:13px;">Present</div>
     </div>
-    <div class="stat">
-        <div class="stat-val" style="font-size:24px;color:var(--amber);">{{ $totalLate }}</div>
-        <div class="stat-label">Late</div>
+    <div class="stat card" style="padding:18px 0;text-align:center;">
+        <div class="stat-val" style="font-size:28px;color:var(--amber);font-weight:700;">{{ $totalLate }}</div>
+        <div class="stat-label" style="font-size:13px;">Late</div>
     </div>
-    <div class="stat">
-        <div class="stat-val" style="font-size:24px;color:var(--red);">{{ $totalAbsent }}</div>
-        <div class="stat-label">Absent</div>
+    <div class="stat card" style="padding:18px 0;text-align:center;">
+        <div class="stat-val" style="font-size:28px;color:var(--red);font-weight:700;">{{ $totalAbsent }}</div>
+        <div class="stat-label" style="font-size:13px;">Absent</div>
     </div>
-    <div class="stat">
-        <div class="stat-val" style="font-size:24px;color:var(--blue);">{{ $classes->count() }}</div>
-        <div class="stat-label">Enrolled Classes</div>
+    <div class="stat card" style="padding:18px 0;text-align:center;">
+        <div class="stat-val" style="font-size:28px;color:var(--blue);font-weight:700;">{{ $classes->count() }}</div>
+        <div class="stat-label" style="font-size:13px;">Enrolled Classes</div>
     </div>
 </div>
 
 <div class="g-6-4">
     <!-- Classes with QR Codes -->
     <div>
-        <div class="sh">Your Classes & QR Codes</div>
-        <div class="card">
-            <div class="tbl-wrap">
-                <table>
+        <div class="sh" style="font-size:18px;font-weight:600;margin-bottom:10px;">Your Classes & QR Codes</div>
+        <div class="card" style="padding:0 0 12px 0;">
+            <div class="tbl-wrap" style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:separate;border-spacing:0 4px;">
                     <thead>
-                        <tr>
-                            <th>Class</th>
-                            <th>Professor</th>
-                            <th>QR Code</th>
-                            <th>Actions</th>
+                        <tr style="background:var(--bg2);">
+                            <th style="padding:10px 8px;text-align:left;">Class</th>
+                            <th style="padding:10px 8px;text-align:left;">Professor</th>
+                            <th style="padding:10px 8px;text-align:center;">QR Code</th>
+                            <th style="padding:10px 8px;text-align:center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($classes as $class)
-                            <tr>
-                                <td>
-                                    <div style="font-size:12px;font-weight:500;">{{ $class->name }}</div>
-                                    <div style="font-size:10px;color:var(--text2);">{{ $class->code }}</div>
+                            <tr style="background:var(--bg1);box-shadow:0 1px 4px rgba(0,0,0,0.03);">
+                                <td style="padding:10px 8px;min-width:120px;">
+                                    <div style="font-size:13px;font-weight:600;">{{ $class->name }}</div>
+                                    <div style="font-size:11px;color:var(--text2);">{{ $class->code }}</div>
                                 </td>
-                                <td style="font-size:11px;">{{ $class->professor->name ?? 'N/A' }}</td>
-                                <td>
-                                    @if($class->qrCodes->count())
-                                        <img src="{{ route('admin.qr-codes.image', $class->qrCodes->first()->uuid) }}" alt="QR" style="width:50px;height:50px;border-radius:4px;border:1px solid var(--border);">
-                                    @else
-                                        <span style="color:var(--text2);font-size:10px;">No active QR</span>
-                                    @endif
+                                <td style="font-size:12px;padding:10px 8px;min-width:100px;">{{ $class->professor->name ?? 'N/A' }}</td>
+                                <td style="text-align:center;padding:10px 8px;">
+                                    <img src="{{ route('student.qr-code', $class->id) }}" alt="QR" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;">
                                 </td>
-                                <td>
-                                    @if($class->qrCodes->count())
-                                        <button type="button" class="btn btn-p" style="padding:6px 10px;font-size:10px;" onclick="showStudentQR('{{ $class->qrCodes->first()->uuid }}', '{{ $class->code }} - {{ $class->name }}')">
-                                            📱 Show QR
-                                        </button>
-                                    @else
-                                        <span style="color:var(--text2);font-size:10px;">-</span>
-                                    @endif
+                                <td style="text-align:center;padding:10px 8px;">
+                                    <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:11px;" onclick="showStudentQR('{{ $class->id }}', '{{ $class->code }} - {{ $class->name }}')">
+                                        📱 Show QR
+                                    </button>
                                 </td>
                             </tr>
                         @empty
@@ -76,24 +69,24 @@
 
     <!-- Recent Attendance -->
     <div>
-        <div class="sh">Recent Attendance</div>
-        <div class="card">
+        <div class="sh" style="font-size:18px;font-weight:600;margin-bottom:10px;">Recent Attendance</div>
+        <div class="card" style="padding:0 0 12px 0;">
             @forelse($recentAttendance as $record)
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 12px 0;border-bottom:1px solid var(--border2);">
                     <div>
-                        <div style="font-size:11px;font-weight:500;">{{ $record->classe->name ?? 'N/A' }}</div>
-                        <div style="font-size:9px;color:var(--text2);">{{ $record->recorded_at?->format('M d, Y h:i A') }}</div>
+                        <div style="font-size:13px;font-weight:600;">{{ $record->classe->name ?? 'N/A' }}</div>
+                        <div style="font-size:10px;color:var(--text2);">{{ $record->recorded_at?->format('M d, Y h:i A') }}</div>
                     </div>
                     @if($record->status === 'present')
-                        <span class="badge bg">Present</span>
+                        <span class="badge bg" style="font-size:11px;">Present</span>
                     @elseif($record->status === 'late')
-                        <span class="badge" style="background:var(--amber);color:white;">Late</span>
+                        <span class="badge" style="background:var(--amber);color:white;font-size:11px;">Late</span>
                     @else
-                        <span class="badge br">Absent</span>
+                        <span class="badge br" style="font-size:11px;">Absent</span>
                     @endif
                 </div>
             @empty
-                <div style="text-align:center;color:var(--text2);padding:20px;font-size:11px;">No attendance records yet.</div>
+                <div style="text-align:center;color:var(--text2);padding:20px;font-size:12px;">No attendance records yet.</div>
             @endforelse
         </div>
     </div>
@@ -115,12 +108,14 @@
 </div>
 
 <script>
-let currentStudentQRUuid = '';
+let currentStudentClassId = '';
+let currentClassName = '';
 
-function showStudentQR(uuid, className) {
-    currentStudentQRUuid = uuid;
-    document.getElementById('modal-student-qr-image').src = '/qr-codes/' + uuid + '/image';
-    document.getElementById('modal-student-qr-uuid').textContent = uuid;
+function showStudentQR(classId, className) {
+    currentStudentClassId = classId;
+    currentClassName = className;
+    document.getElementById('modal-student-qr-image').src = '/student/qr-code/' + classId;
+    document.getElementById('modal-student-qr-uuid').textContent = 'Class ID: ' + classId;
     document.getElementById('modal-class-name').textContent = className;
     document.getElementById('student-qr-modal').style.display = 'flex';
 }
@@ -132,7 +127,7 @@ function closeStudentQRModal() {
 function downloadStudentQR() {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = '/qr-codes/' + currentStudentQRUuid + '/image';
+    img.src = '/student/qr-code/' + currentStudentClassId;
     
     img.onload = function() {
         const canvas = document.createElement('canvas');
