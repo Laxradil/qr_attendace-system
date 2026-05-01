@@ -50,7 +50,8 @@
                                 </td>
                                 <td style="font-size:12px;padding:10px 8px;min-width:100px;">{{ $class->professor->name ?? 'N/A' }}</td>
                                 <td style="text-align:center;padding:10px 8px;">
-                                    <img src="{{ route('student.qr-code', $class->id) }}" alt="QR" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;">
+                                    <object data="{{ route('student.qr-code', $class->id) }}" type="image/svg+xml" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;">
+                                    </object>
                                 </td>
                                 <td style="text-align:center;padding:10px 8px;">
                                     <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:11px;" onclick="showStudentQR('{{ $class->id }}', '{{ $class->code }} - {{ $class->name }}')">
@@ -97,7 +98,8 @@
     <div style="background:white;padding:24px;border-radius:12px;max-width:350px;width:90%;text-align:center;">
         <div style="font-size:16px;font-weight:600;margin-bottom:4px;">Student Attendance QR</div>
         <div id="modal-class-name" style="font-size:11px;color:var(--text2);margin-bottom:16px;"></div>
-        <img id="modal-student-qr-image" src="" alt="QR Code" style="width:220px;height:220px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;">
+        <object id="modal-student-qr-image" data="" type="image/svg+xml" style="width:220px;height:220px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;">
+        </object>
         <div id="modal-student-qr-uuid" style="font-size:10px;color:var(--text3);margin-bottom:12px;font-family:monospace;word-break:break-all;"></div>
         <div style="font-size:10px;color:var(--text2);margin-bottom:16px;">Show this QR code to your professor for attendance scanning</div>
         <div style="display:flex;gap:8px;justify-content:center;">
@@ -114,7 +116,7 @@ let currentClassName = '';
 function showStudentQR(classId, className) {
     currentStudentClassId = classId;
     currentClassName = className;
-    document.getElementById('modal-student-qr-image').src = '/student/qr-code/' + classId;
+    document.getElementById('modal-student-qr-image').data = '/student/qr-code/' + classId;
     document.getElementById('modal-student-qr-uuid').textContent = 'Class ID: ' + classId;
     document.getElementById('modal-class-name').textContent = className;
     document.getElementById('student-qr-modal').style.display = 'flex';

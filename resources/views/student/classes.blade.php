@@ -27,8 +27,9 @@
                         </td>
                         <td style="font-size:12px;padding:10px 8px;min-width:100px;">{{ $class->professor->name ?? 'N/A' }}</td>
                         <td style="text-align:center;padding:10px 8px;">
-                            <img src="{{ route('student.qr-code', $class->id) }}" alt="QR" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;">
-                        </td>
+                                    <object data="{{ route('student.qr-code', $class->id) }}" type="image/svg+xml" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;">
+                                    </object>
+                                </td>
                         <td style="text-align:center;padding:10px 8px;">
                             <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:11px;" onclick="showStudentQR('{{ $class->id }}', '{{ $class->code }} - {{ $class->name }}')">
                                 📱 Show QR
@@ -51,7 +52,8 @@
     <div class="modal-content" style="max-width:350px;">
         <span class="close" onclick="closeStudentQR()">&times;</span>
         <h3 id="studentQRClass"></h3>
-        <img id="studentQRImage" src="" alt="QR Code" style="width:200px;height:200px;margin:20px auto;display:block;">
+        <object id="studentQRImage" data="" type="image/svg+xml" style="width:200px;height:200px;margin:20px auto;display:block;">
+        </object>
         <button class="btn btn-p" onclick="downloadStudentQR()">Download QR</button>
     </div>
 </div>
@@ -59,18 +61,18 @@
 <script>
 function showStudentQR(classId, className) {
     document.getElementById('studentQRClass').innerText = className;
-    document.getElementById('studentQRImage').src = `/student/qr-code/${classId}`;
+    document.getElementById('studentQRImage').data = `/student/qr-code/${classId}`;
     document.getElementById('studentQRModal').style.display = 'block';
 }
 function closeStudentQR() {
     document.getElementById('studentQRModal').style.display = 'none';
 }
 function downloadStudentQR() {
-    const img = document.getElementById('studentQRImage');
-    const url = img.src;
+    const obj = document.getElementById('studentQRImage');
+    const url = obj.data;
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'qr-code.png';
+    a.download = 'qr-code.svg';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

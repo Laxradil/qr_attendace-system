@@ -90,18 +90,19 @@ class StudentController extends Controller
         ]);
     }
 
-    public function generateStudentQR(int $classId): \Illuminate\Http\Response
+    public function generateStudentQR(int $classId)
     {
         $user = Auth::user();
         
-        // Verify student is enrolled in this class
-        $enrolled = $user->classes()->whereKey($classId)->exists();
-        
-        if (!$enrolled) {
-            return response('Class not found or not enrolled', 404);
+        if (!$user) {
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="white"/><text x="100" y="100" text-anchor="middle">Not authenticated</text></svg>';
         }
         
-        $classe = Classe::findOrFail($classId);
+        $classe = Classe::find($classId);
+        
+        if (!$classe) {
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="white"/><text x="100" y="100" text-anchor="middle">Class not found</text></svg>';
+        }
         
         // Generate QR code with student data
         $qrData = json_encode([
@@ -115,54 +116,68 @@ class StudentController extends Controller
             'generated_at' => now()->toIso8601String(),
         ]);
         
-        $svg = $this->generateQRCodeSVG($qrData);
+        // Generate a simple QR code SVG manually
+        $svg = $this->generateSimpleQR($qrData);
         
-        return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
     }
-
-    private function generateQRCodeSVG(string $data): string
+    
+    private function generateSimpleQR(string $data): string
     {
-        // Generate QR code SVG from JSON data
-        $size = 150;
-        $padding = 15;
-        
-        // Use the data as hash for consistent QR pattern
+        // Create a simple QR code pattern based on the data
         $hash = md5($data);
-        $pattern = [];
+        $size = 200;
+        $modules = 21; // 21x21 QR code
+        $cellSize = $size / $modules;
         
-        // Generate 21x21 QR code pattern
-        for ($y = 0; $y < 21; $y++) {
-            $row = [];
-            for ($x = 0; $x < 21; $x++) {
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $size . '" height="' . $size . '" viewBox="0 0 ' . $size . ' ' . $size . '">';
+        
+        // White background
+        $svg .= '<rect width="' . $size . '" height="' . $size . '" fill="white"/>';
+        
+        // Generate QR pattern
+        for ($row = 0; $row < $modules; $row++) {
+            for ($col = 0; $col < $modules; $col++) {
                 // Finder patterns (corners)
-                if (($x < 7 && $y < 7) || ($x > 13 && $y < 7) || ($x < 7 && $y > 13)) {
-                    if (($x < 3 || $x > 3) && ($y < 3 || $y > 3) && ($x >= 0 && $x <= 6 && $y >= 0 && $y <= 6)) {
-                        $row[] = ($x == 0 || $x == 6 || $y == 0 || $y == 6 || ($x >= 2 && $x <= 4 && $y >= 2 && $y <= 4)) ? 1 : 0;
-                    } elseif ($x > 13 && $y < 7) {
-                        $row[] = ($x == 14 || $x == 20 || $y == 0 || $y == 6 || ($x >= 16 && $x <= 18 && $y >= 2 && $y <= 4)) ? 1 : 0;
-                    } elseif ($x < 7 && $y > 13) {
-                        $row[] = ($x == 0 || $x == 6 || $y == 14 || $y == 20 || ($x >= 2 && $x <= 4 && $y >= 16 && $y <= 18)) ? 1 : 0;
-                    } else {
-                        $row[] = 0;
+                $isFinderPattern = false;
+                
+                // Top-left finder pattern
+                if ($row < 7 && $col < 7) {
+                    if (($row == 0 || $row == 6 || $col == 0 || $col == 6) && ($row == 0 || $row == 6 || $col == 0 || $col == 6)) {
+                        $isFinderPattern = true;
+                    } elseif ($row >= 2 && $row <= 4 && $col >= 2 && $col <= 4) {
+                        $isFinderPattern = true;
                     }
-                } else {
-                    // Data pattern based on hash
-                    $idx = ($y * 21 + $x) % 32;
-                    $row[] = (int)substr($hash, $idx, 1) % 2;
                 }
-            }
-            $pattern[] = $row;
-        }
-        
-        $svg = '<?xml version="1.0" encoding="UTF-8"?>';
-        $svg .= '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . ($size + $padding * 2) . ' ' . ($size + $padding * 2) . '" width="' . $size . '" height="' . $size . '">';
-        $svg .= '<rect x="0" y="0" width="' . ($size + $padding * 2) . '" height="' . ($size + $padding * 2) . '" fill="white"/>';
-        
-        $cellSize = $size / 21;
-        for ($y = 0; $y < 21; $y++) {
-            for ($x = 0; $x < 21; $x++) {
-                if ($pattern[$y][$x]) {
-                    $svg .= '<rect x="' . ($padding + $x * $cellSize) . '" y="' . ($padding + $y * $cellSize) . '" width="' . $cellSize . '" height="' . $cellSize . '" fill="black"/>';
+                // Top-right finder pattern
+                elseif ($row < 7 && $col > 13) {
+                    if (($row == 0 || $row == 6 || $col == 14 || $col == 20) && ($row == 0 || $row == 6 || $col == 14 || $col == 20)) {
+                        $isFinderPattern = true;
+                    } elseif ($row >= 2 && $row <= 4 && $col >= 16 && $col <= 18) {
+                        $isFinderPattern = true;
+                    }
+                }
+                // Bottom-left finder pattern
+                elseif ($row > 13 && $col < 7) {
+                    if (($row == 14 || $row == 20 || $col == 0 || $col == 6) && ($row == 14 || $row == 20 || $col == 0 || $col == 6)) {
+                        $isFinderPattern = true;
+                    } elseif ($row >= 16 && $row <= 18 && $col >= 2 && $col <= 4) {
+                        $isFinderPattern = true;
+                    }
+                }
+                
+                if ($isFinderPattern) {
+                    $svg .= '<rect x="' . ($col * $cellSize) . '" y="' . ($row * $cellSize) . '" width="' . $cellSize . '" height="' . $cellSize . '" fill="black"/>';
+                } else {
+                    // Data modules based on hash
+                    $idx = ($row * $modules + $col) % 32;
+                    $bit = hexdec($hash[$idx % 32]) % 2;
+                    if ($bit) {
+                        $svg .= '<rect x="' . ($col * $cellSize) . '" y="' . ($row * $cellSize) . '" width="' . $cellSize . '" height="' . $cellSize . '" fill="black"/>';
+                    }
                 }
             }
         }
