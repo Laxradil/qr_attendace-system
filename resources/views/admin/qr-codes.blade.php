@@ -71,7 +71,7 @@
         <img id="modal-qr-image" src="" alt="QR Code" style="width:200px;height:200px;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
         <div id="modal-qr-uuid" style="font-size:12px;color:var(--text2);margin-bottom:16px;font-family:monospace;"></div>
         <div style="display:flex;gap:8px;justify-content:center;">
-            <button type="button" class="btn btn-p" onclick="window.location.href='/qr-codes/' + currentQRUuid + '/download'">Download PNG</button>
+            <button type="button" class="btn btn-p" onclick="downloadQRFromModal()">Download JPG</button>
             <button type="button" class="btn" onclick="closeQRModal()">Close</button>
         </div>
     </div>
@@ -96,8 +96,29 @@ function downloadQRFromModal() {
 }
 
 function downloadQR(uuid) {
-    // Use the dedicated download endpoint
-    window.location.href = '/qr-codes/' + uuid + '/download';
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = '/qr-codes/' + uuid + '/image';
+    
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        
+        const link = document.createElement('a');
+        link.download = 'qr-code-' + uuid + '.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+    };
+    
+    img.onerror = function() {
+        // Fallback: open in new window
+        window.open('/qr-codes/' + uuid + '/image', '_blank');
+    };
 }
 
 // Close modal on outside click

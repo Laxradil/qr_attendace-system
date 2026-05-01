@@ -301,59 +301,6 @@ class AdminController extends Controller
     return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
 }
 
-    public function downloadQRCode(string $uuid): \Illuminate\Http\Response
-{
-    $qrCode = QRCode::where('uuid', $uuid)->first();
-    
-    if (!$qrCode) {
-        return response('QR Code not found', 404);
-    }
-    
-    // Generate QR code as SVG
-    $svg = $this->generateQRCodeSVG($qrCode->uuid);
-    
-    // Convert SVG to PNG using GD
-    $image = imagecreatetruecolor(300, 300);
-    $white = imagecolorallocate($image, 255, 255, 255);
-    imagefill($image, 0, 0, $white);
-    
-    // Parse SVG and draw on image
-    $this->drawSVGOnImage($svg, $image, 300, 300);
-    
-    // Output as PNG
-    ob_start();
-    imagepng($image);
-    $png = ob_get_clean();
-    imagedestroy($image);
-    
-    return response($png, 200, [
-        'Content-Type' => 'image/png',
-        'Content-Disposition' => 'attachment; filename="qr-code-' . $uuid . '.png"'
-    ]);
-}
-
-    private function drawSVGOnImage(string $svg, $image, int $width, int $height): void
-{
-    $black = imagecolorallocate($image, 0, 0, 0);
-    
-    // Extract rect elements from SVG
-    preg_match_all('/<rect x="([0-9.]+)" y="([0-9.]+)" width="([0-9.]+)" height="([0-9.]+)" fill="black"\/>/', $svg, $matches, PREG_SET_ORDER);
-    
-    $padding = 10;
-    $cellSize = ($width - $padding * 2) / 21;
-    
-    foreach ($matches as $match) {
-        $x = (int)($padding + floatval($match[1]) / 100 * ($width - $padding * 2));
-        $y = (int)($padding + floatval($match[2]) / 100 * ($height - $padding * 2));
-        $w = (int)(floatval($match[3]) / 100 * ($width - $padding * 2));
-        $h = (int)(floatval($match[4]) / 100 * ($height - $padding * 2));
-        
-        if ($w > 0 && $h > 0) {
-            imagefilledrectangle($image, $x, $y, $x + $w - 1, $y + $h - 1, $black);
-        }
-    }
-}
-
     private function generateQRCodeSVG(string $data): string
 {
     // Simple QR code SVG generation
