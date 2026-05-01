@@ -295,8 +295,16 @@ class AdminController extends Controller
         return response('QR Code not found', 404);
     }
     
-    // Generate QR code as SVG
-    $svg = $this->generateQRCodeSVG($qrCode->uuid);
+    // Generate QR code as SVG with real data
+    $qrData = json_encode([
+        'type' => 'class_qr',
+        'uuid' => $qrCode->uuid,
+        'class_id' => $qrCode->class_id,
+        'class_name' => $qrCode->classe->name ?? '',
+        'class_code' => $qrCode->classe->code ?? '',
+    ]);
+    
+    $svg = $this->generateQRCodeSVG($qrData);
     
     return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
 }
