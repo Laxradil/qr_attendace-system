@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function () {
             return redirect()->route('professor.dashboard');
         } elseif ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
+        } elseif ($user->isStudent()) {
+            return redirect()->route('student.dashboard');
         }
         return view('dashboard');
     })->name('dashboard');
@@ -76,7 +78,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('admin.qr-codes');
     Route::post('/qr-codes/generate', [AdminController::class, 'generateQRCode'])->name('admin.qr-codes.generate');
     Route::get('/qr-codes/{uuid}/image', [AdminController::class, 'qrCodeImage'])->name('admin.qr-codes.image');
-    Route::get('/qr-codes/{uuid}/download', [AdminController::class, 'downloadQRCode'])->name('admin.qr-codes.download');
     
     // Attendance records
     Route::get('/attendance-records', [AdminController::class, 'attendanceRecords'])->name('admin.attendance-records');
@@ -100,4 +101,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // Home route
 Route::get('/', function () {
     return redirect('/login');
+});
+
+// Student routes
+Route::prefix('student')->middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\StudentController::class, 'dashboard'])->name('student.dashboard');
+    Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
+    Route::get('/classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.classes');
 });

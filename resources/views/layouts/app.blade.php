@@ -172,6 +172,25 @@
                         </svg>
                         <span>System Logs</span>
                     </a>
+                @elseif(auth()->user()->isStudent())
+                    <a href="{{ route('student.dashboard') }}" class="sidebar-item {{ request()->routeIs('student.dashboard') || request()->is('student/dashboard') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 3l3 3m0 0l3-3m-3 3V7"></path>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ route('student.classes') }}" class="sidebar-item {{ request()->routeIs('student.classes*') || request()->is('student/classes') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17.5S6.5 28.747 12 28.747s10-4.745 10-10.247S17.5 6.253 12 6.253z"></path>
+                        </svg>
+                        <span>My Classes</span>
+                    </a>
+                    <a href="{{ route('student.attendance') }}" class="sidebar-item {{ request()->routeIs('student.attendance') || request()->is('student/attendance') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span>Attendance</span>
+                    </a>
                 @endif
             </nav>
 
