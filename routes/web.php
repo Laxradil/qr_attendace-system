@@ -7,6 +7,11 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\ScheduleController;
 
+// Student: QR code for attendance (must be before class route to avoid conflict)
+Route::get('/student/qr-code/{classId}', [App\Http\Controllers\StudentController::class, 'generateStudentQR'])
+    ->name('student.qr-code')
+    ->middleware(['auth', 'role:student']);
+
 // Student: Get students in a class (AJAX)
 Route::get('/student/class/{id}/students', [App\Http\Controllers\StudentController::class, 'getClassStudents'])->name('student.class.students');
 
@@ -116,5 +121,4 @@ Route::prefix('student')->middleware(['auth', 'role:student'])->group(function (
     Route::get('/dashboard', [App\Http\Controllers\StudentController::class, 'dashboard'])->name('student.dashboard');
     Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
     Route::get('/classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.classes');
-    Route::get('/qr-code/{classId}', [App\Http\Controllers\StudentController::class, 'generateStudentQR'])->name('student.qr-code');
 });
