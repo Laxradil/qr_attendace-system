@@ -82,7 +82,7 @@ let currentQRUuid = '';
 
 function viewQR(uuid) {
     currentQRUuid = uuid;
-    document.getElementById('modal-qr-image').src = '/qr-codes/' + uuid + '/image';
+    document.getElementById('modal-qr-image').src = "{{ url('/admin/qr-codes') }}/" + uuid + "/image";
     document.getElementById('modal-qr-uuid').textContent = uuid;
     document.getElementById('qr-modal').style.display = 'flex';
 }
@@ -98,7 +98,7 @@ function downloadQRFromModal() {
 function downloadQR(uuid) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = '/qr-codes/' + uuid + '/image';
+    img.src = "{{ url('/admin/qr-codes') }}/" + uuid + "/image";
     
     img.onload = function() {
         const canvas = document.createElement('canvas');
