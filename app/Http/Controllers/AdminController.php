@@ -13,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeGenerator;
 
 class AdminController extends Controller
 {
@@ -322,12 +321,11 @@ class AdminController extends Controller
         $qrCode = QRCode::where('uuid', $uuid)->firstOrFail();
         
         // Generate QR code image as PNG
-        /** @var \SimpleSoftwareIO\QrCode\Facades\QrCode $qrGenerator */
-        $image = QrCodeGenerator::format('png')
+        $image = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
             ->size(300)
             ->generate($qrCode->uuid);
         
-        return response($image)->header('Content-type', 'image/png');
+        return response($image)->header('Content-Type', 'image/png');
     }
 
     // Attendance Management

@@ -79,11 +79,11 @@
 
 <script>
 let currentQRUuid = '';
-const qrImageBaseUrl = "{{ route('admin.qr-codes.image', 'PLACEHOLDER') }}".replace('PLACEHOLDER', '');
+const qrImageBaseUrl = "{{ url('/admin/qr-codes') }}/";
 
 function viewQR(uuid) {
     currentQRUuid = uuid;
-    document.getElementById('modal-qr-image').src = qrImageBaseUrl + uuid;
+    document.getElementById('modal-qr-image').src = qrImageBaseUrl + uuid + '/image';
     document.getElementById('modal-qr-uuid').textContent = uuid;
     document.getElementById('qr-modal').style.display = 'flex';
 }
@@ -99,7 +99,7 @@ function downloadQRFromModal() {
 function downloadQR(uuid) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = qrImageBaseUrl + uuid;
+    img.src = qrImageBaseUrl + uuid + '/image';
     
     img.onload = function() {
         const canvas = document.createElement('canvas');
