@@ -63,6 +63,11 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
 });
 
+// QR Code image endpoint (before admin middleware group to bypass role check)
+Route::get('/admin/qr-codes/{uuid}/image', [AdminController::class, 'qrCodeImage'])
+    ->middleware('auth')
+    ->name('admin.qr-codes.image');
+
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -92,7 +97,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // QR Code management
     Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('admin.qr-codes');
     Route::post('/qr-codes/generate', [AdminController::class, 'generateQRCode'])->name('admin.qr-codes.generate');
-    Route::get('/qr-codes/{uuid}/image', [AdminController::class, 'qrCodeImage'])->name('admin.qr-codes.image');
     
     // Attendance records
     Route::get('/attendance-records', [AdminController::class, 'attendanceRecords'])->name('admin.attendance-records');

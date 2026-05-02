@@ -27,7 +27,7 @@
             @forelse($qrCodes as $qr)
                 <tr>
                     <td>
-                        <object data="{{ route('admin.qr-codes.image', $qr->uuid) }}" type="image/svg+xml" style="width:60px;height:60px;border-radius:4px;border:1px solid var(--border);"></object>
+                        <img src="{{ route('admin.qr-codes.image', $qr->uuid) }}" alt="QR" style="width:60px;height:60px;border-radius:4px;border:1px solid var(--border);">
                     </td>
                     <td>
                         <div class="td-mono" style="color:var(--purple-light);">{{ strtoupper(substr($qr->uuid, 0, 12)) }}</div>
@@ -68,7 +68,7 @@
 <div id="qr-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:white;padding:24px;border-radius:12px;max-width:400px;width:90%;text-align:center;">
         <div style="font-size:18px;font-weight:600;margin-bottom:16px;">QR Code</div>
-        <object id="modal-qr-image" data="" type="image/svg+xml" style="width:200px;height:200px;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;"></object>
+        <img id="modal-qr-image" src="" alt="QR Code" style="width:200px;height:200px;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
         <div id="modal-qr-uuid" style="font-size:12px;color:var(--text2);margin-bottom:16px;font-family:monospace;"></div>
         <div style="display:flex;gap:8px;justify-content:center;">
             <button type="button" class="btn btn-p" onclick="downloadQRFromModal()">Download JPG</button>
@@ -83,7 +83,9 @@ const qrImageBaseUrl = "{{ url('/admin/qr-codes') }}/";
 
 function viewQR(uuid) {
     currentQRUuid = uuid;
-    document.getElementById('modal-qr-image').data = qrImageBaseUrl + uuid + '/image';
+    // Use img tag instead of object tag for better SVG compatibility
+    const img = document.getElementById('modal-qr-image');
+    img.src = qrImageBaseUrl + uuid + '/image';
     document.getElementById('modal-qr-uuid').textContent = uuid;
     document.getElementById('qr-modal').style.display = 'flex';
 }
@@ -97,33 +99,8 @@ function downloadQRFromModal() {
 }
 
 function downloadQR(uuid) {
-    // For SVG, we can fetch it directly and download as SVG
-    // Include credentials to send authentication cookies
-    fetch(qrImageBaseUrl + uuid + '/image', { credentials: 'include' })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .then(svgText => {
-            // Check if response is actually SVG (starts with <?xml or <svg)
-            if (!svgText.includes('<svg') && !svgText.includes('<?xml')) {
-                alert('Error: Invalid response from server');
-                return;
-            }
-            const blob = new Blob([svgText], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'qr-code-' + uuid + '.svg';
-            link.click();
-            URL.revokeObjectURL(url);
-        })
-        .catch(error => {
-            console.error('Download failed:', error);
-            alert('Failed to download QR code: ' + error.message);
-        });
+    // Simple download using window.location - browser will handle auth cookies
+    window.location.href = qrImageBaseUrl + uuid + '/image';
 }
 
 // Close modal on outside click
