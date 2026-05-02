@@ -318,18 +318,26 @@ class AdminController extends Controller
 
     public function qrCodeImage($uuid)
     {
-        $qrCode = QRCode::where('uuid', $uuid)->firstOrFail();
-        
-        // Generate QR code image as SVG using SimpleSoftwareIO\QrCode
-        // SVG doesn't require imagick, while PNG requires imagick extension
-        $qrCodeGenerator = new \SimpleSoftwareIO\QrCode\Generator();
-        
-        $image = $qrCodeGenerator->format('svg')
-            ->size(300)
-            ->generate($qrCode->uuid);
-        
-        // Convert HtmlString to string
-        return response((string)$image)->header('Content-Type', 'image/svg+xml');
+        try {
+            $qrCode = QRCode::where('uuid', $uuid)->firstOrFail();
+            
+            // Generate QR code image as SVG using SimpleSoftwareIO\QrCode
+            // SVG doesn't require imagick, while PNG requires imagick extension
+            $qrCodeGenerator = new \SimpleSoftwareIO\QrCode\Generator();
+            
+            $image = $qrCodeGenerator->format('svg')
+                ->size(300)
+                ->generate($qrCode->uuid);
+            
+            // Convert HtmlString to string
+            $svgContent = (string)$image;
+            
+            return response($svgContent)
+                ->header('Content-Type', 'image/svg+xml')
+                ->header('Cache-Control', 'public, max-age=3600');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     // Attendance Management
