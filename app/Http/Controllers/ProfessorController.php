@@ -69,10 +69,25 @@ class ProfessorController extends Controller
     {
         $classes = auth()->user()->classes()
             ->withCount('students')
+            ->with('schedules')
             ->get();
+
+        $totalClasses = $classes->count();
+        $totalStudents = $classes->sum('students_count');
+
+        $attendanceSummary = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
+            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count")
+            ->first();
+
+        $attendanceRate = $attendanceSummary && $attendanceSummary->total_records > 0
+            ? round(($attendanceSummary->present_count / $attendanceSummary->total_records) * 100)
+            : 0;
 
         return view('professor.classes', [
             'classes' => $classes,
+            'totalClasses' => $totalClasses,
+            'totalStudents' => $totalStudents,
+            'attendanceRate' => $attendanceRate,
         ]);
     }
 
@@ -115,7 +130,7 @@ class ProfessorController extends Controller
                 ->exists();
             
             if ($alreadyRecorded) {
-                return back()->with('error', 'Attendance already recorded for this student today');
+                return back()->with('error', 'Attendance already recorded for ' . $studentName . ' in ' . $decoded['class_code'] . ' today');
             }
             
             // Create attendance record
@@ -129,7 +144,7 @@ class ProfessorController extends Controller
 
             SystemLog::create([
                 'user_id' => auth()->id(),
-                'action' => 'scan_student_qr',
+                'action' => 'scan_qr',
                 'description' => 'Scanned student QR and recorded attendance for ' . $studentName,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -212,14 +227,61 @@ class ProfessorController extends Controller
 
     public function schedules(): View
     {
-        $schedules = auth()->user()->classes()
+        $todayName = now()->format('l');
+        $classes = auth()->user()->classes()
+            ->withCount('students')
             ->with('schedules')
-            ->get()
-            ->flatMap(fn($c) => $c->schedules);
+            ->get();
+
+        $scheduleRows = $classes->flatMap(function ($classe) use ($todayName) {
+            return $classe->schedules->map(function ($schedule) use ($classe, $todayName) {
+                $days = array_map('trim', explode(',', $schedule->days));
+                $nextDates = collect($days)->map(fn($day) => $this->getNextDateForWeekday($day));
+                $nextDate = $nextDates->sort()->first() ?? now();
+
+                return (object) [
+                    'id' => $schedule->id,
+                    'subject_code' => $schedule->subject_code,
+                    'subject_name' => $schedule->subject_name,
+                    'professor' => $schedule->professor,
+                    'days' => $schedule->days,
+                    'time' => $schedule->time,
+                    'room' => $schedule->room,
+                    'classe' => $classe,
+                    'next_date' => $nextDate,
+                    'date_label' => strtoupper($nextDate->format('d')) . ' ' . strtoupper($nextDate->format('D')) . ' ' . $nextDate->format('M'),
+                    'status' => in_array($todayName, $days) ? 'Ongoing' : 'Upcoming',
+                    'students_count' => $classe->students_count,
+                ];
+            });
+        })->sortBy('next_date');
+
+        $todayCount = $scheduleRows->where('status', 'Ongoing')->count();
+        $upcomingCount = $scheduleRows->where('status', 'Upcoming')->count();
+        $totalClasses = $classes->count();
+        $totalStudents = $classes->sum('students_count');
 
         return view('professor.schedules', [
-            'schedules' => $schedules,
+            'schedules' => $scheduleRows,
+            'classes' => $classes,
+            'todayCount' => $todayCount,
+            'upcomingCount' => $upcomingCount,
+            'totalClasses' => $totalClasses,
+            'totalStudents' => $totalStudents,
         ]);
+    }
+
+    private function getNextDateForWeekday(string $weekday)
+    {
+        $weekday = trim($weekday);
+        $target = Carbon::parse($weekday)->startOfDay();
+        $today = now()->startOfDay();
+
+        if ($target->lessThan($today)) {
+            $target->next($target->format('l'));
+        }
+
+        return $target;
     }
 
     public function reports(): View
@@ -264,15 +326,15 @@ class ProfessorController extends Controller
 
     public function students(): View
     {
-        $students = auth()->user()->classes()
-            ->with('students')
-            ->get()
-            ->flatMap(fn($c) => $c->students)
-            ->unique('id')
-            ->values();
+        $classes = auth()->user()->classes()
+            ->with(['students' => function ($query) {
+                $query->orderBy('name');
+            }])
+            ->orderBy('name')
+            ->get();
 
         return view('professor.students', [
-            'students' => $students,
+            'classes' => $classes,
         ]);
     }
 

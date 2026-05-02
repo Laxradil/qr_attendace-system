@@ -4,172 +4,245 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Attendance System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --navy: #0b1224;
+            --panel: rgba(15, 23, 42, 0.96);
+            --panel-strong: rgba(10, 16, 30, 0.98);
+            --border: rgba(148, 163, 184, 0.12);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #7c3aed;
+            --accent-soft: rgba(124, 58, 237, 0.12);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3d7ab5 100%);
+            background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.18), transparent 25%),
+                        linear-gradient(180deg, #070a17 0%, #091124 60%, #0b1224 100%);
             min-height: 100vh;
+            font-family: Inter, 'Segoe UI', sans-serif;
+            color: var(--text);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 24px;
         }
+
         .login-container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.4);
+            width: min(480px, 100%);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.35);
+            padding: 36px 34px;
             overflow: hidden;
-            max-width: 420px;
-            width: 100%;
-            padding: 3rem;
         }
+
         .brand-logo {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #1e3a5f 0%, #3d7ab5 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 62px;
+            height: 62px;
             margin: 0 auto 1.5rem;
-            box-shadow: 0 8px 25px rgba(30, 58, 95, 0.3);
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.95), rgba(59, 130, 246, 0.9));
+            box-shadow: 0 16px 40px rgba(124, 58, 237, 0.18);
         }
+
         .brand-logo i {
-            font-size: 2rem;
             color: white;
+            font-size: 1.45rem;
         }
+
         .login-header {
             text-align: center;
             margin-bottom: 2rem;
         }
+
         .login-header h2 {
-            color: #1e3a5f;
-            font-weight: 700;
-            font-size: 1.75rem;
-            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 0.4rem;
         }
+
         .login-header p {
-            color: #6b7280;
-            font-size: 0.9rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
+
         .form-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.3rem;
         }
+
         .form-label {
-            color: #374151;
-            font-weight: 600;
-            font-size: 0.875rem;
-            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-size: 0.88rem;
+            margin-bottom: 0.6rem;
             display: block;
+            font-weight: 600;
         }
+
         .input-wrapper {
             position: relative;
+            display: block;
         }
+
         .input-wrapper i {
             position: absolute;
             left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #9ca3af;
+            color: var(--muted);
             font-size: 1rem;
-            transition: color 0.3s;
+            pointer-events: none;
         }
+
         .form-control {
             width: 100%;
-            padding: 0.875rem 1rem 0.875rem 2.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-            background: #f9fafb;
+            padding: 0.95rem 4.6rem 0.95rem 3rem;
+            border-radius: 16px;
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            transition: all 0.25s ease;
+            font-size: 0.96rem;
+            min-height: 3.2rem;
         }
+
+        .form-control::placeholder {
+            color: rgba(226, 232, 240, 0.5);
+        }
+
         .form-control:focus {
             outline: none;
-            border-color: #3d7ab5;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(61, 122, 181, 0.1);
+            border-color: rgba(124, 58, 237, 0.45);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
         }
-        .form-control:focus + i,
+
         .input-wrapper:focus-within i {
-            color: #3d7ab5;
+            color: #a78bfa;
         }
+
         .password-toggle {
             position: absolute;
-            right: 16px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            background: none;
+            width: 36px;
+            height: 36px;
             border: none;
-            color: #9ca3af;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            color: var(--muted);
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+            pointer-events: auto;
+            z-index: 5;
+            font-size: 0.95rem;
             padding: 0;
-            transition: color 0.3s;
         }
+
+        .password-toggle i {
+            line-height: 1;
+            font-size: 14px;
+            margin: 0;
+            display: inline-block;
+        }
+
+        .password-toggle i {
+            line-height: 1;
+        }
+
         .password-toggle:hover {
-            color: #3d7ab5;
+            background: rgba(255, 255, 255, 0.14);
+            color: #e2e8f0;
+            transform: translateY(-50%) scale(1.02);
         }
+
         .form-options {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
+
         .form-check {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.65rem;
+            color: var(--text);
+            font-size: 0.9rem;
         }
+
         .form-check-input {
             width: 18px;
             height: 18px;
             border-radius: 6px;
-            border: 2px solid #d1d5db;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(255,255,255,0.05);
+            accent-color: #7c3aed;
             cursor: pointer;
         }
-        .form-check-input:checked {
-            background-color: #3d7ab5;
-            border-color: #3d7ab5;
-        }
+
         .form-check-label {
-            color: #6b7280;
-            font-size: 0.875rem;
+            color: var(--text);
             cursor: pointer;
         }
+
         .forgot-link {
-            color: #3d7ab5;
-            font-size: 0.875rem;
+            color: #a78bfa;
+            font-size: 0.9rem;
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s;
         }
+
         .forgot-link:hover {
-            color: #1e3a5f;
+            color: #ede9fe;
         }
+
         .btn-login {
             width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #1e3a5f 0%, #3d7ab5 100%);
+            padding: 1rem 1.1rem;
             border: none;
-            border-radius: 12px;
-            color: white;
+            border-radius: 16px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 18px 30px rgba(124, 58, 237, 0.2);
         }
+
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 95, 0.4);
+            box-shadow: 0 24px 40px rgba(124, 58, 237, 0.24);
         }
+
         .btn-login:active {
             transform: translateY(0);
+        }
+
+        .footer-note {
+            margin-top: 1.6rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -218,11 +291,8 @@
             </button>
         </form>
         
-        <div class="register-link" style="text-align: center; margin-top: 1.5rem;">
-            <p style="color: #6b7280; font-size: 0.9rem;">
-                Don't have an account? 
-                <a href="{{ route('register') }}" style="color: #3d7ab5; text-decoration: none; font-weight: 600;">Create one</a>
-            </p>
+        <div class="footer-note">
+            Access is restricted to registered students and professors only.
         </div>
     </div>
     
