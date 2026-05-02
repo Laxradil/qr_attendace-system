@@ -21,15 +21,86 @@
             box-sizing: border-box;
         }
 
+        html,
+        body {
+            min-height: 100%;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background-color: #0d0c1d;
             color: #fff;
+            overflow-x: hidden;
+        }
+
+        .layout-shell {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
         }
 
         .sidebar {
-            background-color: #1a192d;
-            border-right: 1px solid #2d2c4a;
+            background-color: #0f1025;
+            border-right: 1px solid #23243d;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 16rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 1rem;
+        }
+
+        .main-content {
+            margin-left: 16rem;
+            width: calc(100% - 16rem);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .top-bar {
+            flex-shrink: 0;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            background-color: #0f1025;
+            border-right: 1px solid #23243d;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 16rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            overflow: hidden;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 1rem;
+        }
+
+        .sidebar > .border-t {
+            margin-top: auto;
         }
 
         .sidebar-item {
@@ -54,12 +125,30 @@
             height: 20px;
             margin-right: 12px;
         }
+
+        .logout-button {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 9999px;
+            color: #cbd5e1;
+            transition: all 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background: rgba(255,255,255,0.1);
+            color: #ff6b6b;
+        }
     </style>
 </head>
 <body class="bg-navy">
-    <div class="flex h-screen">
+    <div class="layout-shell">
         <!-- Sidebar -->
-        <div class="sidebar w-64 flex flex-col">
+        <div class="sidebar">
             <!-- Logo -->
             <div class="p-6 border-b border-gray-800">
                 <h1 class="text-2xl font-bold text-purple">QR Attendance</h1>
@@ -67,7 +156,7 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 overflow-y-auto">
+            <nav class="sidebar-content">
                 @if(auth()->user()->isProfessor())
                     <a href="{{ route('professor.dashboard') }}" class="sidebar-item {{ request()->routeIs('professor.dashboard') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,32 +261,51 @@
                         </svg>
                         <span>System Logs</span>
                     </a>
+                @elseif(auth()->user()->isStudent())
+                    <a href="{{ route('student.dashboard') }}" class="sidebar-item {{ request()->routeIs('student.dashboard') || request()->is('student/dashboard') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 3l3 3m0 0l3-3m-3 3V7"></path>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ route('student.classes') }}" class="sidebar-item {{ request()->routeIs('student.classes*') || request()->is('student/classes') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17.5S6.5 28.747 12 28.747s10-4.745 10-10.247S17.5 6.253 12 6.253z"></path>
+                        </svg>
+                        <span>My Classes</span>
+                    </a>
+                    <a href="{{ route('student.attendance') }}" class="sidebar-item {{ request()->routeIs('student.attendance') || request()->is('student/attendance') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span>Attendance</span>
+                    </a>
                 @endif
             </nav>
 
             <!-- User Profile -->
             <div class="border-t border-gray-800 p-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-3">
                     <div>
                         <p class="text-white font-semibold text-sm">{{ auth()->user()->name }}</p>
                         <p class="text-gray-400 text-xs capitalize">{{ auth()->user()->role }}</p>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
                         @csrf
-                        <button type="submit" class="text-gray-400 hover:text-red-500 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                        </button>
                     </form>
+                    <button type="button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-button" title="Logout">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
+        <div class="main-content">
             <!-- Top Bar -->
-            <div class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+            <div class="top-bar bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
                 <h2 class="text-xl font-semibold text-white">@yield('header', '')</h2>
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
@@ -208,7 +316,7 @@
             </div>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto">
+            <div class="content-area">
                 @if($errors->any())
                     <div class="m-6 bg-red-900/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg">
                         <ul class="list-disc list-inside">

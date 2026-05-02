@@ -24,8 +24,12 @@ class LoginController extends Controller
             
             // Check user role and redirect accordingly
             $user = Auth::user();
-            if ($user->role === 'admin') {
+            if ($user->isAdmin()) {
                 return redirect()->intended('/admin');
+            } elseif ($user->isProfessor()) {
+                return redirect()->intended('/professor');
+            } elseif ($user->isStudent()) {
+                return redirect()->intended('/student/dashboard');
             }
             return redirect()->intended('/dashboard');
         }
@@ -60,6 +64,6 @@ class LoginController extends Controller
         ]);
 
         Auth::login($user);
-        return redirect('/dashboard');
+        return redirect('/student/dashboard');
     }
 }
