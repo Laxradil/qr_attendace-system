@@ -99,8 +99,51 @@ function downloadQRFromModal() {
 }
 
 function downloadQR(uuid) {
-    // Simple download using window.location - browser will handle auth cookies
-    window.location.href = qrImageBaseUrl + uuid + '/image';
+    // Fetch the SVG and convert to JPEG
+    fetch(qrImageBaseUrl + uuid + '/image')
+        .then(response => response.text())
+        .then(svgText => {
+            // Create a canvas to convert SVG to JPEG
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            
+            // Fill with white background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 300, 300);
+            
+            // Create an image from the SVG
+            const img = new Image();
+            const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(svgUrl);
+                
+                // Convert canvas to JPEG and download
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'qr-code-' + uuid + '.jpg';
+                    link.click();
+                    URL.revokeObjectURL(url);
+                }, 'image/jpeg', 0.95);
+            };
+            
+            img.onerror = function() {
+                URL.revokeObjectURL(svgUrl);
+                alert('Failed to load QR code image');
+            };
+            
+            img.src = svgUrl;
+        })
+        .catch(error => {
+            console.error('Download failed:', error);
+            alert('Failed to download QR code');
+        });
 }
 
 // Close modal on outside click
