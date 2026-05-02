@@ -31,6 +31,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Dashboard route
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         if ($user->isProfessor()) {
             return redirect()->route('professor.dashboard');

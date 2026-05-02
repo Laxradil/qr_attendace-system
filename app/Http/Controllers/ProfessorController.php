@@ -24,6 +24,7 @@ class ProfessorController extends Controller
 
     public function dashboard(): View
     {
+        /** @var User $user */
         $user = Auth::user();
         // Use withCount() to get student counts in the initial query instead of calling count() in loop
         $classes = $user->classes()
@@ -69,7 +70,9 @@ class ProfessorController extends Controller
 
     public function myClasses(): View
     {
-        $classes = Auth::user()->classes()
+        /** @var User $user */
+        $user = Auth::user();
+        $classes = $user->classes()
             ->withCount('students')
             ->get();
 
@@ -89,7 +92,9 @@ class ProfessorController extends Controller
 
     public function scanQR(): View
     {
-        $classes = Auth::user()->classes()->get();
+        /** @var User $user */
+        $user = Auth::user();
+        $classes = $user->classes()->get();
         return view('professor.scan-qr', ['classes' => $classes]);
     }
 
@@ -108,7 +113,9 @@ class ProfessorController extends Controller
             $studentName = $decoded['student_name'] ?? 'Unknown';
             
             // Verify professor teaches this class
-            abort_unless(Auth::user()->classes()->whereKey($classId)->exists(), 403);
+            /** @var User $user */
+            $user = Auth::user();
+            abort_unless($user->classes()->whereKey($classId)->exists(), 403);
             
             // Check if attendance already recorded today
             $alreadyRecorded = AttendanceRecord::where('student_id', $studentId)
@@ -147,7 +154,9 @@ class ProfessorController extends Controller
             'student_id' => 'required|exists:users,id',
         ]);
 
-        abort_unless(Auth::user()->classes()->whereKey($validated['class_id'])->exists(), 403);
+        /** @var User $user */
+        $user = Auth::user();
+        abort_unless($user->classes()->whereKey($validated['class_id'])->exists(), 403);
 
         $qrCode = QRCode::where('uuid', $validated['qr_code'])->firstOrFail();
         $student = User::findOrFail($validated['student_id']);
@@ -179,7 +188,9 @@ class ProfessorController extends Controller
 
     public function attendanceRecords(Request $request): View
     {
-        $classes = Auth::user()->classes()->get();
+        /** @var User $user */
+        $user = Auth::user();
+        $classes = $user->classes()->get();
         $classId = $request->query('class_id');
         $date = $request->query('date');
 
@@ -214,7 +225,9 @@ class ProfessorController extends Controller
 
     public function schedules(): View
     {
-        $schedules = Auth::user()->classes()
+        /** @var User $user */
+        $user = Auth::user();
+        $schedules = $user->classes()
             ->with('schedules')
             ->get()
             ->flatMap(fn($c) => $c->schedules);
@@ -226,7 +239,9 @@ class ProfessorController extends Controller
 
     public function reports(): View
     {
-        $classes = Auth::user()->classes()->with('students')->get();
+        /** @var User $user */
+        $user = Auth::user();
+        $classes = $user->classes()->with('students')->get();
         $classId = request()->query('class_id');
 
         if ($classId) {
@@ -266,7 +281,9 @@ class ProfessorController extends Controller
 
     public function students(): View
     {
-        $students = Auth::user()->classes()
+        /** @var User $user */
+        $user = Auth::user();
+        $students = $user->classes()
             ->with('students')
             ->get()
             ->flatMap(fn($c) => $c->students)
@@ -280,7 +297,9 @@ class ProfessorController extends Controller
 
     public function logs(): View
     {
-        $logs = Auth::user()->logs()
+        /** @var User $user */
+        $user = Auth::user();
+        $logs = $user->logs()
             ->latest()
             ->paginate(20);
 
@@ -291,6 +310,7 @@ class ProfessorController extends Controller
 
     public function settings(): View
     {
+        /** @var User $user */
         return view('professor.settings', [
             'user' => Auth::user(),
         ]);
@@ -298,7 +318,9 @@ class ProfessorController extends Controller
 
     public function editAttendanceRecord(AttendanceRecord $attendanceRecord): View
     {
-        abort_unless(Auth::user()->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
+        /** @var User $user */
+        $user = Auth::user();
+        abort_unless($user->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
 
         return view('professor.edit-attendance', [
             'record' => $attendanceRecord->load('student', 'classe'),
@@ -307,7 +329,9 @@ class ProfessorController extends Controller
 
     public function updateAttendanceRecord(Request $request, AttendanceRecord $attendanceRecord): RedirectResponse
     {
-        abort_unless(Auth::user()->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
+        /** @var User $user */
+        $user = Auth::user();
+        abort_unless($user->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
 
         $validated = $request->validate([
             'status' => 'required|in:present,late,absent',
@@ -345,6 +369,7 @@ class ProfessorController extends Controller
             'password' => 'nullable|min:8|confirmed',
         ]);
 
+        /** @var User $user */
         $user = Auth::user();
         $user->update([
             'name' => $validated['name'],
