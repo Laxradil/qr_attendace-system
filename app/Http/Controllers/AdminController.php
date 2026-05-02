@@ -323,13 +323,22 @@ class AdminController extends Controller
             
             // Generate QR code image as SVG using SimpleSoftwareIO\QrCode Facade
             // SVG doesn't require imagick, while PNG requires imagick extension
-            $svgContent = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+            $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
                 ->size(300)
                 ->generate($qrCode->uuid);
             
-            return response((string)$svgContent)
-                ->header('Content-Type', 'image/svg+xml')
-                ->header('Cache-Control', 'public, max-age=3600');
+            // Get the raw SVG string
+            $svgContent = (string)$svg;
+            
+            // Return as raw SVG response with proper headers for display and download
+            $response = response($svgContent, 200, [
+                'Content-Type' => 'image/svg+xml; charset=utf-8',
+                'Content-Length' => strlen($svgContent),
+                'Cache-Control' => 'public, max-age=3600',
+                'Pragma' => 'public',
+            ]);
+            
+            return $response;
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
