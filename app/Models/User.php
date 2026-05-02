@@ -13,6 +13,14 @@ namespace App\Models;
  * @property string|null $student_id
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany classes()
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany enrolledClasses()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany qrCodes()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany attendanceRecords()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany logs()
+ * @method bool isProfessor()
+ * @method bool isAdmin()
+ * @method bool isStudent()
  */
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;

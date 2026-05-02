@@ -2,6 +2,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfessorController;
@@ -30,7 +31,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Dashboard route
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        $user = auth()->user();
+        $user = Auth::user();
         if ($user->isProfessor()) {
             return redirect()->route('professor.dashboard');
         } elseif ($user->isAdmin()) {
