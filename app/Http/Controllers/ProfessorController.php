@@ -93,6 +93,52 @@ class ProfessorController extends Controller
 
     public function recordAttendance(Request $request): RedirectResponse
     {
+        // Check if it's a student QR code (JSON data) or class QR code UUID
+        $qrData = $request->input('qr_code');
+        
+        // Try to decode as JSON (student QR code)
+        $decoded = json_decode($qrData, true);
+        
+        if ($decoded && isset($decoded['type']) && $decoded['type'] === 'student_attendance') {
+            // Student QR code - extract data directly
+            $studentId = $decoded['student_id'];
+            $classId = $decoded['class_id'];
+            $studentName = $decoded['student_name'] ?? 'Unknown';
+            
+            // Verify professor teaches this class
+            abort_unless(auth()->user()->classes()->whereKey($classId)->exists(), 403);
+            
+            // Check if attendance already recorded today
+            $alreadyRecorded = AttendanceRecord::where('student_id', $studentId)
+                ->where('class_id', $classId)
+                ->whereDate('recorded_at', today())
+                ->exists();
+            
+            if ($alreadyRecorded) {
+                return back()->with('error', 'Attendance already recorded for this student today');
+            }
+            
+            // Create attendance record
+            AttendanceRecord::create([
+                'class_id' => $classId,
+                'student_id' => $studentId,
+                'qr_code_id' => null,
+                'status' => 'present',
+                'recorded_at' => now(),
+            ]);
+
+            SystemLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'scan_student_qr',
+                'description' => 'Scanned student QR and recorded attendance for ' . $studentName,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Attendance recorded successfully for ' . $studentName);
+        }
+        
+        // Original flow - class QR code with manual student selection
         $validated = $request->validate([
             'qr_code' => 'required|uuid',
             'class_id' => 'required|exists:classes,id',
@@ -305,5 +351,62 @@ class ProfessorController extends Controller
         ]);
 
         return back()->with('success', 'Settings updated successfully');
+    }
+
+    public function addStudent(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'class_id' => 'required|exists:classes,id',
+            'student_email' => 'required|email|exists:users,email',
+        ]);
+
+        $classe = Classe::findOrFail($validated['class_id']);
+        $student = User::where('email', $validated['student_email'])->first();
+
+        // Verify the professor owns this class
+        if ($classe->professor_id !== auth()->id()) {
+            return back()->with('error', 'You do not have permission to add students to this class');
+        }
+
+        // Verify the user is a student
+        if ($student->role !== 'student') {
+            return back()->with('error', 'The provided email belongs to a user who is not a student');
+        }
+
+        // Check if the student is already enrolled in the class using DB
+        $exists = \DB::table('class_student')
+            ->where('class_id', $classe->id)
+            ->where('student_id', $student->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'The student is already enrolled in this class');
+        }
+
+        // Enroll the student
+        $classe->students()->attach($student->id);
+
+        return back()->with('success', 'Student added to class successfully');
+    }
+
+    /**
+     * Return students enrolled in a class (AJAX)
+     */
+    public function getClassStudents($id)
+    {
+        $classe = Classe::with('students')->findOrFail($id);
+        // Verify the professor owns this class
+        if ($classe->professor_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $students = $classe->students->map(function($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'enrolled_at' => $student->pivot->enrolled_at,
+            ];
+        });
+        return response()->json(['students' => $students]);
     }
 }
