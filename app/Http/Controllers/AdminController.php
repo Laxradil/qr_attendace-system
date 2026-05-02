@@ -321,18 +321,13 @@ class AdminController extends Controller
         try {
             $qrCode = QRCode::where('uuid', $uuid)->firstOrFail();
             
-            // Generate QR code image as SVG using SimpleSoftwareIO\QrCode
+            // Generate QR code image as SVG using SimpleSoftwareIO\QrCode Facade
             // SVG doesn't require imagick, while PNG requires imagick extension
-            $qrCodeGenerator = new \SimpleSoftwareIO\QrCode\Generator();
-            
-            $image = $qrCodeGenerator->format('svg')
+            $svgContent = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
                 ->size(300)
                 ->generate($qrCode->uuid);
             
-            // Convert HtmlString to string
-            $svgContent = (string)$image;
-            
-            return response($svgContent)
+            return response((string)$svgContent)
                 ->header('Content-Type', 'image/svg+xml')
                 ->header('Cache-Control', 'public, max-age=3600');
         } catch (\Exception $e) {
