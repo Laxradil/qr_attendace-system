@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
@@ -108,7 +109,7 @@ class AdminController extends Controller
         ]);
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'other',
             'description' => 'Created new user: ' . $validated['name'],
             'ip_address' => $request->ip(),
@@ -146,7 +147,7 @@ class AdminController extends Controller
         ]);
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'update_user',
             'description' => 'Updated user: ' . $user->name,
             'ip_address' => $request->ip(),
@@ -162,7 +163,7 @@ class AdminController extends Controller
          $user->delete();
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'delete_user',
             'description' => 'Deleted user: ' . $name,
             'ip_address' => request()->ip(),
@@ -222,7 +223,7 @@ class AdminController extends Controller
         Classe::create($validated);
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'create_class',
             'description' => 'Created class: ' . $validated['name'],
             'ip_address' => $request->ip(),
@@ -251,7 +252,7 @@ class AdminController extends Controller
         $classe->update($validated);
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'update_class',
             'description' => 'Updated class: ' . $classe->name,
             'ip_address' => $request->ip(),
@@ -267,7 +268,7 @@ class AdminController extends Controller
         $classe->delete();
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'delete_class',
             'description' => 'Deleted class: ' . $name,
             'ip_address' => request()->ip(),
@@ -299,13 +300,13 @@ class AdminController extends Controller
             QRCode::create([
                 'uuid' => Str::uuid(),
                 'class_id' => $validated['class_id'],
-                'professor_id' => auth()->id(),
+                'professor_id' => Auth::id(),
                 'expires_at' => $validated['expires_at'] ?? null,
             ]);
         }
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'generate_qr',
             'description' => 'Generated ' . $validated['count'] . ' QR codes for class',
             'ip_address' => $request->ip(),
