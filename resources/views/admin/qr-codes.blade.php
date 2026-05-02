@@ -98,9 +98,20 @@ function downloadQRFromModal() {
 
 function downloadQR(uuid) {
     // For SVG, we can fetch it directly and download as SVG
-    fetch(qrImageBaseUrl + uuid + '/image')
-        .then(response => response.text())
+    // Include credentials to send authentication cookies
+    fetch(qrImageBaseUrl + uuid + '/image', { credentials: 'include' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
         .then(svgText => {
+            // Check if response is actually SVG (starts with <?xml or <svg)
+            if (!svgText.includes('<svg') && !svgText.includes('<?xml')) {
+                alert('Error: Invalid response from server');
+                return;
+            }
             const blob = new Blob([svgText], { type: 'image/svg+xml' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -111,7 +122,7 @@ function downloadQR(uuid) {
         })
         .catch(error => {
             console.error('Download failed:', error);
-            alert('Failed to download QR code');
+            alert('Failed to download QR code: ' + error.message);
         });
 }
 
