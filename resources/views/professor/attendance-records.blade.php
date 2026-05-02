@@ -36,11 +36,12 @@
 
 <div class="tbl-wrap">
     <table>
-        <thead><tr><th>Date & Time</th><th>Student</th><th>Class</th><th>Status</th><th>Minutes Late</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Date</th><th>Scan Time</th><th>Student</th><th>Subject</th><th>Status</th><th>Minutes Late</th><th>Actions</th></tr></thead>
         <tbody>
             @forelse($records as $record)
                 <tr>
-                    <td class="td-mono">{{ $record->recorded_at?->format('M d, Y h:i A') }}</td>
+                    <td class="td-mono">{{ $record->recorded_at?->format('M d, Y') }}</td>
+                    <td class="td-mono" style="font-weight:600;color:var(--text);">{{ $record->recorded_at?->format('h:i A') }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:6px;">
                             <div class="log-av">{{ strtoupper(substr($record->student->name ?? 'ST', 0, 2)) }}</div>
@@ -62,6 +63,7 @@
                         @else
                             <span class="badge br">Absent</span>
                         @endif
+                        <div class="td-mono" style="font-size:10px;color:var(--text3);margin-top:4px;">{{ $record->recorded_at?->format('M d, Y') }}</div>
                     </td>
                     <td>{{ $record->status === 'late' ? (int) $record->minutes_late . ' min' : '-' }}</td>
                     <td>
@@ -69,7 +71,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" style="text-align:center;color:var(--text2);">No attendance records found.</td></tr>
+                <tr><td colspan="7" style="text-align:center;color:var(--text2);">No attendance records found.</td></tr>
             @endforelse
         </tbody>
     </table>

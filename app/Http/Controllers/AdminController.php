@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Classe;
 use App\Models\QRCode;
+use App\Models\Schedule;
 use App\Models\AttendanceRecord;
 use App\Models\SystemLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 
@@ -218,9 +220,30 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professor_id' => 'required|exists:users,id',
+            'schedule_days' => 'nullable|array|required_with:schedule_start_time|required_with:schedule_end_time',
+            'schedule_days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'schedule_start_time' => 'nullable|date_format:H:i|required_with:schedule_days',
+            'schedule_end_time' => 'nullable|date_format:H:i|after:schedule_start_time|required_with:schedule_days',
+            'schedule_room' => 'nullable|string|max:20',
         ]);
 
-        Classe::create($validated);
+        $classData = Arr::only($validated, ['code', 'name', 'description', 'professor_id']);
+        $classe = Classe::create($classData);
+
+        if (!empty($validated['schedule_days'] ?? []) && $request->filled('schedule_start_time') && $request->filled('schedule_end_time')) {
+            $professor = User::find($validated['professor_id']);
+
+            Schedule::create([
+                'class_id' => $classe->id,
+                'subject_code' => $validated['code'],
+                'subject_name' => $validated['name'],
+                'professor_id' => $validated['professor_id'],
+                'professor' => $professor->name,
+                'days' => implode(', ', $validated['schedule_days']),
+                'time' => $request->input('schedule_start_time') . ' - ' . $request->input('schedule_end_time'),
+                'room' => $validated['schedule_room'] ?? '',
+            ]);
+        }
 
         SystemLog::create([
             'user_id' => auth()->id(),
@@ -236,7 +259,13 @@ class AdminController extends Controller
     public function editClass(Classe $classe): View
     {
         $professors = User::where('role', 'professor')->get();
-        return view('admin.edit-class', ['classe' => $classe, 'professors' => $professors]);
+        $schedule = $classe->schedules()->latest()->first();
+
+        return view('admin.edit-class', [
+            'classe' => $classe,
+            'professors' => $professors,
+            'schedule' => $schedule,
+        ]);
     }
 
     public function updateClass(Request $request, Classe $classe): RedirectResponse
@@ -247,19 +276,46 @@ class AdminController extends Controller
             'description' => 'nullable|string',
             'professor_id' => 'required|exists:users,id',
             'is_active' => 'nullable|boolean',
+            'schedule_days' => 'nullable|array|required_with:schedule_start_time|required_with:schedule_end_time',
+            'schedule_days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'schedule_start_time' => 'nullable|date_format:H:i|required_with:schedule_days',
+            'schedule_end_time' => 'nullable|date_format:H:i|after:schedule_start_time|required_with:schedule_days',
+            'schedule_room' => 'nullable|string|max:20',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
-        Cache::forget('admin_classes_page_1');
-        $classe->update($validated);
+        $classData = Arr::only($validated, ['code', 'name', 'description', 'professor_id', 'is_active']);
 
-        SystemLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'update_class',
-            'description' => 'Updated class: ' . $classe->name,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        Cache::forget('admin_classes_page_1');
+        $classe->update($classData);
+
+        $scheduleDays = $validated['schedule_days'] ?? [];
+        $scheduleStartTime = $request->input('schedule_start_time');
+        $scheduleEndTime = $request->input('schedule_end_time');
+        $scheduleRoom = $validated['schedule_room'] ?? '';
+
+        $schedule = $classe->schedules()->latest()->first();
+
+        if (!empty($scheduleDays) && $scheduleStartTime && $scheduleEndTime) {
+            $scheduleData = [
+                'class_id' => $classe->id,
+                'subject_code' => $validated['code'],
+                'subject_name' => $validated['name'],
+                'professor_id' => $validated['professor_id'],
+                'professor' => User::find($validated['professor_id'])->name,
+                'days' => implode(', ', $scheduleDays),
+                'time' => $scheduleStartTime . ' - ' . $scheduleEndTime,
+                'room' => $scheduleRoom,
+            ];
+
+            if ($schedule) {
+                $schedule->update($scheduleData);
+            } else {
+                Schedule::create($scheduleData);
+            }
+        } elseif ($schedule && empty($scheduleDays)) {
+            $schedule->delete();
+        }
 
         return redirect()->route('admin.classes')->with('success', 'Class updated successfully');
     }
