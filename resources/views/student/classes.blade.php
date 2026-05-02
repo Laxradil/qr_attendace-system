@@ -27,11 +27,10 @@
                         </td>
                         <td style="font-size:12px;padding:10px 8px;min-width:100px;">{{ $class->professor->name ?? 'N/A' }}</td>
                         <td style="text-align:center;padding:10px 8px;">
-                                    <object data="{{ route('student.qr-code', $class->id) }}" type="image/svg+xml" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;">
-                                    </object>
+                                    <canvas class="student-qr-canvas" width="48" height="48" data-qr="{{ base64_encode(json_encode([ 'type' => 'student_attendance', 'student_id' => auth()->id(), 'student_name' => auth()->user()->name, 'student_email' => auth()->user()->email, 'class_id' => $class->id, 'class_name' => $class->name, 'class_code' => $class->code, 'generated_at' => now()->toIso8601String() ])) }}" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;"></canvas>
                                 </td>
                         <td style="text-align:center;padding:10px 8px;">
-                            <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:11px;" onclick="showStudentQR('{{ $class->id }}', '{{ $class->code }} - {{ $class->name }}')">
+                            <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:11px;" data-class-name="{{ $class->code }} - {{ $class->name }}" onclick="showStudentQR(this)">
                                 📱 Show QR
                             </button>
                             <button type="button" class="btn btn-s" style="padding:7px 14px;font-size:11px;margin-left:4px;" onclick="showClassStudents({{ $class->id }}, '{{ $class->name }}')">
@@ -52,30 +51,84 @@
     <div class="modal-content" style="max-width:350px;">
         <span class="close" onclick="closeStudentQR()">&times;</span>
         <h3 id="studentQRClass"></h3>
-        <object id="studentQRImage" data="" type="image/svg+xml" style="width:200px;height:200px;margin:20px auto;display:block;">
-        </object>
+        <canvas id="studentQRModalCanvas" width="200" height="200" style="width:200px;height:200px;margin:20px auto;display:block;border:1px solid var(--border);border-radius:8px;background:white;"></canvas>
         <button class="btn btn-p" onclick="downloadStudentQR()">Download QR</button>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 <script>
-function showStudentQR(classId, className) {
-    document.getElementById('studentQRClass').innerText = className;
-    document.getElementById('studentQRImage').data = `/student/qr-code/${classId}`;
-    document.getElementById('studentQRModal').style.display = 'block';
+let currentStudentQRData = null;
+
+function renderStudentQRCodes() {
+    document.querySelectorAll('.student-qr-canvas').forEach(canvas => {
+        if (canvas.dataset.rendered === '1') {
+            return;
+        }
+        const encoded = canvas.dataset.qr;
+        if (!encoded) {
+            return;
+        }
+        try {
+            const text = atob(encoded);
+            QRCode.toCanvas(canvas, text, {
+                width: 48,
+                margin: 1,
+                color: {
+                    dark: '#000000',
+                    light: '#ffffff'
+                }
+            });
+            canvas.dataset.rendered = '1';
+        } catch (err) {
+            console.error('Failed to render student QR', err);
+        }
+    });
 }
+
+function showStudentQR(button) {
+    const row = button.closest('tr');
+    const canvas = row.querySelector('.student-qr-canvas');
+    if (!canvas) {
+        return;
+    }
+
+    const encoded = canvas.dataset.qr;
+    if (!encoded) {
+        return;
+    }
+
+    currentStudentQRData = atob(encoded);
+    const className = button.dataset.className || '';
+    document.getElementById('studentQRClass').innerText = className;
+    document.getElementById('studentQRModal').style.display = 'block';
+
+    const modalCanvas = document.getElementById('studentQRModalCanvas');
+    QRCode.toCanvas(modalCanvas, currentStudentQRData, {
+        width: 200,
+        margin: 2,
+        color: {
+            dark: '#000000',
+            light: '#ffffff'
+        }
+    });
+}
+
 function closeStudentQR() {
     document.getElementById('studentQRModal').style.display = 'none';
 }
+
 function downloadStudentQR() {
-    const obj = document.getElementById('studentQRImage');
-    const url = obj.data;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'qr-code.svg';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    if (!currentStudentQRData) {
+        return;
+    }
+    const canvas = document.getElementById('studentQRModalCanvas');
+    const link = document.createElement('a');
+    link.download = 'student-qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
 }
+
+document.addEventListener('DOMContentLoaded', renderStudentQRCodes);
 </script>
 @endsection

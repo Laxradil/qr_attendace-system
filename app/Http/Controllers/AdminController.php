@@ -132,16 +132,17 @@ class AdminController extends Controller
             'role' => 'required|in:admin,professor,student',
             'student_id' => 'nullable|string|unique:users,student_id,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|boolean',
         ]);
 
+        $validated['is_active'] = $request->has('is_active');
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'username' => $validated['username'],
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
-            'is_active' => $validated['is_active'] ?? true,
+            'is_active' => $validated['is_active'],
             'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
         ]);
 
@@ -245,9 +246,11 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professor_id' => 'required|exists:users,id',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|boolean',
         ]);
 
+        $validated['is_active'] = $request->has('is_active');
+        Cache::forget('admin_classes_page_1');
         $classe->update($validated);
 
         SystemLog::create([
