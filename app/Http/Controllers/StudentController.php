@@ -75,8 +75,23 @@ class StudentController extends Controller
             ->orderBy('recorded_at', 'desc')
             ->paginate(20);
 
+        $totalPresent = AttendanceRecord::where('student_id', $user->id)
+            ->where('status', 'present')
+            ->count();
+        $totalLate = AttendanceRecord::where('student_id', $user->id)
+            ->where('status', 'late')
+            ->count();
+        $totalAbsent = AttendanceRecord::where('student_id', $user->id)
+            ->where('status', 'absent')
+            ->count();
+        $totalRecords = AttendanceRecord::where('student_id', $user->id)->count();
+
         return view('student.attendance', [
             'attendanceRecords' => $attendanceRecords,
+            'totalPresent' => $totalPresent,
+            'totalLate' => $totalLate,
+            'totalAbsent' => $totalAbsent,
+            'totalRecords' => $totalRecords,
         ]);
     }
 

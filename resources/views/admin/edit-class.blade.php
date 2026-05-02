@@ -28,8 +28,9 @@
             @endforeach
         </select>
 
+        <input type="hidden" name="is_active" value="0">
         <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);margin:10px 0;">
-            <input type="checkbox" name="is_active" {{ $classe->is_active ? 'checked' : '' }}> Active class
+            <input type="checkbox" name="is_active" value="1" {{ $classe->is_active ? 'checked' : '' }}> Active class
         </label>
 
         <div style="font-size:10px;color:var(--text3);margin-bottom:8px;">Enrolled students: {{ $classe->students->count() }}</div>

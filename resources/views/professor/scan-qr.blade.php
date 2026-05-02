@@ -89,6 +89,7 @@
                     <button type="submit" class="btn btn-g" style="width:100%;padding:10px 12px;justify-content:center;margin-bottom:12px;">
                         ✓ Record Attendance
                     </button>
+                    <div id="scan-feedback" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:8px;font-size:12px;"></div>
                 </form>
 
                 <!-- Recent Scans -->
@@ -130,9 +131,17 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
     const recentScans = [];
     let currentMode = 'camera';
+    let scanAnimationFrame = null;
+    const scannerCanvas = document.createElement('canvas');
+    const scannerContext = scannerCanvas.getContext('2d');
+    const video = document.getElementById('qr-scanner');
+    const qrInput = document.getElementById('qr-input');
+    const classSelect = document.querySelector('select[name="class_id"]');
+    const studentSelect = document.querySelector('select[name="student_id"]');
 
     function setMode(mode) {
         currentMode = mode;
@@ -148,7 +157,7 @@
             hardwareBtn.classList.add('btn');
             cameraSection.style.display = 'block';
             hardwareSection.style.display = 'none';
-            document.getElementById('qr-input').focus();
+            qrInput.focus();
         } else {
             cameraBtn.classList.remove('btn-p');
             cameraBtn.classList.add('btn');
@@ -165,25 +174,28 @@
 
     async function startScanner() {
         try {
-            const video = document.getElementById('qr-scanner');
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
             });
             video.srcObject = stream;
-            video.play();
+            await video.play();
             document.getElementById('start-scan').disabled = true;
             document.getElementById('start-scan').style.opacity = '0.5';
             document.getElementById('start-scan').style.cursor = 'not-allowed';
             document.getElementById('stop-scan').disabled = false;
             document.getElementById('stop-scan').style.opacity = '1';
             document.getElementById('stop-scan').style.cursor = 'pointer';
+            scanAnimationFrame = requestAnimationFrame(scanFrame);
         } catch (err) {
             alert('Unable to access camera: ' + err.message);
         }
     }
 
     function stopScanner() {
-        const video = document.getElementById('qr-scanner');
+        if (scanAnimationFrame) {
+            cancelAnimationFrame(scanAnimationFrame);
+            scanAnimationFrame = null;
+        }
         if (video.srcObject) {
             video.srcObject.getTracks().forEach(track => track.stop());
             video.srcObject = null;
@@ -194,6 +206,28 @@
         document.getElementById('stop-scan').disabled = true;
         document.getElementById('stop-scan').style.opacity = '0.5';
         document.getElementById('stop-scan').style.cursor = 'not-allowed';
+    }
+
+    function scanFrame() {
+        if (!video || !video.videoWidth || !video.videoHeight) {
+            scanAnimationFrame = requestAnimationFrame(scanFrame);
+            return;
+        }
+
+        scannerCanvas.width = video.videoWidth;
+        scannerCanvas.height = video.videoHeight;
+        scannerContext.drawImage(video, 0, 0, scannerCanvas.width, scannerCanvas.height);
+
+        const imageData = scannerContext.getImageData(0, 0, scannerCanvas.width, scannerCanvas.height);
+        const code = jsQR(imageData.data, scannerCanvas.width, scannerCanvas.height, { inversionAttempts: 'attemptBoth' });
+
+        if (code && code.data) {
+            handleScannedCode(code.data);
+            stopScanner();
+            return;
+        }
+
+        scanAnimationFrame = requestAnimationFrame(scanFrame);
     }
 
     function updateRecentScans() {
@@ -210,45 +244,100 @@
         ).join('');
     }
 
-    // Camera mode - Manual QR code input
+    function setScanFeedback(message, type = 'info') {
+        const feedback = document.getElementById('scan-feedback');
+        if (!feedback) {
+            return;
+        }
+
+        if (!message) {
+            feedback.style.display = 'none';
+            feedback.textContent = '';
+            return;
+        }
+
+        feedback.style.display = 'block';
+        feedback.textContent = message;
+        feedback.style.color = type === 'error' ? '#ffdddd' : '#0a0';
+        feedback.style.background = type === 'error' ? 'rgba(255, 0, 0, 0.12)' : 'rgba(0, 128, 0, 0.12)';
+        feedback.style.border = type === 'error' ? '1px solid rgba(255, 0, 0, 0.25)' : '1px solid rgba(0, 128, 0, 0.25)';
+    }
+
+    async function populateStudents(classId, selectedStudentId = null) {
+        if (!classId) {
+            studentSelect.innerHTML = '<option value="">Select a student...</option>';
+            return;
+        }
+        studentSelect.innerHTML = '<option value="">Loading students...</option>';
+        try {
+            const response = await fetch(`/professor/class/${classId}/students`);
+            const data = await response.json();
+            studentSelect.innerHTML = '<option value="">Select a student...</option>';
+            data.students.forEach(student => {
+                const opt = document.createElement('option');
+                opt.value = student.id;
+                opt.textContent = `${student.name} (${student.email})`;
+                if (selectedStudentId && selectedStudentId == student.id) {
+                    opt.selected = true;
+                }
+                studentSelect.appendChild(opt);
+            });
+        } catch (err) {
+            studentSelect.innerHTML = '<option value="">Unable to load students</option>';
+            console.error('Failed to load students:', err);
+        }
+    }
+
+    function handleScannedCode(scannedCode) {
+        const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        recentScans.unshift({ code: scannedCode, time });
+        updateRecentScans();
+        qrInput.value = scannedCode;
+
+        try {
+            const data = JSON.parse(scannedCode);
+            if (data.type === 'student_attendance') {
+                setScanFeedback('Student QR scanned. Class and student are now selected. Review and submit.', 'info');
+                if (data.class_id) {
+                    classSelect.value = data.class_id;
+                    populateStudents(data.class_id, data.student_id);
+                }
+                return;
+            }
+
+            setScanFeedback('QR scanned. Please confirm the class and student, then submit.', 'info');
+        } catch (_err) {
+            setScanFeedback('Scanned raw QR text. Please select a class and student before submitting.', 'error');
+        }
+    }
+
     document.getElementById('qr-input').addEventListener('change', (e) => {
         if (e.target.value && currentMode === 'camera') {
-            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            recentScans.unshift({ code: e.target.value, time });
-            updateRecentScans();
+            handleScannedCode(e.target.value.trim());
             e.target.value = '';
         }
     });
 
-    // Hardware Scanner Mode - Capture scanned input
     document.getElementById('hardware-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && e.target.value && currentMode === 'hardware') {
             const scannedCode = e.target.value.trim();
-            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            
-            // Add to recent scans
-            recentScans.unshift({ code: scannedCode, time });
-            updateRecentScans();
-            
-            // Auto-populate the main QR input field for form submission
-            document.getElementById('qr-input').value = scannedCode;
-            
-            // Clear hardware input and keep focus
+            handleScannedCode(scannedCode);
             e.target.value = '';
             e.target.focus();
-            
-            // Optional: Log to console for debugging
             console.log('Hardware scanner detected:', scannedCode);
         }
     });
 
-    // Keep hardware input focused when in hardware mode
     document.getElementById('hardware-input').addEventListener('blur', () => {
         if (currentMode === 'hardware') {
             setTimeout(() => {
                 document.getElementById('hardware-input').focus();
             }, 100);
         }
+    });
+
+    classSelect.addEventListener('change', () => {
+        populateStudents(classSelect.value);
     });
 </script>
 @endsection
