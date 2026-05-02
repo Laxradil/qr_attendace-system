@@ -320,8 +320,11 @@ class AdminController extends Controller
     {
         $qrCode = QRCode::where('uuid', $uuid)->firstOrFail();
         
-        // Generate QR code image as PNG
-        $image = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+        // Generate QR code image as PNG using SimpleSoftwareIO
+        // @psalm-suppress UndefinedClass
+        $qrCodeGenerator = new \SimpleSoftwareIO\QrCode\QrCode();
+        // @psalm-suppress UndefinedMethod
+        $image = $qrCodeGenerator->format('png')
             ->size(300)
             ->generate($qrCode->uuid);
         
