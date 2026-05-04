@@ -5,14 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Classe;
 use App\Models\QRCode;
-use App\Models\Schedule;
 use App\Models\AttendanceRecord;
 use App\Models\SystemLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
@@ -77,11 +76,44 @@ class AdminController extends Controller
 
     public function users(): View
     {
-        // Cache users for 1 minute
-        $users = Cache::remember('admin_users_page_' . request('page', 1), 60, function () {
-            return User::with('classes', 'attendanceRecords')->paginate(20);
+        $role = request('role');
+        $status = request('status');
+
+        // Build query with filters
+        $query = User::with('classes', 'attendanceRecords');
+
+        if ($role && in_array($role, ['admin', 'professor', 'student'])) {
+            $query->where('role', $role);
+        }
+
+        if ($status !== null && in_array($status, ['0', '1'])) {
+            $query->where('is_active', (bool) $status);
+        }
+
+        // Cache with filter params
+        $cacheKey = 'admin_users_' . md5($role . $status . request('page', 1));
+        $users = Cache::remember($cacheKey, 60, function () use ($query) {
+            return $query->paginate(20);
         });
-        return view('admin.users', ['users' => $users]);
+
+        // Get statistics for all users (not filtered)
+        $stats = [
+            'total' => User::count(),
+            'admins' => User::where('role', 'admin')->count(),
+            'professors' => User::where('role', 'professor')->count(),
+            'students' => User::where('role', 'student')->count(),
+            'active' => User::where('is_active', true)->count(),
+            'inactive' => User::where('is_active', false)->count(),
+        ];
+
+        return view('admin.users', [
+            'users' => $users,
+            'stats' => $stats,
+            'filters' => [
+                'role' => $role,
+                'status' => $status,
+            ]
+        ]);
     }
 
     public function createUser(): View
@@ -110,7 +142,7 @@ class AdminController extends Controller
         ]);
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'other',
             'description' => 'Created new user: ' . $validated['name'],
             'ip_address' => $request->ip(),
@@ -134,22 +166,21 @@ class AdminController extends Controller
             'role' => 'required|in:admin,professor,student',
             'student_id' => 'nullable|string|unique:users,student_id,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
-            'is_active' => 'nullable|boolean',
+            'is_active' => 'boolean',
         ]);
 
-        $validated['is_active'] = $request->has('is_active');
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'username' => $validated['username'],
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
-            'is_active' => $validated['is_active'],
+            'is_active' => $validated['is_active'] ?? true,
             'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
         ]);
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'update_user',
             'description' => 'Updated user: ' . $user->name,
             'ip_address' => $request->ip(),
@@ -165,7 +196,7 @@ class AdminController extends Controller
          $user->delete();
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'delete_user',
             'description' => 'Deleted user: ' . $name,
             'ip_address' => request()->ip(),
@@ -220,33 +251,12 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professor_id' => 'required|exists:users,id',
-            'schedule_days' => 'nullable|array|required_with:schedule_start_time|required_with:schedule_end_time',
-            'schedule_days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
-            'schedule_start_time' => 'nullable|date_format:H:i|required_with:schedule_days',
-            'schedule_end_time' => 'nullable|date_format:H:i|after:schedule_start_time|required_with:schedule_days',
-            'schedule_room' => 'nullable|string|max:20',
         ]);
 
-        $classData = Arr::only($validated, ['code', 'name', 'description', 'professor_id']);
-        $classe = Classe::create($classData);
-
-        if (!empty($validated['schedule_days'] ?? []) && $request->filled('schedule_start_time') && $request->filled('schedule_end_time')) {
-            $professor = User::find($validated['professor_id']);
-
-            Schedule::create([
-                'class_id' => $classe->id,
-                'subject_code' => $validated['code'],
-                'subject_name' => $validated['name'],
-                'professor_id' => $validated['professor_id'],
-                'professor' => $professor->name,
-                'days' => implode(', ', $validated['schedule_days']),
-                'time' => $request->input('schedule_start_time') . ' - ' . $request->input('schedule_end_time'),
-                'room' => $validated['schedule_room'] ?? '',
-            ]);
-        }
+        Classe::create($validated);
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'create_class',
             'description' => 'Created class: ' . $validated['name'],
             'ip_address' => $request->ip(),
@@ -259,13 +269,7 @@ class AdminController extends Controller
     public function editClass(Classe $classe): View
     {
         $professors = User::where('role', 'professor')->get();
-        $schedule = $classe->schedules()->latest()->first();
-
-        return view('admin.edit-class', [
-            'classe' => $classe,
-            'professors' => $professors,
-            'schedule' => $schedule,
-        ]);
+        return view('admin.edit-class', ['classe' => $classe, 'professors' => $professors]);
     }
 
     public function updateClass(Request $request, Classe $classe): RedirectResponse
@@ -275,47 +279,18 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professor_id' => 'required|exists:users,id',
-            'is_active' => 'nullable|boolean',
-            'schedule_days' => 'nullable|array|required_with:schedule_start_time|required_with:schedule_end_time',
-            'schedule_days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
-            'schedule_start_time' => 'nullable|date_format:H:i|required_with:schedule_days',
-            'schedule_end_time' => 'nullable|date_format:H:i|after:schedule_start_time|required_with:schedule_days',
-            'schedule_room' => 'nullable|string|max:20',
+            'is_active' => 'boolean',
         ]);
 
-        $validated['is_active'] = $request->has('is_active');
-        $classData = Arr::only($validated, ['code', 'name', 'description', 'professor_id', 'is_active']);
+        $classe->update($validated);
 
-        Cache::forget('admin_classes_page_1');
-        $classe->update($classData);
-
-        $scheduleDays = $validated['schedule_days'] ?? [];
-        $scheduleStartTime = $request->input('schedule_start_time');
-        $scheduleEndTime = $request->input('schedule_end_time');
-        $scheduleRoom = $validated['schedule_room'] ?? '';
-
-        $schedule = $classe->schedules()->latest()->first();
-
-        if (!empty($scheduleDays) && $scheduleStartTime && $scheduleEndTime) {
-            $scheduleData = [
-                'class_id' => $classe->id,
-                'subject_code' => $validated['code'],
-                'subject_name' => $validated['name'],
-                'professor_id' => $validated['professor_id'],
-                'professor' => User::find($validated['professor_id'])->name,
-                'days' => implode(', ', $scheduleDays),
-                'time' => $scheduleStartTime . ' - ' . $scheduleEndTime,
-                'room' => $scheduleRoom,
-            ];
-
-            if ($schedule) {
-                $schedule->update($scheduleData);
-            } else {
-                Schedule::create($scheduleData);
-            }
-        } elseif ($schedule && empty($scheduleDays)) {
-            $schedule->delete();
-        }
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'update_class',
+            'description' => 'Updated class: ' . $classe->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return redirect()->route('admin.classes')->with('success', 'Class updated successfully');
     }
@@ -326,7 +301,7 @@ class AdminController extends Controller
         $classe->delete();
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'delete_class',
             'description' => 'Deleted class: ' . $name,
             'ip_address' => request()->ip(),
@@ -346,80 +321,6 @@ class AdminController extends Controller
     return view('admin.qr-codes', compact('qrCodes', 'classes'));
 }
 
-    public function qrCodeImage(string $uuid): \Illuminate\Http\Response
-{
-    $qrCode = QRCode::where('uuid', $uuid)->first();
-    
-    if (!$qrCode) {
-        return response('QR Code not found', 404);
-    }
-    
-    // Generate QR code as SVG with real data
-    $qrData = json_encode([
-        'type' => 'class_qr',
-        'uuid' => $qrCode->uuid,
-        'class_id' => $qrCode->class_id,
-        'class_name' => $qrCode->classe->name ?? '',
-        'class_code' => $qrCode->classe->code ?? '',
-    ]);
-    
-    $svg = $this->generateQRCodeSVG($qrData);
-    
-    return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
-}
-
-    private function generateQRCodeSVG(string $data): string
-{
-    // Simple QR code SVG generation
-    // Using a basic QR code pattern for the UUID
-    $size = 100;
-    $moduleSize = 2;
-    $padding = 10;
-    
-    // Generate a simple QR-like pattern based on the data
-    $hash = md5($data);
-    $pattern = [];
-    
-    for ($y = 0; $y < 21; $y++) {
-        $row = [];
-        for ($x = 0; $x < 21; $x++) {
-            // Finder patterns (corners)
-            if (($x < 7 && $y < 7) || ($x > 13 && $y < 7) || ($x < 7 && $y > 13)) {
-                if (($x < 3 || $x > 3) && ($y < 3 || $y > 3) && ($x >= 0 && $x <= 6 && $y >= 0 && $y <= 6)) {
-                    $row[] = ($x == 0 || $x == 6 || $y == 0 || $y == 6 || ($x >= 2 && $x <= 4 && $y >= 2 && $y <= 4)) ? 1 : 0;
-                } elseif ($x > 13 && $y < 7) {
-                    $row[] = ($x == 14 || $x == 20 || $y == 0 || $y == 6 || ($x >= 16 && $x <= 18 && $y >= 2 && $y <= 4)) ? 1 : 0;
-                } elseif ($x < 7 && $y > 13) {
-                    $row[] = ($x == 0 || $x == 6 || $y == 14 || $y == 20 || ($x >= 2 && $x <= 4 && $y >= 16 && $y <= 18)) ? 1 : 0;
-                } else {
-                    $row[] = 0;
-                }
-            } else {
-                // Data pattern based on hash
-                $idx = ($y * 21 + $x) % 32;
-                $row[] = (int)substr($hash, $idx, 1) % 2;
-            }
-        }
-        $pattern[] = $row;
-    }
-    
-    $svg = '<?xml version="1.0" encoding="UTF-8"?>';
-    $svg .= '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . ($size + $padding * 2) . ' ' . ($size + $padding * 2) . '" width="' . $size . '" height="' . $size . '">';
-    $svg .= '<rect x="0" y="0" width="' . ($size + $padding * 2) . '" height="' . ($size + $padding * 2) . '" fill="white"/>';
-    
-    $cellSize = $size / 21;
-    for ($y = 0; $y < 21; $y++) {
-        for ($x = 0; $x < 21; $x++) {
-            if ($pattern[$y][$x]) {
-                $svg .= '<rect x="' . ($padding + $x * $cellSize) . '" y="' . ($padding + $y * $cellSize) . '" width="' . $cellSize . '" height="' . $cellSize . '" fill="black"/>';
-            }
-        }
-    }
-    
-    $svg .= '</svg>';
-    return $svg;
-}
-
     public function generateQRCode(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -432,13 +333,13 @@ class AdminController extends Controller
             QRCode::create([
                 'uuid' => Str::uuid(),
                 'class_id' => $validated['class_id'],
-                'professor_id' => auth()->id(),
+                'professor_id' => Auth::id(),
                 'expires_at' => $validated['expires_at'] ?? null,
             ]);
         }
 
         SystemLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'generate_qr',
             'description' => 'Generated ' . $validated['count'] . ' QR codes for class',
             'ip_address' => $request->ip(),
@@ -446,6 +347,24 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', $validated['count'] . ' QR codes generated successfully');
+    }
+
+    public function qrCodeImage($uuid)
+    {
+        try {
+            $qrCode = QRCode::where('uuid', $uuid)->firstOrFail();
+            
+            // Generate QR code image as SVG
+            $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                ->size(300)
+                ->generate($qrCode->uuid);
+            
+            // Return as plain SVG response
+            return response((string)$svg)
+                ->header('Content-Type', 'image/svg+xml');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     // Attendance Management

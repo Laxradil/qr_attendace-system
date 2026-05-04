@@ -4,61 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Attendance System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --navy: #0b1224;
-            --panel: rgba(15, 23, 42, 0.96);
-            --panel-strong: rgba(10, 16, 30, 0.98);
-            --border: rgba(148, 163, 184, 0.12);
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --accent: #7c3aed;
-            --accent-soft: rgba(124, 58, 237, 0.12);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --navy: #0d0c1d;
+            --navy2: #13122a;
+            --navy3: #1a1938;
+            --purple: #6c5ce7;
+            --purple2: #5a4fcf;
+            --purple-light: #a29bfe;
+            --purple-glow: rgba(108, 92, 231, 0.15);
+            --text: #e8e6ff;
+            --text2: #9b97cc;
+            --text3: #5a5880;
+            --border: rgba(255, 255, 255, 0.06);
+            --border2: rgba(255, 255, 255, 0.03);
+            --surface: rgba(255, 255, 255, 0.02);
+            --surface2: rgba(255, 255, 255, 0.05);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
         body {
-            background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.18), transparent 25%),
-                        linear-gradient(180deg, #070a17 0%, #091124 60%, #0b1224 100%);
-            min-height: 100vh;
-            font-family: Inter, 'Segoe UI', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background: #090818;
             color: var(--text);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
         }
 
         .login-container {
-            width: min(480px, 100%);
-            background: var(--panel);
+            background: var(--navy2);
             border: 1px solid var(--border);
-            border-radius: 28px;
-            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.35);
-            padding: 36px 34px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
+            max-width: 420px;
+            width: 100%;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
         }
 
         .brand-logo {
-            width: 62px;
-            height: 62px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--purple), #6c5ce7);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin: 0 auto 1.5rem;
-            border-radius: 18px;
-            display: grid;
-            place-items: center;
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.95), rgba(59, 130, 246, 0.9));
-            box-shadow: 0 16px 40px rgba(124, 58, 237, 0.18);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.2);
         }
 
         .brand-logo i {
+            font-size: 1.75rem;
             color: white;
-            font-size: 1.45rem;
         }
 
         .login-header {
@@ -67,182 +79,165 @@
         }
 
         .login-header h2 {
-            font-size: 2rem;
-            color: white;
-            margin-bottom: 0.4rem;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .login-header p {
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
+            color: var(--text2);
+            font-size: 0.875rem;
         }
 
         .form-group {
-            margin-bottom: 1.3rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-label {
-            color: #cbd5e1;
-            font-size: 0.88rem;
-            margin-bottom: 0.6rem;
-            display: block;
+            color: var(--text);
             font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            display: block;
         }
 
         .input-wrapper {
             position: relative;
-            display: block;
         }
 
         .input-wrapper i {
             position: absolute;
-            left: 16px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--muted);
-            font-size: 1rem;
-            pointer-events: none;
+            color: var(--text3);
+            font-size: 0.95rem;
+            transition: color 0.3s;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.95rem 4.6rem 0.95rem 3rem;
-            border-radius: 16px;
-            border: 1px solid transparent;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            transition: all 0.25s ease;
-            font-size: 0.96rem;
-            min-height: 3.2rem;
+            padding: 0.75rem 2.75rem 0.75rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            background: var(--surface2);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
         }
 
         .form-control::placeholder {
-            color: rgba(226, 232, 240, 0.5);
+            color: var(--text3);
         }
 
         .form-control:focus {
             outline: none;
-            border-color: rgba(124, 58, 237, 0.45);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+            border-color: var(--purple);
+            background: var(--navy3);
+            box-shadow: 0 0 0 3px var(--purple-glow);
         }
 
-        .input-wrapper:focus-within i {
-            color: #a78bfa;
+        .form-control:focus ~ i {
+            color: var(--purple);
         }
 
         .password-toggle {
             position: absolute;
-            right: 12px;
+            right: 22px;
             top: 50%;
             transform: translateY(-50%);
-            width: 36px;
-            height: 36px;
+            background: none;
             border: none;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 50%;
-            color: var(--muted);
+            color: var(--text3);
             cursor: pointer;
-            display: inline-flex;
+            padding: 5px 8px;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
-            pointer-events: auto;
-            z-index: 5;
-            font-size: 0.95rem;
-            padding: 0;
-        }
-
-        .password-toggle i {
-            line-height: 1;
-            font-size: 14px;
-            margin: 0;
-            display: inline-block;
-        }
-
-        .password-toggle i {
-            line-height: 1;
+            z-index: 10;
         }
 
         .password-toggle:hover {
-            background: rgba(255, 255, 255, 0.14);
-            color: #e2e8f0;
-            transform: translateY(-50%) scale(1.02);
+            color: var(--purple-light);
+        }
+        
+        .password-toggle:active {
+            color: var(--purple);
         }
 
         .form-options {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
             margin-bottom: 1.5rem;
-            flex-wrap: wrap;
         }
 
         .form-check {
             display: flex;
             align-items: center;
-            gap: 0.65rem;
-            color: var(--text);
-            font-size: 0.9rem;
+            gap: 0.5rem;
         }
 
         .form-check-input {
-            width: 18px;
-            height: 18px;
-            border-radius: 6px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            background: rgba(255,255,255,0.05);
-            accent-color: #7c3aed;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
             cursor: pointer;
+            background: var(--surface);
+            appearance: none;
+            transition: all 0.3s;
+        }
+
+        .form-check-input:checked {
+            background: var(--purple);
+            border-color: var(--purple);
         }
 
         .form-check-label {
-            color: var(--text);
+            color: var(--text2);
+            font-size: 0.875rem;
             cursor: pointer;
         }
 
         .forgot-link {
-            color: #a78bfa;
-            font-size: 0.9rem;
+            color: var(--purple-light);
+            font-size: 0.875rem;
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.3s;
         }
 
         .forgot-link:hover {
-            color: #ede9fe;
+            color: var(--purple);
         }
 
         .btn-login {
             width: 100%;
-            padding: 1rem 1.1rem;
+            padding: 0.875rem;
+            background: var(--purple);
             border: none;
-            border-radius: 16px;
-            font-size: 1rem;
-            font-weight: 700;
+            border-radius: var(--radius);
             color: white;
-            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 18px 30px rgba(124, 58, 237, 0.2);
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
 
         .btn-login:hover {
+            background: var(--purple2);
             transform: translateY(-2px);
-            box-shadow: 0 24px 40px rgba(124, 58, 237, 0.24);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
         }
 
         .btn-login:active {
             transform: translateY(0);
-        }
-
-        .footer-note {
-            margin-top: 1.6rem;
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.88rem;
-            line-height: 1.6;
         }
     </style>
 </head>
@@ -254,7 +249,7 @@
         
         <div class="login-header">
             <h2>Welcome Back</h2>
-            <p>Please enter your details to sign in</p>
+            <p>Sign in to your account</p>
         </div>
         
         <form method="POST" action="<?php echo e(route('login')); ?>">
@@ -283,20 +278,15 @@
                     <input type="checkbox" class="form-check-input" id="remember">
                     <label class="form-check-label" for="remember">Remember me</label>
                 </div>
-                <a href="#" class="forgot-link">Forgot password?</a>
+                <a href="<?php echo e(route('password.forgot')); ?>" class="forgot-link">Forgot password?</a>
             </div>
             
             <button type="submit" class="btn-login">
                 Sign In
             </button>
         </form>
-        
-        <div class="footer-note">
-            Access is restricted to registered students and professors only.
-        </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');

@@ -1,8 +1,9 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\ScheduleController;
@@ -27,10 +28,17 @@ Route::get('/register', function () {
 Route::post('/register', [LoginController::class, 'register']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Password reset routes
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.forgot');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.send-reset-link');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset.form');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.reset');
+
 // Dashboard route
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         if ($user->isProfessor()) {
             return redirect()->route('professor.dashboard');
         } elseif ($user->isAdmin()) {
@@ -61,6 +69,11 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
 });
 
+// QR Code image endpoint (before admin middleware group to bypass role check)
+Route::get('/admin/qr-codes/{uuid}/image', [AdminController::class, 'qrCodeImage'])
+    ->middleware('auth')
+    ->name('admin.qr-codes.image');
+
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -90,7 +103,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // QR Code management
     Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('admin.qr-codes');
     Route::post('/qr-codes/generate', [AdminController::class, 'generateQRCode'])->name('admin.qr-codes.generate');
-    Route::get('/qr-codes/{uuid}/image', [AdminController::class, 'qrCodeImage'])->name('admin.qr-codes.image');
     
     // Attendance records
     Route::get('/attendance-records', [AdminController::class, 'attendanceRecords'])->name('admin.attendance-records');

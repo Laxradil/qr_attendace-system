@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('attendance_and_pivot', function (Blueprint $table) {
-            //
-        });
+        // Table already exists in database - skipping
     }
 
     /**
