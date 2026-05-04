@@ -43,11 +43,15 @@
             <div id="hardware-section" style="display:none;">
                 <div class="card">
                     <div class="sh" style="margin-top:0;">🔧 Hardware Scanner</div>
-                    <div class="info" style="margin-bottom:12px;">Hold your hardware scanner device ready. Focus will automatically be on the input field below.</div>
+                    <div id="scanner-detection-status" class="info" style="margin-bottom:12px;">Scanner detection is ready. Connect a HID scanner or use a keyboard-wedge scanner.</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                        <button type="button" id="connect-scanner" class="btn btn-p" style="padding:10px 12px;font-size:12px;justify-content:center;">Detect Scanner</button>
+                        <button type="button" id="disconnect-scanner" class="btn btn-d" style="padding:10px 12px;font-size:12px;justify-content:center;" disabled>Disconnect</button>
+                    </div>
                     <div style="margin-bottom:12px;">
                         <label class="fl">Scan QR Code</label>
                         <input type="text" id="hardware-input" placeholder="Point scanner at QR code..." class="fi" style="font-size:14px;padding:12px 10px;">
-                        <div style="font-size:9px;color:var(--text3);margin-top:4px;">📌 Field is auto-focused for hardware scanner input</div>
+                        <div id="scanner-device-name" style="font-size:9px;color:var(--text3);margin-top:4px;">📌 Field is auto-focused for hardware scanner input</div>
                     </div>
                 </div>
             </div>
@@ -136,12 +140,136 @@
     const recentScans = [];
     let currentMode = 'camera';
     let scanAnimationFrame = null;
+    let hardwareScanTimer = null;
+    let detectedHidDevice = null;
     const scannerCanvas = document.createElement('canvas');
     const scannerContext = scannerCanvas.getContext('2d');
     const video = document.getElementById('qr-scanner');
     const qrInput = document.getElementById('qr-input');
+    const hardwareInput = document.getElementById('hardware-input');
+    const connectScannerButton = document.getElementById('connect-scanner');
+    const disconnectScannerButton = document.getElementById('disconnect-scanner');
+    const scannerDetectionStatus = document.getElementById('scanner-detection-status');
+    const scannerDeviceName = document.getElementById('scanner-device-name');
     const classSelect = document.querySelector('select[name="class_id"]');
     const studentSelect = document.querySelector('select[name="student_id"]');
+
+    function isHidSupported() {
+        return typeof navigator !== 'undefined' && 'hid' in navigator;
+    }
+
+    function updateScannerStatus(message, type = 'info') {
+        if (!scannerDetectionStatus) {
+            return;
+        }
+
+        scannerDetectionStatus.textContent = message;
+        scannerDetectionStatus.style.color = type === 'error' ? '#ffdddd' : 'var(--text)';
+        scannerDetectionStatus.style.background = type === 'error' ? 'rgba(255, 0, 0, 0.12)' : 'transparent';
+        scannerDetectionStatus.style.border = type === 'error' ? '1px solid rgba(255, 0, 0, 0.25)' : 'none';
+    }
+
+    function setDetectedDeviceName(name) {
+        if (!scannerDeviceName) {
+            return;
+        }
+
+        scannerDeviceName.textContent = name ? `Connected scanner: ${name}` : '📌 Field is auto-focused for hardware scanner input';
+    }
+
+    function setScannerConnectionControls(connected) {
+        if (connectScannerButton) {
+            connectScannerButton.disabled = connected;
+        }
+        if (disconnectScannerButton) {
+            disconnectScannerButton.disabled = !connected;
+        }
+    }
+
+    async function disconnectScanner() {
+        clearHardwareScanTimer();
+
+        if (detectedHidDevice && detectedHidDevice.opened) {
+            try {
+                await detectedHidDevice.close();
+            } catch (err) {
+                console.error('Failed to close HID device:', err);
+            }
+        }
+
+        detectedHidDevice = null;
+        setDetectedDeviceName('');
+        setScannerConnectionControls(false);
+        updateScannerStatus('Scanner disconnected. You can connect another device or use the text field fallback.');
+        hardwareInput.focus();
+    }
+
+    async function connectScanner() {
+        if (!isHidSupported()) {
+            updateScannerStatus('This browser does not support HID scanner detection. Use Chrome or Edge on a secure page.', 'error');
+            return;
+        }
+
+        try {
+            const grantedDevices = await navigator.hid.getDevices();
+            if (grantedDevices.length > 0) {
+                detectedHidDevice = grantedDevices[0];
+            } else {
+                const devices = await navigator.hid.requestDevice({ filters: [] });
+                detectedHidDevice = devices[0] || null;
+            }
+
+            if (!detectedHidDevice) {
+                updateScannerStatus('No HID scanner was selected. If your scanner behaves like a keyboard, the input field fallback still works.', 'error');
+                return;
+            }
+
+            if (!detectedHidDevice.opened) {
+                await detectedHidDevice.open();
+            }
+
+            setDetectedDeviceName(detectedHidDevice.productName || 'HID device');
+            setScannerConnectionControls(true);
+            updateScannerStatus('Scanner connected. HID-supported scanners can now be detected by the browser. Keyboard-wedge scanners still work through the input field.');
+            hardwareInput.focus();
+        } catch (err) {
+            console.error('Scanner detection failed:', err);
+            updateScannerStatus(`Unable to detect scanner: ${err.message}`, 'error');
+        }
+    }
+
+    function clearHardwareScanTimer() {
+        if (hardwareScanTimer) {
+            clearTimeout(hardwareScanTimer);
+            hardwareScanTimer = null;
+        }
+    }
+
+    function processHardwareScan() {
+        if (currentMode !== 'hardware') {
+            return;
+        }
+
+        const scannedCode = hardwareInput.value.trim();
+        if (!scannedCode) {
+            return;
+        }
+
+        clearHardwareScanTimer();
+        handleScannedCode(scannedCode);
+        hardwareInput.value = '';
+        hardwareInput.focus();
+        console.log('Hardware scanner detected:', scannedCode);
+    }
+
+    function scheduleHardwareScanProcessing() {
+        if (currentMode !== 'hardware') {
+            return;
+        }
+
+        clearHardwareScanTimer();
+        hardwareScanTimer = setTimeout(processHardwareScan, 150);
+    }
 
     function setMode(mode) {
         currentMode = mode;
@@ -157,6 +285,7 @@
             hardwareBtn.classList.add('btn');
             cameraSection.style.display = 'block';
             hardwareSection.style.display = 'none';
+            clearHardwareScanTimer();
             qrInput.focus();
         } else {
             cameraBtn.classList.remove('btn-p');
@@ -165,7 +294,14 @@
             hardwareBtn.classList.remove('btn');
             cameraSection.style.display = 'none';
             hardwareSection.style.display = 'block';
-            document.getElementById('hardware-input').focus();
+            if (!detectedHidDevice) {
+                updateScannerStatus(isHidSupported()
+                    ? 'Scanner detection is ready. Click Detect Scanner to choose a plugged-in HID scanner.'
+                    : 'This browser cannot detect HID scanners. Use Chrome or Edge on HTTPS, or use the keyboard-wedge input fallback.',
+                    isHidSupported() ? 'info' : 'error'
+                );
+            }
+            hardwareInput.focus();
         }
     }
 
@@ -318,23 +454,51 @@
         }
     });
 
-    document.getElementById('hardware-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && e.target.value && currentMode === 'hardware') {
-            const scannedCode = e.target.value.trim();
-            handleScannedCode(scannedCode);
-            e.target.value = '';
-            e.target.focus();
-            console.log('Hardware scanner detected:', scannedCode);
+    hardwareInput.addEventListener('input', () => {
+        scheduleHardwareScanProcessing();
+    });
+
+    hardwareInput.addEventListener('keydown', (e) => {
+        if (currentMode !== 'hardware') {
+            return;
+        }
+
+        if (e.key === 'Enter' || e.key === 'Tab') {
+            e.preventDefault();
+            processHardwareScan();
         }
     });
 
-    document.getElementById('hardware-input').addEventListener('blur', () => {
-        if (currentMode === 'hardware') {
-            setTimeout(() => {
-                document.getElementById('hardware-input').focus();
-            }, 100);
-        }
+    hardwareInput.addEventListener('paste', () => {
+        scheduleHardwareScanProcessing();
     });
+
+    if (connectScannerButton) {
+        connectScannerButton.addEventListener('click', connectScanner);
+    }
+
+    if (disconnectScannerButton) {
+        disconnectScannerButton.addEventListener('click', disconnectScanner);
+    }
+
+    if (isHidSupported()) {
+        navigator.hid.addEventListener('connect', (event) => {
+            detectedHidDevice = event.device;
+            setDetectedDeviceName(event.device.productName || 'Connected HID device');
+            setScannerConnectionControls(true);
+            updateScannerStatus(`Scanner connected: ${event.device.productName || 'HID device'}`);
+        });
+
+        navigator.hid.addEventListener('disconnect', () => {
+            disconnectScanner();
+        });
+    }
+
+    updateScannerStatus(isHidSupported()
+        ? 'Scanner detection is ready. Click Detect Scanner to choose a plugged-in HID scanner.'
+        : 'This browser cannot detect HID scanners. Use Chrome or Edge on HTTPS, or use the keyboard-wedge input fallback.',
+        isHidSupported() ? 'info' : 'error'
+    );
 
     classSelect.addEventListener('change', () => {
         populateStudents(classSelect.value);
