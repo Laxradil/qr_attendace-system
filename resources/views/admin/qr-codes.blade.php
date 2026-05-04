@@ -79,10 +79,13 @@
 
 <script>
 let currentQRUuid = '';
+const qrImageBaseUrl = "{{ url('/admin/qr-codes') }}/";
 
 function viewQR(uuid) {
     currentQRUuid = uuid;
-    document.getElementById('modal-qr-image').src = '/qr-codes/' + uuid + '/image';
+    // Use img tag instead of object tag for better SVG compatibility
+    const img = document.getElementById('modal-qr-image');
+    img.src = qrImageBaseUrl + uuid + '/image';
     document.getElementById('modal-qr-uuid').textContent = uuid;
     document.getElementById('qr-modal').style.display = 'flex';
 }
@@ -96,29 +99,51 @@ function downloadQRFromModal() {
 }
 
 function downloadQR(uuid) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = '/qr-codes/' + uuid + '/image';
-    
-    img.onload = function() {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        
-        const link = document.createElement('a');
-        link.download = 'qr-code-' + uuid + '.jpg';
-        link.href = canvas.toDataURL('image/jpeg', 0.9);
-        link.click();
-    };
-    
-    img.onerror = function() {
-        // Fallback: open in new window
-        window.open('/qr-codes/' + uuid + '/image', '_blank');
-    };
+    // Fetch the SVG and convert to JPEG
+    fetch(qrImageBaseUrl + uuid + '/image')
+        .then(response => response.text())
+        .then(svgText => {
+            // Create a canvas to convert SVG to JPEG
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            
+            // Fill with white background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 300, 300);
+            
+            // Create an image from the SVG
+            const img = new Image();
+            const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(svgUrl);
+                
+                // Convert canvas to JPEG and download
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'qr-code-' + uuid + '.jpg';
+                    link.click();
+                    URL.revokeObjectURL(url);
+                }, 'image/jpeg', 0.95);
+            };
+            
+            img.onerror = function() {
+                URL.revokeObjectURL(svgUrl);
+                alert('Failed to load QR code image');
+            };
+            
+            img.src = svgUrl;
+        })
+        .catch(error => {
+            console.error('Download failed:', error);
+            alert('Failed to download QR code');
+        });
 }
 
 // Close modal on outside click

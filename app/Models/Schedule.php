@@ -11,7 +11,6 @@ class Schedule extends Model
     use HasFactory;
 
     protected $fillable = [
-        'class_id',
         'subject_code',
         'subject_name',
         'professor_id',

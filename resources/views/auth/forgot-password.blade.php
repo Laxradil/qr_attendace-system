@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Attendance System</title>
+    <title>Forgot Password - Attendance System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -27,7 +27,8 @@
             --text2: #9b97cc;
             --text3: #5a5880;
             --border: rgba(255, 255, 255, 0.06);
-            --border2: rgba(255, 255, 255, 0.03);
+            --green: #00b894;
+            --red: #d63031;
             --surface: rgba(255, 255, 255, 0.02);
             --surface2: rgba(255, 255, 255, 0.05);
             --radius: 8px;
@@ -118,7 +119,7 @@
 
         .form-control {
             width: 100%;
-            padding: 0.75rem 2.75rem 0.75rem 2.5rem;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
             border: 1px solid var(--border);
             border-radius: var(--radius);
             font-size: 0.9rem;
@@ -137,83 +138,6 @@
             border-color: var(--purple);
             background: var(--navy3);
             box-shadow: 0 0 0 3px var(--purple-glow);
-        }
-
-        .form-control:focus ~ i {
-            color: var(--purple);
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 22px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text3);
-            cursor: pointer;
-            padding: 5px 8px;
-            transition: all 0.3s;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .password-toggle:hover {
-            color: var(--purple-light);
-        }
-        
-        .password-toggle:active {
-            color: var(--purple);
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-check {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-check-input {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            background: var(--surface);
-            appearance: none;
-            transition: all 0.3s;
-        }
-
-        .form-check-input:checked {
-            background: var(--purple);
-            border-color: var(--purple);
-        }
-
-        .form-check-label {
-            color: var(--text2);
-            font-size: 0.875rem;
-            cursor: pointer;
-        }
-
-        .forgot-link {
-            color: var(--purple-light);
-            font-size: 0.875rem;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .forgot-link:hover {
-            color: var(--purple);
         }
 
         .btn-login {
@@ -239,68 +163,103 @@
         .btn-login:active {
             transform: translateY(0);
         }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text2);
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--purple-light);
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background: rgba(0, 184, 148, 0.15);
+            border: 1px solid rgba(0, 184, 148, 0.3);
+            color: var(--green);
+        }
+
+        .alert-error {
+            background: rgba(214, 48, 49, 0.15);
+            border: 1px solid rgba(214, 48, 49, 0.3);
+            color: var(--red);
+        }
+
+        .error-text {
+            color: var(--red);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="brand-logo">
-            <i class="fas fa-clock"></i>
+            <i class="fas fa-lock"></i>
         </div>
         
         <div class="login-header">
-            <h2>Welcome Back</h2>
-            <p>Sign in to your account</p>
+            <h2>Forgot Password?</h2>
+            <p>Enter your email to reset your password</p>
         </div>
+
+        @if ($errors->any())
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>{{ $errors->first() }}</div>
+            </div>
+        @endif
+
+        @if (session('success'))
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <div>{!! session('success') !!}</div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>{{ session('error') }}</div>
+            </div>
+        @endif
         
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('password.send-reset-link') }}">
             @csrf
             <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <div class="input-wrapper">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" value="{{ old('email') }}" required>
                     <i class="fas fa-envelope"></i>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <div class="input-wrapper">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                    <i class="fas fa-lock"></i>
-                    <button type="button" class="password-toggle" id="togglePassword">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="form-options">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="remember">
-                    <label class="form-check-label" for="remember">Remember me</label>
-                </div>
-                <a href="{{ route('password.forgot') }}" class="forgot-link">Forgot password?</a>
+                @error('email')
+                    <div class="error-text">{{ $message }}</div>
+                @enderror
             </div>
             
             <button type="submit" class="btn-login">
-                Sign In
+                Send Reset Link
             </button>
         </form>
+
+        <a href="{{ route('login') }}" class="back-link">
+            <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i> Back to Login
+        </a>
     </div>
-    
-    <script>
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const icon = this.querySelector('i');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
-    </script>
 </body>
 </html>

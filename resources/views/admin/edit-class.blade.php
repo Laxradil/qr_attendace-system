@@ -27,41 +27,6 @@
                 <option value="{{ $professor->id }}" {{ $classe->professor_id == $professor->id ? 'selected' : '' }}>{{ $professor->name }}</option>
             @endforeach
         </select>
-        <div style="height:8px;"></div>
-
-        @php
-            $existingSchedule = old('schedule_days', isset($schedule) && $schedule ? explode(', ', $schedule->days) : []);
-            $startTime = old('schedule_start_time', isset($schedule) && $schedule && $schedule->time ? explode(' - ', $schedule->time)[0] : '');
-            $endTime = old('schedule_end_time', isset($schedule) && $schedule && $schedule->time ? (explode(' - ', $schedule->time)[1] ?? '') : '');
-            $room = old('schedule_room', isset($schedule) && $schedule ? ($schedule->room ?? '') : '');
-        @endphp
-
-        <label class="fl">Class Schedule (optional)</label>
-        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;">
-            @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $day)
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                    <input type="checkbox" name="schedule_days[]" value="{{ $day }}" {{ in_array($day, $existingSchedule) ? 'checked' : '' }}>
-                    {{ $day }}
-                </label>
-            @endforeach
-        </div>
-        <div style="height:8px;"></div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div>
-                <label class="fl">Start Time</label>
-                <input class="fi" type="time" name="schedule_start_time" value="{{ $startTime }}">
-            </div>
-            <div>
-                <label class="fl">End Time</label>
-                <input class="fi" type="time" name="schedule_end_time" value="{{ $endTime }}">
-            </div>
-        </div>
-        <div style="height:8px;"></div>
-
-        <label class="fl">Room</label>
-        <input class="fi" type="text" name="schedule_room" value="{{ $room }}" maxlength="20" placeholder="Optional room or location">
-        <div style="height:8px;"></div>
 
         <input type="hidden" name="is_active" value="0">
         <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);margin:10px 0;">
