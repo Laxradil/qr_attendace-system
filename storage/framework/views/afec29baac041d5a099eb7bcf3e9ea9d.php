@@ -252,8 +252,8 @@
             <p>Sign in to your account</p>
         </div>
         
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
+        <form method="POST" action="<?php echo e(route('login')); ?>">
+            <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <div class="input-wrapper">
@@ -278,7 +278,7 @@
                     <input type="checkbox" class="form-check-input" id="remember">
                     <label class="form-check-label" for="remember">Remember me</label>
                 </div>
-                <a href="{{ route('password.forgot') }}" class="forgot-link">Forgot password?</a>
+                <a href="<?php echo e(route('password.forgot')); ?>" class="forgot-link">Forgot password?</a>
             </div>
             
             <button type="submit" class="btn-login">
@@ -303,4 +303,4 @@
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\xampp\htdocs\dashboard\Attendance-System\resources\views/login.blade.php ENDPATH**/ ?>

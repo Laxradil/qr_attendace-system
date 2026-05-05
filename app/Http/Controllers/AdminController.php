@@ -76,11 +76,44 @@ class AdminController extends Controller
 
     public function users(): View
     {
-        // Cache users for 1 minute
-        $users = Cache::remember('admin_users_page_' . request('page', 1), 60, function () {
-            return User::with('classes', 'attendanceRecords')->paginate(20);
+        $role = request('role');
+        $status = request('status');
+
+        // Build query with filters
+        $query = User::with('classes', 'attendanceRecords');
+
+        if ($role && in_array($role, ['admin', 'professor', 'student'])) {
+            $query->where('role', $role);
+        }
+
+        if ($status !== null && in_array($status, ['0', '1'])) {
+            $query->where('is_active', (bool) $status);
+        }
+
+        // Cache with filter params
+        $cacheKey = 'admin_users_' . md5($role . $status . request('page', 1));
+        $users = Cache::remember($cacheKey, 60, function () use ($query) {
+            return $query->paginate(20);
         });
-        return view('admin.users', ['users' => $users]);
+
+        // Get statistics for all users (not filtered)
+        $stats = [
+            'total' => User::count(),
+            'admins' => User::where('role', 'admin')->count(),
+            'professors' => User::where('role', 'professor')->count(),
+            'students' => User::where('role', 'student')->count(),
+            'active' => User::where('is_active', true)->count(),
+            'inactive' => User::where('is_active', false)->count(),
+        ];
+
+        return view('admin.users', [
+            'users' => $users,
+            'stats' => $stats,
+            'filters' => [
+                'role' => $role,
+                'status' => $status,
+            ]
+        ]);
     }
 
     public function createUser(): View
