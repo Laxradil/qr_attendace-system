@@ -44,11 +44,20 @@ class Classe extends Model
     ];
 
     /**
-     * Get the professor who owns this class
+     * Get the primary professor who owns this class
      */
     public function professor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professor_id');
+    }
+
+    /**
+     * Get all professors assigned to this class
+     */
+    public function professors(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'class_professor', 'class_id', 'professor_id')
+            ->withTimestamps();
     }
 
     /**

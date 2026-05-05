@@ -20,7 +20,18 @@
                         <div style="font-weight:500;font-size:11px;">{{ $classe->name }}</div>
                         <div style="font-size:9px;color:var(--text3);">{{ $classe->description ?: 'No description' }}</div>
                     </td>
-                    <td style="font-size:10px;">{{ $classe->professor->name ?? 'N/A' }}</td>
+                    <td style="font-size:10px;">
+                        @if($classe->professors->isNotEmpty())
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                @foreach($classe->professors as $prof)
+                                    <span class="badge bp">{{ $prof->name }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <span style="color:var(--text3);">N/A</span>
+                        @endif
+                    </td>
+
                     <td style="font-size:11px;font-weight:600;">{{ $classe->students->count() }}</td>
                     <td><span class="badge {{ $classe->is_active ? 'bg' : 'ba' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span></td>
                     <td style="display:flex;gap:4px;">
