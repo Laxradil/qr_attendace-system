@@ -111,10 +111,10 @@ class ProfessorController extends Controller
     {
         // Check if it's a student QR code (JSON data) or class QR code UUID
         $qrData = $request->input('qr_code');
-        
+
         // Try to decode as JSON (student QR code)
         $decoded = json_decode($qrData, true);
-        
+
         if ($decoded && isset($decoded['type']) && $decoded['type'] === 'student_attendance') {
             $selectedClassId = $request->input('class_id');
             $selectedStudentId = $request->input('student_id');
@@ -136,33 +136,38 @@ class ProfessorController extends Controller
 
             /** @var User $user */
             $user = Auth::user();
-            if (!$user->assignedClasses()->whereKey($selectedClassId)->exists()) {
-                $message = 'You are not assigned to the selected class.';
+
+            // Combine multiple validations into a single efficient query
+            $classe = Classe::whereHas('professors', function($q) use ($user) {
+                $q->where('users.id', $user->id);
+            })
+            ->whereHas('students', function($q) use ($selectedStudentId) {
+                $q->where('users.id', $selectedStudentId);
+            })
+            ->find($selectedClassId);
+
+            if (!$classe) {
+                $message = !$classe || !$user->assignedClasses()->whereKey($selectedClassId)->exists()
+                    ? 'You are not assigned to the selected class.'
+                    : 'This student is not enrolled in the selected class.';
                 return $request->expectsJson()
                     ? response()->json(['error' => $message], 403)
-                    : abort(403);
-            }
-
-            $classe = Classe::findOrFail($selectedClassId);
-            if (!$classe->students()->where('users.id', $selectedStudentId)->exists()) {
-                $message = 'This student is not enrolled in the selected class.';
-                return $request->expectsJson()
-                    ? response()->json(['error' => $message], 422)
                     : back()->with('error', $message);
             }
 
+            // Check if already recorded today
             $alreadyRecorded = AttendanceRecord::where('student_id', $selectedStudentId)
                 ->where('class_id', $selectedClassId)
                 ->whereDate('recorded_at', today())
                 ->exists();
-            
+
             if ($alreadyRecorded) {
                 $message = 'Attendance already recorded for this student today';
                 return $request->expectsJson()
                     ? response()->json(['error' => $message], 409)
                     : back()->with('error', $message);
             }
-            
+
             AttendanceRecord::create([
                 'class_id' => $selectedClassId,
                 'student_id' => $selectedStudentId,
@@ -298,7 +303,7 @@ class ProfessorController extends Controller
                 ->where('status', 'pending')
                 ->get()
                 ->mapWithKeys(fn (DropRequest $request) => ["{$request->class_id}_{$request->student_id}" => $request]);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Table doesn't exist yet - migration hasn't been run
         }
 
@@ -480,13 +485,15 @@ class ProfessorController extends Controller
     /**
      * Return students enrolled in a class (AJAX)
      */
-    public function getClassStudents($id)
+    public function getClassStudents(int $id)
     {
-        $classe = Classe::with('students')->findOrFail($id);
-        // Verify the professor is assigned to this class
-        if (!$classe->professors()->wherePivot('professor_id', Auth::id())->exists()) {
+        $classe = Classe::with(['students', 'professors'])->findOrFail($id);
+
+        // Verify authorization by checking if current professor is in professors collection
+        if (!$classe->professors->contains(Auth::id())) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+
         $students = $classe->students->map(function($student) {
             return [
                 'id' => $student->id,
