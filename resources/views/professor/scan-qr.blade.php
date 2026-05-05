@@ -68,12 +68,15 @@
                     <!-- Class Selection -->
                     <div style="margin-bottom:12px;">
                         <label class="fl">Select Class</label>
-                        <select name="class_id" required class="fi">
+                        <select name="class_id" required class="fi" id="class-select" {{ $selectedClassId ? 'disabled' : '' }}>
                             <option value="">Choose a class...</option>
                             @foreach($classes as $classe)
-                                <option value="{{ $classe->id }}">{{ $classe->code }} - {{ $classe->name }}</option>
+                                <option value="{{ $classe->id }}" {{ old('class_id', $selectedClassId) == $classe->id ? 'selected' : '' }}>{{ $classe->code }} - {{ $classe->name }}</option>
                             @endforeach
                         </select>
+                        @if($selectedClassId)
+                            <input type="hidden" name="class_id" value="{{ $selectedClassId }}">
+                        @endif
                     </div>
 
                     <!-- Student Selection -->
@@ -153,6 +156,7 @@
     const scannerDeviceName = document.getElementById('scanner-device-name');
     const classSelect = document.querySelector('select[name="class_id"]');
     const studentSelect = document.querySelector('select[name="student_id"]');
+    let scannedStudentId = null;
 
     function isHidSupported() {
         return typeof navigator !== 'undefined' && 'hid' in navigator;
@@ -433,10 +437,10 @@
         try {
             const data = JSON.parse(scannedCode);
             if (data.type === 'student_attendance') {
-                setScanFeedback('Student QR scanned. Class and student are now selected. Review and submit.', 'info');
-                if (data.class_id) {
-                    classSelect.value = data.class_id;
-                    populateStudents(data.class_id, data.student_id);
+                scannedStudentId = data.student_id;
+                setScanFeedback('Student QR scanned. Select the class, then submit.', 'info');
+                if (classSelect.value) {
+                    populateStudents(classSelect.value, scannedStudentId);
                 }
                 return;
             }
@@ -501,7 +505,11 @@
     );
 
     classSelect.addEventListener('change', () => {
-        populateStudents(classSelect.value);
+        populateStudents(classSelect.value, scannedStudentId);
     });
+
+    if (classSelect.value) {
+        populateStudents(classSelect.value, scannedStudentId);
+    }
 </script>
 @endsection
