@@ -18,6 +18,9 @@
             </div>
             <span class="badge {{ $classe->is_active ? 'bg' : 'br' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span>
         </div>
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+            <a class="btn btn-p btn-sm" href="{{ route('professor.scan-qr', ['class_id' => $classe->id]) }}">Scan QR</a>
+        </div>
     </div>
 
     <!-- Stats -->
