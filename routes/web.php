@@ -67,12 +67,8 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::get('/settings', [ProfessorController::class, 'settings'])->name('professor.settings');
     Route::put('/settings', [ProfessorController::class, 'updateSettings'])->name('professor.settings.update');
     Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
+    Route::post('/drop-request', [ProfessorController::class, 'submitDropRequest'])->name('professor.drop-request');
 });
-
-// QR Code image endpoint (before admin middleware group to bypass role check)
-Route::get('/admin/qr-codes/{uuid}/image', [AdminController::class, 'qrCodeImage'])
-    ->middleware('auth')
-    ->name('admin.qr-codes.image');
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
@@ -91,6 +87,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     
     // Students
     Route::get('/students', [AdminController::class, 'students'])->name('admin.students');
+    Route::get('/students/{student}/qr-code', [AdminController::class, 'studentQrCode'])->name('admin.students.qr-code');
     
     // Classes management
     Route::get('/classes', [AdminController::class, 'classes'])->name('admin.classes');
@@ -100,15 +97,19 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/classes/{classe}', [AdminController::class, 'updateClass'])->name('admin.classes.update');
     Route::delete('/classes/{classe}', [AdminController::class, 'deleteClass'])->name('admin.classes.delete');
     
-    // QR Code management
+    // Student QR management
     Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('admin.qr-codes');
-    Route::post('/qr-codes/generate', [AdminController::class, 'generateQRCode'])->name('admin.qr-codes.generate');
     
     // Attendance records
     Route::get('/attendance-records', [AdminController::class, 'attendanceRecords'])->name('admin.attendance-records');
     
     // Reports
     Route::get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
+
+    // Drop request approvals
+    Route::get('/drop-requests', [AdminController::class, 'dropRequests'])->name('admin.drop-requests');
+    Route::post('/drop-requests/{dropRequest}/approve', [AdminController::class, 'approveDropRequest'])->name('admin.drop-requests.approve');
+    Route::post('/drop-requests/{dropRequest}/reject', [AdminController::class, 'rejectDropRequest'])->name('admin.drop-requests.reject');
     
     // System logs
     Route::get('/logs', [AdminController::class, 'logs'])->name('admin.logs');

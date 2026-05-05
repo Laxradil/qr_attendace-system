@@ -1,4 +1,4 @@
-@extends('layouts.professor')
+@extends(request()->query('modal') ? 'layouts.blank' : 'layouts.professor')
 
 @section('title', 'Scan QR Code - Professor')
 @section('header', 'QR Code Scanner')
@@ -16,16 +16,15 @@
         </button>
     </div>
 
-    <div class="g-6-4" style="gap:18px;">
+    <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
         <!-- Scanner -->
-        <div>
-            <!-- Camera Mode -->
+        <div style="flex:0 0 420px;min-width:320px;">
             <div id="camera-section">
                 <div class="card" style="margin-bottom:0;padding:0;border-radius:var(--radius-lg);overflow:hidden;">
-                    <div style="width:100%;padding-top:56.25%;position:relative;background:var(--navy3);">
+                    <div style="width:100%;height:300px;position:relative;background:var(--navy3);">
                         <video id="qr-scanner" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;"></video>
                         <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-                            <div style="width:250px;height:250px;border:2px solid var(--purple);border-radius:var(--radius-lg);box-shadow:0 0 20px rgba(108,92,231,0.3);"></div>
+                            <div style="width:200px;height:200px;border:2px solid var(--purple);border-radius:var(--radius-lg);box-shadow:0 0 20px rgba(108,92,231,0.3);"></div>
                         </div>
                     </div>
                 </div>
@@ -58,9 +57,9 @@
         </div>
 
         <!-- Attendance Form -->
-        <div>
-            <div class="card">
-                <div class="sh" style="margin-top:0;">Record Attendance</div>
+        <div style="flex:1;min-width:320px;">
+            <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:16px;">
+                <div class="sh" style="margin-top:0;">Attendance Scanner</div>
                 
                 <form id="attendance-form" action="{{ route('professor.attendance.store') }}" method="POST">
                     @csrf
@@ -93,16 +92,13 @@
                         <input type="text" name="qr_code" id="qr-input" placeholder="QR code will appear here..." class="fi" required>
                     </div>
 
-                    <button type="submit" class="btn btn-g" style="width:100%;padding:10px 12px;justify-content:center;margin-bottom:12px;">
-                        ✓ Record Attendance
-                    </button>
                     <div id="scan-feedback" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:8px;font-size:12px;"></div>
                 </form>
+            </div>
 
-                <!-- Recent Scans -->
-                <div style="padding-top:12px;border-top:1px solid var(--border);margin-top:12px;">
-                    <div class="sh" style="margin-top:0;margin-bottom:8px;">Recent Scans</div>
-                    <div id="recent-scans" style="font-size:10px;max-height:200px;overflow-y:auto;">
+            <div class="card" style="margin-top:16px;padding:18px;">
+                <div class="sh" style="margin-top:0;margin-bottom:8px;">Recent Scans</div>
+                <div id="recent-scans" style="font-size:10px;max-height:220px;overflow-y:auto;">
                         <div style="color:var(--text2);padding:8px 0;">No scans yet</div>
                     </div>
                 </div>
@@ -156,7 +152,9 @@
     const scannerDeviceName = document.getElementById('scanner-device-name');
     const classSelect = document.querySelector('select[name="class_id"]');
     const studentSelect = document.querySelector('select[name="student_id"]');
+    const attendanceForm = document.getElementById('attendance-form');
     let scannedStudentId = null;
+    let isAutoSubmitting = false;
 
     function isHidSupported() {
         return typeof navigator !== 'undefined' && 'hid' in navigator;
@@ -426,8 +424,13 @@
         }
     }
 
+    const autoStartCamera = @json(request()->query('modal') ? true : false);
+
     // Initialize with camera mode
     setMode('camera');
+    if (autoStartCamera) {
+        startScanner();
+    }
 
     async function startScanner() {
         try {
@@ -495,7 +498,7 @@
         }
         container.innerHTML = recentScans.slice(0, 5).map(scan => 
             `<div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div class="scan-code">${scan.code}</div>
+                <div class="scan-code">${scan.name || scan.code}</div>
                 <div class="scan-time">${scan.time}</div>
             </div>`
         ).join('');
@@ -520,6 +523,45 @@
         feedback.style.border = type === 'error' ? '1px solid rgba(255, 0, 0, 0.25)' : '1px solid rgba(0, 128, 0, 0.25)';
     }
 
+    async function autoSubmitAttendance() {
+        if (!scannedStudentId || !classSelect.value || !studentSelect.value || Number(studentSelect.value) !== Number(scannedStudentId)) {
+            return;
+        }
+
+        if (isAutoSubmitting) {
+            return;
+        }
+
+        isAutoSubmitting = true;
+        setScanFeedback('Recording attendance automatically…', 'info');
+
+        try {
+            const formData = new FormData(attendanceForm);
+            const response = await fetch(attendanceForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || data.message || 'Unable to record attendance');
+            }
+
+            setScanFeedback(data.message || 'Attendance recorded automatically.', 'info');
+            qrInput.value = '';
+            scannedStudentId = null;
+            studentSelect.value = '';
+        } catch (err) {
+            console.error('Auto-submit failed:', err);
+            setScanFeedback(err.message || 'Failed to record attendance automatically.', 'error');
+        } finally {
+            isAutoSubmitting = false;
+        }
+    }
+
     async function populateStudents(classId, selectedStudentId = null) {
         if (!classId) {
             studentSelect.innerHTML = '<option value="">Select a student...</option>';
@@ -539,44 +581,54 @@
                 }
                 studentSelect.appendChild(opt);
             });
+            await autoSubmitAttendance();
         } catch (err) {
             studentSelect.innerHTML = '<option value="">Unable to load students</option>';
             console.error('Failed to load students:', err);
         }
     }
 
-    function handleScannedCode(scannedCode) {
+    async function handleScannedCode(scannedCode) {
         const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        recentScans.unshift({ code: scannedCode, time });
-        updateRecentScans();
+        let scanEntry = { code: scannedCode, name: scannedCode, time };
         qrInput.value = scannedCode;
 
         try {
             const data = JSON.parse(scannedCode);
             if (data.type === 'student_attendance') {
                 scannedStudentId = data.student_id;
-                setScanFeedback('Student QR scanned. Select the class, then submit.', 'info');
+                scanEntry.name = `${data.student_name} (${data.student_email})`;
+                setScanFeedback('Student QR scanned. Recording attendance automatically once the class is selected.', 'info');
                 if (classSelect.value) {
-                    populateStudents(classSelect.value, scannedStudentId);
+                    await populateStudents(classSelect.value, scannedStudentId);
                 }
+                recentScans.unshift(scanEntry);
+                updateRecentScans();
                 return;
             }
 
             setScanFeedback('QR scanned. Please confirm the class and student, then submit.', 'info');
         } catch (_err) {
+            recentScans.unshift(scanEntry);
+            updateRecentScans();
             setScanFeedback('Scanned raw QR text. Please select a class and student before submitting.', 'error');
         }
     }
 
-    document.getElementById('qr-input').addEventListener('change', (e) => {
+    document.getElementById('qr-input').addEventListener('change', async (e) => {
         if (e.target.value && currentMode === 'camera') {
-            handleScannedCode(e.target.value.trim());
+            await handleScannedCode(e.target.value.trim());
             e.target.value = '';
         }
     });
 
     hardwareInput.addEventListener('input', () => {
         scheduleHardwareScanProcessing();
+    });
+
+    attendanceForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        setScanFeedback('Attendance is recorded automatically when a valid student QR is scanned.', 'info');
     });
 
     hardwareInput.addEventListener('keydown', (e) => {
@@ -621,8 +673,8 @@
         isHidSupported() ? 'info' : 'error'
     );
 
-    classSelect.addEventListener('change', () => {
-        populateStudents(classSelect.value, scannedStudentId);
+    classSelect.addEventListener('change', async () => {
+        await populateStudents(classSelect.value, scannedStudentId);
     });
 
     if (classSelect.value) {
