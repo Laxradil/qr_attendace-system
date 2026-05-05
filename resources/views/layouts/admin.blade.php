@@ -247,8 +247,9 @@
             <a href="{{ route('admin.professors') }}" class="sb-item {{ request()->routeIs('admin.professors') ? 'active' : '' }}">Professors</a>
             <a href="{{ route('admin.students') }}" class="sb-item {{ request()->routeIs('admin.students') ? 'active' : '' }}">Students</a>
             <a href="{{ route('admin.classes') }}" class="sb-item {{ request()->routeIs('admin.classes*') ? 'active' : '' }}">Classes</a>
-            <a href="{{ route('admin.qr-codes') }}" class="sb-item {{ request()->routeIs('admin.qr-codes*') ? 'active' : '' }}">QR Code Mgmt</a>
+            <a href="{{ route('admin.qr-codes') }}" class="sb-item {{ request()->routeIs('admin.qr-codes*') ? 'active' : '' }}">Student QR Codes</a>
             <a href="{{ route('admin.attendance-records') }}" class="sb-item {{ request()->routeIs('admin.attendance-records') ? 'active' : '' }}">Attendance Records</a>
+            <a href="{{ route('admin.drop-requests') }}" class="sb-item {{ request()->routeIs('admin.drop-requests*') ? 'active' : '' }}">Drop Requests</a>
             <a href="{{ route('admin.logs') }}" class="sb-item {{ request()->routeIs('admin.logs') ? 'active' : '' }}">System Logs</a>
 
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto;">

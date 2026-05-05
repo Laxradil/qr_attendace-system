@@ -241,7 +241,7 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        <span>QR Codes</span>
+                        <span>Student QR Codes</span>
                     </a>
                     <a href="<?php echo e(route('admin.attendance-records')); ?>" class="sidebar-item <?php echo e(request()->routeIs('admin.attendance-records') ? 'active' : ''); ?>">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
