@@ -94,14 +94,23 @@ class AdminController extends Controller
             return $query->paginate(20);
         });
 
-        // Get statistics for all users (not filtered)
+        // Get statistics for all users (not filtered) in a single query
+        $userStats = User::selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admins,
+            SUM(CASE WHEN role = 'professor' THEN 1 ELSE 0 END) as professors,
+            SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students,
+            SUM(CASE WHEN is_active = true THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN is_active = false THEN 1 ELSE 0 END) as inactive
+        ")->first();
+
         $stats = [
-            'total' => User::count(),
-            'admins' => User::where('role', 'admin')->count(),
-            'professors' => User::where('role', 'professor')->count(),
-            'students' => User::where('role', 'student')->count(),
-            'active' => User::where('is_active', true)->count(),
-            'inactive' => User::where('is_active', false)->count(),
+            'total' => $userStats->total ?? 0,
+            'admins' => $userStats->admins ?? 0,
+            'professors' => $userStats->professors ?? 0,
+            'students' => $userStats->students ?? 0,
+            'active' => $userStats->active ?? 0,
+            'inactive' => $userStats->inactive ?? 0,
         ];
 
         return view('admin.users', [
@@ -141,17 +150,8 @@ class AdminController extends Controller
 
         // Create QR code for students
         if ($validated['role'] === 'student') {
-            $qrData = json_encode([
-                'type' => 'student_attendance',
-                'student_id' => $user->id,
-                'student_name' => $validated['name'],
-                'student_email' => $validated['email'],
-                'generated_at' => now()->toIso8601String(),
-            ]);
-
             QRCode::create([
                 'uuid' => \Illuminate\Support\Str::uuid(),
-                'code' => $qrData, // Store the JSON data
                 'student_id' => $user->id,
             ]);
         }
@@ -248,7 +248,7 @@ class AdminController extends Controller
     {
         // Cache classes for 1 minute
         $classes = Cache::remember('admin_classes_page_' . request('page', 1), 60, function () {
-            return Classe::with('professor', 'professors', 'students')->paginate(20);
+            return Classe::with('professors', 'students')->paginate(20);
         });
         return view('admin.classes', ['classes' => $classes]);
     }
@@ -288,6 +288,11 @@ class AdminController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
+
+        Cache::forget('admin_stats');
+        for ($i = 1; $i <= 10; $i++) {
+            Cache::forget('admin_classes_page_' . $i);
+        }
 
         return redirect()->route('admin.classes')->with('success', 'Class created successfully');
     }
@@ -331,6 +336,11 @@ class AdminController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        Cache::forget('admin_stats');
+        for ($i = 1; $i <= 10; $i++) {
+            Cache::forget('admin_classes_page_' . $i);
+        }
+
         return redirect()->route('admin.classes')->with('success', 'Class updated successfully');
     }
 
@@ -346,6 +356,11 @@ class AdminController extends Controller
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+
+        Cache::forget('admin_stats');
+        for ($i = 1; $i <= 10; $i++) {
+            Cache::forget('admin_classes_page_' . $i);
+        }
 
         return redirect()->route('admin.classes')->with('success', 'Class deleted successfully');
     }
@@ -367,18 +382,14 @@ class AdminController extends Controller
 
         $qrCode = QRCode::where('student_id', $student->id)->first();
 
-        if (!$qrCode) {
-            // Fallback: generate on the fly if no stored QR code
-            $qrData = json_encode([
-                'type' => 'student_attendance',
-                'student_id' => $student->id,
-                'student_name' => $student->name,
-                'student_email' => $student->email,
-                'generated_at' => now()->toIso8601String(),
-            ]);
-        } else {
-            $qrData = $qrCode->code;
-        }
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'student_email' => $student->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
 
         $svg = QrCodeFacade::format('svg')
             ->size(180)
