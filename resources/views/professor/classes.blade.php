@@ -55,8 +55,9 @@
                     {{ $classe->schedules->isNotEmpty() ? $classe->schedules->first()->time : 'Schedule not set' }}
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-sm" onclick="showClassStudents({{ $classe->id }}, '{{ addslashes($classe->code . ' - ' . $classe->name) }}')" style="flex:1;min-width:120px;">Students</button>
-                    <button type="button" class="btn btn-sm btn-p" onclick="openScanModal({{ $classe->id }})" style="flex:1;min-width:120px;">Scan QR</button>
+                    <button class="btn btn-sm" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->code }} - {{ $classe->name }}" onclick="handleShowClassStudents(this)" style="flex:1;min-width:100px;">Students</button>
+                    <button type="button" class="btn btn-sm btn-p" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->code }} - {{ $classe->name }}" onclick="handleAddStudent(this)" style="flex:1;min-width:100px;">+ Add</button>
+                    <button type="button" class="btn btn-sm btn-p" data-class-id="{{ $classe->id }}" onclick="handleScanQR(this)" style="flex:1;min-width:100px;">Scan QR</button>
                 </div>
             </div>
         </div>
@@ -102,6 +103,20 @@
     </div>
 </div>
 <script>
+function handleShowClassStudents(button) {
+    const classId = button.dataset.classId;
+    const className = button.dataset.className;
+    showClassStudents(classId, className);
+}
+function handleAddStudent(button) {
+    const classId = button.dataset.classId;
+    const className = button.dataset.className;
+    showAddStudentModal(classId, className);
+}
+function handleScanQR(button) {
+    const classId = button.dataset.classId;
+    openScanModal(classId);
+}
 function showAddStudentModal(classId, className) {
     document.getElementById('addStudentClass').innerText = className;
     document.getElementById('addStudentClassId').value = classId;

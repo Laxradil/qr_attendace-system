@@ -17,6 +17,7 @@ namespace App\Models;
  * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany assignedClasses()
  * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany enrolledClasses()
  * @method \Illuminate\Database\Eloquent\Relations\HasMany qrCodes()
+ * @method \Illuminate\Database\Eloquent\Relations\HasOne studentQrCode()
  * @method \Illuminate\Database\Eloquent\Relations\HasMany attendanceRecords()
  * @method \Illuminate\Database\Eloquent\Relations\HasMany logs()
  * @method bool isProfessor()

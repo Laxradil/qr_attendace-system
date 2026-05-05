@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AttendanceRecord;
-use App\Models\Classe;
 use App\Models\QRCode;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
@@ -16,7 +13,7 @@ class StudentController extends Controller
     /**
      * Return students enrolled in a class (AJAX)
      */
-    public function getClassStudents($id)
+    public function getClassStudents(int $id)
     {
         $classe = \App\Models\Classe::with('students')->findOrFail($id);
         $students = $classe->students->map(function($student) {
@@ -40,52 +37,50 @@ class StudentController extends Controller
             ->limit(10)
             ->get();
 
-        // Get attendance statistics
-        $totalPresent = AttendanceRecord::where('student_id', $user->id)
-            ->where('status', 'present')
-            ->count();
-        $totalLate = AttendanceRecord::where('student_id', $user->id)
-            ->where('status', 'late')
-            ->count();
-        $totalAbsent = AttendanceRecord::where('student_id', $user->id)
-            ->where('status', 'absent')
-            ->count();
+        // Get all attendance statistics in a single query
+        $stats = AttendanceRecord::where('student_id', $user->id)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent
+            ")
+            ->first();
 
         return view('student.dashboard', [
             'classes' => $classes,
             'recentAttendance' => $recentAttendance,
-            'totalPresent' => $totalPresent,
-            'totalLate' => $totalLate,
-            'totalAbsent' => $totalAbsent,
+            'totalPresent' => $stats->present ?? 0,
+            'totalLate' => $stats->late ?? 0,
+            'totalAbsent' => $stats->absent ?? 0,
         ]);
     }
 
     public function attendance(): View
     {
         $user = Auth::user();
-        
+
         $attendanceRecords = AttendanceRecord::where('student_id', $user->id)
             ->with(['classe', 'qrCode'])
             ->orderBy('recorded_at', 'desc')
             ->paginate(20);
 
-        $totalPresent = AttendanceRecord::where('student_id', $user->id)
-            ->where('status', 'present')
-            ->count();
-        $totalLate = AttendanceRecord::where('student_id', $user->id)
-            ->where('status', 'late')
-            ->count();
-        $totalAbsent = AttendanceRecord::where('student_id', $user->id)
-            ->where('status', 'absent')
-            ->count();
-        $totalRecords = AttendanceRecord::where('student_id', $user->id)->count();
+        // Get all attendance statistics in a single query
+        $stats = AttendanceRecord::where('student_id', $user->id)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent
+            ")
+            ->first();
 
         return view('student.attendance', [
             'attendanceRecords' => $attendanceRecords,
-            'totalPresent' => $totalPresent,
-            'totalLate' => $totalLate,
-            'totalAbsent' => $totalAbsent,
-            'totalRecords' => $totalRecords,
+            'totalPresent' => $stats->present ?? 0,
+            'totalLate' => $stats->late ?? 0,
+            'totalAbsent' => $stats->absent ?? 0,
+            'totalRecords' => $stats->total ?? 0,
         ]);
     }
 
@@ -112,18 +107,14 @@ class StudentController extends Controller
 
         $qrCode = QRCode::where('student_id', $user->id)->first();
 
-        if (!$qrCode) {
-            // Fallback: generate on the fly if no stored QR code
-            $qrData = json_encode([
-                'type' => 'student_attendance',
-                'student_id' => $user->id,
-                'student_name' => $user->name,
-                'student_email' => $user->email,
-                'generated_at' => now()->toIso8601String(),
-            ]);
-        } else {
-            $qrData = $qrCode->code;
-        }
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $user->id,
+            'student_name' => $user->name,
+            'student_email' => $user->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
 
         $svg = QrCodeFacade::format('svg')
             ->size(280)
