@@ -7,14 +7,28 @@
 @section('content')
 
 <div class="card" style="padding:0 0 12px 0;">
-    <div class="sh" style="font-size:18px;font-weight:600;margin-bottom:10px;">Your Classes & Personal QR Codes</div>
+    <div class="sh" style="font-size:18px;font-weight:600;margin-bottom:10px;">Your Personal Student QR Code</div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:10px 0 16px 0;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:100px;height:100px;background:white;border-radius:18px;display:flex;align-items:center;justify-content:center;">
+                <img id="student-qr-img" src="{{ route('student.qr-code') }}" alt="Student QR Code" style="width:88px;height:88px;border-radius:18px;background:#fff;object-fit:contain;" />
+            </div>
+            <div>
+                <div style="font-size:14px;font-weight:700;">{{ auth()->user()->name }}</div>
+                <div style="font-size:12px;color:var(--text2);">Student ID: {{ auth()->id() }}</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-p" style="padding:8px 14px;font-size:12px;" onclick="showStudentQR()">View QR</button>
+            <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn" style="padding:8px 14px;font-size:12px;">Download</a>
+        </div>
+    </div>
     <div class="tbl-wrap" style="overflow-x:auto;">
         <table style="width:100%;border-collapse:separate;border-spacing:0 4px;">
             <thead>
                 <tr style="background:var(--bg2);">
                     <th style="padding:10px 8px;text-align:left;">Class</th>
                     <th style="padding:10px 8px;text-align:left;">Professor</th>
-                    <th style="padding:10px 8px;text-align:center;">QR Code</th>
                     <th style="padding:10px 8px;text-align:center;">Actions</th>
                 </tr>
             </thead>
@@ -27,11 +41,8 @@
                         </td>
                         <td style="font-size:12px;padding:10px 8px;min-width:100px;">{{ $class->professor->name ?? 'N/A' }}</td>
                         <td style="text-align:center;padding:10px 8px;">
-                                    <canvas class="student-qr-canvas" width="48" height="48" data-qr="{{ base64_encode(json_encode([ 'type' => 'student_attendance', 'student_id' => auth()->id(), 'student_name' => auth()->user()->name, 'student_email' => auth()->user()->email, 'class_id' => $class->id, 'class_name' => $class->name, 'class_code' => $class->code, 'generated_at' => now()->toIso8601String() ])) }}" style="width:48px;height:48px;border-radius:4px;border:1px solid var(--border);background:white;"></canvas>
-                                </td>
-                        <td style="text-align:center;padding:10px 8px;">
-                            <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:11px;" data-class-name="{{ $class->code }} - {{ $class->name }}" onclick="showStudentQR(this)">
-                                📱 Show QR
+                            <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:11px;" onclick="showStudentQR()">
+                                📱 View QR
                             </button>
                             <button type="button" class="btn btn-s" style="padding:7px 14px;font-size:11px;margin-left:4px;" onclick="showClassStudents({{ $class->id }}, '{{ $class->name }}')">
                                 👥 View Students
@@ -39,7 +50,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px;">You are not enrolled in any classes.</td></tr>
+                    <tr><td colspan="3" style="text-align:center;color:var(--text2);padding:20px;">You are not enrolled in any classes.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -51,84 +62,28 @@
     <div class="modal-content" style="max-width:350px;">
         <span class="close" onclick="closeStudentQR()">&times;</span>
         <h3 id="studentQRClass"></h3>
-        <canvas id="studentQRModalCanvas" width="200" height="200" style="width:200px;height:200px;margin:20px auto;display:block;border:1px solid var(--border);border-radius:8px;background:white;"></canvas>
-        <button class="btn btn-p" onclick="downloadStudentQR()">Download QR</button>
+        <img id="studentQRModalImage" src="{{ route('student.qr-code') }}" alt="Student QR" style="width:200px;height:200px;margin:20px auto;display:block;border:1px solid var(--border);border-radius:8px;background:white;object-fit:contain;" />
+        <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-p">Download QR</a>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 <script>
-let currentStudentQRData = null;
-
-function renderStudentQRCodes() {
-    document.querySelectorAll('.student-qr-canvas').forEach(canvas => {
-        if (canvas.dataset.rendered === '1') {
-            return;
-        }
-        const encoded = canvas.dataset.qr;
-        if (!encoded) {
-            return;
-        }
-        try {
-            const text = atob(encoded);
-            QRCode.toCanvas(canvas, text, {
-                width: 48,
-                margin: 1,
-                color: {
-                    dark: '#000000',
-                    light: '#ffffff'
-                }
-            });
-            canvas.dataset.rendered = '1';
-        } catch (err) {
-            console.error('Failed to render student QR', err);
-        }
-    });
-}
-
-function showStudentQR(button) {
-    const row = button.closest('tr');
-    const canvas = row.querySelector('.student-qr-canvas');
-    if (!canvas) {
-        return;
-    }
-
-    const encoded = canvas.dataset.qr;
-    if (!encoded) {
-        return;
-    }
-
-    currentStudentQRData = atob(encoded);
-    const className = button.dataset.className || '';
-    document.getElementById('studentQRClass').innerText = className;
+function showStudentQR() {
+    document.getElementById('studentQRClass').innerText = 'Student QR Code';
     document.getElementById('studentQRModal').style.display = 'block';
-
-    const modalCanvas = document.getElementById('studentQRModalCanvas');
-    QRCode.toCanvas(modalCanvas, currentStudentQRData, {
-        width: 200,
-        margin: 2,
-        color: {
-            dark: '#000000',
-            light: '#ffffff'
-        }
-    });
 }
 
 function closeStudentQR() {
     document.getElementById('studentQRModal').style.display = 'none';
 }
 
-function downloadStudentQR() {
-    if (!currentStudentQRData) {
-        return;
-    }
-    const canvas = document.getElementById('studentQRModalCanvas');
-    const link = document.createElement('a');
-    link.download = 'student-qr.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+const studentQRModal = document.getElementById('studentQRModal');
+if (studentQRModal) {
+    studentQRModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeStudentQR();
+        }
+    });
 }
-
-document.addEventListener('DOMContentLoaded', renderStudentQRCodes);
 </script>
 @endsection

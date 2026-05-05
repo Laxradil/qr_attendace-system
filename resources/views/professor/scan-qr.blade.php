@@ -68,12 +68,15 @@
                     <!-- Class Selection -->
                     <div style="margin-bottom:12px;">
                         <label class="fl">Select Class</label>
-                        <select name="class_id" required class="fi">
+                        <select name="class_id" required class="fi" id="class-select" {{ $selectedClassId ? 'disabled' : '' }}>
                             <option value="">Choose a class...</option>
                             @foreach($classes as $classe)
-                                <option value="{{ $classe->id }}">{{ $classe->code }} - {{ $classe->name }}</option>
+                                <option value="{{ $classe->id }}" {{ old('class_id', $selectedClassId) == $classe->id ? 'selected' : '' }}>{{ $classe->code }} - {{ $classe->name }}</option>
                             @endforeach
                         </select>
+                        @if($selectedClassId)
+                            <input type="hidden" name="class_id" value="{{ $selectedClassId }}">
+                        @endif
                     </div>
 
                     <!-- Student Selection -->
@@ -153,6 +156,124 @@
     const scannerDeviceName = document.getElementById('scanner-device-name');
     const classSelect = document.querySelector('select[name="class_id"]');
     const studentSelect = document.querySelector('select[name="student_id"]');
+    let scannedStudentId = null;
+
+    function isHidSupported() {
+        return typeof navigator !== 'undefined' && 'hid' in navigator;
+    }
+
+    function updateScannerStatus(message, type = 'info') {
+        if (!scannerDetectionStatus) {
+            return;
+        }
+
+        scannerDetectionStatus.textContent = message;
+        scannerDetectionStatus.style.color = type === 'error' ? '#ffdddd' : 'var(--text)';
+        scannerDetectionStatus.style.background = type === 'error' ? 'rgba(255, 0, 0, 0.12)' : 'transparent';
+        scannerDetectionStatus.style.border = type === 'error' ? '1px solid rgba(255, 0, 0, 0.25)' : 'none';
+    }
+
+    function setDetectedDeviceName(name) {
+        if (!scannerDeviceName) {
+            return;
+        }
+
+        scannerDeviceName.textContent = name ? `Connected scanner: ${name}` : '📌 Field is auto-focused for hardware scanner input';
+    }
+
+    function setScannerConnectionControls(connected) {
+        if (connectScannerButton) {
+            connectScannerButton.disabled = connected;
+        }
+        if (disconnectScannerButton) {
+            disconnectScannerButton.disabled = !connected;
+        }
+    }
+
+    async function disconnectScanner() {
+        clearHardwareScanTimer();
+
+        if (detectedHidDevice && detectedHidDevice.opened) {
+            try {
+                await detectedHidDevice.close();
+            } catch (err) {
+                console.error('Failed to close HID device:', err);
+            }
+        }
+
+        detectedHidDevice = null;
+        setDetectedDeviceName('');
+        setScannerConnectionControls(false);
+        updateScannerStatus('Scanner disconnected. You can connect another device or use the text field fallback.');
+        hardwareInput.focus();
+    }
+
+    async function connectScanner() {
+        if (!isHidSupported()) {
+            updateScannerStatus('This browser does not support HID scanner detection. Use Chrome or Edge on a secure page.', 'error');
+            return;
+        }
+
+        try {
+            const grantedDevices = await navigator.hid.getDevices();
+            if (grantedDevices.length > 0) {
+                detectedHidDevice = grantedDevices[0];
+            } else {
+                const devices = await navigator.hid.requestDevice({ filters: [] });
+                detectedHidDevice = devices[0] || null;
+            }
+
+            if (!detectedHidDevice) {
+                updateScannerStatus('No HID scanner was selected. If your scanner behaves like a keyboard, the input field fallback still works.', 'error');
+                return;
+            }
+
+            if (!detectedHidDevice.opened) {
+                await detectedHidDevice.open();
+            }
+
+            setDetectedDeviceName(detectedHidDevice.productName || 'HID device');
+            setScannerConnectionControls(true);
+            updateScannerStatus('Scanner connected. HID-supported scanners can now be detected by the browser. Keyboard-wedge scanners still work through the input field.');
+            hardwareInput.focus();
+        } catch (err) {
+            console.error('Scanner detection failed:', err);
+            updateScannerStatus(`Unable to detect scanner: ${err.message}`, 'error');
+        }
+    }
+
+    function clearHardwareScanTimer() {
+        if (hardwareScanTimer) {
+            clearTimeout(hardwareScanTimer);
+            hardwareScanTimer = null;
+        }
+    }
+
+    function processHardwareScan() {
+        if (currentMode !== 'hardware') {
+            return;
+        }
+
+        const scannedCode = hardwareInput.value.trim();
+        if (!scannedCode) {
+            return;
+        }
+
+        clearHardwareScanTimer();
+        handleScannedCode(scannedCode);
+        hardwareInput.value = '';
+        hardwareInput.focus();
+        console.log('Hardware scanner detected:', scannedCode);
+    }
+
+    function scheduleHardwareScanProcessing() {
+        if (currentMode !== 'hardware') {
+            return;
+        }
+
+        clearHardwareScanTimer();
+        hardwareScanTimer = setTimeout(processHardwareScan, 150);
+    }
 
     function isHidSupported() {
         return typeof navigator !== 'undefined' && 'hid' in navigator;
@@ -433,10 +554,10 @@
         try {
             const data = JSON.parse(scannedCode);
             if (data.type === 'student_attendance') {
-                setScanFeedback('Student QR scanned. Class and student are now selected. Review and submit.', 'info');
-                if (data.class_id) {
-                    classSelect.value = data.class_id;
-                    populateStudents(data.class_id, data.student_id);
+                scannedStudentId = data.student_id;
+                setScanFeedback('Student QR scanned. Select the class, then submit.', 'info');
+                if (classSelect.value) {
+                    populateStudents(classSelect.value, scannedStudentId);
                 }
                 return;
             }
@@ -501,7 +622,11 @@
     );
 
     classSelect.addEventListener('change', () => {
-        populateStudents(classSelect.value);
+        populateStudents(classSelect.value, scannedStudentId);
     });
+
+    if (classSelect.value) {
+        populateStudents(classSelect.value, scannedStudentId);
+    }
 </script>
 @endsection

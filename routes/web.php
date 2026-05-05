@@ -3,12 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\ScheduleController;
 
 // Student: QR code for attendance (must be before class route to avoid conflict)
-Route::get('/student/qr-code/{classId}', [App\Http\Controllers\StudentController::class, 'generateStudentQR'])
+Route::get('/student/qr-code', [App\Http\Controllers\StudentController::class, 'generateStudentQR'])
     ->name('student.qr-code')
     ->middleware(['auth', 'role:student']);
 
@@ -26,6 +27,12 @@ Route::get('/register', function () {
 })->name('register');
 Route::post('/register', [LoginController::class, 'register']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Password reset routes
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.forgot');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.send-reset-link');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset.form');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.reset');
 
 // Dashboard route
 Route::middleware('auth')->group(function () {
