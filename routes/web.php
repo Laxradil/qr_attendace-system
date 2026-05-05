@@ -9,7 +9,7 @@ use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\ScheduleController;
 
 // Student: QR code for attendance (must be before class route to avoid conflict)
-Route::get('/student/qr-code/{classId}', [App\Http\Controllers\StudentController::class, 'generateStudentQR'])
+Route::get('/student/qr-code', [App\Http\Controllers\StudentController::class, 'generateStudentQR'])
     ->name('student.qr-code')
     ->middleware(['auth', 'role:student']);
 

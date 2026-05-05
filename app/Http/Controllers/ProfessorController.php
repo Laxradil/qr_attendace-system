@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Classe;
-use App\Models\QRCode;
 use App\Models\AttendanceRecord;
 use App\Models\SystemLog;
 use App\Models\User;
@@ -29,7 +28,7 @@ class ProfessorController extends Controller
         // Use withCount() to get student counts in the initial query instead of calling count() in loop
         $classes = $user->classes()
             ->withCount('students')
-            ->with('students')
+            ->with(['students', 'schedules'])
             ->get();
         
         $totalClasses = $classes->count();
@@ -65,6 +64,7 @@ class ProfessorController extends Controller
             'attendanceRate' => $totalRecords > 0 ? round(($presentCount / $totalRecords) * 100) : 0,
             'recentLogs' => $recentLogs,
             'todaySchedules' => $todaySchedules,
+            'classes' => $classes,
         ]);
     }
 
@@ -74,6 +74,7 @@ class ProfessorController extends Controller
         $user = Auth::user();
         $classes = $user->classes()
             ->withCount('students')
+            ->with('schedules')
             ->get();
 
         return view('professor.classes', [
@@ -94,8 +95,13 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $classes = $user->classes()->get();
-        return view('professor.scan-qr', ['classes' => $classes]);
+        $classes = $user->classes()->with('students')->get();
+        $selectedClassId = request()->query('class_id');
+
+        return view('professor.scan-qr', [
+            'classes' => $classes,
+            'selectedClassId' => $selectedClassId,
+        ]);
     }
 
     public function recordAttendance(Request $request): RedirectResponse
@@ -107,19 +113,24 @@ class ProfessorController extends Controller
         $decoded = json_decode($qrData, true);
         
         if ($decoded && isset($decoded['type']) && $decoded['type'] === 'student_attendance') {
-            // Student QR code - extract data directly
-            $studentId = $decoded['student_id'];
-            $classId = $decoded['class_id'];
+            $selectedClassId = $request->input('class_id');
+            $selectedStudentId = $request->input('student_id');
             $studentName = $decoded['student_name'] ?? 'Unknown';
-            
-            // Verify professor teaches this class
+
+            if (!$selectedClassId || !$selectedStudentId) {
+                return back()->with('error', 'Please select a class and student before submitting.');
+            }
+
+            if ($decoded['student_id'] != $selectedStudentId) {
+                return back()->with('error', 'Scanned QR does not match the selected student.');
+            }
+
             /** @var User $user */
             $user = Auth::user();
-            abort_unless($user->classes()->whereKey($classId)->exists(), 403);
-            
-            // Check if attendance already recorded today
-            $alreadyRecorded = AttendanceRecord::where('student_id', $studentId)
-                ->where('class_id', $classId)
+            abort_unless($user->classes()->whereKey($selectedClassId)->exists(), 403);
+
+            $alreadyRecorded = AttendanceRecord::where('student_id', $selectedStudentId)
+                ->where('class_id', $selectedClassId)
                 ->whereDate('recorded_at', today())
                 ->exists();
             
@@ -127,10 +138,9 @@ class ProfessorController extends Controller
                 return back()->with('error', 'Attendance already recorded for this student today');
             }
             
-            // Create attendance record
             AttendanceRecord::create([
-                'class_id' => $classId,
-                'student_id' => $studentId,
+                'class_id' => $selectedClassId,
+                'student_id' => $selectedStudentId,
                 'qr_code_id' => null,
                 'status' => 'present',
                 'recorded_at' => now(),
@@ -138,7 +148,7 @@ class ProfessorController extends Controller
 
             SystemLog::create([
                 'user_id' => Auth::id(),
-                'action' => 'scan_student_qr',
+                'action' => 'scan_qr',
                 'description' => 'Scanned student QR and recorded attendance for ' . $studentName,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -146,44 +156,8 @@ class ProfessorController extends Controller
 
             return back()->with('success', 'Attendance recorded successfully for ' . $studentName);
         }
-        
-        // Original flow - class QR code with manual student selection
-        $validated = $request->validate([
-            'qr_code' => 'required|uuid',
-            'class_id' => 'required|exists:classes,id',
-            'student_id' => 'required|exists:users,id',
-        ]);
 
-        /** @var User $user */
-        $user = Auth::user();
-        abort_unless($user->classes()->whereKey($validated['class_id'])->exists(), 403);
-
-        $qrCode = QRCode::where('uuid', $validated['qr_code'])->firstOrFail();
-        $student = User::findOrFail($validated['student_id']);
-        
-        if (!$qrCode->isValid()) {
-            return back()->with('error', 'Invalid or expired QR code');
-        }
-
-        AttendanceRecord::create([
-            'class_id' => $validated['class_id'],
-            'student_id' => $validated['student_id'],
-            'qr_code_id' => $qrCode->id,
-            'status' => 'present',
-            'recorded_at' => now(),
-        ]);
-
-        $qrCode->update(['is_used' => true, 'used_at' => now()]);
-
-        SystemLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'scan_qr',
-            'description' => 'Scanned QR and recorded attendance for ' . $student->name,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        return back()->with('success', 'Attendance recorded successfully');
+        return back()->with('error', 'Only student QR codes are supported now. Please scan the student attendance QR code.');
     }
 
     public function attendanceRecords(Request $request): View
