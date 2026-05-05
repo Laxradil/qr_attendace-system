@@ -14,6 +14,7 @@ namespace App\Models;
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @method \Illuminate\Database\Eloquent\Relations\HasMany classes()
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany assignedClasses()
  * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany enrolledClasses()
  * @method \Illuminate\Database\Eloquent\Relations\HasMany qrCodes()
  * @method \Illuminate\Database\Eloquent\Relations\HasMany attendanceRecords()
@@ -28,6 +29,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -72,10 +74,17 @@ class User extends Authenticatable
         ];
     }
 
-    // Relationship for professors to their classes
+    // Relationship for professors to their classes as the primary instructor
     public function classes(): HasMany
     {
         return $this->hasMany(Classe::class, 'professor_id');
+    }
+
+    // Relationship for professors assigned to classes through the pivot table
+    public function assignedClasses(): BelongsToMany
+    {
+        return $this->belongsToMany(Classe::class, 'class_professor', 'professor_id', 'class_id')
+            ->withTimestamps();
     }
 
     // Relationship for students to their enrolled classes
@@ -89,6 +98,12 @@ class User extends Authenticatable
     public function qrCodes(): HasMany
     {
         return $this->hasMany(QRCode::class, 'professor_id');
+    }
+
+    // Relationship for student's personal QR code
+    public function studentQrCode(): HasOne
+    {
+        return $this->hasOne(QRCode::class, 'student_id');
     }
 
     // Relationship for attendance records

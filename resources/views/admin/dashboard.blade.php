@@ -76,7 +76,6 @@
     <div>
         <div class="sh">System Overview</div>
         <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Active QR Codes</span><span style="font-size:13px;font-weight:700;color:var(--green);">{{ $activeQRCodes }}</span></div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Today's Records</span><span style="font-size:13px;font-weight:700;">{{ $todayRecords }}</span></div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Total Classes</span><span style="font-size:13px;font-weight:700;">{{ $totalClasses }}</span></div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;"><span style="font-size:11px;">System Status</span><span class="badge bg">All Systems Operational</span></div>
@@ -87,7 +86,7 @@
             <a class="btn" href="{{ route('admin.users.create') }}" style="justify-content:center;">Add User</a>
             <a class="btn" href="{{ route('admin.classes.create') }}" style="justify-content:center;">Add Class</a>
             <a class="btn" href="{{ route('admin.students') }}" style="justify-content:center;">Manage Students</a>
-            <a class="btn" href="{{ route('admin.qr-codes') }}" style="justify-content:center;">Generate QR</a>
+            <a class="btn" href="{{ route('admin.qr-codes') }}" style="justify-content:center;">Student QR Codes</a>
         </div>
     </div>
 </div>

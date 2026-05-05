@@ -20,13 +20,27 @@
         <textarea class="fi" name="description" rows="4">{{ old('description') }}</textarea>
         <div style="height:8px;"></div>
 
-        <label class="fl">Assigned Professor *</label>
-        <select class="fi" name="professor_id" required>
-            <option value="">Select a professor...</option>
-            @foreach($professors as $professor)
-                <option value="{{ $professor->id }}" {{ old('professor_id') == $professor->id ? 'selected' : '' }}>{{ $professor->name }}</option>
-            @endforeach
-        </select>
+        <label class="fl">Assigned Professors *</label>
+        <div class="professor-selector" style="display:flex;gap:10px;align-items:center;">
+            <div style="flex:1;">
+                <label style="font-size:12px;color:var(--text2);">Available Professors</label>
+                <select id="available-professors" multiple size="8" style="width:100%;min-height:120px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;">
+                    @foreach($professors as $professor)
+                        <option value="{{ $professor->id }}">{{ $professor->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <button type="button" id="add-professor" class="btn" style="font-size:12px;padding:4px 8px;">Add >></button>
+                <button type="button" id="remove-professor" class="btn" style="font-size:12px;padding:4px 8px;"><< Remove</button>
+            </div>
+            <div style="flex:1;">
+                <label style="font-size:12px;color:var(--text2);">Selected Professors</label>
+                <select id="selected-professors" name="professors[]" multiple size="8" required style="width:100%;min-height:120px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;">
+                </select>
+            </div>
+        </div>
+        <div style="font-size:10px;color:var(--text2);margin-top:4px;">Select professors from available list and move them to selected</div>
 
         <div style="display:flex;gap:8px;margin-top:14px;">
             <button type="submit" class="btn btn-p">Create Class</button>
@@ -34,4 +48,52 @@
         </div>
     </form>
 </div>
+
+<style>
+.professor-selector select {
+    overflow: auto;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.professor-selector select:focus {
+    outline: none;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 1px var(--amber);
+}
+.professor-selector select::-webkit-scrollbar {
+    width: 8px;
+}
+.professor-selector select::-webkit-scrollbar-track {
+    background: rgba(253,203,110,0.08);
+    border-radius: 4px;
+}
+.professor-selector select::-webkit-scrollbar-thumb {
+    background: rgba(253,203,110,0.3);
+    border-radius: 4px;
+}
+.professor-selector select::-webkit-scrollbar-thumb:hover {
+    background: rgba(253,203,110,0.45);
+}
+.professor-selector select option:checked,
+.professor-selector select option[selected] {
+    background: rgba(253,203,110,0.22);
+    color: var(--text);
+}
+</style>
+
+<script>
+document.getElementById('add-professor').addEventListener('click', function() {
+    moveOptions('available-professors', 'selected-professors');
+});
+document.getElementById('remove-professor').addEventListener('click', function() {
+    moveOptions('selected-professors', 'available-professors');
+});
+
+function moveOptions(fromId, toId) {
+    const from = document.getElementById(fromId);
+    const to = document.getElementById(toId);
+    Array.from(from.selectedOptions).forEach(option => {
+        to.appendChild(option);
+    });
+}
+</script>
 @endsection

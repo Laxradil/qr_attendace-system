@@ -1,67 +1,45 @@
 @extends('layouts.admin')
 
-@section('title', 'QR Code Management')
-@section('header', 'QR Code Management')
-@section('subheader', 'Generate, view and manage QR codes for classes.')
+@section('title', 'Student QR Codes')
+@section('header', 'Student QR Codes')
+@section('subheader', 'View and manage student attendance QR codes.')
 
 @section('content')
-<div class="card" style="margin-bottom:12px;">
-    <form action="{{ route('admin.qr-codes.generate') }}" method="POST" style="display:flex;gap:8px;flex-wrap:wrap;">
-        @csrf
-        <select name="class_id" required class="fi" style="flex:1;min-width:220px;">
-            <option value="">Select class...</option>
-            @foreach($classes as $classe)
-                <option value="{{ $classe->id }}">{{ $classe->code }} - {{ $classe->name }}</option>
-            @endforeach
-        </select>
-        <input class="fi" type="number" name="count" min="1" max="100" value="1" required style="width:120px;" placeholder="Count">
-        <input class="fi" type="date" name="expires_at" style="width:180px;">
-        <button type="submit" class="btn btn-p">+ Generate QR Code</button>
-    </form>
-</div>
-
 <div class="tbl-wrap">
     <table>
-        <thead><tr><th style="width:80px;">QR Image</th><th>QR Code</th><th>Class</th><th>Professor</th><th>Generated On</th><th>Expires On</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Student</th><th>Email</th><th>Classes</th><th style="width:120px;">QR Code</th><th>Actions</th></tr></thead>
         <tbody>
-            @forelse($qrCodes as $qr)
+            @forelse($students as $student)
                 <tr>
                     <td>
-                        <img src="{{ route('admin.qr-codes.image', $qr->uuid) }}" alt="QR" style="width:60px;height:60px;border-radius:4px;border:1px solid var(--border);">
+                        <div style="font-weight:500;font-size:11px;">{{ $student->name }}</div>
                     </td>
-                    <td>
-                        <div class="td-mono" style="color:var(--purple-light);">{{ strtoupper(substr($qr->uuid, 0, 12)) }}</div>
-                        <div style="font-size:9px;color:var(--text3);">{{ $qr->uuid }}</div>
-                    </td>
-                    <td>
-                        <div style="font-size:11px;font-weight:500;">{{ $qr->classe->name ?? 'N/A' }}</div>
-                        <div style="font-size:9px;color:var(--text2);">{{ $qr->classe->code ?? '-' }}</div>
-                    </td>
-                    <td style="font-size:10px;">{{ $qr->professor->name ?? 'N/A' }}</td>
-                    <td class="td-mono" style="font-size:10px;">{{ $qr->created_at?->format('M d, Y h:i A') }}</td>
-                    <td class="td-mono" style="font-size:10px;">{{ $qr->expires_at?->format('M d, Y h:i A') ?: 'No expiry' }}</td>
-                    <td>
-                        @if($qr->is_used)
-                            <span class="badge bb">Used</span>
-                        @elseif($qr->isExpired())
-                            <span class="badge br">Expired</span>
+                    <td style="font-size:10px;color:var(--text2);">{{ $student->email }}</td>
+                    <td style="font-size:10px;">
+                        @if($student->enrolledClasses->isNotEmpty())
+                            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                @foreach($student->enrolledClasses as $class)
+                                    <span class="badge bp">{{ $class->code }}</span>
+                                @endforeach
+                            </div>
                         @else
-                            <span class="badge bg">Active</span>
+                            <span style="color:var(--text3);">No class</span>
                         @endif
                     </td>
                     <td>
-                        <div style="display:flex;gap:4px;">
-                            <button type="button" class="btn btn-d" style="padding:4px 8px;font-size:10px;" onclick="viewQR('{{ $qr->uuid }}')">View</button>
-                            <button type="button" class="btn btn-p" style="padding:4px 8px;font-size:10px;" onclick="downloadQR('{{ $qr->uuid }}')">Download</button>
-                        </div>
+                        <img src="{{ route('admin.students.qr-code', $student) }}" alt="QR" style="width:60px;height:60px;border-radius:4px;border:1px solid var(--border);">
+                    </td>
+                    <td style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button type="button" class="btn btn-sm" onclick='viewStudentQR({{ json_encode(route('admin.students.qr-code', $student)) }}, {{ json_encode($student->name) }})'>Open</button>
+                        <button type="button" class="btn btn-sm btn-p" onclick='downloadQR({{ json_encode(route('admin.students.qr-code', $student)) }}, {{ json_encode($student->name) }}, "png")'>Download PNG</button>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="8" style="text-align:center;color:var(--text2);">No QR codes generated yet.</td></tr>
+                <tr><td colspan="5" style="text-align:center;color:var(--text2);">No students found.</td></tr>
             @endforelse
         </tbody>
     </table>
-    <div class="pag"><span>Showing {{ $qrCodes->firstItem() ?? 0 }} to {{ $qrCodes->lastItem() ?? 0 }} of {{ $qrCodes->total() }} QR codes</span><div>{{ $qrCodes->links() }}</div></div>
+    <div class="pag"><span>Showing {{ $students->firstItem() ?? 0 }} to {{ $students->lastItem() ?? 0 }} of {{ $students->total() }} students</span><div>{{ $students->links() }}</div></div>
 </div>
 
 <!-- QR Code Modal -->
@@ -71,73 +49,74 @@
         <img id="modal-qr-image" src="" alt="QR Code" style="width:200px;height:200px;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
         <div id="modal-qr-uuid" style="font-size:12px;color:var(--text2);margin-bottom:16px;font-family:monospace;"></div>
         <div style="display:flex;gap:8px;justify-content:center;">
-            <button type="button" class="btn btn-p" onclick="downloadQRFromModal()">Download JPG</button>
+            <button type="button" class="btn btn-p" onclick="downloadQRFromModal('png')">Download PNG</button>
             <button type="button" class="btn" onclick="closeQRModal()">Close</button>
         </div>
     </div>
 </div>
 
 <script>
-let currentQRUuid = '';
-const qrImageBaseUrl = "{{ url('/admin/qr-codes') }}/";
+let currentQRUrl = '';
+let currentQRLabel = '';
 
-function viewQR(uuid) {
-    currentQRUuid = uuid;
-    // Use img tag instead of object tag for better SVG compatibility
+function viewQR(url, label) {
+    currentQRUrl = url;
+    currentQRLabel = label;
     const img = document.getElementById('modal-qr-image');
-    img.src = qrImageBaseUrl + uuid + '/image';
-    document.getElementById('modal-qr-uuid').textContent = uuid;
+    img.src = url;
+    document.getElementById('modal-qr-uuid').textContent = label;
     document.getElementById('qr-modal').style.display = 'flex';
+}
+
+function viewStudentQR(url, label) {
+    viewQR(url, label);
 }
 
 function closeQRModal() {
     document.getElementById('qr-modal').style.display = 'none';
 }
 
-function downloadQRFromModal() {
-    downloadQR(currentQRUuid);
+function downloadQRFromModal(type = 'png') {
+    if (!currentQRUrl) {
+        alert('No QR selected');
+        return;
+    }
+    downloadQR(currentQRUrl, currentQRLabel, type);
 }
 
-function downloadQR(uuid) {
-    // Fetch the SVG and convert to JPEG
-    fetch(qrImageBaseUrl + uuid + '/image')
+function downloadQR(url, label, type = 'png') {
+    fetch(url)
         .then(response => response.text())
         .then(svgText => {
-            // Create a canvas to convert SVG to JPEG
             const canvas = document.createElement('canvas');
             canvas.width = 300;
             canvas.height = 300;
             const ctx = canvas.getContext('2d');
-            
-            // Fill with white background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, 300, 300);
-            
-            // Create an image from the SVG
             const img = new Image();
             const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
             const svgUrl = URL.createObjectURL(svgBlob);
-            
+
             img.onload = function() {
                 ctx.drawImage(img, 0, 0);
                 URL.revokeObjectURL(svgUrl);
-                
-                // Convert canvas to JPEG and download
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
-                    link.download = 'qr-code-' + uuid + '.jpg';
+                    const safeLabel = label ? label.replace(/[^a-zA-Z0-9-_]/g, '_') : 'qr-code';
+                    link.download = safeLabel + '-qr.' + (type === 'png' ? 'png' : 'jpg');
                     link.click();
                     URL.revokeObjectURL(url);
-                }, 'image/jpeg', 0.95);
+                }, type === 'png' ? 'image/png' : 'image/jpeg', 0.95);
             };
-            
+
             img.onerror = function() {
                 URL.revokeObjectURL(svgUrl);
                 alert('Failed to load QR code image');
             };
-            
+
             img.src = svgUrl;
         })
         .catch(error => {
