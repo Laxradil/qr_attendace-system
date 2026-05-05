@@ -8,7 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AttendanceRecord;
 use App\Models\Classe;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\QRCode;
+use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class StudentController extends Controller
 {
@@ -109,15 +110,22 @@ class StudentController extends Controller
             ]);
         }
 
-        $qrData = json_encode([
-            'type' => 'student_attendance',
-            'student_id' => $user->id,
-            'student_name' => $user->name,
-            'student_email' => $user->email,
-            'generated_at' => now()->toIso8601String(),
-        ]);
+        $qrCode = QRCode::where('student_id', $user->id)->first();
 
-        $svg = QrCode::format('svg')
+        if (!$qrCode) {
+            // Fallback: generate on the fly if no stored QR code
+            $qrData = json_encode([
+                'type' => 'student_attendance',
+                'student_id' => $user->id,
+                'student_name' => $user->name,
+                'student_email' => $user->email,
+                'generated_at' => now()->toIso8601String(),
+            ]);
+        } else {
+            $qrData = $qrCode->code;
+        }
+
+        $svg = QrCodeFacade::format('svg')
             ->size(280)
             ->margin(1)
             ->encoding('UTF-8')

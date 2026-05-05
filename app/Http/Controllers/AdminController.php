@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Classe;
-use App\Models\QRCode;
 use App\Models\AttendanceRecord;
+use App\Models\DropRequest;
 use App\Models\SystemLog;
+use App\Models\QRCode;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class AdminController extends Controller
 {
@@ -46,8 +47,6 @@ class AdminController extends Controller
                 COUNT(CASE WHEN status = \'absent\' THEN 1 END) as absent
             ')->first();
 
-            // Get QR codes and today records
-            $activeQRCodes = QRCode::where('is_used', false)->count();
             $todayRecords = AttendanceRecord::whereDate('recorded_at', now())->count();
 
             return [
@@ -59,7 +58,6 @@ class AdminController extends Controller
                 'presentCount' => $attendanceCounts->present ?? 0,
                 'lateCount' => $attendanceCounts->late ?? 0,
                 'absentCount' => $attendanceCounts->absent ?? 0,
-                'activeQRCodes' => $activeQRCodes,
                 'todayRecords' => $todayRecords,
             ];
         });
@@ -132,7 +130,7 @@ class AdminController extends Controller
             'student_id' => 'nullable|string|unique:users|max:255',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'username' => $validated['username'],
@@ -140,6 +138,23 @@ class AdminController extends Controller
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
         ]);
+
+        // Create QR code for students
+        if ($validated['role'] === 'student') {
+            $qrData = json_encode([
+                'type' => 'student_attendance',
+                'student_id' => $user->id,
+                'student_name' => $validated['name'],
+                'student_email' => $validated['email'],
+                'generated_at' => now()->toIso8601String(),
+            ]);
+
+            QRCode::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
+                'code' => $qrData, // Store the JSON data
+                'student_id' => $user->id,
+            ]);
+        }
 
         SystemLog::create([
             'user_id' => Auth::id(),
@@ -221,11 +236,11 @@ class AdminController extends Controller
 
     public function students(): View
     {
-        // Cache students for 1 minute
-        $students = Cache::remember('admin_students_page_' . request('page', 1), 60, function () {
-            return User::with('attendanceRecords', 'enrolledClasses')->where('role', 'student')->paginate(20);
+        // Cache class-based student groups for 1 minute
+        $classes = Cache::remember('admin_students_by_class_page_' . request('page', 1), 60, function () {
+            return Classe::with(['students', 'professors'])->paginate(10);
         });
-        return view('admin.students', ['students' => $students]);
+        return view('admin.students', ['classes' => $classes]);
     }
 
     // Classes Management
@@ -233,7 +248,7 @@ class AdminController extends Controller
     {
         // Cache classes for 1 minute
         $classes = Cache::remember('admin_classes_page_' . request('page', 1), 60, function () {
-            return Classe::with('professor', 'students')->paginate(20);
+            return Classe::with('professor', 'professors', 'students')->paginate(20);
         });
         return view('admin.classes', ['classes' => $classes]);
     }
@@ -250,15 +265,26 @@ class AdminController extends Controller
             'code' => 'required|string|unique:classes|max:20',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'professor_id' => 'required|exists:users,id',
+            'professors' => 'required|array|min:1',
+            'professors.*' => 'required|exists:users,id',
         ]);
 
-        Classe::create($validated);
+        $professors = $validated['professors'];
+        $primaryProfessorId = $professors[0];
+
+        $classe = Classe::create([
+            'code' => $validated['code'],
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'professor_id' => $primaryProfessorId,
+        ]);
+
+        $classe->professors()->attach($professors);
 
         SystemLog::create([
             'user_id' => Auth::id(),
             'action' => 'create_class',
-            'description' => 'Created class: ' . $validated['name'],
+            'description' => 'Created class: ' . $validated['name'] . ' with ' . count($professors) . ' professor(s)',
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
@@ -268,6 +294,7 @@ class AdminController extends Controller
 
     public function editClass(Classe $classe): View
     {
+        $classe->load('professors');
         $professors = User::where('role', 'professor')->get();
         return view('admin.edit-class', ['classe' => $classe, 'professors' => $professors]);
     }
@@ -278,16 +305,28 @@ class AdminController extends Controller
             'code' => 'required|string|unique:classes,code,' . $classe->id . '|max:20',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'professor_id' => 'required|exists:users,id',
+            'professors' => 'required|array|min:1',
+            'professors.*' => 'required|exists:users,id',
             'is_active' => 'boolean',
         ]);
 
-        $classe->update($validated);
+        $professors = $validated['professors'];
+        $primaryProfessorId = $professors[0];
+
+        $classe->update([
+            'code' => $validated['code'],
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'professor_id' => $primaryProfessorId,
+            'is_active' => $validated['is_active'] ?? false,
+        ]);
+
+        $classe->professors()->sync($professors);
 
         SystemLog::create([
             'user_id' => Auth::id(),
             'action' => 'update_class',
-            'description' => 'Updated class: ' . $classe->name,
+            'description' => 'Updated class: ' . $classe->name . ' with ' . count($professors) . ' professor(s)',
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
@@ -313,58 +352,44 @@ class AdminController extends Controller
 
     // QR Code Management
     public function qrCodes(): View
-{
-    // Add 'professor' if you display who generated it
-    $qrCodes = QRCode::with(['classe', 'professor'])->paginate(20);
-    $classes = Classe::orderBy('name')->get();
-
-    return view('admin.qr-codes', compact('qrCodes', 'classes'));
-}
-
-    public function generateQRCode(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'class_id' => 'required|exists:classes,id',
-            'count' => 'required|integer|min:1|max:100',
-            'expires_at' => 'nullable|date|after:today',
-        ]);
+        $students = User::where('role', 'student')
+            ->with('enrolledClasses')
+            ->orderBy('name')
+            ->paginate(20, ['*'], 'students_page');
 
-        for ($i = 0; $i < $validated['count']; $i++) {
-            QRCode::create([
-                'uuid' => Str::uuid(),
-                'class_id' => $validated['class_id'],
-                'professor_id' => Auth::id(),
-                'expires_at' => $validated['expires_at'] ?? null,
-            ]);
-        }
-
-        SystemLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'generate_qr',
-            'description' => 'Generated ' . $validated['count'] . ' QR codes for class',
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        return back()->with('success', $validated['count'] . ' QR codes generated successfully');
+        return view('admin.qr-codes', compact('students'));
     }
 
-    public function qrCodeImage($uuid)
+    public function studentQrCode(User $student)
     {
-        try {
-            $qrCode = QRCode::where('uuid', $uuid)->firstOrFail();
-            
-            // Generate QR code image as SVG
-            $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
-                ->size(300)
-                ->generate($qrCode->uuid);
-            
-            // Return as plain SVG response
-            return response((string)$svg)
-                ->header('Content-Type', 'image/svg+xml');
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        abort_if(!$student->isStudent(), 404);
+
+        $qrCode = QRCode::where('student_id', $student->id)->first();
+
+        if (!$qrCode) {
+            // Fallback: generate on the fly if no stored QR code
+            $qrData = json_encode([
+                'type' => 'student_attendance',
+                'student_id' => $student->id,
+                'student_name' => $student->name,
+                'student_email' => $student->email,
+                'generated_at' => now()->toIso8601String(),
+            ]);
+        } else {
+            $qrData = $qrCode->code;
         }
+
+        $svg = QrCodeFacade::format('svg')
+            ->size(180)
+            ->margin(1)
+            ->encoding('UTF-8')
+            ->generate($qrData);
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
     }
 
     // Attendance Management
@@ -407,6 +432,65 @@ class AdminController extends Controller
             'absentCount' => $attendanceStats->absent_count,
             'topClasses' => $topClasses,
         ]);
+    }
+
+    public function dropRequests(): View
+    {
+        $requests = DropRequest::with(['classe', 'student', 'professor', 'admin'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.drop-requests', [
+            'requests' => $requests,
+        ]);
+    }
+
+    public function approveDropRequest(Request $request, DropRequest $dropRequest): RedirectResponse
+    {
+        if ($dropRequest->status !== 'pending') {
+            return back()->with('error', 'Only pending requests can be approved.');
+        }
+
+        $dropRequest->update([
+            'status' => 'approved',
+            'admin_id' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        $dropRequest->classe->students()->detach($dropRequest->student_id);
+
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'other',
+            'description' => 'Approved drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Drop request approved and student removed from the class.');
+    }
+
+    public function rejectDropRequest(Request $request, DropRequest $dropRequest): RedirectResponse
+    {
+        if ($dropRequest->status !== 'pending') {
+            return back()->with('error', 'Only pending requests can be rejected.');
+        }
+
+        $dropRequest->update([
+            'status' => 'rejected',
+            'admin_id' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'other',
+            'description' => 'Rejected drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Drop request rejected.');
     }
 
     // System Logs

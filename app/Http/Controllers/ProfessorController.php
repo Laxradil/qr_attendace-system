@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Classe;
 use App\Models\AttendanceRecord;
+use App\Models\DropRequest;
 use App\Models\SystemLog;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +29,7 @@ class ProfessorController extends Controller
         /** @var User $user */
         $user = Auth::user();
         // Use withCount() to get student counts in the initial query instead of calling count() in loop
-        $classes = $user->classes()
+        $classes = $user->assignedClasses()
             ->withCount('students')
             ->with(['students', 'schedules'])
             ->get();
@@ -48,7 +51,7 @@ class ProfessorController extends Controller
             ->limit(5)
             ->get();
 
-        $todaySchedules = $user->classes()
+        $todaySchedules = $user->assignedClasses()
             ->with('schedules')
             ->get()
             ->flatMap(fn($c) => $c->schedules)
@@ -72,7 +75,7 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $classes = $user->classes()
+        $classes = $user->assignedClasses()
             ->withCount('students')
             ->with('schedules')
             ->get();
@@ -95,7 +98,7 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $classes = $user->classes()->with('students')->get();
+        $classes = $user->assignedClasses()->with('students')->get();
         $selectedClassId = request()->query('class_id');
 
         return view('professor.scan-qr', [
@@ -104,7 +107,7 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function recordAttendance(Request $request): RedirectResponse
+    public function recordAttendance(Request $request): Response|RedirectResponse|JsonResponse
     {
         // Check if it's a student QR code (JSON data) or class QR code UUID
         $qrData = $request->input('qr_code');
@@ -118,16 +121,35 @@ class ProfessorController extends Controller
             $studentName = $decoded['student_name'] ?? 'Unknown';
 
             if (!$selectedClassId || !$selectedStudentId) {
-                return back()->with('error', 'Please select a class and student before submitting.');
+                $message = 'Please select a class and student before submitting.';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 422)
+                    : back()->with('error', $message);
             }
 
             if ($decoded['student_id'] != $selectedStudentId) {
-                return back()->with('error', 'Scanned QR does not match the selected student.');
+                $message = 'Scanned QR does not match the selected student.';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 422)
+                    : back()->with('error', $message);
             }
 
             /** @var User $user */
             $user = Auth::user();
-            abort_unless($user->classes()->whereKey($selectedClassId)->exists(), 403);
+            if (!$user->assignedClasses()->whereKey($selectedClassId)->exists()) {
+                $message = 'You are not assigned to the selected class.';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 403)
+                    : abort(403);
+            }
+
+            $classe = Classe::findOrFail($selectedClassId);
+            if (!$classe->students()->where('users.id', $selectedStudentId)->exists()) {
+                $message = 'This student is not enrolled in the selected class.';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 422)
+                    : back()->with('error', $message);
+            }
 
             $alreadyRecorded = AttendanceRecord::where('student_id', $selectedStudentId)
                 ->where('class_id', $selectedClassId)
@@ -135,7 +157,10 @@ class ProfessorController extends Controller
                 ->exists();
             
             if ($alreadyRecorded) {
-                return back()->with('error', 'Attendance already recorded for this student today');
+                $message = 'Attendance already recorded for this student today';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 409)
+                    : back()->with('error', $message);
             }
             
             AttendanceRecord::create([
@@ -154,17 +179,23 @@ class ProfessorController extends Controller
                 'user_agent' => $request->userAgent(),
             ]);
 
-            return back()->with('success', 'Attendance recorded successfully for ' . $studentName);
+            $message = 'Attendance recorded successfully for ' . $studentName;
+            return $request->expectsJson()
+                ? response()->json(['message' => $message])
+                : back()->with('success', $message);
         }
 
-        return back()->with('error', 'Only student QR codes are supported now. Please scan the student attendance QR code.');
+        $message = 'Only student QR codes are supported now. Please scan the student attendance QR code.';
+        return $request->expectsJson()
+            ? response()->json(['error' => $message], 422)
+            : back()->with('error', $message);
     }
 
     public function attendanceRecords(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
-        $classes = $user->classes()->get();
+        $classes = $user->assignedClasses()->get();
         $classId = $request->query('class_id');
         $date = $request->query('date');
 
@@ -201,7 +232,7 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $schedules = $user->classes()
+        $schedules = $user->assignedClasses()
             ->with('schedules')
             ->get()
             ->flatMap(fn($c) => $c->schedules);
@@ -215,7 +246,7 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $classes = $user->classes()->with('students')->get();
+        $classes = $user->assignedClasses()->with('students')->get();
         $classId = request()->query('class_id');
 
         if ($classId) {
@@ -257,16 +288,72 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $students = $user->classes()
+        $classes = $user->assignedClasses()
             ->with('students')
-            ->get()
-            ->flatMap(fn($c) => $c->students)
-            ->unique('id')
-            ->values();
+            ->get();
+
+        $pendingRequests = [];
+        try {
+            $pendingRequests = DropRequest::whereIn('class_id', $classes->pluck('id'))
+                ->where('status', 'pending')
+                ->get()
+                ->mapWithKeys(fn (DropRequest $request) => ["{$request->class_id}_{$request->student_id}" => $request]);
+        } catch (\Exception $e) {
+            // Table doesn't exist yet - migration hasn't been run
+        }
 
         return view('professor.students', [
-            'students' => $students,
+            'classes' => $classes,
+            'pendingRequests' => $pendingRequests,
         ]);
+    }
+
+    public function submitDropRequest(Request $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'class_id' => 'required|exists:classes,id',
+            'student_id' => 'required|exists:users,id',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $classe = Classe::findOrFail($validated['class_id']);
+        $student = User::findOrFail($validated['student_id']);
+
+        abort_unless($user->assignedClasses()->whereKey($classe->id)->exists(), 403);
+
+        if (!$classe->students()->wherePivot('student_id', $student->id)->exists()) {
+            return back()->with('error', 'This student is not enrolled in the selected class.');
+        }
+
+        $alreadyPending = DropRequest::where('class_id', $classe->id)
+            ->where('student_id', $student->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($alreadyPending) {
+            return back()->with('error', 'A drop request for this student is already pending approval.');
+        }
+
+        DropRequest::create([
+            'professor_id' => $user->id,
+            'student_id' => $student->id,
+            'class_id' => $classe->id,
+            'reason' => $validated['reason'] ?? null,
+            'status' => 'pending',
+        ]);
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'other',
+            'description' => 'Requested to drop ' . $student->name . ' from ' . $classe->code . ' - ' . $classe->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Drop request submitted and is pending admin approval.');
     }
 
     public function logs(): View
@@ -294,7 +381,7 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        abort_unless($user->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
+        abort_unless($user->assignedClasses()->whereKey($attendanceRecord->class_id)->exists(), 403);
 
         return view('professor.edit-attendance', [
             'record' => $attendanceRecord->load('student', 'classe'),
@@ -305,7 +392,7 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        abort_unless($user->classes()->whereKey($attendanceRecord->class_id)->exists(), 403);
+        abort_unless($user->assignedClasses()->whereKey($attendanceRecord->class_id)->exists(), 403);
 
         $validated = $request->validate([
             'status' => 'required|in:present,late,absent',
@@ -364,8 +451,8 @@ class ProfessorController extends Controller
         $classe = Classe::findOrFail($validated['class_id']);
         $student = User::where('email', $validated['student_email'])->first();
 
-        // Verify the professor owns this class
-        if ($classe->professor_id !== Auth::id()) {
+        // Verify the professor is assigned to this class
+        if (!$classe->professors()->wherePivot('professor_id', Auth::id())->exists()) {
             return back()->with('error', 'You do not have permission to add students to this class');
         }
 
@@ -396,8 +483,8 @@ class ProfessorController extends Controller
     public function getClassStudents($id)
     {
         $classe = Classe::with('students')->findOrFail($id);
-        // Verify the professor owns this class
-        if ($classe->professor_id !== Auth::id()) {
+        // Verify the professor is assigned to this class
+        if (!$classe->professors()->wherePivot('professor_id', Auth::id())->exists()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $students = $classe->students->map(function($student) {

@@ -23,8 +23,10 @@ class QRCode extends Model
 
     protected $fillable = [
         'uuid',
+        'code',
         'class_id',
         'professor_id',
+        'student_id',
         'is_used',
         'used_at',
         'expires_at',
@@ -46,6 +48,11 @@ class QRCode extends Model
     public function professor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professor_id');
+    }
+
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
     }
 
     public function isExpired(): bool
