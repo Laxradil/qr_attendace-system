@@ -53,8 +53,8 @@
             </div>
             <div style="font-size:10px;color:var(--text2);margin-bottom:12px;">Show your QR code to professors for attendance scanning</div>
             <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-                <button type="button" class="btn btn-sm btn-p" onclick="showStudentQR()" style="flex:1;min-width:100px;">Show QR</button>
-                <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-sm" style="flex:1;min-width:100px;justify-content:center;">Download</a>
+                <button type="button" class="btn btn-sm btn-p" onclick="showStudentQR()" style="flex:1;min-width:100px;display:flex;justify-content:center;align-items:center;text-align:center;">Show QR</button>
+                <button type="button" class="btn btn-sm" onclick="downloadStudentQrAsPng('student-qr.png')" style="flex:1;min-width:100px;display:flex;justify-content:center;align-items:center;text-align:center;">Download</button>
             </div>
         </div>
     </div>
@@ -102,7 +102,7 @@
             <img id="modal-student-qr-image" src="{{ route('student.qr-code') }}" alt="Student QR" style="width:220px;height:220px;border-radius:6px;background:#fff;object-fit:contain;" />
         </div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-            <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-p" style="flex:1;min-width:100px;justify-content:center;">Download</a>
+            <button type="button" class="btn btn-p" onclick="downloadStudentQrAsPng('student-qr.png')" style="flex:1;min-width:100px;display:flex;justify-content:center;align-items:center;text-align:center;">Download</button>
         </div>
     </div>
 </div>
@@ -122,6 +122,47 @@ if (studentQRModal) {
             closeStudentQRModal();
         }
     });
+}
+
+function downloadStudentQrAsPng(filename = 'student-qr.png') {
+    fetch('{{ route('student.qr-code') }}')
+        .then(response => response.text())
+        .then(svgText => {
+            const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+            const image = new Image();
+
+            image.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(image, 0, 0);
+                canvas.toBlob(function(blob) {
+                    if (!blob) {
+                        alert('Unable to generate PNG file.');
+                        return;
+                    }
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, 'image/png');
+                URL.revokeObjectURL(url);
+            };
+
+            image.onerror = function() {
+                alert('Unable to load QR code for download.');
+                URL.revokeObjectURL(url);
+            };
+
+            image.src = url;
+        })
+        .catch(() => {
+            alert('Unable to download the QR code.');
+        });
 }
 </script>
 @endsection
