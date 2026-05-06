@@ -19,7 +19,7 @@
             <select id="class_id" name="class_id" class="fi">
                 <option value="">All Classes</option>
                 @foreach($classes as $classe)
-                    <option value="{{ $classe->id }}" {{ request('class_id') == $classe->id ? 'selected' : '' }}>{{ $classe->code }} - {{ $classe->name }}</option>
+                    <option value="{{ $classe->id }}" {{ request('class_id') == $classe->id ? 'selected' : '' }}>{{ $classe->display_name }}</option>
                 @endforeach
             </select>
         </div>
@@ -40,7 +40,7 @@
         <tbody>
             @forelse($records as $record)
                 <tr>
-                    <td class="td-mono">{{ $record->recorded_at?->format('M d, Y h:i A') }}</td>
+                    <td class="td-mono">{{ $record->recorded_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:6px;">
                             <div class="log-av">{{ strtoupper(substr($record->student->name ?? 'ST', 0, 2)) }}</div>
@@ -51,8 +51,7 @@
                         </div>
                     </td>
                     <td>
-                        <div style="font-size:11px;font-weight:500;">{{ $record->classe->name ?? 'N/A' }}</div>
-                        <div style="font-size:9px;color:var(--text2);">{{ $record->classe->code ?? '-' }}</div>
+                        <div style="font-size:11px;font-weight:500;">{{ $record->classe->display_name ?? 'N/A' }}</div>
                     </td>
                     <td>
                         @if($record->status === 'present')

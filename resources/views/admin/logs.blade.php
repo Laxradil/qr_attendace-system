@@ -11,7 +11,7 @@
         <tbody>
             @forelse($logs as $log)
                 <tr>
-                    <td class="td-mono">{{ $log->created_at?->format('M d, Y h:i:s A') }}</td>
+                    <td class="td-mono">{{ $log->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y h:i:s A') }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:5px;">
                             <div class="log-av" style="width:22px;height:22px;font-size:9px;">{{ strtoupper(substr($log->user->name ?? 'SY', 0, 2)) }}</div>

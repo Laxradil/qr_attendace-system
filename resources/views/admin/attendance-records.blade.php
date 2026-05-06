@@ -18,7 +18,7 @@
         <tbody>
             @forelse($records as $record)
                 <tr>
-                    <td class="td-mono">{{ $record->recorded_at?->format('M d, Y h:i A') }}</td>
+                    <td class="td-mono">{{ $record->recorded_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:6px;">
                             <div class="log-av">{{ strtoupper(substr($record->student->name ?? 'ST', 0, 2)) }}</div>

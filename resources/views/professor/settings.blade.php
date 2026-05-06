@@ -72,7 +72,7 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
                         <span style="color:var(--text2);">Member Since:</span>
-                        <span style="font-weight:600;">{{ $user->created_at->format('M d, Y') }}</span>
+                        <span style="font-weight:600;">{{ $user->created_at->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</span>
                     </div>
                 </div>
             </div>

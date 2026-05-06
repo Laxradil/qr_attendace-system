@@ -19,7 +19,7 @@
             </div>
             <div>
                 <div class="fl">Class</div>
-                <div class="fi">{{ $record->classe->code ?? '-' }} - {{ $record->classe->name ?? 'N/A' }}</div>
+                <div class="fi">{{ $record->classe->display_name ?? 'N/A' }}</div>
             </div>
             <div>
                 <div class="fl">Current QR Scan</div>
@@ -46,7 +46,7 @@
 
             <div>
                 <label class="fl" for="recorded_at">Time Stamp</label>
-                <input id="recorded_at" type="datetime-local" name="recorded_at" value="{{ old('recorded_at', optional($record->recorded_at)->format('Y-m-d\TH:i')) }}" class="fi">
+                <input id="recorded_at" type="datetime-local" name="recorded_at" value="{{ old('recorded_at', optional($record->recorded_at)->tz('UTC')->setTimezone('Asia/Manila')->format('Y-m-d\\TH:i')) }}" class="fi">
             </div>
 
             <div>

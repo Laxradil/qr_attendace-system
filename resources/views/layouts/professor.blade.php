@@ -180,22 +180,29 @@
             </div>
 
             <div class="sb-user">
-                <div class="sb-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'PR', 0, 1)) }}</div>
+                <div class="sb-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
                 <div>
                     <div class="sb-uname">{{ auth()->user()->name }}</div>
-                    <div class="sb-urole"><span class="sb-online"></span>Online · Professor</div>
+                    <div class="sb-urole"><span class="sb-online"></span>Online · {{ ucfirst(auth()->user()->role) }}</div>
                 </div>
             </div>
 
             <div class="sb-sec">Menu</div>
-            <a href="{{ route('professor.dashboard') }}" class="sb-item {{ request()->routeIs('professor.dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('professor.classes') }}" class="sb-item {{ request()->routeIs('professor.classes*') ? 'active' : '' }}">My Classes</a>
-            <a href="{{ route('professor.scan-qr') }}" class="sb-item {{ request()->routeIs('professor.scan-qr') ? 'active' : '' }}">Scan QR</a>
-            <a href="{{ route('professor.attendance-records') }}" class="sb-item {{ request()->routeIs('professor.attendance-records*') ? 'active' : '' }}">Attendance Records</a>
-            <a href="{{ route('professor.schedules') }}" class="sb-item {{ request()->routeIs('professor.schedules') ? 'active' : '' }}">Schedules</a>
-            <a href="{{ route('professor.students') }}" class="sb-item {{ request()->routeIs('professor.students') ? 'active' : '' }}">Students</a>
-            <a href="{{ route('professor.logs') }}" class="sb-item {{ request()->routeIs('professor.logs') ? 'active' : '' }}">Logs</a>
-            <a href="{{ route('professor.settings') }}" class="sb-item {{ request()->routeIs('professor.settings*') ? 'active' : '' }}">Settings</a>
+            @if(auth()->user()->isProfessor())
+                <a href="{{ route('professor.dashboard') }}" class="sb-item {{ request()->routeIs('professor.dashboard') ? 'active' : '' }}">Dashboard</a>
+                <a href="{{ route('professor.classes') }}" class="sb-item {{ request()->routeIs('professor.classes*') ? 'active' : '' }}">My Classes</a>
+                <a href="{{ route('professor.scan-qr') }}" class="sb-item {{ request()->routeIs('professor.scan-qr') ? 'active' : '' }}">Scan QR</a>
+                <a href="{{ route('professor.attendance-records') }}" class="sb-item {{ request()->routeIs('professor.attendance-records*') ? 'active' : '' }}">Attendance Records</a>
+                <a href="{{ route('professor.schedules') }}" class="sb-item {{ request()->routeIs('professor.schedules') ? 'active' : '' }}">Schedules</a>
+                <a href="{{ route('professor.students') }}" class="sb-item {{ request()->routeIs('professor.students') ? 'active' : '' }}">Students</a>
+                <a href="{{ route('professor.logs') }}" class="sb-item {{ request()->routeIs('professor.logs') ? 'active' : '' }}">Logs</a>
+                <a href="{{ route('professor.settings') }}" class="sb-item {{ request()->routeIs('professor.settings*') ? 'active' : '' }}">Settings</a>
+            @elseif(auth()->user()->isStudent())
+                <a href="{{ route('student.dashboard') }}" class="sb-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Dashboard</a>
+                <a href="{{ route('student.classes') }}" class="sb-item {{ request()->routeIs('student.classes') ? 'active' : '' }}">My Classes</a>
+                <a href="{{ route('student.attendance') }}" class="sb-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}">Attendance</a>
+                <a href="{{ route('student.qr-code') }}" class="sb-item {{ request()->routeIs('student.qr-code') ? 'active' : '' }}">My QR Code</a>
+            @endif
 
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto;">
                 @csrf

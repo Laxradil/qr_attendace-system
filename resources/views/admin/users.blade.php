@@ -78,7 +78,7 @@
                     <td>
                         <span class="badge {{ $user->is_active ? 'bg' : 'ba' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                     </td>
-                    <td class="td-mono">{{ $user->created_at?->format('M d, Y') }}</td>
+                    <td class="td-mono">{{ $user->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
                     <td style="display:flex;gap:4px;">
                         <a class="btn btn-sm" href="{{ route('admin.users.edit', $user) }}">Edit</a>
                         <form action="{{ route('admin.users.delete', $user) }}" method="POST" onsubmit="return confirm('Delete this user?')">

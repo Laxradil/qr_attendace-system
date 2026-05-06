@@ -304,7 +304,15 @@
                                                 </span>
                                             </td>
                                             <td>{{ $schedule->days }}</td>
-                                            <td>{{ $schedule->time }}</td>
+                                            <td>
+                                                @if($schedule->start_time || $schedule->end_time)
+                                                    {{ $schedule->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $schedule->start_time)->format('g:i A') : '' }}
+                                                    @if($schedule->start_time && $schedule->end_time)-@endif
+                                                    {{ $schedule->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $schedule->end_time)->format('g:i A') : '' }}
+                                                @else
+                                                    {{ $schedule->time }}
+                                                @endif
+                                            </td>
                                             <td><i class="fas fa-door me-1"></i>{{ $schedule->room }}</td>
                                             <td>
                                                 <button class="action-btn btn-edit" title="Edit" onclick="editSchedule({{ $schedule->id }})">
@@ -341,7 +349,7 @@
                     <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Add New Schedule</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('admin.schedule.create') }}" method="POST">
+                <form action="{{ route('schedules.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
@@ -367,7 +375,16 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Time</label>
-                            <input type="text" class="form-control" name="time" placeholder="e.g., 9:00 AM - 10:30 AM" required>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="start_time" class="form-label small">Start Time</label>
+                                    <input type="time" class="form-control" name="start_time" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="end_time" class="form-label small">End Time</label>
+                                    <input type="time" class="form-control" name="end_time" required>
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Room</label>
@@ -410,7 +427,16 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Time</label>
-                            <input type="text" class="form-control" id="editTime" name="time" required>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="editStartTime" class="form-label small">Start Time</label>
+                                    <input type="time" class="form-control" id="editStartTime" name="start_time" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editEndTime" class="form-label small">End Time</label>
+                                    <input type="time" class="form-control" id="editEndTime" name="end_time" required>
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Room</label>
@@ -477,7 +503,8 @@
                     document.getElementById('editSubjectCode').value = data.subject_code;
                     document.getElementById('editSubjectName').value = data.subject_name;
                     document.getElementById('editDays').value = data.days;
-                    document.getElementById('editTime').value = data.time;
+                    document.getElementById('editStartTime').value = normalizeTimeForInput(data.start_time || '');
+                    document.getElementById('editEndTime').value = normalizeTimeForInput(data.end_time || '');
                     document.getElementById('editRoom').value = data.room;
                     
                     document.getElementById('editScheduleForm').action = `/admin/schedules/${id}`;
@@ -485,6 +512,17 @@
                 });
         }
         
+        function normalizeTimeForInput(timeValue) {
+            if (!timeValue) {
+                return '';
+            }
+            const parts = timeValue.split(':');
+            if (parts.length < 2) {
+                return '';
+            }
+            return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+        }
+
         // Delete schedule function
         function deleteSchedule(id) {
             document.getElementById('deleteForm').action = `/admin/schedules/${id}`;

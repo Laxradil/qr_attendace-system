@@ -41,7 +41,8 @@ class ScheduleController extends Controller
             'subject_name' => 'required|string|max:255',
             'professor_id' => 'required|exists:users,id',
             'days' => 'required|string|max:20',
-            'time' => 'required|string|max:50',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'room' => 'required|string|max:20',
         ]);
 
@@ -53,7 +54,8 @@ class ScheduleController extends Controller
             'professor_id' => $request->professor_id,
             'professor' => $professor->name,
             'days' => $request->days,
-            'time' => $request->time,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
             'room' => $request->room,
         ]);
 
@@ -77,7 +79,8 @@ class ScheduleController extends Controller
             'subject_code' => 'required|string|max:20',
             'subject_name' => 'required|string|max:255',
             'days' => 'required|string|max:20',
-            'time' => 'required|string|max:50',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'room' => 'required|string|max:20',
         ]);
 

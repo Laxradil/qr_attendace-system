@@ -43,6 +43,27 @@ class Classe extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function getDisplayNameAttribute(): string
+    {
+        $code = trim($this->code ?? '');
+        $name = trim($this->name ?? '');
+
+        if (!$code || !$name) {
+            return $name ?: $code;
+        }
+
+        // Remove repeated leading prefixes like "F101 - F101 - F101 - "
+        $pattern = '/^(?:' . preg_quote($code, '/') . '\s*[-–—]\s*)+/i';
+        $cleanName = preg_replace($pattern, '', $name);
+        $cleanName = trim($cleanName);
+
+        if ($cleanName === '') {
+            return $code;
+        }
+
+        return "$code - $cleanName";
+    }
+
     /**
      * Get the primary professor who owns this class
      */
