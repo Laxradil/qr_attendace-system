@@ -21,7 +21,7 @@
                     </td>
                     <td style="font-size:10px;color:var(--text2);">{{ $professor->email }}</td>
                     <td><span class="badge {{ $professor->is_active ? 'bg' : 'br' }}">{{ $professor->is_active ? 'Active' : 'Inactive' }}</span></td>
-                    <td class="td-mono">{{ $professor->created_at?->format('M d, Y') }}</td>
+                    <td class="td-mono">{{ $professor->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
                     <td style="display:flex;gap:4px;">
                         <a href="{{ route('admin.users.edit', $professor) }}" class="btn btn-sm">Edit</a>
                         <form action="{{ route('admin.users.delete', $professor) }}" method="POST" onsubmit="return confirm('Delete this professor?')">@csrf @method('DELETE')<button class="btn btn-sm btn-d" type="submit">Delete</button></form>
