@@ -50,6 +50,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'student_id',
+        'is_active',
     ];
 
     /**
@@ -67,13 +69,11 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_active' => 'boolean',
+    ];
 
     // Relationship for professors to their classes as the primary instructor
     public function classes(): HasMany

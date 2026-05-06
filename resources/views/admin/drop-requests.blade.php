@@ -36,7 +36,7 @@
                             {{ ucfirst($request->status) }}
                         </span>
                     </td>
-                    <td class="td-mono">{{ $request->created_at->format('M d, Y') }}</td>
+                    <td class="td-mono">{{ $request->created_at->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
                     <td style="display:flex;gap:6px;flex-wrap:wrap;">
                         @if($request->status === 'pending')
                             <form method="POST" action="{{ route('admin.drop-requests.approve', $request) }}">

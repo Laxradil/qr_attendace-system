@@ -11,7 +11,7 @@
             <div class="card" style="margin-bottom:0;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
                     <span class="badge bp" style="font-size:9px;">{{ ucfirst(str_replace('_', ' ', $log->action)) }}</span>
-                    <span style="font-size:9px;color:var(--text3);">{{ $log->created_at->diffForHumans() }}</span>
+                    <span style="font-size:9px;color:var(--text3);">{{ $log->created_at->tz('UTC')->setTimezone('Asia/Manila')->diffForHumans() }}</span>
                 </div>
                 @if($log->description)
                     <div style="font-size:11px;color:var(--text);margin-bottom:8px;line-height:1.4;">{{ $log->description }}</div>
@@ -20,7 +20,7 @@
                     @if($log->ip_address)
                         <span class="td-mono">IP: {{ $log->ip_address }}</span>
                     @endif
-                    <span class="td-mono">{{ $log->created_at->format('M d, Y H:i:s') }}</span>
+                    <span class="td-mono">{{ $log->created_at->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y H:i:s') }}</span>
                 </div>
             </div>
         @empty

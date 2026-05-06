@@ -34,7 +34,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
                     <div>
                         <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.85;">{{ $classe->code }}</div>
-                        <div style="font-size:16px;font-weight:800;line-height:1.1;margin-top:6px;">{{ \Illuminate\Support\Str::limit($classe->name, 30) }}</div>
+                        <div style="font-size:16px;font-weight:800;line-height:1.1;margin-top:6px;">{{ \Illuminate\Support\Str::limit($classe->display_name, 30) }}</div>
                     </div>
                     <div style="width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;">{{ strtoupper(substr($classe->code, 0, 1)) }}</div>
                 </div>
@@ -52,11 +52,22 @@
                     <span style="background:rgba(0,0,0,0.04);padding:6px 10px;border-radius:999px;">{{ $classe->schedules->isNotEmpty() ? $classe->schedules->first()->days : 'No schedule' }}</span>
                 </div>
                 <div style="font-size:11px;color:var(--text3);min-height:28px;">
-                    {{ $classe->schedules->isNotEmpty() ? $classe->schedules->first()->time : 'Schedule not set' }}
+                    @if($classe->schedules->isNotEmpty() && ($classe->schedules->first()->start_time || $classe->schedules->first()->end_time))
+                        {{ $classe->schedules->first()->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $classe->schedules->first()->start_time)->format('g:i A') : '' }}
+                        @if($classe->schedules->first()->start_time && $classe->schedules->first()->end_time)
+                            -
+                        @endif
+                        {{ $classe->schedules->first()->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $classe->schedules->first()->end_time)->format('g:i A') : '' }}
+                    @elseif($classe->schedules->isNotEmpty() && $classe->schedules->first()->time)
+                        {{ $classe->schedules->first()->time }}
+                    @else
+                        Schedule not set
+                    @endif
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-sm" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->code }} - {{ $classe->name }}" onclick="handleShowClassStudents(this)" style="flex:1;min-width:100px;">Students</button>
-                    <button type="button" class="btn btn-sm btn-p" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->code }} - {{ $classe->name }}" onclick="handleAddStudent(this)" style="flex:1;min-width:100px;">+ Add</button>
+                    <button class="btn btn-sm" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" onclick="handleShowClassStudents(this)" style="flex:1;min-width:100px;">Students</button>
+                    <button type="button" class="btn btn-sm" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" data-class-code="{{ $classe->code }}" data-class-desc="{{ $classe->description }}" data-schedule-id="{{ optional($classe->schedules->first())->id }}" data-schedule-days='@json(optional($classe->schedules->first()) && optional($classe->schedules->first())->days ? explode(",", optional($classe->schedules->first())->days) : [])' data-schedule-start-time="{{ optional($classe->schedules->first())->start_time }}" data-schedule-end-time="{{ optional($classe->schedules->first())->end_time }}" data-schedule-room="{{ optional($classe->schedules->first())->room }}" onclick="handleEditSchedule(this)" style="flex:1;min-width:100px;">Edit Class</button>
+                    <button type="button" class="btn btn-sm btn-p" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" onclick="handleAddStudent(this)" style="flex:1;min-width:100px;">+ Add</button>
                     <button type="button" class="btn btn-sm btn-p" data-class-id="{{ $classe->id }}" onclick="handleScanQR(this)" style="flex:1;min-width:100px;">Scan QR</button>
                 </div>
             </div>
@@ -87,22 +98,172 @@
         </div>
     </div>
 
-<div id="addStudentModal" class="modal" style="display:none;">
-    <div class="modal-content" style="max-width:350px;">
-        <span class="close" onclick="closeAddStudentModal()">&times;</span>
-        <h3 id="addStudentClass"></h3>
+<div id="addStudentModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:relative;width:100%;max-width:420px;max-height:90vh;background:var(--navy2);border-radius:18px;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,0.45);padding:24px;">
+        <button onclick="closeAddStudentModal()" class="btn btn-sm btn-d" style="position:absolute;top:16px;right:16px;z-index:10;">Close</button>
+        <h3 id="addStudentClass" style="margin-bottom:14px;"></h3>
         <form id="addStudentForm" method="POST" action="{{ route('professor.add-student') }}">
             @csrf
             <input type="hidden" name="class_id" id="addStudentClassId">
             <div style="margin-bottom:12px;">
-                <label for="student_email" style="font-size:12px;">Student Email</label>
-                <input type="email" name="student_email" id="studentEmailInput" class="input" required style="width:100%;margin-top:4px;">
+                <label for="studentSearch" style="font-size:12px;display:block;margin-bottom:6px;">Search student</label>
+                <input type="search" id="studentSearch" class="fi" placeholder="Search by name or email..." oninput="renderAvailableStudentList()" style="width:100%;margin-top:4px;">
+                <input type="hidden" name="student_id" id="selectedStudentId">
             </div>
+            <div id="availableStudentList" style="max-height:260px;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:8px;background:var(--navy3);margin-bottom:12px;">
+                <div style="font-size:11px;color:var(--text2);">Search to select a student.</div>
+            </div>
+            <div style="margin-bottom:12px;font-size:11px;color:var(--text2);">Selected: <span id="selectedStudentLabel">None</span></div>
             <button type="submit" class="btn btn-p" style="width:100%;">Add Student</button>
         </form>
     </div>
 </div>
+
+<div id="editScheduleModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:relative;width:100%;max-width:520px;max-height:90vh;background:var(--navy2);border-radius:18px;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,0.45);padding:24px;">
+        <button onclick="closeEditScheduleModal()" class="btn btn-sm btn-d" style="position:absolute;top:16px;right:16px;z-index:10;">Close</button>
+        <h3 style="margin-bottom:8px;">Edit Class</h3>
+        <div id="editScheduleClassName" style="font-size:12px;color:var(--text2);margin-bottom:14px;"></div>
+        <form id="editScheduleForm" method="POST" action="">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="schedule_id" id="editScheduleId">
+            <div style="margin-bottom:12px;">
+                <label for="editClassCode" style="font-size:12px;">Class Code</label>
+                <input type="text" name="code" id="editClassCode" class="input" required style="width:100%;margin-top:4px;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label for="editClassName" style="font-size:12px;">Class Name</label>
+                <input type="text" name="name" id="editClassName" class="input" required style="width:100%;margin-top:4px;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label for="editClassDescription" style="font-size:12px;">Description</label>
+                <textarea name="description" id="editClassDescription" class="input" rows="3" style="width:100%;margin-top:4px;"></textarea>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px;display:block;margin-bottom:6px;">Days</label>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">
+                    @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $day)
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" name="days[]" value="{{ $day }}" class="day-checkbox" style="width:16px;height:16px;">
+                            <span style="font-size:12px;">{{ $day }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px;display:block;margin-bottom:6px;">Time</label>
+                <div style="display:flex;gap:8px;">
+                    <div style="flex:1;">
+                        <label for="editScheduleStartTime" style="font-size:10px;color:#666;">Start Time</label>
+                        <input type="time" name="start_time" id="editScheduleStartTime" class="input" required style="width:100%;margin-top:2px;">
+                    </div>
+                    <div style="flex:1;">
+                        <label for="editScheduleEndTime" style="font-size:10px;color:#666;">End Time</label>
+                        <input type="time" name="end_time" id="editScheduleEndTime" class="input" required style="width:100%;margin-top:2px;">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label for="editScheduleRoom" style="font-size:12px;">Room</label>
+                <input type="text" name="room" id="editScheduleRoom" class="input" required style="width:100%;margin-top:4px;">
+            </div>
+            <button type="submit" class="btn btn-p" style="width:100%;">Save Class</button>
+        </form>
+    </div>
+</div>
 <script>
+function handleEditSchedule(button) {
+    const classId = button.dataset.classId;
+    const className = button.dataset.className;
+    const classCode = button.dataset.classCode || '';
+    const classDescription = button.dataset.classDesc || '';
+    let scheduleDays = [];
+    if (button.dataset.scheduleDays) {
+        try {
+            scheduleDays = JSON.parse(button.dataset.scheduleDays);
+        } catch (err) {
+            scheduleDays = button.dataset.scheduleDays;
+        }
+    }
+    const scheduleStartTime = button.dataset.scheduleStartTime || '';
+    const scheduleEndTime = button.dataset.scheduleEndTime || '';
+    const scheduleRoom = button.dataset.scheduleRoom || '';
+    const scheduleId = button.dataset.scheduleId || '';
+
+    const form = document.getElementById('editScheduleForm');
+    const classNameEl = document.getElementById('editScheduleClassName');
+    form.action = '/professor/classes/' + classId;
+    document.getElementById('editScheduleId').value = scheduleId;
+    document.getElementById('editClassCode').value = classCode;
+    document.getElementById('editClassName').value = className;
+    document.getElementById('editClassDescription').value = classDescription;
+    setScheduleDays(scheduleDays);
+    document.getElementById('editScheduleStartTime').value = normalizeTimeForInput(scheduleStartTime);
+    document.getElementById('editScheduleEndTime').value = normalizeTimeForInput(scheduleEndTime);
+    document.getElementById('editScheduleRoom').value = scheduleRoom;
+    classNameEl.textContent = className;
+    document.getElementById('editScheduleModal').style.display = 'flex';
+}
+
+function normalizeTimeForInput(timeValue) {
+    if (!timeValue) {
+        return '';
+    }
+    const parts = timeValue.split(':');
+    if (parts.length < 2) {
+        return '';
+    }
+    return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+}
+
+function parseDaysString(daysString) {
+    const allowed = {
+        mon: 'Monday',
+        tue: 'Tuesday',
+        wed: 'Wednesday',
+        thu: 'Thursday',
+        fri: 'Friday',
+        sat: 'Saturday',
+        sun: 'Sunday',
+    };
+    if (!daysString) {
+        return [];
+    }
+    const tokens = daysString
+        .replace(/\band\b/gi, ',')
+        .replace(/[\/|;]/g, ',')
+        .split(/[,\s]+/)
+        .map(token => token.trim())
+        .filter(Boolean);
+    return tokens.map(token => {
+        const lower = token.toLowerCase();
+        if (allowed[lower]) {
+            return allowed[lower];
+        }
+        if (lower.length <= 3) {
+            return allowed[lower.slice(0, 3)] ?? null;
+        }
+        for (const key in allowed) {
+            if (lower.startsWith(key)) {
+                return allowed[key];
+            }
+        }
+        return null;
+    }).filter(Boolean);
+}
+
+function setScheduleDays(days) {
+    const selected = Array.isArray(days)
+        ? days.map(day => day.trim()).filter(Boolean)
+        : parseDaysString(days);
+    document.querySelectorAll('#editScheduleModal .day-checkbox').forEach(checkbox => {
+        checkbox.checked = selected.includes(checkbox.value);
+    });
+}
+function closeEditScheduleModal() {
+    document.getElementById('editScheduleModal').style.display = 'none';
+}
 function handleShowClassStudents(button) {
     const classId = button.dataset.classId;
     const className = button.dataset.className;
@@ -120,7 +281,11 @@ function handleScanQR(button) {
 function showAddStudentModal(classId, className) {
     document.getElementById('addStudentClass').innerText = className;
     document.getElementById('addStudentClassId').value = classId;
-    document.getElementById('addStudentModal').style.display = 'block';
+    document.getElementById('studentSearch').value = '';
+    document.getElementById('selectedStudentId').value = '';
+    document.getElementById('selectedStudentLabel').innerText = 'None';
+    renderAvailableStudentList();
+    document.getElementById('addStudentModal').style.display = 'flex';
 }
 function closeAddStudentModal() {
     document.getElementById('addStudentModal').style.display = 'none';
@@ -157,6 +322,54 @@ function showClassStudents(classId, className) {
 }
 function closeStudentsModal() {
     document.getElementById('studentsModal').style.display = 'none';
+}
+
+const professorAvailableStudents = @json($availableStudents);
+const classExistingStudentIds = {
+    @foreach($classes as $classe)
+        {{ $classe->id }}: [@foreach($classe->students as $student){{ $student->id }},@endforeach],
+    @endforeach
+};
+
+function renderAvailableStudentList() {
+    const query = document.getElementById('studentSearch').value.trim().toLowerCase();
+    const list = document.getElementById('availableStudentList');
+    const selectedId = document.getElementById('selectedStudentId').value;
+    const classId = document.getElementById('addStudentClassId').value;
+
+    const filtered = professorAvailableStudents.filter(student => {
+        const text = (student.name + ' ' + student.email).toLowerCase();
+        return !query || text.includes(query);
+    });
+
+    if (!filtered.length) {
+        list.innerHTML = '<div style="font-size:11px;color:var(--text2);">No students match that search.</div>';
+        return;
+    }
+
+    list.innerHTML = filtered.map(student => {
+        const enrolled = classExistingStudentIds[classId] && classExistingStudentIds[classId].includes(student.id);
+        const active = selectedId === String(student.id);
+        return `
+            <button type="button" class="btn" style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:6px;padding:8px 10px;text-align:left;${active ? 'border:1px solid var(--purple);background:rgba(108,92,231,0.12);' : 'background:var(--navy2);'}" ${enrolled ? 'disabled' : ''} onclick="selectAvailableStudent(${student.id}, ${classId})">
+                <span style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;">
+                    <span style="font-size:12px;font-weight:700;color:var(--text);">${student.name}</span>
+                    <span style="font-size:11px;color:var(--text2);">${student.email}</span>
+                </span>
+                <span style="font-size:11px;color:${enrolled ? 'var(--text3)' : 'var(--purple-light)'};">${enrolled ? 'Enrolled' : 'Select'}</span>
+            </button>
+        `;
+    }).join('');
+}
+
+function selectAvailableStudent(studentId) {
+    const student = professorAvailableStudents.find(s => s.id === studentId);
+    if (!student) {
+        return;
+    }
+    document.getElementById('selectedStudentId').value = student.id;
+    document.getElementById('selectedStudentLabel').innerText = `${student.name} (${student.email})`;
+    renderAvailableStudentList();
 }
 
 const scanQrRoute = "{{ route('professor.scan-qr') }}";

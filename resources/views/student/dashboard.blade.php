@@ -1,125 +1,116 @@
-@extends('layouts.app')
+@extends('layouts.professor')
 
-@section('title', 'Student Dashboard')
-@section('header', 'Student Dashboard')
-@section('subheader', 'View your classes and generate QR codes for attendance.')
+@section('title', 'Dashboard - Student')
+@section('header', 'Dashboard')
+@section('subheader', 'Welcome back, ' . auth()->user()->name . '. Here is your attendance overview.')
 
 @section('content')
-<div style="padding:24px;">
-    <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:24px;">
-        <div style="flex:1 1 170px;min-width:170px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px;text-align:center;">
-            <div style="font-size:26px;font-weight:700;color:var(--green);">{{ $totalPresent }}</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px;letter-spacing:.03em;">Present</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.classes') }}">
+        <div class="stat-val">{{ $classes->count() }}</div>
+        <div class="stat-label">Enrolled Classes</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View classes -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.attendance') }}">
+        <div class="stat-val">{{ $totalPresent }}</div>
+        <div class="stat-label">Present</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View attendance -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.attendance') }}">
+        <div class="stat-val">{{ $totalLate }}</div>
+        <div class="stat-label">Late</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View attendance -></div>
+    </a>
+    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.attendance') }}">
+        <div class="stat-val">{{ $totalAbsent }}</div>
+        <div class="stat-label">Absent</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View attendance -></div>
+    </a>
+</div>
+
+<div class="g-6-4">
+    <div>
+        <div class="sh">Your Classes</div>
+        <div class="card">
+            @forelse($classes as $class)
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border2);gap:12px;">
+                    <div>
+                        <div style="font-size:12px;font-weight:600;">{{ $class->display_name }}</div>
+                        <div style="font-size:10px;color:var(--text2);">{{ $class->code }}</div>
+                    </div>
+                    <div style="text-align:right;font-size:11px;color:var(--text2);">{{ $class->professor->name ?? 'N/A' }}</div>
+                </div>
+            @empty
+                <div style="color:var(--text2);font-size:11px;">Not enrolled in any classes.</div>
+            @endforelse
+            <a class="btn btn-sm" href="{{ route('student.classes') }}" style="width:100%;justify-content:center;margin-top:8px;">View All Classes -></a>
         </div>
-        <div style="flex:1 1 170px;min-width:170px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px;text-align:center;">
-            <div style="font-size:26px;font-weight:700;color:var(--amber);">{{ $totalLate }}</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px;letter-spacing:.03em;">Late</div>
-        </div>
-        <div style="flex:1 1 170px;min-width:170px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px;text-align:center;">
-            <div style="font-size:26px;font-weight:700;color:var(--red);">{{ $totalAbsent }}</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px;letter-spacing:.03em;">Absent</div>
-        </div>
-        <div style="flex:1 1 170px;min-width:170px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px;text-align:center;">
-            <div style="font-size:26px;font-weight:700;color:var(--blue);">{{ $classes->count() }}</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px;letter-spacing:.03em;">Enrolled Classes</div>
+
+        <div class="sh">Your QR Code</div>
+        <div class="card" style="text-align:center;">
+            <div style="background:#fff;border-radius:var(--radius);display:inline-flex;padding:12px;margin-bottom:12px;">
+                <img id="student-qr-img" src="{{ route('student.qr-code') }}" alt="Student QR Code" style="width:180px;height:180px;border-radius:6px;background:#fff;object-fit:contain;" />
+            </div>
+            <div style="font-size:10px;color:var(--text2);margin-bottom:12px;">Show your QR code to professors for attendance scanning</div>
+            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                <button type="button" class="btn btn-sm btn-p" onclick="showStudentQR()" style="flex:1;min-width:100px;">Show QR</button>
+                <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-sm" style="flex:1;min-width:100px;justify-content:center;">Download</a>
+            </div>
         </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:20px;align-items:start;">
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:22px;">
-            <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:20px;">
-                <div style="flex:1 1 320px;min-width:280px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px;text-align:center;">
-                    <div style="font-size:18px;font-weight:700;margin-bottom:12px;color:#fff;">Your Student QR Code</div>
-                    <div style="background:#fff;border-radius:18px;display:inline-flex;padding:16px;">
-                        <img id="student-qr-img" src="{{ route('student.qr-code') }}" alt="Student QR Code" style="width:220px;height:220px;border-radius:18px;background:#fff;object-fit:contain;" />
+    <div>
+        <div class="sh">Recent Attendance</div>
+        <div class="card">
+            @forelse($recentAttendance as $record)
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);gap:12px;">
+                    <div style="flex:1;">
+                        <div style="font-size:11px;font-weight:600;">{{ $record->classe->name ?? 'N/A' }}</div>
+                        <div style="font-size:9px;color:var(--text3);">{{ $record->recorded_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</div>
                     </div>
-                    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
-                        <button type="button" class="btn btn-p" style="padding:10px 16px;font-size:12px;" onclick="showStudentQR()">Show QR</button>
-                        <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn" style="padding:10px 16px;font-size:12px;">Download</a>
-                    </div>
+                    @if($record->status === 'present')
+                        <span class="badge bg" style="font-size:10px;">Present</span>
+                    @elseif($record->status === 'late')
+                        <span class="badge" style="background:var(--amber);color:#000;font-size:10px;">Late</span>
+                    @else
+                        <span class="badge br" style="font-size:10px;">Absent</span>
+                    @endif
                 </div>
-            </div>
-
-            <div style="font-size:18px;font-weight:700;margin-bottom:14px;color:#fff;">Your Classes</div>
-            <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:separate;border-spacing:0 6px;">
-                    <thead>
-                        <tr style="background:rgba(255,255,255,0.04);">
-                            <th style="padding:12px 10px;text-align:left;color:rgba(255,255,255,0.7);">Class</th>
-                            <th style="padding:12px 10px;text-align:left;color:rgba(255,255,255,0.7);">Professor</th>
-                            <th style="padding:12px 10px;text-align:center;color:rgba(255,255,255,0.7);">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($classes as $class)
-                            <tr style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;">
-                                <td style="padding:12px 10px;min-width:150px;">
-                                    <div style="font-size:13px;font-weight:700;color:#fff;">{{ $class->name }}</div>
-                                    <div style="font-size:11px;color:rgba(255,255,255,0.6);">{{ $class->code }}</div>
-                                </td>
-                                <td style="font-size:12px;padding:12px 10px;min-width:120px;color:rgba(255,255,255,0.75);">{{ $class->professor->name ?? 'N/A' }}</td>
-                                <td style="text-align:center;padding:12px 10px;">
-                                    <button type="button" class="btn btn-p" style="padding:8px 14px;font-size:12px;" onclick="showStudentQR()">
-                                        📱 View QR
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="3" style="text-align:center;color:rgba(255,255,255,0.65);padding:24px;font-size:13px;">You are not enrolled in any classes.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+            @empty
+                <div style="text-align:center;color:var(--text2);padding:12px;font-size:11px;">
+                    No attendance records yet.
+                </div>
+            @endforelse
+            <a class="btn btn-sm" href="{{ route('student.attendance') }}" style="width:100%;justify-content:center;margin-top:8px;">View All Records -></a>
         </div>
 
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:22px;">
-            <div style="font-size:18px;font-weight:700;margin-bottom:14px;color:#fff;">Recent Attendance</div>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-                @forelse($recentAttendance as $record)
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
-                        <div>
-                            <div style="font-size:13px;font-weight:700;color:#fff;">{{ $record->classe->name ?? 'N/A' }}</div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.55);">{{ $record->recorded_at?->format('M d, Y h:i A') }}</div>
-                        </div>
-                        @if($record->status === 'present')
-                            <span class="badge bg" style="font-size:11px;">Present</span>
-                        @elseif($record->status === 'late')
-                            <span class="badge" style="background:var(--amber);color:white;font-size:11px;">Late</span>
-                        @else
-                            <span class="badge br" style="font-size:11px;">Absent</span>
-                        @endif
-                    </div>
-                @empty
-                    <div style="text-align:center;color:rgba(255,255,255,0.65);padding:24px;font-size:13px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
-                        No attendance records yet.
-                    </div>
-                @endforelse
-            </div>
+        <div class="sh">Quick Actions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            <a class="btn" href="{{ route('student.classes') }}" style="justify-content:center;">My Classes</a>
+            <a class="btn" href="{{ route('student.attendance') }}" style="justify-content:center;">Attendance</a>
         </div>
     </div>
 </div>
 
-<!-- QR Code Modal for Student -->
-<div id="student-qr-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:white;padding:24px;border-radius:12px;max-width:350px;width:90%;text-align:center;">
-        <div style="font-size:16px;font-weight:600;margin-bottom:4px;">Student Attendance QR</div>
-        <div id="modal-class-name" style="font-size:11px;color:var(--text2);margin-bottom:16px;"></div>
-        <img id="modal-student-qr-image" src="{{ route('student.qr-code') }}" alt="Student QR" style="width:220px;height:220px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:white;object-fit:contain;" />
-        <div id="modal-student-qr-uuid" style="font-size:10px;color:var(--text3);margin-bottom:12px;font-family:monospace;word-break:break-all;"></div>
-        <div style="font-size:10px;color:var(--text2);margin-bottom:16px;">Show this QR code to your professor for attendance scanning</div>
-        <div style="display:flex;gap:8px;justify-content:center;">
-            <button type="button" class="btn btn-p" onclick="downloadStudentQR()">Download</button>
-            <button type="button" class="btn" onclick="closeStudentQRModal()">Close</button>
+<!-- QR Code Modal -->
+<div id="student-qr-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:relative;width:100%;max-width:420px;max-height:90vh;background:var(--navy2);border-radius:18px;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,0.45);padding:24px;text-align:center;">
+        <button onclick="closeStudentQRModal()" class="btn btn-sm btn-d" style="position:absolute;top:16px;right:16px;z-index:10;">Close</button>
+        <h3 style="margin-bottom:8px;">Your Student QR Code</h3>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Show this to professors for attendance</div>
+        <div style="background:#fff;border-radius:var(--radius);display:inline-flex;padding:12px;margin-bottom:12px;">
+            <img id="modal-student-qr-image" src="{{ route('student.qr-code') }}" alt="Student QR" style="width:220px;height:220px;border-radius:6px;background:#fff;object-fit:contain;" />
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-p" style="flex:1;min-width:100px;justify-content:center;">Download</a>
         </div>
     </div>
 </div>
 
 <script>
 function showStudentQR() {
-    document.getElementById('modal-class-name').textContent = 'Student QR Code';
     document.getElementById('student-qr-modal').style.display = 'flex';
 }
-
 function closeStudentQRModal() {
     document.getElementById('student-qr-modal').style.display = 'none';
 }
