@@ -32,14 +32,14 @@
         <div class="sh">Your QR Code</div>
         <div class="card" style="text-align:center;\">
             <div style="background:#fff;border-radius:var(--radius);display:inline-flex;padding:12px;margin-bottom:12px;\">
-                <img id="student-qr-img" src="{{ route('student.qr-code') }}" alt="Student QR Code" style="width:140px;height:140px;border-radius:6px;background:#fff;object-fit:contain;\" />
+                <img id="student-qr-img" src="{{ $studentQrDataUri }}" alt="Student QR Code" style="width:140px;height:140px;border-radius:6px;background:#fff;object-fit:contain;" />
             </div>
             <div style="font-size:11px;font-weight:600;\">{{ auth()->user()->name }}</div>
             <div style="font-size:10px;color:var(--text2);\">Student ID: {{ auth()->id() }}</div>
             <div style="font-size:10px;color:var(--text3);\">Show to professor for attendance</div>
             <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px;\">
                 <button type="button" class="btn btn-sm btn-p" onclick="showStudentQR()" style="flex:1;min-width:80px;\">Show</button>
-                <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-sm" style="flex:1;min-width:80px;justify-content:center;\">Download</a>
+                <a href="{{ $studentQrDataUri }}" download="student-qr.svg" class="btn btn-sm" style="flex:1;min-width:80px;justify-content:center;">Download</a>
             </div>
         </div>
 
@@ -76,11 +76,11 @@
         <div style="font-size:12px;color:var(--text2);\">{{ auth()->user()->name }}</div>
         <div style="font-size:10px;color:var(--text3);\">Student ID: {{ auth()->id() }}</div>
         <div style="background:#fff;border-radius:var(--radius);\;display:inline-flex;padding:12px;margin:16px 0;\">
-            <img id="modal-student-qr-image" src="{{ route('student.qr-code') }}" alt="Student QR" style="width:220px;height:220px;border-radius:6px;background:#fff;object-fit:contain;\" />
+            <img id="modal-student-qr-image" src="{{ $studentQrDataUri }}" alt="Student QR" style="width:220px;height:220px;border-radius:6px;background:#fff;object-fit:contain;" />
         </div>
         <div style="font-size:10px;color:var(--text2);\">Show this QR code to your professor for attendance scanning</div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;\">
-            <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-p" style="flex:1;min-width:100px;justify-content:center;\">Download</a>
+            <a href="{{ $studentQrDataUri }}" download="student-qr.svg" class="btn btn-p" style="flex:1;min-width:100px;justify-content:center;">Download</a>
             <button type="button" class="btn btn-sm" onclick="closeStudentQRModal()" style="flex:1;min-width:100px;justify-content:center;\">Close</button>
         </div>
     </div>

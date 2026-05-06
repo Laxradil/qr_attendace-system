@@ -32,7 +32,7 @@
     <div>
         <div class="sh">Attendance Overview</div>
         <div class="card">
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
                 <div>
                     <div class="stat-val" style="font-size:18px;color:var(--green);">{{ $presentCount }}</div>
                     <div class="stat-label">Present</div>
@@ -44,6 +44,10 @@
                 <div>
                     <div class="stat-val" style="font-size:18px;color:var(--red);">{{ $absentCount }}</div>
                     <div class="stat-label">Absent</div>
+                </div>
+                <div>
+                    <div class="stat-val" style="font-size:18px;color:var(--purple);">{{ $excusedCount }}</div>
+                    <div class="stat-label">Excused</div>
                 </div>
                 <div>
                     <div class="stat-val" style="font-size:18px;color:var(--blue);">{{ $totalRecords }}</div>

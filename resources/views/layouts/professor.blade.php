@@ -18,6 +18,7 @@
             --purple:#6c5ce7;
             --purple2:#5a4fcf;
             --purple-light:#a29bfe;
+            --purple-bg:rgba(108,92,231,0.12);
             --purple-glow:rgba(108,92,231,0.15);
             --blue:#0984e3;
             --blue-bg:rgba(9,132,227,0.12);
@@ -201,7 +202,6 @@
                 <a href="{{ route('student.dashboard') }}" class="sb-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Dashboard</a>
                 <a href="{{ route('student.classes') }}" class="sb-item {{ request()->routeIs('student.classes') ? 'active' : '' }}">My Classes</a>
                 <a href="{{ route('student.attendance') }}" class="sb-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}">Attendance</a>
-                <a href="{{ route('student.qr-code') }}" class="sb-item {{ request()->routeIs('student.qr-code') ? 'active' : '' }}">My QR Code</a>
             @endif
 
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto;">
