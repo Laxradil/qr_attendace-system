@@ -201,7 +201,6 @@
                 <a href="{{ route('student.dashboard') }}" class="sb-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Dashboard</a>
                 <a href="{{ route('student.classes') }}" class="sb-item {{ request()->routeIs('student.classes') ? 'active' : '' }}">My Classes</a>
                 <a href="{{ route('student.attendance') }}" class="sb-item {{ request()->routeIs('student.attendance') ? 'active' : '' }}">Attendance</a>
-                <a href="{{ route('student.qr-code') }}" class="sb-item {{ request()->routeIs('student.qr-code') ? 'active' : '' }}">My QR Code</a>
             @endif
 
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto;">
