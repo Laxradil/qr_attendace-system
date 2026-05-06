@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS "public"."attendance_records" (
     "recorded_at" timestamp(0) without time zone NOT NULL,
     "created_at" timestamp(0) without time zone,
     "updated_at" timestamp(0) without time zone,
-    CONSTRAINT "attendance_records_status_check" CHECK ((("status")::"text" = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying])::"text"[])))
+    CONSTRAINT "attendance_records_status_check" CHECK ((("status")::"text" = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying, 'excused'::character varying])::"text"[])))
 );
 
 
@@ -1245,7 +1245,7 @@ alter table "public"."system_logs" drop constraint "system_logs_action_check";
 
 alter table "public"."users" drop constraint "users_role_check";
 
-alter table "public"."attendance_records" add constraint "attendance_records_status_check" CHECK (((status)::text = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying])::text[]))) not valid;
+alter table "public"."attendance_records" add constraint "attendance_records_status_check" CHECK (((status)::text = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying, 'excused'::character varying])::text[]))) not valid;
 
 alter table "public"."attendance_records" validate constraint "attendance_records_status_check";
 
