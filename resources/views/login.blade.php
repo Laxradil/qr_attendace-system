@@ -239,6 +239,33 @@
         .btn-login:active {
             transform: translateY(0);
         }
+
+        .error-box {
+            background: rgba(255, 72, 66, 0.12);
+            border: 1px solid rgba(255, 72, 66, 0.25);
+            color: #ffe8e6;
+            padding: 1rem 1.1rem;
+            border-radius: 0.85rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .error-box strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: #ffb3b0;
+        }
+
+        .error-text {
+            color: #ffb3b0;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .form-control.error {
+            border-color: #ff6b6b;
+        }
     </style>
 </head>
 <body>
@@ -251,26 +278,43 @@
             <h2>Welcome Back</h2>
             <p>Sign in to your account</p>
         </div>
+
+        @if ($errors->any())
+            <div class="error-box" id="loginErrorBox">
+                <strong>Login failed</strong>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('login') }}" novalidate id="loginForm">
             @csrf
             <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <div class="input-wrapper">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                    <input type="email" class="form-control @error('email') error @enderror" id="email" name="email" placeholder="Enter your email" value="{{ old('email') }}" required>
                     <i class="fas fa-envelope"></i>
                 </div>
+                <span class="error-text" id="emailError" @if(!$errors->has('email')) style="display:none;" @endif>
+                    @error('email') {{ $message }} @enderror
+                </span>
             </div>
             
             <div class="form-group">
                 <label class="form-label">Password</label>
                 <div class="input-wrapper">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                    <input type="password" class="form-control @error('password') error @enderror" id="password" name="password" placeholder="Enter your password" required>
                     <i class="fas fa-lock"></i>
                     <button type="button" class="password-toggle" id="togglePassword">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
+                <span class="error-text" id="passwordError" @if(!$errors->has('password')) style="display:none;" @endif>
+                    @error('password') {{ $message }} @enderror
+                </span>
             </div>
             
             <div class="form-options">
@@ -300,6 +344,56 @@
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
+        });
+
+        const clearErrors = () => {
+            const errorBox = document.getElementById('loginErrorBox');
+            if (errorBox) {
+                errorBox.style.display = 'none';
+            }
+            document.querySelectorAll('.error-text').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.form-control.error').forEach(el => el.classList.remove('error'));
+        };
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        const showFieldError = (field, message) => {
+            const errorSpan = document.getElementById(field.id + 'Error');
+            if (errorSpan) {
+                errorSpan.textContent = message;
+                errorSpan.style.display = 'block';
+            }
+            field.classList.add('error');
+        };
+
+        loginForm.addEventListener('submit', function(event) {
+            clearErrors();
+            let hasError = false;
+            const emailValue = emailInput.value.trim();
+            const passwordValue = passwordInput.value.trim();
+
+            if (!emailValue) {
+                showFieldError(emailInput, 'Email is required.');
+                hasError = true;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+                showFieldError(emailInput, 'Please enter a valid email address.');
+                hasError = true;
+            }
+
+            if (!passwordValue) {
+                showFieldError(passwordInput, 'Password is required.');
+                hasError = true;
+            }
+
+            if (hasError) {
+                event.preventDefault();
+            }
+        });
+
+        document.querySelectorAll('input[name="email"], input[name="password"]').forEach(input => {
+            input.addEventListener('input', clearErrors);
         });
     </script>
 </body>

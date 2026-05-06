@@ -41,6 +41,7 @@
                     <option value="present" {{ old('status', $record->status) === 'present' ? 'selected' : '' }}>Present</option>
                     <option value="late" {{ old('status', $record->status) === 'late' ? 'selected' : '' }}>Late</option>
                     <option value="absent" {{ old('status', $record->status) === 'absent' ? 'selected' : '' }}>Absent</option>
+                    <option value="excused" {{ old('status', $record->status) === 'excused' ? 'selected' : '' }}>Excused</option>
                 </select>
             </div>
 
