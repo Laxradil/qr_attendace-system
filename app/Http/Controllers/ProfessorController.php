@@ -15,6 +15,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ProfessorController extends Controller
 {
@@ -77,12 +78,89 @@ class ProfessorController extends Controller
         $user = Auth::user();
         $classes = $user->assignedClasses()
             ->withCount('students')
-            ->with('schedules')
+            ->with(['schedules', 'students:id'])
             ->get();
+
+        $availableStudents = User::where('role', 'student')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
         return view('professor.classes', [
             'classes' => $classes,
+            'availableStudents' => $availableStudents,
         ]);
+    }
+
+    public function updateClass(Request $request, Classe $classe): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user->assignedClasses()->whereKey($classe->id)->exists()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'code' => 'required|string|unique:classes,code,' . $classe->id . '|max:20',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
+            'schedule_id' => 'nullable|exists:schedules,id',
+            'days' => 'required|array|min:1',
+            'days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'room' => 'required|string|max:20',
+        ]);
+
+        $classe->update([
+            'code' => $validated['code'],
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+        ]);
+
+        $schedule = null;
+        if (!empty($validated['schedule_id'])) {
+            $schedule = $classe->schedules()->where('id', $validated['schedule_id'])->first();
+        }
+
+        if (!$schedule) {
+            $schedule = $classe->schedules()->first();
+        }
+
+        $daysValue = implode(', ', $validated['days']);
+
+        if (!$schedule) {
+            $classe->schedules()->create([
+                'class_id' => $classe->id,
+                'professor_id' => $user->id,
+                'professor' => $user->name,
+                'subject_code' => $validated['code'],
+                'subject_name' => $validated['name'],
+                'days' => $daysValue,
+                'time' => $validated['start_time'],
+                'start_time' => $validated['start_time'],
+                'end_time' => $validated['end_time'],
+                'room' => $validated['room'],
+            ]);
+        } else {
+            $schedule->update([
+                'days' => $daysValue,
+                'time' => $validated['start_time'],
+                'start_time' => $validated['start_time'],
+                'end_time' => $validated['end_time'],
+                'room' => $validated['room'],
+            ]);
+        }
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'update_class',
+            'description' => 'Updated class information for: ' . $classe->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('professor.classes')->with('success', 'Class updated successfully.');
     }
 
     public function showClass(Classe $classe): View
@@ -138,13 +216,14 @@ class ProfessorController extends Controller
             $user = Auth::user();
 
             // Combine multiple validations into a single efficient query
-            $classe = Classe::whereHas('professors', function($q) use ($user) {
-                $q->where('users.id', $user->id);
-            })
-            ->whereHas('students', function($q) use ($selectedStudentId) {
-                $q->where('users.id', $selectedStudentId);
-            })
-            ->find($selectedClassId);
+            $classe = Classe::with('schedules')
+                ->whereHas('professors', function($q) use ($user) {
+                    $q->where('users.id', $user->id);
+                })
+                ->whereHas('students', function($q) use ($selectedStudentId) {
+                    $q->where('users.id', $selectedStudentId);
+                })
+                ->find($selectedClassId);
 
             if (!$classe) {
                 $message = !$classe || !$user->assignedClasses()->whereKey($selectedClassId)->exists()
@@ -168,12 +247,31 @@ class ProfessorController extends Controller
                     : back()->with('error', $message);
             }
 
+            $schedule = $this->findTodayScheduleForClass($classe);
+            $attendanceStatus = 'present';
+            $minutesLate = null;
+            $recordedAt = now();
+
+            if ($schedule && $schedule->start_time) {
+                $sessionStart = Carbon::parse($schedule->start_time)->setDate($recordedAt->year, $recordedAt->month, $recordedAt->day);
+                $lateThreshold = $sessionStart->copy()->addMinutes(15);
+                $absentThreshold = $sessionStart->copy()->addMinutes(20);
+
+                if ($recordedAt->greaterThanOrEqualTo($absentThreshold)) {
+                    $attendanceStatus = 'absent';
+                } elseif ($recordedAt->greaterThanOrEqualTo($lateThreshold)) {
+                    $attendanceStatus = 'late';
+                    $minutesLate = (int) $recordedAt->diffInMinutes($sessionStart);
+                }
+            }
+
             AttendanceRecord::create([
                 'class_id' => $selectedClassId,
                 'student_id' => $selectedStudentId,
                 'qr_code_id' => null,
-                'status' => 'present',
-                'recorded_at' => now(),
+                'status' => $attendanceStatus,
+                'minutes_late' => $minutesLate ?? 0,
+                'recorded_at' => $recordedAt,
             ]);
 
             SystemLog::create([
@@ -196,11 +294,69 @@ class ProfessorController extends Controller
             : back()->with('error', $message);
     }
 
+    private function findTodayScheduleForClass(Classe $classe)
+    {
+        $today = now()->format('l');
+        return $classe->schedules->first(fn($schedule) => $this->scheduleMatchesDay($schedule, $today));
+    }
+
+    private function scheduleMatchesDay($schedule, string $day): bool
+    {
+        if (empty($schedule->days)) {
+            return false;
+        }
+
+        $normalizedDay = strtolower($day);
+        return collect($this->parseScheduleDays($schedule->days))
+            ->map(fn($value) => strtolower($value))
+            ->contains($normalizedDay);
+    }
+
+    private function parseScheduleDays(string $days): array
+    {
+        $tokens = preg_split('/[\s,;\/]+/', trim($days));
+        $mapped = [];
+
+        foreach ($tokens as $token) {
+            $token = trim($token);
+            if (!$token) {
+                continue;
+            }
+
+            $lower = strtolower($token);
+            $map = [
+                'mon' => 'Monday',
+                'monday' => 'Monday',
+                'tue' => 'Tuesday',
+                'tues' => 'Tuesday',
+                'tuesday' => 'Tuesday',
+                'wed' => 'Wednesday',
+                'wednesday' => 'Wednesday',
+                'thu' => 'Thursday',
+                'thur' => 'Thursday',
+                'thurs' => 'Thursday',
+                'thursday' => 'Thursday',
+                'fri' => 'Friday',
+                'friday' => 'Friday',
+                'sat' => 'Saturday',
+                'saturday' => 'Saturday',
+                'sun' => 'Sunday',
+                'sunday' => 'Sunday',
+            ];
+
+            if (isset($map[$lower])) {
+                $mapped[] = $map[$lower];
+            }
+        }
+
+        return array_unique($mapped);
+    }
+
     public function attendanceRecords(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
-        $classes = $user->assignedClasses()->get();
+        $classes = $user->assignedClasses()->get()->unique('id')->values();
         $classId = $request->query('class_id');
         $date = $request->query('date');
 
@@ -321,7 +477,18 @@ class ProfessorController extends Controller
         $validated = $request->validate([
             'class_id' => 'required|exists:classes,id',
             'student_id' => 'required|exists:users,id',
-            'reason' => 'nullable|string|max:500',
+            'reason' => [
+                'required',
+                'string',
+                'max:500',
+                Rule::in([
+                    'Schedule conflict',
+                    'Transfer to another section',
+                    'Medical reason',
+                    'Academic performance',
+                    'Personal reasons',
+                ]),
+            ],
         ]);
 
         $classe = Classe::findOrFail($validated['class_id']);
@@ -450,11 +617,11 @@ class ProfessorController extends Controller
     {
         $validated = $request->validate([
             'class_id' => 'required|exists:classes,id',
-            'student_email' => 'required|email|exists:users,email',
+            'student_id' => 'required|exists:users,id',
         ]);
 
         $classe = Classe::findOrFail($validated['class_id']);
-        $student = User::where('email', $validated['student_email'])->first();
+        $student = User::findOrFail($validated['student_id']);
 
         // Verify the professor is assigned to this class
         if (!$classe->professors()->wherePivot('professor_id', Auth::id())->exists()) {

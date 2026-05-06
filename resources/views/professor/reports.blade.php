@@ -15,7 +15,7 @@
                     <option value="">Choose a class to view reports...</option>
                     @foreach($classes as $classe)
                         <option value="{{ $classe->id }}" {{ request('class_id') == $classe->id ? 'selected' : '' }}>
-                            {{ $classe->code }} - {{ $classe->name }}
+                            {{ $classe->display_name }}
                         </option>
                     @endforeach
                 </select>

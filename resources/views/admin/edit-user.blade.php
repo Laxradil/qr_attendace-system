@@ -42,8 +42,9 @@
         <input class="fi" type="password" name="password_confirmation">
         <div style="height:8px;"></div>
 
+        <input type="hidden" name="is_active" value="0">
         <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);margin-bottom:12px;">
-            <input type="checkbox" name="is_active" {{ $user->is_active ? 'checked' : '' }}> Active account
+            <input type="checkbox" name="is_active" value="1" {{ $user->is_active ? 'checked' : '' }}> Active account
         </label>
 
         <div style="display:flex;gap:8px;">

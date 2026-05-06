@@ -202,7 +202,7 @@
     <div id="addScheduleModal" class="modal">
         <div class="modal-content">
             <h3 class="text-lg font-semibold mb-4">Add New Schedule</h3>
-            <form method="POST" action="{{ route('admin.schedule.create') }}">
+            <form method="POST" action="{{ route('schedules.store') }}">
                 @csrf
                 <div class="mb-3">
                     <label class="block text-sm mb-1">Subject Code</label>
@@ -226,8 +226,12 @@
                     <input type="text" name="days" class="input" placeholder="e.g. MWF or TTh" required>
                 </div>
                 <div class="mb-3">
-                    <label class="block text-sm mb-1">Time</label>
-                    <input type="text" name="time" class="input" placeholder="e.g. 7:30-9:00" required>
+                    <label class="block text-sm mb-1">Start Time</label>
+                    <input type="time" name="start_time" class="input" required>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm mb-1">End Time</label>
+                    <input type="time" name="end_time" class="input" required>
                 </div>
                 <div class="mb-3">
                     <label class="block text-sm mb-1">Room</label>
@@ -293,8 +297,12 @@
                     <input type="text" name="days" id="editDays" class="input" required>
                 </div>
                 <div class="mb-3">
-                    <label class="block text-sm mb-1">Time</label>
-                    <input type="text" name="time" id="editTime" class="input" required>
+                    <label class="block text-sm mb-1">Start Time</label>
+                    <input type="time" name="start_time" id="editStartTime" class="input" required>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm mb-1">End Time</label>
+                    <input type="time" name="end_time" id="editEndTime" class="input" required>
                 </div>
                 <div class="mb-3">
                     <label class="block text-sm mb-1">Room</label>
@@ -356,12 +364,20 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Unable to delete user.');
+                    }
+                    return response.json().catch(() => ({ success: true }));
+                })
+                .then(() => {
                     alert('User deleted successfully!');
                     location.reload();
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete user. Please refresh and try again.');
+                });
             }
         }
         
@@ -374,7 +390,8 @@
                     document.getElementById('editSubjectCode').value = data.subject_code;
                     document.getElementById('editSubjectName').value = data.subject_name;
                     document.getElementById('editDays').value = data.days;
-                    document.getElementById('editTime').value = data.time;
+                    document.getElementById('editStartTime').value = data.start_time || '';
+                    document.getElementById('editEndTime').value = data.end_time || '';
                     document.getElementById('editRoom').value = data.room;
                     document.getElementById('editScheduleForm').action = '/schedules/' + id;
                     openModal('editScheduleModal');

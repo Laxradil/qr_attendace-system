@@ -73,7 +73,7 @@
                         <select name="class_id" required class="fi" id="class-select" {{ $selectedClassId ? 'disabled' : '' }}>
                             <option value="">Choose a class...</option>
                             @foreach($classes as $classe)
-                                <option value="{{ $classe->id }}" {{ old('class_id', $selectedClassId) == $classe->id ? 'selected' : '' }}>{{ $classe->code }} - {{ $classe->name }}</option>
+                                <option value="{{ $classe->id }}" {{ old('class_id', $selectedClassId) == $classe->id ? 'selected' : '' }}>{{ $classe->display_name }}</option>
                             @endforeach
                         </select>
                         @if($selectedClassId)

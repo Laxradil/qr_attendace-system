@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('attendance:reset')->dailyAt('00:00');
+        $schedule->command('attendance:mark-absent')->everyMinute();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

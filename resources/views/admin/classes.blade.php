@@ -34,7 +34,8 @@
 
                     <td style="font-size:11px;font-weight:600;">{{ $classe->students->count() }}</td>
                     <td><span class="badge {{ $classe->is_active ? 'bg' : 'ba' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span></td>
-                    <td style="display:flex;gap:4px;">
+                    <td style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <a href="{{ route('admin.classes.enroll', $classe) }}" class="btn btn-sm">Enroll</a>
                         <a href="{{ route('admin.classes.edit', $classe) }}" class="btn btn-sm">Edit</a>
                         <form action="{{ route('admin.classes.delete', $classe) }}" method="POST" onsubmit="return confirm('Delete this class?')">@csrf @method('DELETE')<button class="btn btn-sm btn-d" type="submit">Delete</button></form>
                     </td>

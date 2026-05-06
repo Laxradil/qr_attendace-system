@@ -64,7 +64,7 @@
                             <div style="font-size:10px;color:var(--text2);margin-top:1px;">{{ $log->description }}</div>
                         @endif
                     </div>
-                    <div style="font-size:9px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace;">{{ $log->created_at?->format('h:i A') }}</div>
+                    <div style="font-size:9px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace;">{{ $log->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('h:i A') }}</div>
                 </div>
             @empty
                 <div style="color:var(--text2);font-size:11px;">No recent activity.</div>

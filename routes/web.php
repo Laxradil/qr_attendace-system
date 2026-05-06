@@ -55,6 +55,7 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::get('/', [ProfessorController::class, 'dashboard'])->name('professor.dashboard');
     Route::get('/classes', [ProfessorController::class, 'myClasses'])->name('professor.classes');
     Route::get('/classes/{classe}', [ProfessorController::class, 'showClass'])->name('professor.class-detail');
+    Route::put('/classes/{classe}', [ProfessorController::class, 'updateClass'])->name('professor.classes.update');
     Route::get('/scan-qr', [ProfessorController::class, 'scanQR'])->name('professor.scan-qr');
     Route::post('/attendance', [ProfessorController::class, 'recordAttendance'])->name('professor.attendance.store');
     Route::get('/attendance-records', [ProfessorController::class, 'attendanceRecords'])->name('professor.attendance-records');
@@ -94,6 +95,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/classes/create', [AdminController::class, 'createClass'])->name('admin.classes.create');
     Route::post('/classes', [AdminController::class, 'storeClass'])->name('admin.classes.store');
     Route::get('/classes/{classe}/edit', [AdminController::class, 'editClass'])->name('admin.classes.edit');
+    Route::get('/classes/{classe}/enroll', [AdminController::class, 'enrollClassForm'])->name('admin.classes.enroll');
+    Route::post('/classes/{classe}/enroll', [AdminController::class, 'storeClassEnrollment'])->name('admin.classes.enroll.store');
     Route::put('/classes/{classe}', [AdminController::class, 'updateClass'])->name('admin.classes.update');
     Route::delete('/classes/{classe}', [AdminController::class, 'deleteClass'])->name('admin.classes.delete');
     
