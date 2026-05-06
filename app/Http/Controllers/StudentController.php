@@ -53,6 +53,7 @@ class StudentController extends Controller
             'totalPresent' => $stats->present ?? 0,
             'totalLate' => $stats->late ?? 0,
             'totalAbsent' => $stats->absent ?? 0,
+            'studentQrDataUri' => 'data:image/svg+xml;charset=utf-8,' . rawurlencode($this->createStudentQrSvg($user)),
         ]);
     }
 
@@ -91,7 +92,28 @@ class StudentController extends Controller
 
         return view('student.classes', [
             'classes' => $classes,
+            'studentQrDataUri' => 'data:image/svg+xml;charset=utf-8,' . rawurlencode($this->createStudentQrSvg($user)),
         ]);
+    }
+
+    private function createStudentQrSvg($user): string
+    {
+        $qrCode = QRCode::where('student_id', $user->id)->first();
+
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $user->id,
+            'student_name' => $user->name,
+            'student_email' => $user->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
+
+        return QrCodeFacade::format('svg')
+            ->size(280)
+            ->margin(1)
+            ->encoding('UTF-8')
+            ->generate($qrData);
     }
 
     public function generateStudentQR()
