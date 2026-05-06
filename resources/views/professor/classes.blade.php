@@ -98,6 +98,9 @@
         </div>
     </div>
 
+    <script type="application/json" id="professorAvailableStudentsData">@json($availableStudents)</script>
+    <script type="application/json" id="classExistingStudentIdsData">@json($classes->mapWithKeys(fn ($classe) => [$classe->id => $classe->students->pluck('id')->values()]))</script>
+
 <div id="addStudentModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:16px;">
     <div style="position:relative;width:100%;max-width:420px;max-height:90vh;background:var(--navy2);border-radius:18px;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,0.45);padding:24px;">
         <button onclick="closeAddStudentModal()" class="btn btn-sm btn-d" style="position:absolute;top:16px;right:16px;z-index:10;">Close</button>
@@ -324,12 +327,8 @@ function closeStudentsModal() {
     document.getElementById('studentsModal').style.display = 'none';
 }
 
-const professorAvailableStudents = @json($availableStudents);
-const classExistingStudentIds = {
-    @foreach($classes as $classe)
-        {{ $classe->id }}: [@foreach($classe->students as $student){{ $student->id }},@endforeach],
-    @endforeach
-};
+const professorAvailableStudents = JSON.parse(document.getElementById('professorAvailableStudentsData').textContent || '[]');
+const classExistingStudentIds = JSON.parse(document.getElementById('classExistingStudentIdsData').textContent || '{}');
 
 function renderAvailableStudentList() {
     const query = document.getElementById('studentSearch').value.trim().toLowerCase();
