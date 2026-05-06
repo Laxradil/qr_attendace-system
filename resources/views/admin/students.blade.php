@@ -17,7 +17,7 @@
                 <summary>
                     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;">
                         <div>
-                            <div style="font-weight:700;">{{ $classe->code }} - {{ $classe->name }}</div>
+                            <div style="font-weight:700;">{{ $classe->display_name }}</div>
                             <div style="font-size:11px;color:var(--text3);margin-top:4px;">
                                 {{ $classe->students->count() }} student{{ $classe->students->count() === 1 ? '' : 's' }} &middot;
                                 Assigned: {{ $classe->professors->pluck('name')->join(', ') ?: 'No professor assigned' }}
@@ -43,7 +43,7 @@
                                             <td style="font-size:10px;color:var(--text2);">{{ $student->email }}</td>
                                             <td style="font-size:10px;color:var(--text2);">{{ $student->username }}</td>
                                             <td><span class="badge {{ $student->is_active ? 'bg' : 'br' }}">{{ $student->is_active ? 'Active' : 'Inactive' }}</span></td>
-                                            <td class="td-mono">{{ $student->created_at?->format('M d, Y') }}</td>
+                                            <td class="td-mono">{{ $student->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
                                             <td style="display:flex;gap:4px;flex-wrap:wrap;"><a class="btn btn-sm" href="{{ route('admin.users.edit', $student) }}">Edit</a><form action="{{ route('admin.users.delete', $student) }}" method="POST" onsubmit="return confirm('Delete this student?')">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-d">Delete</button></form></td>
                                         </tr>
                                     @endforeach

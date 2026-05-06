@@ -94,14 +94,23 @@ class AdminController extends Controller
             return $query->paginate(20);
         });
 
-        // Get statistics for all users (not filtered)
+        // Get statistics for all users (not filtered) in a single query
+        $userStats = User::selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admins,
+            SUM(CASE WHEN role = 'professor' THEN 1 ELSE 0 END) as professors,
+            SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students,
+            SUM(CASE WHEN is_active = true THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN is_active = false THEN 1 ELSE 0 END) as inactive
+        ")->first();
+
         $stats = [
-            'total' => User::count(),
-            'admins' => User::where('role', 'admin')->count(),
-            'professors' => User::where('role', 'professor')->count(),
-            'students' => User::where('role', 'student')->count(),
-            'active' => User::where('is_active', true)->count(),
-            'inactive' => User::where('is_active', false)->count(),
+            'total' => $userStats->total ?? 0,
+            'admins' => $userStats->admins ?? 0,
+            'professors' => $userStats->professors ?? 0,
+            'students' => $userStats->students ?? 0,
+            'active' => $userStats->active ?? 0,
+            'inactive' => $userStats->inactive ?? 0,
         ];
 
         return view('admin.users', [
@@ -141,17 +150,8 @@ class AdminController extends Controller
 
         // Create QR code for students
         if ($validated['role'] === 'student') {
-            $qrData = json_encode([
-                'type' => 'student_attendance',
-                'student_id' => $user->id,
-                'student_name' => $validated['name'],
-                'student_email' => $validated['email'],
-                'generated_at' => now()->toIso8601String(),
-            ]);
-
             QRCode::create([
                 'uuid' => \Illuminate\Support\Str::uuid(),
-                'code' => $qrData, // Store the JSON data
                 'student_id' => $user->id,
             ]);
         }
@@ -190,7 +190,7 @@ class AdminController extends Controller
             'username' => $validated['username'],
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
-            'is_active' => $validated['is_active'] ?? true,
+            'is_active' => $validated['is_active'] ?? false,
             'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
         ]);
 
@@ -205,18 +205,24 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', 'User updated successfully');
     }
 
-    public function deleteUser(User $user): RedirectResponse
-    { 
-         $name = $user->name; 
-         $user->delete();
+    public function deleteUser(User $user)
+    {
+        $name = $user->name;
+        $actorId = Auth::id();
 
         SystemLog::create([
-            'user_id' => Auth::id(),
+            'user_id' => $actorId,
             'action' => 'delete_user',
             'description' => 'Deleted user: ' . $name,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+
+        $user->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('admin.users')->with('success', 'User deleted successfully');
     }
@@ -248,7 +254,7 @@ class AdminController extends Controller
     {
         // Cache classes for 1 minute
         $classes = Cache::remember('admin_classes_page_' . request('page', 1), 60, function () {
-            return Classe::with('professor', 'professors', 'students')->paginate(20);
+            return Classe::with('professors', 'students')->paginate(20);
         });
         return view('admin.classes', ['classes' => $classes]);
     }
@@ -288,6 +294,11 @@ class AdminController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
+
+        Cache::forget('admin_stats');
+        for ($i = 1; $i <= 10; $i++) {
+            Cache::forget('admin_classes_page_' . $i);
+        }
 
         return redirect()->route('admin.classes')->with('success', 'Class created successfully');
     }
@@ -331,7 +342,61 @@ class AdminController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        Cache::forget('admin_stats');
+        for ($i = 1; $i <= 10; $i++) {
+            Cache::forget('admin_classes_page_' . $i);
+        }
+
         return redirect()->route('admin.classes')->with('success', 'Class updated successfully');
+    }
+
+    public function enrollClassForm(Classe $classe): View
+    {
+        $classe->load('professors', 'students');
+        $availableStudents = User::where('role', 'student')
+            ->whereNotIn('id', $classe->students->pluck('id'))
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.enroll-class', [
+            'classe' => $classe,
+            'availableStudents' => $availableStudents,
+        ]);
+    }
+
+    public function storeClassEnrollment(Request $request, Classe $classe): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'required|exists:users,id',
+        ]);
+
+        $studentIds = User::whereIn('id', $validated['student_ids'])
+            ->where('role', 'student')
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($studentIds)) {
+            return back()->with('error', 'Please select valid students to enroll.');
+        }
+
+        $classe->students()->syncWithoutDetaching($studentIds);
+
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'add_student',
+            'description' => 'Enrolled ' . count($studentIds) . ' student(s) into class: ' . $classe->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        Cache::forget('admin_stats');
+        for ($i = 1; $i <= 10; $i++) {
+            Cache::forget('admin_classes_page_' . $i);
+            Cache::forget('admin_students_by_class_page_' . $i);
+        }
+
+        return redirect()->route('admin.classes')->with('success', 'Students enrolled successfully');
     }
 
     public function deleteClass(Classe $classe): RedirectResponse
@@ -346,6 +411,11 @@ class AdminController extends Controller
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+
+        Cache::forget('admin_stats');
+        for ($i = 1; $i <= 10; $i++) {
+            Cache::forget('admin_classes_page_' . $i);
+        }
 
         return redirect()->route('admin.classes')->with('success', 'Class deleted successfully');
     }
@@ -367,18 +437,14 @@ class AdminController extends Controller
 
         $qrCode = QRCode::where('student_id', $student->id)->first();
 
-        if (!$qrCode) {
-            // Fallback: generate on the fly if no stored QR code
-            $qrData = json_encode([
-                'type' => 'student_attendance',
-                'student_id' => $student->id,
-                'student_name' => $student->name,
-                'student_email' => $student->email,
-                'generated_at' => now()->toIso8601String(),
-            ]);
-        } else {
-            $qrData = $qrCode->code;
-        }
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'student_email' => $student->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
 
         $svg = QrCodeFacade::format('svg')
             ->size(180)
