@@ -514,7 +514,17 @@
     .activity p{margin:3px 0 0;color:var(--muted);font-size:12.5px;line-height:1.4}
     .activity time{font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono)}
 
-    .right-stack{display:grid;gap:16px}
+    .right-stack{display:grid;gap:12px}
+    .system-overview-card{padding:16px 16px 14px}
+    .system-overview-card .section-head{margin-bottom:12px}
+    .system-overview-card .section-head h3{font-size:16px}
+    .system-overview-card .row-item{
+      border-radius:12px;
+      padding:9px 12px;
+      margin-bottom:6px;
+      font-size:12.5px;
+    }
+    .system-overview-card .pill{padding:4px 9px;font-size:10.5px}
     .row-item{
       display:flex;align-items:center;justify-content:space-between;
       border:1px solid rgba(255,255,255,.10);
