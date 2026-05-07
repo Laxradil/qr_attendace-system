@@ -11,7 +11,7 @@
 
 <div class="tbl-wrap">
     <table>
-        <thead><tr><th>Class Code</th><th>Class Name</th><th>Professor</th><th>Enrolled</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Class Code</th><th>Class Name</th><th>Professor</th><th>Enrolled</th><th>Status</th><th style="width:220px;">Actions</th></tr></thead>
         <tbody>
             @forelse($classes as $classe)
                 <tr>
@@ -34,10 +34,16 @@
 
                     <td style="font-size:11px;font-weight:600;">{{ $classe->students->count() }}</td>
                     <td><span class="badge {{ $classe->is_active ? 'bg' : 'ba' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span></td>
-                    <td style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <a href="{{ route('admin.classes.enroll', $classe) }}" class="btn btn-sm">Enroll</a>
-                        <a href="{{ route('admin.classes.edit', $classe) }}" class="btn btn-sm">Edit</a>
-                        <form action="{{ route('admin.classes.delete', $classe) }}" method="POST" onsubmit="return confirm('Delete this class?')">@csrf @method('DELETE')<button class="btn btn-sm btn-d" type="submit">Delete</button></form>
+                    <td>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;justify-content:flex-start;white-space:nowrap;">
+                            <a href="{{ route('admin.classes.enroll', $classe) }}" class="btn btn-sm">Enroll</a>
+                            <a href="{{ route('admin.classes.edit', $classe) }}" class="btn btn-sm">Edit</a>
+                            <form action="{{ route('admin.classes.delete', $classe) }}" method="POST" onsubmit="return confirm('Delete this class?')" style="margin:0;">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-d" type="submit">Delete</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty
