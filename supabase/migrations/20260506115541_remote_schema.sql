@@ -1245,11 +1245,7 @@ alter table "public"."system_logs" drop constraint "system_logs_action_check";
 
 alter table "public"."users" drop constraint "users_role_check";
 
-<<<<<<< HEAD
-alter table "public"."attendance_records" add constraint "attendance_records_status_check" CHECK (((status)::text = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying])::text[]))) not valid;
-=======
 alter table "public"."attendance_records" add constraint "attendance_records_status_check" CHECK (((status)::text = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying, 'excused'::character varying])::text[]))) not valid;
->>>>>>> a936e1228ac50d0d2558a317e08334a7a628aad7
 
 alter table "public"."attendance_records" validate constraint "attendance_records_status_check";
 
