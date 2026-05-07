@@ -105,7 +105,7 @@
 
   <div class="right-stack">
     <!-- System overview -->
-    <div class="card glass">
+    <div class="card glass system-overview-card">
       <div class="section-head"><h3>🖥 System Overview</h3></div>
       <div class="row-item">
         <span>Today's Records</span>

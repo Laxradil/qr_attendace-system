@@ -503,13 +503,14 @@ class ProfessorController extends Controller
             return back()->with('error', 'This student is not enrolled in the selected class.');
         }
 
-        $alreadyPending = DropRequest::where('class_id', $classe->id)
+        $existingRequest = DropRequest::where('class_id', $classe->id)
             ->where('student_id', $student->id)
-            ->where('status', 'pending')
-            ->exists();
+            ->where('professor_id', $user->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->first();
 
-        if ($alreadyPending) {
-            return back()->with('error', 'A drop request for this student is already pending approval.');
+        if ($existingRequest) {
+            return back()->with('error', 'A pending or approved drop request already exists for this student in the selected class.');
         }
 
         DropRequest::create([
