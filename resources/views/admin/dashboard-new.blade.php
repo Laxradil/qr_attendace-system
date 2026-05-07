@@ -149,18 +149,24 @@
     </div>
 
     <!-- Drop requests alert -->
-    @if(App\Models\DropRequest::where('status', 'pending')->exists())
+    @php
+      $pendingDropCount = App\Models\DropRequest::where('status', 'pending')->count();
+      $firstPendingDrop = App\Models\DropRequest::where('status', 'pending')->with('student', 'classe')->first();
+    @endphp
     <div class="card" style="border-radius:var(--radius-lg);padding:18px;background:rgba(255,61,114,.08);border:1px solid rgba(255,61,114,.22)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span style="font-size:20px">⚠️</span>
-        <b style="font-size:14px">{{ App\Models\DropRequest::where('status', 'pending')->count() }} Pending Drop Request(s)</b>
+        <b style="font-size:14px">{{ $pendingDropCount }} Pending Drop Request(s)</b>
       </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:13px">{{ App\Models\DropRequest::where('status', 'pending')->with('student', 'classe')->first()?->student?->name ?? 'N/A' }} · {{ App\Models\DropRequest::where('status', 'pending')->with('student', 'classe')->first()?->classe?->code ?? 'N/A' }} · {{ now()->format('M d') }}</p>
+      @if($pendingDropCount > 0)
+        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">{{ $firstPendingDrop?->student?->name ?? 'N/A' }} · {{ $firstPendingDrop?->classe?->code ?? 'N/A' }} · {{ now()->format('M d') }}</p>
+      @else
+        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">No pending drop requests at this time</p>
+      @endif
       <div style="display:flex;gap:8px">
         <a href="{{ route('admin.drop-requests') }}" class="btn primary slim" style="flex:1">Review →</a>
       </div>
     </div>
-    @endif
   </div>
 </div>
 @endsection

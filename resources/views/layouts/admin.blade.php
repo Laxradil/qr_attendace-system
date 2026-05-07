@@ -603,7 +603,6 @@
         <a href="{{ route('admin.users') }}" class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
           <span class="nav-icon">👥</span>
           <span>Users</span>
-          <span class="nav-badge">@yield('usersCount', '0')</span>
         </a>
         <a href="{{ route('admin.professors') }}" class="nav-link {{ request()->routeIs('admin.professors') ? 'active' : '' }}">
           <span class="nav-icon">🎓</span>
@@ -628,6 +627,7 @@
         <a href="{{ route('admin.drop-requests') }}" class="nav-link {{ request()->routeIs('admin.drop-requests*') ? 'active' : '' }}">
           <span class="nav-icon">⇩</span>
           <span>Drop Requests</span>
+          <span class="nav-badge">{{ App\Models\DropRequest::where('status', 'pending')->count() }}</span>
         </a>
         <a href="{{ route('admin.logs') }}" class="nav-link {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
           <span class="nav-icon">☷</span>
