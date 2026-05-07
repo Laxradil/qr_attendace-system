@@ -133,7 +133,6 @@
         <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Show this to professors for attendance</div>
         <div style="position:relative;background:#fff;border-radius:var(--radius);display:inline-flex;padding:12px;margin-bottom:12px;box-shadow:0 0 25px rgba(108,92,231,0.35);overflow:hidden;">
             <img id="modal-student-qr-image" src="{{ $studentQrDataUri }}" alt="Student QR" style="width:220px;height:220px;border-radius:6px;background:#fff;object-fit:contain;" />
-            <div style="position:absolute;left:0;right:0;top:0;height:8px;background:linear-gradient(180deg,rgba(108,92,231,0),rgba(108,92,231,1),rgba(108,92,231,0));animation:qrScan 2.5s infinite;box-shadow:0 0 12px rgba(108,92,231,0.9),0 0 24px rgba(108,92,231,0.5);"></div>
         </div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
             <button type="button" class="btn btn-p" onclick="downloadStudentQrAsPng('student-qr.png')" style="flex:1;min-width:100px;display:flex;justify-content:center;align-items:center;text-align:center;">Download</button>
