@@ -31,12 +31,25 @@ class ProfessorController extends Controller
         $user = Auth::user();
         // Use withCount() to get student counts in the initial query instead of calling count() in loop
         $classes = $user->assignedClasses()
-            ->withCount('students')
+            ->withCount(['students',
+                'attendanceRecords as present_count' => function ($query) {
+                    $query->where('status', 'present');
+                },
+                'attendanceRecords as late_count' => function ($query) {
+                    $query->where('status', 'late');
+                },
+                'attendanceRecords as absent_count' => function ($query) {
+                    $query->where('status', 'absent');
+                },
+                'attendanceRecords as excused_count' => function ($query) {
+                    $query->where('status', 'excused');
+                },
+            ])
             ->with(['students', 'schedules'])
             ->get();
         
         $totalClasses = $classes->count();
-        $totalStudents = $classes->sum('students_count'); // Use the counted value, not a new query
+        $totalStudents = $classes->sum('students_count');
 
         $attendanceSummary = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
             ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
@@ -87,9 +100,12 @@ class ProfessorController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email']);
 
+        $totalStudents = $classes->sum('students_count');
+
         return view('professor.classes', [
             'classes' => $classes,
             'availableStudents' => $availableStudents,
+            'totalStudents' => $totalStudents,
         ]);
     }
 
@@ -651,6 +667,29 @@ class ProfessorController extends Controller
         $classe->students()->attach($student->id);
 
         return back()->with('success', 'Student added to class successfully');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $user->update([
+            'password' => bcrypt($validated['password']),
+        ]);
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'update_password',
+            'description' => 'Updated password',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Password updated successfully');
     }
 
     /**

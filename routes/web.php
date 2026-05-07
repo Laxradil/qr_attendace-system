@@ -67,6 +67,7 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::get('/logs', [ProfessorController::class, 'logs'])->name('professor.logs');
     Route::get('/settings', [ProfessorController::class, 'settings'])->name('professor.settings');
     Route::put('/settings', [ProfessorController::class, 'updateSettings'])->name('professor.settings.update');
+    Route::put('/settings/password', [ProfessorController::class, 'updatePassword'])->name('professor.settings.password');
     Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
     Route::post('/drop-request', [ProfessorController::class, 'submitDropRequest'])->name('professor.drop-request');
 });
