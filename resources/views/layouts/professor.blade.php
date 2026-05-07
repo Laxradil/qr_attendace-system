@@ -84,8 +84,8 @@
         .sb-urole{font-size:9px;color:var(--purple-light);}
         .sb-online{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);margin-right:3px;}
         .sb-sec{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);padding:0 8px;margin:8px 0 3px;}
-        .sb-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .1s;margin-bottom:1px;text-decoration:none;border:none;background:transparent;width:100%;text-align:left;}
-        .sb-item:hover{background:var(--surface2);color:var(--text);}
+        .sb-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s cubic-bezier(0.23, 1, 0.320, 1);margin-bottom:1px;text-decoration:none;border:none;background:transparent;width:100%;text-align:left;}
+        .sb-item:hover{background:var(--surface2);color:var(--text);transform:translateX(4px);}
         .sb-item.active{background:var(--purple-glow);color:var(--purple-light);}
         .sb-logout{margin-top:auto;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:11px;color:var(--red);cursor:pointer;border:none;background:transparent;width:100%;text-align:left;}
         .sb-logout:hover{background:var(--red-bg);}
@@ -100,16 +100,22 @@
         .notif-btn{position:relative;width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;}
         .notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--purple);border:1.5px solid var(--navy2);}
 
-        .main{flex:1;overflow-y:auto;background:var(--navy);height:calc(100vh - 52px);}
+        .main{flex:1;overflow-y:auto;background:var(--navy);height:calc(100vh - 52px);animation:fadeIn 0.4s ease-in;}
         .main::-webkit-scrollbar{width:4px;}
         .main::-webkit-scrollbar-thumb{background:var(--navy4);border-radius:4px;}
         .content{padding:18px;}
+
+        @keyframes fadeIn{
+            from{opacity:0;transform:translateY(8px);}
+            to{opacity:1;transform:translateY(0);}
+        }
 
         .stats{display:grid;gap:10px;margin-bottom:16px;}
         .stats-3{grid-template-columns:repeat(3,1fr);}
         .stats-4{grid-template-columns:repeat(4,1fr);}
         .stats-5{grid-template-columns:repeat(5,1fr);}
-        .stat{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;}
+        .stat{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;transition:all 0.3s cubic-bezier(0.23, 1, 0.320, 1);cursor:pointer;}
+        .stat:hover{border-color:var(--purple);background:var(--navy3);transform:translateY(-4px);box-shadow:0 8px 24px rgba(108,92,231,0.15);}
         .stat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
         .stat-val{font-size:20px;font-weight:700;line-height:1;}
         .stat-label{font-size:10px;color:var(--text2);margin-top:3px;}
@@ -121,7 +127,8 @@
         .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
         .g-6-4{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;}
 
-        .card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px;}
+        .card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px;transition:all 0.3s cubic-bezier(0.23, 1, 0.320, 1);}
+        .card:hover{border-color:var(--purple);background:var(--navy3);box-shadow:0 8px 24px rgba(108,92,231,0.15);}
         .sh{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;}
         .sh:first-child{margin-top:0;}
 
@@ -131,7 +138,9 @@
         th{text-align:left;padding:9px 12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;}
         td{padding:9px 12px;border-bottom:1px solid var(--border2);color:var(--text);vertical-align:middle;}
         tr:last-child td{border-bottom:none;}
-        tbody tr:hover td{background:var(--surface);}
+        tbody tr{transition:all 0.2s cubic-bezier(0.23, 1, 0.320, 1);}
+        tbody tr:hover td{background:var(--surface);border-color:rgba(108,92,231,0.3);}
+        tbody tr:hover{box-shadow:inset 0 0 12px rgba(108,92,231,0.1);}
 
         .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
         .bg{background:var(--green-bg);color:var(--green);} .ba{background:var(--amber-bg);color:var(--amber);} .br{background:var(--red-bg);color:var(--red);} .bb{background:var(--blue-bg);color:var(--blue);} .bp{background:var(--purple-glow);color:var(--purple-light);} .bx{background:var(--surface2);color:var(--text2);}
@@ -153,6 +162,17 @@
         .alert-error { background: var(--red-bg); border: 1px solid rgba(214,48,49,.3); color: #ffcaca; }
         .alert-success { background: var(--green-bg); border: 1px solid rgba(0,184,148,.3); color: #c5ffe9; }
         .info { background: var(--purple-glow); border: 1px solid rgba(108,92,231,.2); border-radius: var(--radius); padding: 8px 12px; font-size: 10px; color: var(--purple-light); margin-bottom: 10px; }
+
+        .toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;pointer-events:none;}
+        .toast{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:10px;font-size:11px;color:var(--text);display:flex;gap:10px;align-items:center;pointer-events:all;animation:slideInRight 0.3s cubic-bezier(0.23,1,0.320,1),slideOutRight 0.3s cubic-bezier(0.23,1,0.320,1) 2.7s;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+        .toast.success{border-color:rgba(0,184,148,0.3);background:var(--green-bg);}
+        .toast.error{border-color:rgba(214,48,49,0.3);background:var(--red-bg);}
+        .toast.info{border-color:rgba(9,132,227,0.3);background:var(--blue-bg);}
+        .toast-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .toast-message{flex:1;}
+
+        @keyframes slideInRight{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+        @keyframes slideOutRight{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(24px);}}
 
         @media (max-width: 1100px) {
             .stats-5 { grid-template-columns: repeat(2, 1fr); }
@@ -275,6 +295,79 @@
 
     updateDateTime();
     setInterval(updateDateTime, 1000);
+
+    // Number Counter Animation
+    function animateCounter(element) {
+        const target = parseInt(element.textContent, 10);
+        const duration = 800;
+        const start = Date.now();
+        
+        function update() {
+            const now = Date.now();
+            const progress = Math.min((now - start) / duration, 1);
+            const current = Math.floor(progress * target);
+            element.textContent = current.toLocaleString();
+            
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            } else {
+                element.textContent = target.toLocaleString();
+            }
+        }
+        
+        requestAnimationFrame(update);
+    }
+
+    // Initialize counters on page load
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.stat-val').forEach(el => {
+            const value = parseInt(el.textContent, 10);
+            if (!isNaN(value) && value > 0) {
+                el.textContent = '0';
+                animateCounter(el);
+            }
+        });
+    });
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container') || createToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = '✓';
+        if (type === 'error') icon = '✕';
+        if (type === 'info') icon = 'ℹ';
+        
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-message">${message}</div>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Show success toast from session
+    @if(session('success'))
+        window.addEventListener('load', () => showToast("{{ session('success') }}", 'success'));
+    @endif
+
+    // Show error toast from session
+    @if($errors->any())
+        window.addEventListener('load', () => showToast("{{ $errors->first() }}", 'error'));
+    @endif
 </script>
 </body>
 </html>
