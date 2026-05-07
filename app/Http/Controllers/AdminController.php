@@ -13,6 +13,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class AdminController extends Controller
@@ -538,23 +539,46 @@ class AdminController extends Controller
             return back()->with('error', 'Only pending requests can be approved.');
         }
 
-        $dropRequest->update([
-            'status' => 'approved',
-            'admin_id' => Auth::id(),
-            'reviewed_at' => now(),
-        ]);
+        return DB::transaction(function () use ($request, $dropRequest) {
+            $duplicateApproved = DropRequest::where('professor_id', $dropRequest->professor_id)
+                ->where('student_id', $dropRequest->student_id)
+                ->where('class_id', $dropRequest->class_id)
+                ->where('status', 'approved')
+                ->where('id', '!=', $dropRequest->id)
+                ->exists();
 
-        $dropRequest->classe->students()->detach($dropRequest->student_id);
+            if ($duplicateApproved) {
+                $dropRequest->delete();
 
-        SystemLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'other',
-            'description' => 'Approved drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+                SystemLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'other',
+                    'description' => 'Skipped duplicate drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
 
-        return back()->with('success', 'Drop request approved and student removed from the class.');
+                return back()->with('warning', 'That drop request was already approved. The duplicate request was removed.');
+            }
+
+            $dropRequest->update([
+                'status' => 'approved',
+                'admin_id' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
+
+            $dropRequest->classe->students()->detach($dropRequest->student_id);
+
+            SystemLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'other',
+                'description' => 'Approved drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Drop request approved and student removed from the class.');
+        });
     }
 
     public function rejectDropRequest(Request $request, DropRequest $dropRequest): RedirectResponse
