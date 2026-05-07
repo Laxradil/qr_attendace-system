@@ -42,6 +42,8 @@ This project is configured to use **Supabase PostgreSQL Session Pooler** as the 
    ```
 5. Ensure you have PostgreSQL PHP driver enabled: `php --ri pdo_pgsql`
 
+> If you are running this app locally with XAMPP or a non-Supabase database, make sure `DB_CONNECTION` matches your local driver (for example `mysql`) and that the corresponding PHP extension is enabled.
+
 ### Connection Details
 
 Use the **Session Pooler** connection from Supabase (not the direct host):
@@ -50,7 +52,7 @@ Use the **Session Pooler** connection from Supabase (not the direct host):
 - Note: Username must include the full format: `postgres.project-id`
 
 The configuration uses individual connection fields (no DB_URL) to work with the pooler correctly.
-
+> PHP 8.5 note: This project currently patches `nesbot/carbon` to maintain compatibility with `DatePeriod::getIterator(): Iterator`. If you update dependencies later, verify that Carbon remains compatible with PHP 8.5.
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
