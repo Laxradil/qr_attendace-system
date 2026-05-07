@@ -17,6 +17,7 @@
             --purple:#6c5ce7;
             --purple2:#5a4fcf;
             --purple-light:#a29bfe;
+            --purple-bg:rgba(108,92,231,0.12);
             --purple-glow:rgba(108,92,231,0.15);
             --blue:#0984e3;
             --blue-bg:rgba(9,132,227,0.12);

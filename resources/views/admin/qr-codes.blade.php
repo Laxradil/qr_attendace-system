@@ -26,12 +26,16 @@
                             <span style="color:var(--text3);">No class</span>
                         @endif
                     </td>
-                    <td>
-                        <img src="{{ route('admin.students.qr-code', $student) }}" alt="QR" style="width:60px;height:60px;border-radius:4px;border:1px solid var(--border);">
+                    <td style="vertical-align:middle;text-align:center;width:96px;">
+                        <div style="display:inline-flex;align-items:center;justify-content:center;height:100%;">
+                            <img src="{{ route('admin.students.qr-code', $student) }}" alt="QR" style="width:60px;height:60px;border-radius:4px;border:1px solid var(--border);">
+                        </div>
                     </td>
-                    <td style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button type="button" class="btn btn-sm" onclick='viewStudentQR({{ json_encode(route('admin.students.qr-code', $student)) }}, {{ json_encode($student->name) }})'>Open</button>
-                        <button type="button" class="btn btn-sm btn-p" onclick='downloadQR({{ json_encode(route('admin.students.qr-code', $student)) }}, {{ json_encode($student->name) }}, "png")'>Download PNG</button>
+                    <td style="vertical-align:middle;">
+                        <div style="display:inline-flex;gap:4px;align-items:center;white-space:nowrap;height:100%;">
+                            <button type="button" class="btn btn-sm" onclick='viewStudentQR({{ json_encode(route('admin.students.qr-code', $student)) }}, {{ json_encode($student->name) }})'>Open</button>
+                            <button type="button" class="btn btn-sm btn-p" onclick='downloadQR({{ json_encode(route('admin.students.qr-code', $student)) }}, {{ json_encode($student->name) }}, "png")'>Download PNG</button>
+                        </div>
                     </td>
                 </tr>
             @empty

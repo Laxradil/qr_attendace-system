@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('class_id');
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('qr_code_id')->nullable();
-            $table->enum('status', ['present', 'late', 'absent'])->default('present');
+            $table->enum('status', ['present', 'late', 'absent', 'excused'])->default('present');
             $table->integer('minutes_late')->default(0);
             $table->timestamp('recorded_at');
             $table->timestamps();

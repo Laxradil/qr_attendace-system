@@ -39,13 +39,14 @@ class ProfessorController extends Controller
         $totalStudents = $classes->sum('students_count'); // Use the counted value, not a new query
 
         $attendanceSummary = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
-            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count")
+            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
             ->first();
 
         $totalRecords = (int) ($attendanceSummary->total_records ?? 0);
         $presentCount = (int) ($attendanceSummary->present_count ?? 0);
         $lateCount = (int) ($attendanceSummary->late_count ?? 0);
         $absentCount = (int) ($attendanceSummary->absent_count ?? 0);
+        $excusedCount = (int) ($attendanceSummary->excused_count ?? 0);
 
         $recentLogs = $user->logs()
             ->latest()
@@ -65,6 +66,7 @@ class ProfessorController extends Controller
             'presentCount' => $presentCount,
             'lateCount' => $lateCount,
             'absentCount' => $absentCount,
+            'excusedCount' => $excusedCount,
             'attendanceRate' => $totalRecords > 0 ? round(($presentCount / $totalRecords) * 100) : 0,
             'recentLogs' => $recentLogs,
             'todaySchedules' => $todaySchedules,
@@ -372,7 +374,7 @@ class ProfessorController extends Controller
 
         $summaryQuery = clone $query;
         $summary = $summaryQuery
-            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count")
+            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
             ->first();
 
         $records = $query->with('student', 'classe')
@@ -386,6 +388,7 @@ class ProfessorController extends Controller
             'presentCount' => (int) ($summary->present_count ?? 0),
             'lateCount' => (int) ($summary->late_count ?? 0),
             'absentCount' => (int) ($summary->absent_count ?? 0),
+            'excusedCount' => (int) ($summary->excused_count ?? 0),
         ]);
     }
 
@@ -567,7 +570,7 @@ class ProfessorController extends Controller
         abort_unless($user->assignedClasses()->whereKey($attendanceRecord->class_id)->exists(), 403);
 
         $validated = $request->validate([
-            'status' => 'required|in:present,late,absent',
+            'status' => 'required|in:present,late,absent,excused',
             'recorded_at' => 'required|date',
             'minutes_late' => 'nullable|integer|min:0',
         ]);

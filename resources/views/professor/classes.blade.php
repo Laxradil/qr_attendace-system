@@ -27,48 +27,57 @@
     </div>
 </div>
 
-<div id="classesList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;align-items:start;">
+<div id="classesList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:start;">
     @forelse($classes as $classe)
-        <div class="card class-row" data-semester="{{ strtolower($classe->semester ?? 'all') }}" style="overflow:hidden;display:flex;flex-direction:column;min-height:260px;">
-            <div style="padding:16px;background:linear-gradient(135deg,rgba(21,101,192,0.95),rgba(0,150,136,0.95));color:#fff;display:flex;flex-direction:column;gap:12px;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
-                    <div>
-                        <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.85;">{{ $classe->code }}</div>
-                        <div style="font-size:16px;font-weight:800;line-height:1.1;margin-top:6px;">{{ \Illuminate\Support\Str::limit($classe->display_name, 30) }}</div>
-                    </div>
-                    <div style="width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;">{{ strtoupper(substr($classe->code, 0, 1)) }}</div>
+        <div class="card class-row" data-semester="{{ strtolower($classe->semester ?? 'all') }}" style="overflow:hidden;display:flex;flex-direction:column;padding:16px;border:1px solid var(--border2);background:rgba(9,8,24,0.55);position:relative;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;">
+                <div>
+                    <div style="font-size:11px;font-weight:600;letter-spacing:0.5px;color:var(--text2);text-transform:uppercase;">{{ $classe->code }} - {{ strtoupper(substr($classe->display_name, 0, 40)) }}</div>
+                    <div style="font-size:10px;color:var(--text3);margin-top:4px;">{{ $classe->code }}</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">{{ strtoupper(substr($classe->professor?->name ?? 'P', 0, 1)) }}</div>
-                    <div>
-                        <div style="font-size:11px;opacity:0.8;">Professor</div>
-                        <div style="font-size:13px;font-weight:700;">{{ $classe->professor?->name ?? 'Unassigned' }}</div>
-                    </div>
+                <div style="font-size:11px;font-weight:700;color:#6c5ce7;letter-spacing:1px;text-transform:uppercase;">F-{{ random_int(100, 999) }}</div>
+            </div>
+            
+            <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:12px 0;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:10px;">
+                    <span style="display:inline-block;width:16px;">📅</span>
+                    <span style="color:var(--text2);">Days:</span>
+                    <span style="color:var(--text);font-weight:600;">{{ $classe->schedules->isNotEmpty() ? $classe->schedules->first()->days : 'TBD' }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:10px;">
+                    <span style="display:inline-block;width:16px;">🕐</span>
+                    <span style="color:var(--text2);">Time:</span>
+                    <span style="color:var(--text);font-weight:600;">
+                        @if($classe->schedules->isNotEmpty() && ($classe->schedules->first()->start_time || $classe->schedules->first()->end_time))
+                            {{ $classe->schedules->first()->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $classe->schedules->first()->start_time)->format('H:i') : '' }}
+                        @else
+                            TBD
+                        @endif
+                    </span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:10px;">
+                    <span style="display:inline-block;width:16px;">👨‍🏫</span>
+                    <span style="color:var(--text2);">Professor:</span>
+                    <span style="color:var(--text);font-weight:600;">{{ $classe->professor?->name ?? 'N/A' }}</span>
                 </div>
             </div>
-            <div style="padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;flex:1;background:var(--bg);">
-                <div style="display:flex;flex-wrap:wrap;gap:8px;color:var(--text2);font-size:11px;">
-                    <span style="background:rgba(0,0,0,0.04);padding:6px 10px;border-radius:999px;">{{ $classe->students_count }} students</span>
-                    <span style="background:rgba(0,0,0,0.04);padding:6px 10px;border-radius:999px;">{{ $classe->schedules->isNotEmpty() ? $classe->schedules->first()->days : 'No schedule' }}</span>
-                </div>
-                <div style="font-size:11px;color:var(--text3);min-height:28px;">
-                    @if($classe->schedules->isNotEmpty() && ($classe->schedules->first()->start_time || $classe->schedules->first()->end_time))
-                        {{ $classe->schedules->first()->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $classe->schedules->first()->start_time)->format('g:i A') : '' }}
-                        @if($classe->schedules->first()->start_time && $classe->schedules->first()->end_time)
-                            -
-                        @endif
-                        {{ $classe->schedules->first()->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $classe->schedules->first()->end_time)->format('g:i A') : '' }}
-                    @elseif($classe->schedules->isNotEmpty() && $classe->schedules->first()->time)
-                        {{ $classe->schedules->first()->time }}
-                    @else
-                        Schedule not set
-                    @endif
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-sm" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" onclick="handleShowClassStudents(this)" style="flex:1;min-width:100px;">Students</button>
-                    <button type="button" class="btn btn-sm" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" data-class-code="{{ $classe->code }}" data-class-desc="{{ $classe->description }}" data-schedule-id="{{ optional($classe->schedules->first())->id }}" data-schedule-days='@json(optional($classe->schedules->first()) && optional($classe->schedules->first())->days ? explode(",", optional($classe->schedules->first())->days) : [])' data-schedule-start-time="{{ optional($classe->schedules->first())->start_time }}" data-schedule-end-time="{{ optional($classe->schedules->first())->end_time }}" data-schedule-room="{{ optional($classe->schedules->first())->room }}" onclick="handleEditSchedule(this)" style="flex:1;min-width:100px;">Edit Class</button>
-                    <button type="button" class="btn btn-sm btn-p" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" onclick="handleAddStudent(this)" style="flex:1;min-width:100px;">+ Add</button>
-                    <button type="button" class="btn btn-sm btn-p" data-class-id="{{ $classe->id }}" onclick="handleScanQR(this)" style="flex:1;min-width:100px;">Scan QR</button>
+            
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <a href="#" onclick="handleShowClassStudents({dataset:{classId:'{{ $classe->id }}',className:'{{ $classe->display_name }}'}})" style="font-size:10px;color:#6c5ce7;text-decoration:none;font-weight:500;cursor:pointer;">View-only →</a>
+                <div style="display:flex;gap:6px;">
+                    <button type="button" class="btn btn-sm" 
+                        data-class-id="{{ $classe->id }}"
+                        data-class-name="{{ $classe->display_name }}"
+                        data-class-code="{{ $classe->code }}"
+                        data-class-desc="{{ $classe->description }}"
+                        data-schedule-id="{{ optional($classe->schedules->first())->id }}"
+                        data-schedule-days='{!! json_encode(optional($classe->schedules->first()) && optional($classe->schedules->first())->days ? explode(",", optional($classe->schedules->first())->days) : []) !!}'
+                        data-schedule-start-time="{{ optional($classe->schedules->first())->start_time }}"
+                        data-schedule-end-time="{{ optional($classe->schedules->first())->end_time }}"
+                        data-schedule-room="{{ optional($classe->schedules->first())->room }}"
+                        onclick="handleEditSchedule(this)"
+                        style="font-size:10px;padding:4px 8px;">Edit</button>
+                    <button type="button" class="btn btn-sm btn-p" onclick="handleAddStudent(this)" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" style="font-size:10px;padding:4px 8px;">+Add</button>
                 </div>
             </div>
         </div>
@@ -97,6 +106,10 @@
             <div style="font-size:10px;color:var(--text3);">Classes marked active right now.</div>
         </div>
     </div>
+</div>
+
+    <script type="application/json" id="professorAvailableStudentsData">{!! json_encode($availableStudents) !!}</script>
+    <script type="application/json" id="classExistingStudentIdsData">{!! json_encode($classes->mapWithKeys(fn ($classe) => [$classe->id => $classe->students->pluck('id')->values()])) !!}</script>
 
     <script type="application/json" id="professorAvailableStudentsData">@json($availableStudents)</script>
     <script type="application/json" id="classExistingStudentIdsData">@json($classes->mapWithKeys(fn ($classe) => [$classe->id => $classe->students->pluck('id')->values()]))</script>

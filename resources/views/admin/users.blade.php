@@ -79,13 +79,15 @@
                         <span class="badge {{ $user->is_active ? 'bg' : 'ba' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                     </td>
                     <td class="td-mono">{{ $user->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
-                    <td style="display:flex;gap:4px;">
-                        <a class="btn btn-sm" href="{{ route('admin.users.edit', $user) }}">Edit</a>
-                        <form action="{{ route('admin.users.delete', $user) }}" method="POST" onsubmit="return confirm('Delete this user?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-d">Delete</button>
-                        </form>
+                    <td style="vertical-align:middle;">
+                        <div style="display:inline-flex;gap:4px;align-items:center;white-space:nowrap;">
+                            <a class="btn btn-sm" href="{{ route('admin.users.edit', $user) }}">Edit</a>
+                            <form action="{{ route('admin.users.delete', $user) }}" method="POST" onsubmit="return confirm('Delete this user?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-d">Delete</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty
