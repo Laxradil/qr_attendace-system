@@ -479,19 +479,6 @@
         }
 
         // Show success toast from session
-        @if(session('success'))
-            window.addEventListener('load', () => showToast("{{ session('success') }}", 'success'));
-        @endif
-
-        // Show error toast from session
-        @if(session('error'))
-            window.addEventListener('load', () => showToast("{{ session('error') }}", 'error'));
-        @endif
-
-        // Show validation errors as toast
-        @if($errors->any())
-            window.addEventListener('load', () => showToast("{{ $errors->first() }}", 'error'));
-        @endif
     </script>
 </body>
 </html>
