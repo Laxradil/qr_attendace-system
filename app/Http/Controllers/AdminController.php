@@ -67,7 +67,10 @@ class AdminController extends Controller
             return SystemLog::with('user')->latest()->limit(10)->get();
         });
 
-        return view('admin.dashboard', array_merge($stats, ['recentLogs' => $recentLogs]));
+        // Get pending drop requests count
+        $dropRequests = DropRequest::where('status', 'pending')->count();
+
+        return view('admin.dashboard', array_merge($stats, ['recentLogs' => $recentLogs, 'dropRequests' => $dropRequests]));
     }
 
     private function getUserStats(): array

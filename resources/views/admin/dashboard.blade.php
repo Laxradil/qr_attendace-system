@@ -5,89 +5,143 @@
 @section('subheader', "Welcome back, Admin! Here's what's happening in the system.")
 
 @section('content')
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.users') }}">
-        <div class="stat-val">{{ $totalUsers }}</div>
-        <div class="stat-label">Total Users</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.professors') }}">
-        <div class="stat-val">{{ $totalProfessors }}</div>
-        <div class="stat-label">Professors</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.students') }}">
-        <div class="stat-val">{{ $totalStudents }}</div>
-        <div class="stat-label">Students</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('admin.classes') }}">
-        <div class="stat-val">{{ $totalClasses }}</div>
-        <div class="stat-label">Classes</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View all -></div>
-    </a>
+<div class="stats stats-4">
+  <a href="{{ route('admin.users') }}" class="stat glass">
+    <div class="stat-icon blue">👥</div>
+    <div class="stat-body">
+      <strong>{{ $totalUsers }}</strong>
+      <span>Total Users</span>
+      <div class="trend up">↑ Managing system users</div>
+    </div>
+  </a>
+  <a href="{{ route('admin.professors') }}" class="stat glass">
+    <div class="stat-icon purple">🎓</div>
+    <div class="stat-body">
+      <strong>{{ $totalProfessors }}</strong>
+      <span>Professors</span>
+      <div class="trend up">↑ Teaching staff</div>
+    </div>
+  </a>
+  <a href="{{ route('admin.students') }}" class="stat glass">
+    <div class="stat-icon yellow">🧑‍🎓</div>
+    <div class="stat-body">
+      <strong>{{ $totalStudents }}</strong>
+      <span>Students</span>
+      <div class="trend up">↑ Enrolled students</div>
+    </div>
+  </a>
+  <a href="{{ route('admin.classes') }}" class="stat glass">
+    <div class="stat-icon green">📘</div>
+    <div class="stat-body">
+      <strong>{{ $totalClasses }}</strong>
+      <span>Classes</span>
+      <div class="trend up">↑ Active sections</div>
+    </div>
+  </a>
 </div>
 
-<div class="g-6-4">
-    <div>
-        <div class="sh">Attendance Overview</div>
-        <div class="card">
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--green);">{{ $presentCount }}</div>
-                    <div class="stat-label">Present</div>
-                </div>
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--amber);">{{ $lateCount }}</div>
-                    <div class="stat-label">Late</div>
-                </div>
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--red);">{{ $absentCount }}</div>
-                    <div class="stat-label">Absent</div>
-                </div>
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--blue);">{{ $totalAttendance }}</div>
-                    <div class="stat-label">Total Records</div>
-                </div>
+<div class="dashboard">
+  <div class="dash-left">
+    <!-- Attendance overview -->
+    <div class="card glass">
+      <div class="section-head">
+        <h3>📊 Attendance Overview</h3>
+        <a href="{{ route('admin.reports') }}">View Full Report →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-.06em;color:#4dffa0;">{{ $presentCount }}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Present</div>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-.06em;color:#ffd584;">{{ $lateCount }}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Late</div>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-.06em;color:#ff7f96;">{{ $absentCount }}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Absent</div>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-.06em;">{{ $totalAttendance }}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Total</div>
+        </div>
+      </div>
+      <!-- Attendance bar -->
+      <div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:10px;flex-shrink:0">
+        <div style="height:100%;width:{{ $totalAttendance > 0 ? ($presentCount / $totalAttendance * 100) : 0 }}%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;box-shadow:0 0 10px rgba(24,240,139,.5)"></div>
+      </div>
+      <a href="{{ route('admin.attendance-records') }}" class="btn primary" style="width:100%;justify-content:center;">View Full Attendance Report →</a>
+    </div>
+
+    <!-- Recent activities -->
+    <div class="card glass stretch">
+      <div class="section-head">
+        <h3>⚡ Recent Activities</h3>
+        <a href="{{ route('admin.logs') }}">View All →</a>
+      </div>
+      <div style="flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;">
+        @forelse($recentLogs as $log)
+          <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);align-items:flex-start;">
+            <div style="width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:14px;background:rgba(139,92,255,.15);border:1px solid rgba(139,92,255,.2);flex-shrink:0;">
+              {{ $log->action === 'ADD_STUDENT' ? '➕' : ($log->action === 'UPDATE_USER' ? '✏️' : ($log->action === 'SCAN_QR' ? '📷' : '⚙️')) }}
             </div>
-            <a class="btn btn-sm" href="{{ route('admin.reports') }}" style="width:100%;justify-content:center;margin-top:8px;">View Full Report -></a>
-        </div>
+            <div style="flex:1;min-width:0;">
+              <b style="font-size:13px;font-weight:700;display:block;">{{ $log->user->name ?? 'System' }} {{ str_replace('_', ' ', $log->action) }}</b>
+              @if($log->description)
+                <p style="margin:2px 0 0;color:var(--muted);font-size:11.5px;line-height:1.3;">{{ $log->description }}</p>
+              @endif
+            </div>
+            <time style="font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono);">{{ $log->created_at?->tz('UTC')->setTimezone('Asia/Manila')->diffForHumans() }}</time>
+          </div>
+        @empty
+          <div style="color:var(--muted);font-size:11.5px;">No recent activity.</div>
+        @endforelse
+      </div>
+    </div>
+  </div>
 
-        <div class="sh">Recent Activities</div>
-        <div class="card">
-            @forelse($recentLogs as $log)
-                <div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border2);align-items:flex-start;">
-                    <div style="width:26px;height:26px;border-radius:6px;background:var(--purple-glow);display:flex;align-items:center;justify-content:center;font-size:10px;">{{ strtoupper(substr($log->action, 0, 1)) }}</div>
-                    <div style="font-size:11px;flex:1;">
-                        <strong>{{ $log->user->name ?? 'System' }}</strong> {{ str_replace('_', ' ', $log->action) }}
-                        @if($log->description)
-                            <div style="font-size:10px;color:var(--text2);margin-top:1px;">{{ $log->description }}</div>
-                        @endif
-                    </div>
-                    <div style="font-size:9px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace;">{{ $log->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('h:i A') }}</div>
-                </div>
-            @empty
-                <div style="color:var(--text2);font-size:11px;">No recent activity.</div>
-            @endforelse
-            <a class="btn btn-sm" href="{{ route('admin.logs') }}" style="width:100%;justify-content:center;margin-top:6px;">View All Activities -></a>
-        </div>
+  <div class="dash-right">
+    <!-- System overview -->
+    <div class="card glass">
+      <div class="section-head"><h3>🖥 System Overview</h3></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.055);border-radius:12px;padding:9px 12px;margin-bottom:6px;font-weight:700;font-size:13px;">
+        <span>Today's Records</span>
+        <b>{{ $todayRecords }}</b>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.055);border-radius:12px;padding:9px 12px;margin-bottom:6px;font-weight:700;font-size:13px;">
+        <span>Total Classes</span>
+        <b>{{ $totalClasses }}</b>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.055);border-radius:12px;padding:9px 12px;">
+        <span>System Status</span>
+        <span class="pill green"><span class="status-dot" style="color:var(--green);background:var(--green)"></span> Operational</span>
+      </div>
     </div>
 
-    <div>
-        <div class="sh">System Overview</div>
-        <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Today's Records</span><span style="font-size:13px;font-weight:700;">{{ $todayRecords }}</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);"><span style="font-size:11px;">Total Classes</span><span style="font-size:13px;font-weight:700;">{{ $totalClasses }}</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;"><span style="font-size:11px;">System Status</span><span class="badge bg">All Systems Operational</span></div>
-        </div>
-
-        <div class="sh">Quick Actions</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-            <a class="btn" href="{{ route('admin.users.create') }}" style="justify-content:center;">Add User</a>
-            <a class="btn" href="{{ route('admin.classes.create') }}" style="justify-content:center;">Add Class</a>
-            <a class="btn" href="{{ route('admin.students') }}" style="justify-content:center;">Manage Students</a>
-            <a class="btn" href="{{ route('admin.qr-codes') }}" style="justify-content:center;">Student QR Codes</a>
-        </div>
+    <!-- Quick Actions -->
+    <div class="card glass">
+      <div class="section-head"><h3>🚀 Quick Actions</h3></div>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;">
+        <a href="{{ route('admin.users.create') }}" class="btn primary" style="justify-content:center;gap:6px;"><span>➕</span> <span>Add User</span></a>
+        <a href="{{ route('admin.classes.create') }}" class="btn primary" style="justify-content:center;gap:6px;"><span>📘</span> <span>Add Class</span></a>
+        <a href="{{ route('admin.students') }}" class="btn" style="justify-content:center;gap:6px;"><span>👥</span> <span>Students</span></a>
+        <a href="{{ route('admin.qr-codes') }}" class="btn" style="justify-content:center;gap:6px;"><span>▦</span> <span>QR Codes</span></a>
+      </div>
     </div>
+
+    <!-- Alerts -->
+    @if($dropRequests > 0)
+      <div class="card glass" style="border-radius:var(--radius-lg);padding:18px;background:rgba(255,61,114,.08);border:1px solid rgba(255,61,114,.22)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:20px">⚠️</span>
+          <b style="font-size:14px">{{ $dropRequests }} Pending Drop Request</b>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">Review and approve or reject drop requests</p>
+        <div style="display:flex;gap:8px">
+          <a href="{{ route('admin.drop-requests') }}" class="btn primary slim" style="flex:1;justify-content:center;">Review →</a>
+        </div>
+      </div>
+    @endif
+  </div>
 </div>
 @endsection
