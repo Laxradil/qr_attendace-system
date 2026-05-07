@@ -815,7 +815,6 @@
         <a href="{{ route('admin.users') }}" class="@if(Route::currentRouteName() === 'admin.users') active @endif">
           <span class="nav-icon">👥</span>
           <span>Users</span>
-          <span class="nav-badge">{{ App\Models\User::count() }}</span>
         </a>
         <a href="{{ route('admin.professors') }}" class="@if(Route::currentRouteName() === 'admin.professors') active @endif">
           <span class="nav-icon">🎓</span>
@@ -836,7 +835,6 @@
         <a href="{{ route('admin.attendance-records') }}" class="@if(Route::currentRouteName() === 'admin.attendance-records') active @endif">
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
-          <span class="nav-badge" style="background:rgba(255,199,90,.85);color:#1a1200">4</span>
         </a>
         <a href="{{ route('admin.drop-requests') }}" class="@if(Route::currentRouteName() === 'admin.drop-requests') active @endif">
           <span class="nav-icon">⇩</span>
@@ -909,7 +907,10 @@
       setTimeout(()=>t.remove(), 3200);
     }
 
-    setTimeout(()=>showToast('Welcome back, Admin!','👋','#b9c4ff'), 600);
+    if(!sessionStorage.getItem('admin_welcomed')){
+      sessionStorage.setItem('admin_welcomed', 'true');
+      setTimeout(()=>showToast('Welcome back, Admin!','👋','#b9c4ff'), 600);
+    }
   </script>
 
   @yield('scripts')
