@@ -116,6 +116,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     
     // System logs
     Route::get('/logs', [AdminController::class, 'logs'])->name('admin.logs');
+
+    // Debug: return current user stats (admin-only)
+    Route::get('/_debug/user-stats', [AdminController::class, 'debugUserStats'])->name('admin.debug.user-stats');
 });
 
 // Schedule routes

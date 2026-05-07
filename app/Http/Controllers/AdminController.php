@@ -70,6 +70,20 @@ class AdminController extends Controller
         return view('admin.dashboard', array_merge($stats, ['recentLogs' => $recentLogs]));
     }
 
+    private function getUserStats(): array
+    {
+        return Cache::remember('admin_user_stats', 300, function () {
+            return [
+                'total' => User::count(),
+                'admins' => User::where('role', 'admin')->count(),
+                'professors' => User::where('role', 'professor')->count(),
+                'students' => User::where('role', 'student')->count(),
+                'active' => User::where('is_active', true)->count(),
+                'inactive' => User::where('is_active', false)->count(),
+            ];
+        });
+    }
+
     // Users Management
 
     public function users(): View
@@ -94,24 +108,7 @@ class AdminController extends Controller
             return $query->paginate(20);
         });
 
-        // Get statistics for all users (not filtered) in a single query
-        $userStats = User::selectRaw("
-            COUNT(*) as total,
-            SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admins,
-            SUM(CASE WHEN role = 'professor' THEN 1 ELSE 0 END) as professors,
-            SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students,
-            SUM(CASE WHEN is_active = true THEN 1 ELSE 0 END) as active,
-            SUM(CASE WHEN is_active = false THEN 1 ELSE 0 END) as inactive
-        ")->first();
-
-        $stats = [
-            'total' => $userStats->total ?? 0,
-            'admins' => $userStats->admins ?? 0,
-            'professors' => $userStats->professors ?? 0,
-            'students' => $userStats->students ?? 0,
-            'active' => $userStats->active ?? 0,
-            'inactive' => $userStats->inactive ?? 0,
-        ];
+        $stats = $this->getUserStats();
 
         return view('admin.users', [
             'users' => $users,
@@ -121,6 +118,16 @@ class AdminController extends Controller
                 'status' => $status,
             ]
         ]);
+    }
+
+    // Debug helper to inspect computed user stats
+    public function debugUserStats()
+    {
+        if (! auth()->check() || ! auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        return response()->json($this->getUserStats());
     }
 
     public function createUser(): View
@@ -164,6 +171,9 @@ class AdminController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        Cache::forget('admin_user_stats');
+        Cache::forget('admin_stats');
+
         return redirect()->route('admin.users')->with('success', 'User created successfully');
     }
 
@@ -202,6 +212,9 @@ class AdminController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        Cache::forget('admin_user_stats');
+        Cache::forget('admin_stats');
+
         return redirect()->route('admin.users')->with('success', 'User updated successfully');
     }
 
@@ -219,6 +232,9 @@ class AdminController extends Controller
         ]);
 
         $user->delete();
+
+        Cache::forget('admin_user_stats');
+        Cache::forget('admin_stats');
 
         if (request()->expectsJson()) {
             return response()->json(['success' => true]);
