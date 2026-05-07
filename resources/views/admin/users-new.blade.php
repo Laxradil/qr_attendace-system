@@ -1,54 +1,43 @@
-@extends('layouts.admin')
+@extends('layouts.admin-new')
 
-@section('title', 'Users')
-@section('header', 'Users')
-@section('subheader', 'Manage all system users and their access.')
+@section('title', 'Users - QR Attendance Admin')
+@section('pageTitle', 'Users')
+@section('pageSubtitle', 'Manage all system users and their access.')
 
 @section('content')
-@php
-    $roleFilter = $filters['role'] ?? null;
-    $statusFilter = $filters['status'] ?? null;
-@endphp
-
-<div class="stats stats-4">
+<div class="stats">
     <div class="stat glass">
       <div class="stat-icon blue">👥</div>
       <div class="stat-body">
-        <strong>{{ $stats['total'] }}</strong>
+            <strong>{{ $users->count() }}</strong>
         <span>Total Users</span>
       </div>
     </div>
     <div class="stat glass">
       <div class="stat-icon red">🛡</div>
       <div class="stat-body">
-        <strong>{{ $stats['admins'] }}</strong>
+            <strong>{{ App\Models\User::where('role', 'admin')->count() }}</strong>
         <span>Administrators</span>
       </div>
     </div>
     <div class="stat glass">
       <div class="stat-icon yellow">🎓</div>
       <div class="stat-body">
-        <strong>{{ $stats['professors'] }}</strong>
+            <strong>{{ App\Models\User::where('role', 'professor')->count() }}</strong>
         <span>Professors</span>
       </div>
     </div>
     <div class="stat glass">
       <div class="stat-icon purple">🧑‍🎓</div>
       <div class="stat-body">
-        <strong>{{ $stats['students'] }}</strong>
+            <strong>{{ App\Models\User::where('role', 'student')->count() }}</strong>
         <span>Students</span>
       </div>
     </div>
 </div>
 
-<div class="toolbar">
+<div class="glass-table glass" style="margin-top:16px">
     <div class="tools">
-        <a href="{{ route('admin.users.create') }}" class="btn primary">+ Add User</a>
-        <span class="chip {{ !$roleFilter ? 'active' : '' }}"><a href="{{ route('admin.users') }}" style="text-decoration:none;color:inherit;">All Roles</a></span>
-        <span class="chip {{ $roleFilter === 'admin' ? 'active' : '' }}"><a href="{{ route('admin.users', ['role' => 'admin']) }}" style="text-decoration:none;color:inherit;">Admin</a></span>
-        <span class="chip {{ $roleFilter === 'professor' ? 'active' : '' }}"><a href="{{ route('admin.users', ['role' => 'professor']) }}" style="text-decoration:none;color:inherit;">Professor</a></span>
-        <span class="chip {{ $roleFilter === 'student' ? 'active' : '' }}"><a href="{{ route('admin.users', ['role' => 'student']) }}" style="text-decoration:none;color:inherit;">Student</a></span>
-    </div>
     <div class="tools">
         <div class="search-bar" style="width:220px;height:40px">🔍 <span style="font-size:13px">Search users...</span></div>
         <button class="btn">☰ Filter</button>

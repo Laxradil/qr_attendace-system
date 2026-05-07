@@ -70,7 +70,7 @@ class AdminController extends Controller
         // Get pending drop requests count
         $dropRequests = DropRequest::where('status', 'pending')->count();
 
-        return view('admin.dashboard', array_merge($stats, ['recentLogs' => $recentLogs, 'dropRequests' => $dropRequests]));
+        return view('admin.dashboard-new', array_merge($stats, ['recentLogs' => $recentLogs, 'dropRequests' => $dropRequests]));
     }
 
     private function getUserStats(): array
@@ -113,7 +113,7 @@ class AdminController extends Controller
 
         $stats = $this->getUserStats();
 
-        return view('admin.users', [
+        return view('admin.users-new', [
             'users' => $users,
             'stats' => $stats,
             'filters' => [
@@ -254,7 +254,7 @@ class AdminController extends Controller
         $professors = Cache::remember('admin_professors_page_' . request('page', 1), 60, function () {
             return User::with('classes')->where('role', 'professor')->paginate(20);
         });
-        return view('admin.professors', ['professors' => $professors]);
+        return view('admin.professors-new', ['professors' => $professors]);
     }
 
     // Students Management
@@ -265,7 +265,7 @@ class AdminController extends Controller
         $classes = Cache::remember('admin_students_by_class_page_' . request('page', 1), 60, function () {
             return Classe::with(['students', 'professors'])->paginate(10);
         });
-        return view('admin.students', ['classes' => $classes]);
+        return view('admin.students-new', ['classes' => $classes]);
     }
 
     // Classes Management
@@ -275,7 +275,7 @@ class AdminController extends Controller
         $classes = Cache::remember('admin_classes_page_' . request('page', 1), 60, function () {
             return Classe::with('professors', 'students')->paginate(20);
         });
-        return view('admin.classes', ['classes' => $classes]);
+        return view('admin.classes-new', ['classes' => $classes]);
     }
 
     public function createClass(): View
@@ -443,11 +443,11 @@ class AdminController extends Controller
     public function qrCodes(): View
     {
         $students = User::where('role', 'student')
-            ->with('enrolledClasses')
+              ->with(['enrolledClasses', 'studentQrCode'])
             ->orderBy('name')
             ->paginate(20, ['*'], 'students_page');
 
-        return view('admin.qr-codes', compact('students'));
+        return view('admin.qr-codes-new', compact('students'));
     }
 
     public function studentQrCode(User $student)
@@ -482,7 +482,8 @@ class AdminController extends Controller
     {
         $records = AttendanceRecord::with('student', 'classe')
             ->paginate(20);
-        return view('admin.attendance-records', ['records' => $records]);
+        $attendanceRecords = $records;
+        return view('admin.attendance-records-new', ['attendanceRecords' => $attendanceRecords]);
     }
 
     // Reports
@@ -525,8 +526,9 @@ class AdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('admin.drop-requests', [
-            'requests' => $requests,
+        $dropRequests = $requests;
+        return view('admin.drop-requests-new', [
+            'dropRequests' => $dropRequests,
         ]);
     }
 
@@ -585,6 +587,6 @@ class AdminController extends Controller
         $logs = Cache::remember('admin_logs_page_' . request('page', 1), 60, function () {
             return SystemLog::with('user')->latest()->paginate(20);
         });
-        return view('admin.logs', ['logs' => $logs]);
+        return view('admin.logs-new', ['logs' => $logs]);
     }
 }
