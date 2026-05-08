@@ -8,7 +8,7 @@
 <div class="glass-table glass">
   <div class="toolbar">
     <h3 style="font-size:16px;font-weight:800">Student QR Codes</h3>
-    <button class="btn primary" onclick="alert('Bulk download started')">📥 Download All</button>
+    <button class="btn primary" onclick="downloadAllQRCodes()">📥 Download All</button>
   </div>
 
   <div class="table-wrap">
@@ -50,7 +50,7 @@
           </td>
           <td>
             <a href="{{ route('admin.students.qr-code', $student) }}" class="btn slim">Open</a>
-            <button class="btn primary slim" onclick="alert('Downloading QR for {{ $student->name }}')">↓ PNG</button>
+            <button class="btn primary slim" onclick="downloadQRCode('{{ route('admin.students.qr-code', $student) }}', '{{ $student->name }}')">↓ PNG</button>
           </td>
         </tr>
         @empty
@@ -71,4 +71,36 @@
     </div>
   </div>
 </div>
+
+<script>
+function downloadQRCode(url, studentName) {
+  const link = document.createElement('a');
+  link.href = url;
+  const safeFileName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
+  link.download = safeFileName + '-qr.png';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function downloadAllQRCodes() {
+  const rows = document.querySelectorAll('tbody tr');
+  let count = 0;
+  rows.forEach((row, index) => {
+    const nameCell = row.querySelector('.user-cell');
+    const openBtn = row.querySelector('a[href*="qr-code"]');
+    if (nameCell && openBtn) {
+      const studentName = nameCell.textContent.trim();
+      const qrUrl = openBtn.href;
+      setTimeout(() => {
+        downloadQRCode(qrUrl, studentName);
+      }, index * 500);
+      count++;
+    }
+  });
+  if (count > 0) {
+    alert(`Downloading ${count} QR codes...`);
+  }
+}
+</script>
 @endsection

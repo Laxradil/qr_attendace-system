@@ -866,7 +866,6 @@
           <p>@yield('pageSubtitle', 'Welcome back, Admin!')</p>
         </div>
         <div class="top-right">
-          <div class="search-bar">🔍 <span style="font-size:13.5px">Search...</span></div>
           <div class="clock-pill">
             📅 <span id="clockDate">{{ now()->format('M d, Y') }}</span>
             &nbsp;·&nbsp;

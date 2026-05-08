@@ -30,23 +30,6 @@
         flex-wrap:wrap;
     }
 
-    .users-search{
-        width:250px;
-        height:40px;
-        padding:0 14px;
-        display:flex;
-        align-items:center;
-        gap:9px;
-        border-radius:999px;
-        border:1px solid rgba(255,255,255,.14);
-        background:rgba(255,255,255,.06);
-        color:var(--muted);
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
-        font-size:13px;
-    }
-
-    .users-search span{white-space:nowrap}
-
     .users-table-shell{
         border-radius:var(--radius-lg);
         overflow:hidden;
@@ -78,7 +61,6 @@
 
     @media (max-width: 760px){
         .users-panel{padding:14px 12px 10px}
-        .users-search{width:100%}
     }
 </style>
 
@@ -116,7 +98,6 @@
 <div class="users-panel" style="margin-top:16px">
     <div class="users-toolbar">
       <div class="tools">
-        <div class="users-search">🔍 <span>Search users...</span></div>
         <button class="btn">☰ Filter</button>
       </div>
     </div>

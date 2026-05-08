@@ -8,7 +8,6 @@
 <div class="glass-table glass">
   <div class="toolbar">
     <a href="{{ route('admin.classes.create') }}" class="btn primary">＋ Add Class</a>
-    <div class="search-bar" style="height:42px;width:260px">🔍 <span style="font-size:13px">Search classes...</span></div>
   </div>
 
   <div class="table-wrap">
