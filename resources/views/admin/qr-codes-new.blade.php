@@ -53,7 +53,7 @@
           </td>
           <td>
             <a href="{{ route('admin.students.qr-code', $student) }}" class="btn slim">Open</a>
-            <button class="btn primary slim" onclick="downloadQRCode('{{ route('admin.students.qr-code', $student) }}', '{{ $student->name }}')">↓ PNG</button>
+            <button class="btn primary slim" data-url="{{ route('admin.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
           </td>
         </tr>
         @empty
@@ -61,20 +61,6 @@
           <td colspan="5" style="text-align:center;padding:40px;color:var(--muted)">No students found</td>
         </tr>
         @endforelse
-
-<script>
-function filterTable(input) {
-  const searchValue = input.value.toLowerCase();
-  const table = input.closest('.glass-table').querySelector('table');
-  const rows = table.querySelectorAll('tbody tr');
-  
-  rows.forEach(row => {
-    if (row.querySelector('td[colspan]')) return;
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(searchValue) ? '' : 'none';
-  });
-}
-</script>
       </tbody>
     </table>
   </div>
@@ -90,6 +76,18 @@ function filterTable(input) {
 </div>
 
 <script>
+function filterTable(input) {
+  const searchValue = input.value.toLowerCase();
+  const table = input.closest('.glass-table').querySelector('table');
+  const rows = table.querySelectorAll('tbody tr');
+
+  rows.forEach(row => {
+    if (row.querySelector('td[colspan]')) return;
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  });
+}
+
 function downloadQRCode(url, studentName) {
   const link = document.createElement('a');
   link.href = url;
