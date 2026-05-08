@@ -1,112 +1,241 @@
-@extends('layouts.admin')
+@extends('layouts.admin-new')
 
-@section('title', 'Edit Class')
-@section('header', 'Edit Class')
-@section('subheader', 'Update class details and assigned professor.')
+@section('title', 'Edit Class - QR Attendance Admin')
+@section('pageTitle', 'Edit Class')
+@section('pageSubtitle', 'Update class details and assigned professor.')
 
 @section('content')
-<div class="card" style="max-width:760px;">
-    <form action="{{ route('admin.classes.update', $classe) }}" method="POST">
-        @csrf
-        @method('PUT')
-        <label class="fl">Class Code *</label>
-        <input class="fi" type="text" name="code" value="{{ $classe->code }}" maxlength="20" required>
-        <div style="height:8px;"></div>
-
-        <label class="fl">Class Name *</label>
-        <input class="fi" type="text" name="name" value="{{ $classe->name }}" required>
-        <div style="height:8px;"></div>
-
-        <label class="fl">Description</label>
-        <textarea class="fi" name="description" rows="4">{{ $classe->description }}</textarea>
-        <div style="height:8px;"></div>
-
-        <label class="fl">Assigned Professors *</label>
-        <div class="professor-selector" style="display:flex;gap:10px;align-items:center;">
-            <div style="flex:1;">
-                <label style="font-size:12px;color:var(--text2);">Available Professors</label>
-                <select id="available-professors" multiple size="8" style="width:100%;min-height:120px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;">
-                    @foreach($professors as $professor)
-                        @if(!$classe->professors->contains($professor->id))
-                            <option value="{{ $professor->id }}">{{ $professor->name }}</option>
-                        @endif
-                    @endforeach
-                </select>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:4px;">
-                <button type="button" id="add-professor" class="btn" style="font-size:12px;padding:4px 8px;">Add >></button>
-                <button type="button" id="remove-professor" class="btn" style="font-size:12px;padding:4px 8px;"><< Remove</button>
-            </div>
-            <div style="flex:1;">
-                <label style="font-size:12px;color:var(--text2);">Selected Professors</label>
-                <select id="selected-professors" name="professors[]" multiple size="8" required style="width:100%;min-height:120px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;">
-                    @foreach($classe->professors as $professor)
-                        <option value="{{ $professor->id }}">{{ $professor->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-        <div style="font-size:10px;color:var(--text2);margin-top:4px;">Select professors from available list and move them to selected</div>
-
-        <input type="hidden" name="is_active" value="0">
-        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);margin:10px 0;">
-            <input type="checkbox" name="is_active" value="1" {{ $classe->is_active ? 'checked' : '' }}> Active class
-        </label>
-
-        <div style="font-size:10px;color:var(--text3);margin-bottom:8px;">Enrolled students: {{ $classe->students->count() }}</div>
-
-        <div style="display:flex;gap:8px;">
-            <button type="submit" class="btn btn-p">Update Class</button>
-            <a href="{{ route('admin.classes') }}" class="btn">Cancel</a>
-        </div>
-    </form>
-</div>
-
 <style>
-.professor-selector select {
-    overflow: auto;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.professor-selector select:focus {
-    outline: none;
-    border-color: var(--amber);
-    box-shadow: 0 0 0 1px var(--amber);
-}
-.professor-selector select::-webkit-scrollbar {
-    width: 8px;
-}
-.professor-selector select::-webkit-scrollbar-track {
-    background: rgba(253,203,110,0.08);
-    border-radius: 4px;
-}
-.professor-selector select::-webkit-scrollbar-thumb {
-    background: rgba(253,203,110,0.3);
-    border-radius: 4px;
-}
-.professor-selector select::-webkit-scrollbar-thumb:hover {
-    background: rgba(253,203,110,0.45);
-}
-.professor-selector select option:checked,
-.professor-selector select option[selected] {
-    background: rgba(253,203,110,0.22);
-    color: var(--text);
-}
+  .form-grid{
+    display:grid;
+    gap:16px;
+  }
+  .form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .form-group label{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.01em;
+    color:#fff;
+    text-transform:uppercase;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea{
+    padding:12px 14px;
+    border-radius:var(--radius-md);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,12,30,.58);
+    color:#fff;
+    font-size:13px;
+    transition:border-color .2s ease, box-shadow .2s ease;
+    font-family:inherit;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus{
+    outline:none;
+    border-color:rgba(143,91,255,.5);
+    box-shadow:inset 0 0 0 2px rgba(143,91,255,.1),0 0 16px rgba(143,91,255,.2);
+  }
+  .form-group input::placeholder,
+  .form-group textarea::placeholder{
+    color:rgba(255,255,255,.3);
+  }
+  .form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width: 760px){
+    .form-row{
+      grid-template-columns:1fr;
+    }
+  }
+  .form-actions{
+    display:flex;
+    gap:12px;
+    margin-top:24px;
+  }
+  .professor-selector{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .professor-list{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .professor-list label{
+    font-size:12px;
+    color:rgba(255,255,255,.6);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  .professor-list select{
+    width:100%;
+    min-height:140px;
+    padding:10px;
+    border-radius:var(--radius-md);
+    border:none;
+    background:rgba(8,12,30,.58);
+    color:#fff;
+    font-size:13px;
+  }
+  .professor-list select:focus{
+    outline:none;
+    border:none;
+    box-shadow:inset 0 0 0 2px rgba(143,91,255,.1),0 0 16px rgba(143,91,255,.2);
+  }
+  .professor-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    justify-content:center;
+    align-items:center;
+  }
+  .professor-buttons button{
+    padding:10px 12px;
+    font-size:12px;
+    white-space:nowrap;
+  }
+  .checkbox-group{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 14px;
+    border-radius:var(--radius-md);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,12,30,.58);
+    width:fit-content;
+  }
+  .checkbox-group input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    cursor:pointer;
+    accent-color:#8f5bff;
+  }
+  .checkbox-group label{
+    margin:0;
+    font-size:13px;
+    cursor:pointer;
+    text-transform:none;
+  }
+  .info-text{
+    font-size:12px;
+    color:rgba(255,255,255,.5);
+    margin-top:8px;
+  }
 </style>
 
+<div class="card glass" style="margin-bottom:16px">
+  <div class="mini-grid">
+    <div class="mini">
+      <div class="mini-icon stat-icon purple" style="width:38px;height:38px;border-radius:12px;font-size:16px">📚</div>
+      <div><b>{{ App\Models\Classe::count() }}</b><small>Total Classes</small></div>
+    </div>
+    <div class="mini">
+      <div class="mini-icon stat-icon blue" style="width:38px;height:38px;border-radius:12px;font-size:16px">👥</div>
+      <div><b>{{ $classe->students->count() }}</b><small>Enrolled Students</small></div>
+    </div>
+    <div class="mini">
+      <div class="mini-icon stat-icon yellow" style="width:38px;height:38px;border-radius:12px;font-size:16px">🎓</div>
+      <div><b>{{ $classe->professors->count() }}</b><small>Professors</small></div>
+    </div>
+    <div class="mini">
+      <div class="mini-icon stat-icon green" style="width:38px;height:38px;border-radius:12px;font-size:16px">{{ $classe->is_active ? '✓' : '✕' }}</div>
+      <div><b>{{ $classe->is_active ? 'Active' : 'Inactive' }}</b><small>Status</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="glass-table glass" style="padding:32px">
+  <form action="{{ route('admin.classes.update', $classe) }}" method="POST" class="form-grid">
+    @csrf
+    @method('PUT')
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="code">Class Code *</label>
+        <input type="text" id="code" name="code" value="{{ $classe->code }}" maxlength="20" placeholder="Enter class code" required>
+      </div>
+      <div class="form-group">
+        <label for="name">Class Name *</label>
+        <input type="text" id="name" name="name" value="{{ $classe->name }}" placeholder="Enter class name" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" placeholder="Enter class description (optional)">{{ $classe->description }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Assigned Professors *</label>
+      <div class="professor-selector">
+        <div class="professor-list">
+          <label>Available Professors</label>
+          <select id="available-professors" multiple>
+            @foreach($professors as $professor)
+              @if(!$classe->professors->contains($professor->id))
+                <option value="{{ $professor->id }}">{{ $professor->name }}</option>
+              @endif
+            @endforeach
+          </select>
+        </div>
+        <div class="professor-buttons">
+          <button type="button" id="add-professor" class="btn">Add →</button>
+          <button type="button" id="remove-professor" class="btn">← Remove</button>
+        </div>
+        <div class="professor-list">
+          <label>Selected Professors</label>
+          <select id="selected-professors" name="professors[]" multiple required>
+            @foreach($classe->professors as $professor)
+              <option value="{{ $professor->id }}">{{ $professor->name }}</option>
+            @endforeach
+          </select>
+        </div>
+      </div>
+      <div class="info-text">Select professors from available list and move them to selected</div>
+    </div>
+
+    <div class="form-group">
+      <input type="hidden" name="is_active" value="0">
+      <div class="checkbox-group">
+        <input type="checkbox" id="is_active" name="is_active" value="1" {{ $classe->is_active ? 'checked' : '' }}>
+        <label for="is_active">Active class</label>
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top:32px">
+      <button type="submit" class="btn primary">✓ Update Class</button>
+      <a href="{{ route('admin.classes') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+
 <script>
-document.getElementById('add-professor').addEventListener('click', function() {
-    moveOptions('available-professors', 'selected-professors');
+document.getElementById('add-professor').addEventListener('click', function(e) {
+  e.preventDefault();
+  moveOptions('available-professors', 'selected-professors');
 });
-document.getElementById('remove-professor').addEventListener('click', function() {
-    moveOptions('selected-professors', 'available-professors');
+document.getElementById('remove-professor').addEventListener('click', function(e) {
+  e.preventDefault();
+  moveOptions('selected-professors', 'available-professors');
 });
 
 function moveOptions(fromId, toId) {
-    const from = document.getElementById(fromId);
-    const to = document.getElementById(toId);
-    Array.from(from.selectedOptions).forEach(option => {
-        to.appendChild(option);
-    });
+  const from = document.getElementById(fromId);
+  const to = document.getElementById(toId);
+  Array.from(from.selectedOptions).forEach(option => {
+    to.appendChild(option);
+  });
 }
 </script>
 @endsection

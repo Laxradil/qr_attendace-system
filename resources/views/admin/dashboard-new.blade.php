@@ -66,11 +66,16 @@
     background:linear-gradient(90deg,#8f5bff 0%,#5d63ff 45%,#2d68b8 100%);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 10px 26px rgba(78,88,255,.28);
     transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    text-decoration:none;
+    color:#fff;
   }
   .attendance-panel .report-btn:hover{
     transform:translateY(-2px);
     filter:saturate(1.05);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 14px 34px rgba(78,88,255,.36);
+  }
+  .quick-grid .quick div{
+    color:#fff;
   }
 </style>
 
@@ -138,10 +143,6 @@
           <div class="mini-icon stat-icon blue" style="width:38px;height:38px;border-radius:12px;font-size:16px">▤</div>
           <div><b>{{ App\Models\AttendanceRecord::count() }}</b><small>Total</small></div>
         </div>
-      </div>
-      <!-- Attendance bar -->
-      <div style="height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:16px">
-        <div class="attendance-fill" data-progress="{{ round($attendanceProgress, 2) }}" style="height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;box-shadow:0 0 12px rgba(24,240,139,.5)"></div>
       </div>
       <a href="{{ route('admin.attendance-records') }}" class="report-btn">View Full Attendance Report →</a>
     </div>
