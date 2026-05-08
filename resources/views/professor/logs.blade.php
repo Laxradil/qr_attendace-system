@@ -1,105 +1,213 @@
 @extends('layouts.professor')
 
 @section('title', 'Activity Logs - Professor')
-@section('header', 'My Activity Logs')
-@section('subheader', 'Track your recent system activities')
+@section('header', 'Activity Logs')
+@section('subheader', 'Monitor your recent system activities and events.')
 
 @section('content')
-<div style="display:grid;gap:12px;max-width:900px">
-  @forelse($logs as $log)
-    <div class="glass" style="border-radius:var(--radius-lg);padding:16px;transition:.3s ease">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:12px">
-        <div>
-          <span class="activity-badge" style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">
-            {{ str_replace('_', ' ', $log->action ?? 'Other') }}
-          </span>
-        </div>
-        <span style="font-size:11px;color:var(--muted);white-space:nowrap">
-          {{ $log->created_at->diffForHumans() ?? 'N/A' }}
-        </span>
-      </div>
-      
-      @if($log->description)
-        <div style="font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.5">
-          {{ $log->description }}
-        </div>
-      @endif
-      
-      <div style="display:flex;gap:12px;font-size:11px;color:var(--muted);padding-top:8px;border-top:1px solid rgba(255,255,255,.07)">
-        @if($log->ip_address)
-          <span style="font-family:var(--mono)">IP: {{ $log->ip_address }}</span>
-        @endif
-        <span style="font-family:var(--mono)">{{ $log->created_at->format('M d, Y H:i:s') ?? 'N/A' }}</span>
-      </div>
+<style>
+    .logs-toolbar{display:flex;gap:9px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+    .filter-chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{
+        display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.15);
+        background:rgba(255,255,255,.06);color:#dde5ff;border-radius:999px;padding:8px 14px;
+        font-weight:700;font-size:13px;cursor:pointer;transition:.2s ease;font-family:var(--font);
+    }
+    .chip:hover{background:rgba(255,255,255,.1)}
+    .chip.active{
+        background:linear-gradient(135deg,rgba(139,92,255,.85),rgba(67,166,255,.45));
+        border-color:transparent;box-shadow:0 8px 24px rgba(80,94,255,.2);
+    }
+    .logs-actions{display:flex;gap:9px;margin-left:auto;flex-wrap:wrap}
+    .action-btn{
+        display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.15);
+        background:rgba(255,255,255,.08);color:#fff;border-radius:13px;padding:9px 14px;
+        font-weight:700;cursor:pointer;transition:.2s ease;font-size:13px;font-family:var(--font);
+    }
+    .action-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24)}
+    
+    .logs-table-wrap{
+        background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);
+        border-radius:22px;overflow:hidden;margin-bottom:14px;
+    }
+    .logs-table-wrap table{width:100%;border-collapse:collapse}
+    .logs-table-wrap th{
+        background:rgba(255,255,255,.05);color:var(--faint);font-size:11px;letter-spacing:.12em;
+        text-transform:uppercase;font-weight:700;position:sticky;top:0;backdrop-filter:blur(8px);
+        padding:14px 15px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle;
+    }
+    .logs-table-wrap td{
+        padding:14px 15px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);
+        vertical-align:middle;color:#e8eeff;font-size:13.5px;
+    }
+    .logs-table-wrap tbody tr:hover td{background:rgba(255,255,255,.028)}
+    .logs-table-wrap tr:last-child td{border-bottom:0}
+    
+    .log-user-cell{display:flex;align-items:center;gap:10px;font-weight:700}
+    .log-avatar{
+        width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+        background:linear-gradient(145deg,rgba(139,92,255,.36),rgba(67,166,255,.2));
+        font-size:11px;font-weight:900;border:1px solid rgba(139,92,255,.3);flex-shrink:0;
+    }
+    .log-action-badge{
+        display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:6px 10px;
+        font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.01em;border:1px solid transparent;
+    }
+    .log-action-badge.add-student{background:rgba(24,240,139,.12);color:#4dffa0;border-color:rgba(24,240,139,.2)}
+    .log-action-badge.update-user{background:rgba(255,199,90,.12);color:#ffc75a;border-color:rgba(255,199,90,.22)}
+    .log-action-badge.scan-qr{background:rgba(67,166,255,.12);color:#43a6ff;border-color:rgba(67,166,255,.2)}
+    .log-action-badge.attendance-record{background:rgba(139,92,255,.12);color:#b9c4ff;border-color:rgba(139,92,255,.2)}
+    .log-action-badge.other{background:rgba(255,255,255,.055);color:var(--muted);border-color:rgba(255,255,255,.1)}
+    
+    .logs-footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12.5px}
+    .pager{display:flex;gap:6px}
+    .pager button{
+        width:34px;height:34px;border:1px solid rgba(255,255,255,.14);border-radius:11px;
+        background:rgba(255,255,255,.07);color:#fff;cursor:pointer;font-family:var(--mono);
+        font-weight:700;transition:.2s ease;font-size:12px;
+    }
+    .pager button:hover{background:rgba(255,255,255,.13)}
+    .pager .current{background:linear-gradient(135deg,rgba(139,92,255,.95),rgba(67,166,255,.55));border-color:transparent}
+    
+    .td-mono{font-family:var(--mono);font-size:12px;color:var(--muted)}
+    .log-desc{font-size:13px;color:#e8eeff}
+    .log-desc.muted{color:var(--muted)}
+</style>
+
+<div class="logs-toolbar">
+    <div class="filter-chips">
+        <div class="chip active" onclick="filterLogs('all')">⊙ All Actions</div>
+        <div class="chip" onclick="filterLogs('add-student')">➕ Add Student</div>
+        <div class="chip" onclick="filterLogs('update-user')">🔄 Update User</div>
+        <div class="chip" onclick="filterLogs('scan-qr')">▦ Scan QR</div>
     </div>
-  @empty
-    <div class="glass" style="border-radius:var(--radius-lg);padding:40px;text-align:center">
-      <div style="font-size:48px;margin-bottom:12px">📋</div>
-      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">No Activity Logs Yet</div>
-      <div style="font-size:13px;color:var(--muted)">Your activity logs will appear here as you interact with the system.</div>
+    <div style="display:flex;gap:9px;margin-left:auto;flex-wrap:wrap;align-items:center;flex:1;justify-content:flex-end">
+        <input type="text" id="logsSearchInput" placeholder="Search logs..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;width:200px" oninput="searchLogs()">
+        <div class="logs-actions">
+            <button class="action-btn" onclick="location.reload()">🔄 Refresh</button>
+            <button class="action-btn" onclick="exportLogs()">⬇ Export</button>
+        </div>
     </div>
-  @endforelse
 </div>
 
-<!-- Pagination -->
-@if($logs && method_exists($logs, 'hasPages') && $logs->hasPages())
-  <div style="display:flex;justify-content:center;margin-top:24px;gap:8px">
-    @if($logs->onFirstPage())
-      <button class="pag-btn" disabled style="opacity:0.5;cursor:not-allowed">←</button>
-    @else
-      <a href="{{ $logs->previousPageUrl() }}" class="pag-btn">←</a>
-    @endif
-    
-    @foreach($logs->getUrlRange(1, $logs->lastPage()) as $page => $url)
-      @if($page == $logs->currentPage())
-        <button class="pag-btn active">{{ $page }}</button>
-      @else
-        <a href="{{ $url }}" class="pag-btn">{{ $page }}</a>
-      @endif
-    @endforeach
-    
-    @if($logs->hasMorePages())
-      <a href="{{ $logs->nextPageUrl() }}" class="pag-btn">→</a>
-    @else
-      <button class="pag-btn" disabled style="opacity:0.5;cursor:not-allowed">→</button>
-    @endif
-  </div>
-@endif
+<div class="logs-table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Description</th>
+                <th>IP Address</th>
+            </tr>
+        </thead>
+        <tbody id="logsTableBody">
+            @forelse($logs as $log)
+                <tr data-action="{{ strtolower($log->action ?? '') }}">
+                    <td class="td-mono">{{ $log->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y h:i:s A') }}</td>
+                    <td>
+                        <div class="log-user-cell">
+                            <div class="log-avatar">{{ strtoupper(substr($log->user->name ?? 'SY', 0, 2)) }}</div>
+                            <div>
+                                <div style="font-size:13px;font-weight:700;">{{ $log->user->name ?? 'System' }}</div>
+                                <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ $log->user->role ?? 'system' }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        @php
+                            $actionLower = strtolower($log->action ?? 'event');
+                            if (str_contains($actionLower, 'student')) $badgeClass = 'add-student';
+                            elseif (str_contains($actionLower, 'update')) $badgeClass = 'update-user';
+                            elseif (str_contains($actionLower, 'scan')) $badgeClass = 'scan-qr';
+                            elseif (str_contains($actionLower, 'attendance')) $badgeClass = 'attendance-record';
+                            else $badgeClass = 'other';
+                        @endphp
+                        <span class="log-action-badge {{ $badgeClass }}">{{ strtoupper(str_replace('_', ' ', $log->action)) }}</span>
+                    </td>
+                    <td class="log-desc">{{ $log->description ?: '-' }}</td>
+                    <td class="td-mono">{{ $log->ip_address ?: '-' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" style="text-align:center;padding:40px;color:var(--muted);">
+                        <div style="font-size:14px;font-weight:500;">No activity logs yet</div>
+                        <div style="font-size:12px;margin-top:4px;">Your activities will appear here</div>
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 
-<style>
-  .activity-badge {
-    padding: 4px 8px;
-    border-radius: 6px;
-    background: rgba(139,92,255,.15);
-    color: rgba(200,180,255,.9);
-    border: 1px solid rgba(139,92,255,.25);
-    display: inline-block;
-  }
-  
-  .pag-btn {
-    padding: 9px 12px;
-    border-radius: 10px;
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--text);
-    font-size: 13px;
-    cursor: pointer;
-    transition: .2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-  }
-  
-  .pag-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,.13);
-    border-color: rgba(255,255,255,.24);
-    transform: translateY(-2px);
-  }
-  
-  .pag-btn.active {
-    background: linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));
-    border-color: rgba(139,92,255,.5);
-    color: #fff;
-  }
-</style>
+<div class="logs-footer">
+    <span>Showing {{ $logs->firstItem() ?? 0 }} to {{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }} logs</span>
+    <div class="pager">
+        {{ $logs->links() }}
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'all';
+    
+    function filterLogs(action) {
+        currentFilter = action;
+        const chips = document.querySelectorAll('.chip');
+        chips.forEach(chip => chip.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        applyFiltersAndSearch();
+    }
+    
+    function searchLogs() {
+        applyFiltersAndSearch();
+    }
+    
+    function applyFiltersAndSearch() {
+        const searchTerm = document.getElementById('logsSearchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#logsTableBody tr');
+        
+        rows.forEach(row => {
+            const rowAction = row.dataset.action;
+            const rowText = row.textContent.toLowerCase();
+            
+            // Apply action filter
+            let actionMatch = true;
+            if (currentFilter !== 'all') {
+                actionMatch = rowAction.includes(currentFilter.toLowerCase());
+            }
+            
+            // Apply search filter
+            let searchMatch = true;
+            if (searchTerm.length > 0) {
+                searchMatch = rowText.includes(searchTerm);
+            }
+            
+            row.style.display = (actionMatch && searchMatch) ? '' : 'none';
+        });
+    }
+    
+    function exportLogs() {
+        const rows = document.querySelectorAll('#logsTableBody tr:not([style*="display: none"])');
+        let csv = 'Date & Time,User,Action,Description,IP Address\n';
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length === 5) {
+                csv += `"${cells[0].textContent.trim()}","${cells[1].textContent.trim()}","${cells[2].textContent.trim()}","${cells[3].textContent.trim()}","${cells[4].textContent.trim()}"\n`;
+            }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    }
+</script>
+
 @endsection

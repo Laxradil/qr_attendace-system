@@ -14,7 +14,6 @@
       <div class="stat-body">
         <strong>{{ $classes->count() }}</strong>
         <span class="stat-label">Enrolled Classes</span>
-        <a href="{{ route('student.classes') }}">View classes →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -22,7 +21,6 @@
       <div class="stat-body">
         <strong>{{ $totalPresent }}</strong>
         <span class="stat-label">Present</span>
-        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -30,7 +28,6 @@
       <div class="stat-body">
         <strong>{{ $totalLate }}</strong>
         <span class="stat-label">Late</span>
-        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -38,7 +35,6 @@
       <div class="stat-body">
         <strong>{{ $totalAbsent }}</strong>
         <span class="stat-label">Absent</span>
-        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -46,7 +42,6 @@
       <div class="stat-body">
         <strong>{{ $totalExcused ?? 0 }}</strong>
         <span class="stat-label">Excused</span>
-        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
   </div>
@@ -61,7 +56,8 @@
           <h3>📚 Your Classes</h3>
           <a href="{{ route('student.classes') }}">View all →</a>
         </div>
-        @forelse($classes->take(3) as $class)
+        @php $classList = collect($classes); @endphp
+        @forelse($classList->take(3) as $class)
         <div class="class-row">
           <div class="class-row-left">
             <div class="class-row-name">{{ $class->code }} — {{ $class->name }}</div>
@@ -77,7 +73,7 @@
         @empty
         <div class="empty-state" style="padding:20px 0;font-size:12.5px">No classes enrolled</div>
         @endforelse
-        <a href="{{ route('student.classes') }}" class="btn" style="width:100%;margin-top:auto;padding-top:11px;padding-bottom:11px;text-align:center;text-decoration:none">View All Classes →</a>
+        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none">View All Classes →</a>
       </div>
     </div>
 
@@ -110,7 +106,7 @@
         <div class="empty-state" style="padding:20px 0;font-size:12.5px">No records yet.</div>
         @endforelse
 
-        <a href="{{ route('student.attendance') }}" class="btn" style="width:100%;margin-top:auto;text-align:center;text-decoration:none;display:block">View All Records →</a>
+        <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Records →</a>
       </div>
 
       <!-- Quick Actions -->
@@ -142,8 +138,8 @@
         <div class="qr-student-id">Student ID: {{ Auth::user()->id }}</div>
         <div class="qr-hint">Show to professor for attendance</div>
         <div class="qr-actions">
-          <button class="btn primary" onclick="openQRModal()">Show QR</button>
-          <button class="btn" onclick="showToast('Downloading QR...','📥','#4dffa0')">Download</button>
+          <button class="btn btn-pill primary" onclick="openQRModal()">Show QR</button>
+          <button class="btn btn-pill" onclick="downloadQR()">Download</button>
         </div>
         <div class="qr-status">
           <span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(24,240,139,.8);display:inline-block"></span>
@@ -177,6 +173,14 @@
 </div>
 
 <script>
+    function downloadQR() {
+      const canvas = document.getElementById('qrDashboard');
+      if (!canvas) return;
+      const link = document.createElement('a');
+      link.download = 'student-qr.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
   // Generate QR code for dashboard
   setTimeout(function() {
     const qrData = JSON.stringify({

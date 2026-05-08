@@ -134,12 +134,12 @@
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;flex-shrink:0}
     .logout{
-      border:1px solid rgba(255,61,114,.2);background:rgba(255,61,114,.07);color:#ff8298;
-      padding:9px 10px;border-radius:13px;display:flex;align-items:center;gap:10px;
+      border:1px solid transparent;background:transparent;color:#ff8298;
+      padding:11px 14px;border-radius:16px;display:flex;align-items:center;gap:10px;
       font-weight:700;cursor:pointer;transition:.2s ease;font-size:13.5px;font-family:var(--font);width:100%;
     }
-    .logout:hover{background:rgba(255,61,114,.14);transform:translateX(3px)}
-    .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:rgba(255,61,114,.15)}
+    .logout:hover{background:rgba(255,61,114,.12);border-color:rgba(255,61,114,.2);transform:scale(1.02)}
+    .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:transparent}
 
     main{padding:18px 24px 18px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px;flex-shrink:0}
@@ -207,16 +207,16 @@
     .section-head a{color:rgba(139,92,255,.9);text-decoration:none;font-weight:700;font-size:12px;letter-spacing:.02em;cursor:pointer}
     .section-head a:hover{color:#b9c4ff}
 
-    .mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+    .mini-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px;max-width:400px}
     .mini{
-      border-radius:14px;padding:10px;
+      border-radius:10px;padding:6px;
       border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.065);
-      display:flex;gap:8px;align-items:center;transition:.2s ease;
+      display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;transition:.2s ease;aspect-ratio:1/1;
     }
     .mini:hover{background:rgba(255,255,255,.1)}
-    .mini b{font-size:18px;display:block;font-weight:900;letter-spacing:-.04em}
-    .mini small{color:var(--muted);font-size:10.5px;margin-top:1px;display:block}
-    .mini-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:14px;flex-shrink:0}
+    .mini b{font-size:12px;display:block;font-weight:900;letter-spacing:-.04em;text-align:center}
+    .mini small{color:var(--muted);font-size:8px;margin-top:0px;display:block;text-align:center}
+    .mini-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:10px;flex-shrink:0}
 
     .report-btn{
       width:100%;height:40px;border:0;border-radius:13px;color:white;font-weight:800;cursor:pointer;
@@ -227,16 +227,27 @@
     .report-btn:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 14px 32px rgba(80,94,255,.35)}
 
     .activity{
-      display:grid;grid-template-columns:34px 1fr auto;gap:10px;padding:9px 0;
+      display:grid;grid-template-columns:38px 1fr auto;gap:10px;padding:9px 0;
       border-bottom:1px solid rgba(255,255,255,.06);transition:.2s ease;border-radius:8px;
     }
     .activity:hover{background:rgba(255,255,255,.03);padding-left:6px;padding-right:6px}
     .activity:last-child{border-bottom:0}
-    .act-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:14px;flex-shrink:0}
+    .act-icon{
+      width:38px;height:38px;
+      border-radius:13px;
+      display:grid;place-items:center;
+      font-size:15px;
+      flex-shrink:0;
+    }
+    .act-icon.add{background:rgba(24,240,139,.15);border:1px solid rgba(24,240,139,.2)}
+    .act-icon.edit{background:rgba(255,199,90,.15);border:1px solid rgba(255,199,90,.2)}
+    .act-icon.create{background:rgba(139,92,255,.18);border:1px solid rgba(139,92,255,.22)}
+    .act-icon.scan{background:rgba(67,166,255,.15);border:1px solid rgba(67,166,255,.2)}
+    .act-icon.drop{background:rgba(255,61,114,.12);border:1px solid rgba(255,61,114,.18)}
     .act-icon.att{background:rgba(139,92,255,.15);border:1px solid rgba(139,92,255,.2)}
-    .activity b{font-size:13px;font-weight:700;display:block}
-    .activity p{margin:2px 0 0;color:var(--muted);font-size:11.5px;line-height:1.3}
-    .activity time{font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono)}
+    .activity b{font-size:13.5px;font-weight:700}
+    .activity p{margin:3px 0 0;color:var(--muted);font-size:12.5px;line-height:1.4}
+    .activity time{font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono)}
 
     .row-item{
       display:flex;align-items:center;justify-content:space-between;
@@ -247,14 +258,14 @@
     .row-item:last-child{margin-bottom:0}
     .row-item span{color:var(--muted);font-weight:500}
 
-    .quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-width:280px}
     .quick{
-      border-radius:16px;padding:11px;display:flex;align-items:center;gap:9px;
-      cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);transition:.25s ease;
+      border-radius:12px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+      cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);transition:.25s ease;aspect-ratio:1/1;
     }
     .quick:hover{background:rgba(255,255,255,.1);transform:translateY(-2px);border-color:rgba(255,255,255,.22)}
-    .quick strong{display:block;font-size:12.5px;font-weight:700}
-    .quick span{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+    .quick strong{display:block;font-size:11px;font-weight:700;margin-top:4px}
+    .quick span{display:block;color:var(--muted);font-size:9px;margin-top:1px}
 
     .pill{
       display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 11px;
@@ -278,6 +289,7 @@
       box-shadow:inset 0 1px 0 rgba(255,255,255,.14);font-size:13px;font-family:var(--font);
     }
     .btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24)}
+    .btn-pill{border-radius:999px !important;padding:10px 20px;display:flex;align-items:center;justify-content:center}
 
     ::-webkit-scrollbar{width:5px;height:5px}
     ::-webkit-scrollbar-track{background:transparent}
@@ -348,6 +360,10 @@
         <a href="{{ route('professor.students') }}" class="{{ request()->routeIs('professor.students') ? 'active' : '' }}">
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>
+        </a>
+        <a href="{{ route('professor.reports') }}" class="{{ request()->routeIs('professor.reports') ? 'active' : '' }}">
+          <span class="nav-icon">📊</span>
+          <span>Reports</span>
         </a>
         <a href="{{ route('professor.logs') }}" class="{{ request()->routeIs('professor.logs') ? 'active' : '' }}">
           <span class="nav-icon">☷</span>

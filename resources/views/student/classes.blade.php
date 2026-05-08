@@ -43,8 +43,8 @@
         <div class="qr-student-id">Student ID: {{ Auth::user()->id }}</div>
         <div class="qr-hint">Show to professor for attendance</div>
         <div class="qr-actions">
-          <button class="btn primary" onclick="showToast('QR displayed','▦','#b9c4ff')">Show</button>
-          <button class="btn" onclick="showToast('Downloading...','📥','#4dffa0')">Download</button>
+          <button class="btn btn-pill primary" onclick="openQRModal()">Show</button>
+          <a class="btn btn-pill" href="#" onclick="downloadQR()">Download</a>
         </div>
 
         <!-- Divider -->
@@ -79,6 +79,26 @@
   </div>
 </section>
 
+<!-- QR Modal (reuse dashboard modal) -->
+<div class="qr-modal" id="qrModal" style="display:none">
+  <div class="qr-modal-overlay" onclick="closeQRModal()"></div>
+  <div class="qr-modal-content glass">
+    <button class="qr-modal-close" onclick="closeQRModal()">✕</button>
+    <div class="qr-modal-body">
+      <div style="text-align:center">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)">Your QR Code</div>
+        <div class="qr-modal-frame">
+          <canvas id="qrModalCanvas"></canvas>
+        </div>
+        <div style="margin-top:16px">
+          <div style="font-size:16px;font-weight:800;color:var(--text)">{{ Auth::user()->name }}</div>
+          <div style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-top:4px">Student ID: {{ Auth::user()->id }}</div>
+          <div style="font-size:12px;color:var(--faint);margin-top:8px">Show to professor for attendance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
   // Generate QR code for classes page
   setTimeout(function() {
@@ -89,6 +109,21 @@
       email: '{{ Auth::user()->email }}'
     });
     generateQR('qrClasses', qrDataClasses);
+    generateQR('qrModalCanvas', qrDataClasses);
   }, 100);
+
+  function openQRModal() {
+    document.getElementById('qrModal').style.display = 'flex';
+  }
+  function closeQRModal() {
+    document.getElementById('qrModal').style.display = 'none';
+  }
+  function downloadQR() {
+    const canvas = document.getElementById('qrClasses');
+    const link = document.createElement('a');
+    link.download = 'student-qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
 </script>
 @endsection

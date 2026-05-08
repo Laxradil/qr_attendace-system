@@ -12,6 +12,11 @@
 @section('subheader', 'View and update attendance records for your classes.')
 
 @section('content')
+<style>
+  .search-bar {
+    display: none !important;
+  }
+</style>
 <!-- Stats row -->
 <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px">
   <div class="stat glass" style="padding:12px">
@@ -46,7 +51,7 @@
           <option value="">All Classes</option>
           @foreach($classes as $class)
             <option value="{{ $class->id }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>
-              {{ $class->subject_code }} — {{ $class->subject_name }}
+              {{ $class->code }} — {{ $class->name }}
             </option>
           @endforeach
         </select>
@@ -86,7 +91,7 @@
                   </div>
                 </div>
               </td>
-              <td>{{ $record->classe->subject_code ?? 'N/A' }} — {{ $record->classe->subject_name ?? 'N/A' }}</td>
+              <td>{{ $record->classe->code ?? 'N/A' }} — {{ $record->classe->name ?? 'N/A' }}</td>
               <td>
                 <span class="pill {{ strtolower($record->status ?? 'present') }}">{{ ucfirst($record->status ?? 'Present') }}</span>
               </td>
@@ -317,4 +322,55 @@
     border-radius: 10px;
   }
 </style>
+
+<script>
+  // Auto-submit filter on change
+  const classSelect = document.querySelector('select[name="class_id"]');
+  const dateInput = document.querySelector('input[name="date"]');
+  const filterForm = document.querySelector('form');
+  
+  if (classSelect) {
+    classSelect.addEventListener('change', () => {
+      filterForm.submit();
+    });
+  }
+  
+  if (dateInput) {
+    dateInput.addEventListener('change', () => {
+      filterForm.submit();
+    });
+  }
+  
+  // Live table search (optional - search within displayed records)
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.placeholder = 'Search students...';
+  searchInput.style.cssText = 'padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;min-width:160px;margin-left:auto';
+  searchInput.classList.add('live-search');
+  
+  const filterFieldsContainer = document.querySelector('.filter-row');
+  const buttonContainer = filterFieldsContainer.querySelector('div:last-child');
+  buttonContainer.parentElement.insertBefore(searchInput, buttonContainer);
+  
+  // Search table rows
+  const tableRows = document.querySelectorAll('#attTable tbody tr');
+  const noDataRow = document.querySelector('#attTable tbody tr td[colspan]');
+  
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    let visibleCount = 0;
+    
+    tableRows.forEach(row => {
+      if (noDataRow && row.querySelector('td[colspan]')) {
+        return; // Skip no-data row
+      }
+      
+      const text = row.textContent.toLowerCase();
+      const shouldShow = text.includes(query) || query === '';
+      row.style.display = shouldShow ? '' : 'none';
+      if (shouldShow) visibleCount++;
+    });
+  });
+</script>
+
 @endsection

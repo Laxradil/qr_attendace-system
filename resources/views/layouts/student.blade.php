@@ -112,9 +112,10 @@
       border:2px solid rgba(255,255,255,.3);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 28px rgba(93,71,255,.38);
       flex-shrink:0;position:relative;
+      color: #ffffff; /* Adds white color to the avatar letter */
     }
     .avatar-status{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid rgba(2,4,18,.8);box-shadow:0 0 8px rgba(24,240,139,.6)}
-    .profile-info h2{font-size:14px;font-weight:700;display:flex;gap:6px;align-items:center}
+    .profile-info h2 {font-size: 14px;font-weight: 700; display: flex;gap: 6px;align-items: center;color: #ffffff;/* Adds white color to your name */}
     .tag{font-size:10px;padding:3px 7px;border-radius:999px;background:rgba(139,92,255,.3);color:#efeaff;border:1px solid rgba(139,92,255,.4)}
     .profile-info p{margin-top:3px;color:var(--muted);font-size:11.5px}
     .online-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);margin-top:2px;font-weight:600}
@@ -140,12 +141,12 @@
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;flex-shrink:0}
     .logout{
-      border:1px solid rgba(255,61,114,.2);background:rgba(255,61,114,.07);color:#ff8298;
-      padding:9px 10px;border-radius:13px;display:flex;align-items:center;gap:10px;
+      border:1px solid transparent;background:transparent;color:#ff8298;
+      padding:11px 14px;border-radius:16px;display:flex;align-items:center;gap:10px;
       font-weight:700;cursor:pointer;transition:.2s ease;font-size:13.5px;font-family:var(--font);width:100%;
     }
-    .logout:hover{background:rgba(255,61,114,.14);transform:translateX(3px)}
-    .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:rgba(255,61,114,.15)}
+    .logout:hover{background:rgba(255,61,114,.12);border-color:rgba(255,61,114,.2);transform:scale(1.02)}
+    .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:transparent}
 
     /* ═══ MAIN ═══ */
     main{padding:18px 24px 18px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
@@ -362,6 +363,7 @@
     }
     .btn.primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 28px rgba(80,94,255,.38)}
     .btn.slim{padding:7px 12px;font-size:12px;border-radius:10px}
+    .btn-pill{border-radius:999px !important;padding:10px 20px;display:flex;align-items:center;justify-content:center}
 
     /* ─── MY CLASSES PAGE ─── */
     .classes-layout{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
@@ -507,17 +509,16 @@
         </div>
       </div>
 
-      <div class="profile-card">
-        <div class="avatar" style="position:relative">
-          {{ substr(Auth::user()->name, 0, 1) }}
+      <a href="{{ route('student.settings') }}" class="profile-card" style="text-decoration:none;cursor:pointer;transition:.2s ease;display:flex;align-items:center;gap:10px;">
+        <div class="avatar">{{ strtoupper(substr(auth()->user()->name ?? 'S', 0, 1)) }}
           <div class="avatar-status"></div>
         </div>
         <div class="profile-info">
-          <h2>{{ Auth::user()->name }} <span class="tag">Student</span></h2>
-          <p>{{ Auth::user()->email }}</p>
+          <h2>{{ auth()->user()->name }} <span class="tag">Student</span></h2>
+          <p>{{ auth()->user()->email }}</p>
           <div class="online-badge"><span class="dot"></span> Online</div>
         </div>
-      </div>
+      </a>
 
       <div class="nav-label">Menu</div>
       <nav class="nav">
@@ -532,6 +533,10 @@
         <a href="{{ route('student.attendance') }}" class="nav-btn {{ request()->routeIs('student.attendance') ? 'active' : '' }}">
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
+        </a>
+        <a href="{{ route('student.settings') }}" class="nav-btn {{ request()->routeIs('student.settings') ? 'active' : '' }}">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
         </a>
       </nav>
 
