@@ -11,8 +11,136 @@
   $attendanceProgress = $attendanceTotal > 0 ? ($attendancePresent / $attendanceTotal) * 100 : 0;
 @endphp
 
-<div class="stats">
-  <div class="stat glass">
+<style>
+  .dashboard-stats{
+    gap:12px;
+  }
+  .dashboard-stats .stat{
+    border:none;
+    background:transparent;
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    padding:16px;
+    cursor:pointer;
+    transition:transform .25s ease, background .25s ease, box-shadow .25s ease, border-color .25s ease, padding .25s ease;
+  }
+  .dashboard-stats .stat:hover{
+    transform:translateY(-3px);
+    padding:22px;
+    border:1px solid rgba(255,255,255,.22);
+    background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.03) 40%,rgba(255,255,255,.07));
+    backdrop-filter:var(--blur);
+    -webkit-backdrop-filter:var(--blur);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 24px 60px rgba(0,0,0,.4);
+    z-index:10;
+  }
+  .dashboard-stats .stat-body a,
+  .dashboard-stats .stat-body .trend{
+    opacity:0;
+    max-height:0;
+    overflow:hidden;
+    margin-top:0;
+    transform:translateY(-4px);
+    transition:opacity .2s ease, max-height .2s ease, margin-top .2s ease, transform .2s ease;
+    pointer-events:none;
+  }
+  .dashboard-stats .stat:hover .stat-body a,
+  .dashboard-stats .stat:hover .stat-body .trend{
+    opacity:1;
+    max-height:40px;
+    margin-top:6px;
+    transform:none;
+    pointer-events:auto;
+  }
+  .attendance-panel .report-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:46px;
+    border-radius:18px;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:.01em;
+    background:linear-gradient(90deg,#8f5bff 0%,#5d63ff 45%,#2d68b8 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 10px 26px rgba(78,88,255,.28);
+    transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    text-decoration:none;
+    color:#fff;
+  }
+  .attendance-panel .report-btn:hover{
+    transform:translateY(-2px);
+    filter:saturate(1.05);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 14px 34px rgba(78,88,255,.36);
+  }
+  .attendance-panel .mini-grid{
+    grid-template-columns:repeat(4, 145px);
+    gap:6px;
+    align-content:start;
+    justify-content:center;
+    margin-bottom:12px;
+  }
+  .attendance-panel .mini{
+    aspect-ratio:1 / 1;
+    min-height:145px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:10px;
+    padding:10px;
+  }
+  .attendance-panel .mini b{
+    font-size:38px;
+    line-height:1;
+  }
+  .attendance-panel .mini small{
+    margin-top:0;
+    font-size:12px;
+  }
+  .attendance-panel .mini .mini-icon{
+    width:48px;
+    height:48px;
+    border-radius:13px;
+    font-size:20px;
+  }
+  .attendance-panel .mini > div:last-child{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    align-items:center;
+  }
+  @media (max-width: 900px){
+    .attendance-panel .mini-grid{
+      grid-template-columns:repeat(2, minmax(120px, 1fr));
+      justify-content:normal;
+    }
+    .attendance-panel .mini{
+      aspect-ratio:1 / 1;
+      min-height:120px;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+    .attendance-panel .mini b{
+      font-size:34px;
+    }
+  }
+  @media (max-width: 560px){
+    .attendance-panel .mini-grid{
+      grid-template-columns:1fr;
+    }
+  }
+  .quick-grid .quick div{
+    color:#fff;
+  }
+</style>
+
+<div class="stats dashboard-stats">
+  <div class="stat">
     <div class="stat-icon blue">👥</div>
     <div class="stat-body">
       <strong>{{ App\Models\User::count() }}</strong>
@@ -21,7 +149,7 @@
       <a href="{{ route('admin.users') }}">View all →</a>
     </div>
   </div>
-  <div class="stat glass">
+  <div class="stat">
     <div class="stat-icon green">🎓</div>
     <div class="stat-body">
       <strong>{{ App\Models\User::where('role', 'professor')->count() }}</strong>
@@ -30,7 +158,7 @@
       <a href="{{ route('admin.professors') }}">View all →</a>
     </div>
   </div>
-  <div class="stat glass">
+  <div class="stat">
     <div class="stat-icon yellow">🧑‍🎓</div>
     <div class="stat-body">
       <strong>{{ App\Models\User::where('role', 'student')->count() }}</strong>
@@ -39,7 +167,7 @@
       <a href="{{ route('admin.students') }}">View all →</a>
     </div>
   </div>
-  <div class="stat glass">
+  <div class="stat">
     <div class="stat-icon purple">📘</div>
     <div class="stat-body">
       <strong>{{ App\Models\Classe::count() }}</strong>
@@ -53,7 +181,7 @@
 <div class="dashboard">
   <div style="display:grid;gap:16px">
     <!-- Attendance overview -->
-    <div class="card glass">
+    <div class="card glass attendance-panel">
       <div class="section-head">
         <h3>📊 Attendance Overview</h3>
         <a href="{{ route('admin.attendance-records') }}">View Full Report →</a>
@@ -75,10 +203,6 @@
           <div class="mini-icon stat-icon blue" style="width:38px;height:38px;border-radius:12px;font-size:16px">▤</div>
           <div><b>{{ App\Models\AttendanceRecord::count() }}</b><small>Total</small></div>
         </div>
-      </div>
-      <!-- Attendance bar -->
-      <div style="height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:16px">
-        <div class="attendance-fill" data-progress="{{ round($attendanceProgress, 2) }}" style="height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;box-shadow:0 0 12px rgba(24,240,139,.5)"></div>
       </div>
       <a href="{{ route('admin.attendance-records') }}" class="report-btn">View Full Attendance Report →</a>
     </div>

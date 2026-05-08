@@ -15,7 +15,6 @@
     </div>
     <div class="tools">
       <button class="btn" onclick="location.reload()">⟳ Refresh</button>
-      <button class="btn" onclick="alert('Exporting logs CSV...')">⇩ Export</button>
     </div>
   </div>
 
