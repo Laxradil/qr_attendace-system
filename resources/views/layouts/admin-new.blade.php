@@ -376,8 +376,11 @@
       cursor:pointer;
       position:relative;
       transition:.2s ease;
+      text-decoration:none;
+      color:#fff;
     }
-    .top-avatar:hover{transform:scale(1.06)}
+    .top-avatar:hover{transform:scale(1.06);color:#fff}
+    .top-avatar:focus{outline:none}
     .top-avatar::after{
       content:"";
       position:absolute;
@@ -592,7 +595,7 @@
     }
     th{
       background:rgba(255,255,255,.055);
-      color:var(--faint);
+      color:#fff;
       font-size:11px;
       letter-spacing:.12em;
       text-transform:uppercase;
@@ -602,7 +605,7 @@
     }
     th:first-child{border-radius:var(--radius-md) 0 0 0}
     th:last-child{border-radius:0 var(--radius-md) 0 0}
-    td{color:#e8eeff;font-size:13.5px}
+    td{color:#fff;font-size:13.5px}
     tr:last-child td{border-bottom:0}
     tr:hover td{background:rgba(255,255,255,.028)}
     .user-cell{display:flex;align-items:center;gap:10px;font-weight:700}
@@ -845,6 +848,10 @@
           <span class="nav-icon">☷</span>
           <span>System Logs</span>
         </a>
+        <a href="{{ route('admin.settings') }}" class="@if(Route::currentRouteName() === 'admin.settings') active @endif">
+          <span class="nav-icon">⚙</span>
+          <span>Settings</span>
+        </a>
       </nav>
 
       <div class="logout-wrap">
@@ -875,7 +882,7 @@
             🔔
             <span class="notif-dot"></span>
           </div>
-          <div class="top-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+          <a href="{{ route('admin.settings') }}" class="top-avatar" title="Go to Settings">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</a>
         </div>
       </header>
 
