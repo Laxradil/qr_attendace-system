@@ -140,12 +140,12 @@
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;flex-shrink:0}
     .logout{
-      border:1px solid rgba(255,61,114,.2);background:rgba(255,61,114,.07);color:#ff8298;
-      padding:9px 10px;border-radius:13px;display:flex;align-items:center;gap:10px;
+      border:1px solid transparent;background:transparent;color:#ff8298;
+      padding:11px 14px;border-radius:16px;display:flex;align-items:center;gap:10px;
       font-weight:700;cursor:pointer;transition:.2s ease;font-size:13.5px;font-family:var(--font);width:100%;
     }
-    .logout:hover{background:rgba(255,61,114,.14);transform:translateX(3px)}
-    .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:rgba(255,61,114,.15)}
+    .logout:hover{background:rgba(255,61,114,.12);border-color:rgba(255,61,114,.2);transform:scale(1.02)}
+    .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:transparent}
 
     /* ═══ MAIN ═══ */
     main{padding:18px 24px 18px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
@@ -362,6 +362,7 @@
     }
     .btn.primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 28px rgba(80,94,255,.38)}
     .btn.slim{padding:7px 12px;font-size:12px;border-radius:10px}
+    .btn-pill{border-radius:999px !important;padding:10px 20px;display:flex;align-items:center;justify-content:center}
 
     /* ─── MY CLASSES PAGE ─── */
     .classes-layout{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}

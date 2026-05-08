@@ -43,8 +43,8 @@
         <div class="qr-student-id">Student ID: {{ Auth::user()->id }}</div>
         <div class="qr-hint">Show to professor for attendance</div>
         <div class="qr-actions">
-          <button class="btn primary" onclick="showToast('QR displayed','▦','#b9c4ff')">Show</button>
-          <button class="btn" onclick="showToast('Downloading...','📥','#4dffa0')">Download</button>
+          <button class="btn btn-pill primary" onclick="showToast('QR displayed','▦','#b9c4ff')">Show</button>
+          <button class="btn btn-pill" onclick="showToast('Downloading...','📥','#4dffa0')">Download</button>
         </div>
 
         <!-- Divider -->

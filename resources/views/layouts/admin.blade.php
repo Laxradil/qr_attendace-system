@@ -279,8 +279,8 @@
     /* Logout */
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;flex-shrink:0}
     .logout{
-      border:1px solid rgba(214,48,49,.2);
-      background:rgba(214,48,49,.07);
+      border:1px solid transparent;
+      background:transparent;
       color:#d63031;
       padding:9px 10px;
       border-radius:13px;
@@ -291,11 +291,11 @@
       font-family:var(--font);
       width:100%;
     }
-    .logout:hover{background:rgba(214,48,49,.14);transform:translateX(3px)}
+    .logout:hover{background:rgba(214,48,49,.12);border-color:rgba(214,48,49,.2);transform:scale(1.02)}
     .logout-icon{
       width:30px;height:30px;border-radius:9px;
       display:grid;place-items:center;font-size:14px;
-      background:rgba(214,48,49,.15);
+      background:transparent;
     }
 
     /* ═══════════ MAIN ═══════════ */
@@ -493,6 +493,7 @@
       font-size:11px;font-family:var(--font);
     }
     .btn:hover{background:var(--panel2)}
+    .btn-pill{border-radius:999px !important;padding:10px 20px;display:flex;align-items:center;justify-content:center}
     .btn.primary{
       background:var(--purple);
       border-color:var(--purple);

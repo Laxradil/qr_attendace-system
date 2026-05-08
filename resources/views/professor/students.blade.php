@@ -5,6 +5,11 @@
 @section('subheader', 'View all students in your assigned classes')
 
 @section('content')
+<style>
+  .search-bar {
+    display: none !important;
+  }
+</style>
 @if($classes && $classes->count())
   <div style="display:grid;gap:14px">
     @foreach($classes as $classe)
@@ -12,7 +17,7 @@
         <details style="cursor:pointer" {{ $loop->index === 0 ? 'open' : '' }}>
           <summary style="display:flex;justify-content:space-between;align-items:center;gap:12px;list-style:none;user-select:none">
             <div>
-              <div style="font-weight:700;font-size:15px">{{ $classe->subject_code ?? 'N/A' }} — {{ $classe->subject_name ?? 'Class' }}</div>
+              <div style="font-weight:700;font-size:15px">{{ $classe->display_name ?? 'Class' }}</div>
               <div style="font-size:11px;color:var(--muted);margin-top:4px">
                 {{ $classe->students->count() ?? 0 }} student{{ ($classe->students->count() ?? 0) === 1 ? '' : 's' }} enrolled
               </div>
@@ -24,8 +29,8 @@
           </summary>
 
           <div style="padding-top:14px;border-top:1px solid rgba(255,255,255,.07);margin-top:14px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-              <span></span>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
+              <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
               <button type="button" class="btn primary slim" onclick="alert('Add student feature coming soon')">+ Add Student</button>
             </div>
 
@@ -58,7 +63,7 @@
                           <span class="pill green">Active</span>
                         </td>
                         <td>
-                          <button class="btn slim" onclick="alert('Manage student coming soon')">Manage</button>
+                          <button class="btn slim drop" onclick="dropStudent({{ $student->id }}, '{{ $student->name }}', {{ $classe->id }})">Drop</button>
                         </td>
                       </tr>
                     @endforeach
@@ -124,6 +129,18 @@
     border-radius: 10px;
   }
   
+  .btn.drop {
+    background: rgba(255,61,114,.15);
+    border-color: rgba(255,61,114,.3);
+    color: #ff3d72;
+  }
+  
+  .btn.drop:hover {
+    background: rgba(255,61,114,.28);
+    border-color: rgba(255,61,114,.5);
+    box-shadow: 0 8px 24px rgba(255,61,114,.2);
+  }
+  
   .pill {
     padding: 4px 10px;
     border-radius: 8px;
@@ -158,8 +175,8 @@
   }
   
   th {
-    background: rgba(255,255,255,.055);
-    color: var(--faint);
+    background: rgba(255,255,255,.12);
+    color: var(--text);
     font-size: 11px;
     letter-spacing: .12em;
     text-transform: uppercase;
@@ -167,7 +184,7 @@
   }
   
   td {
-    color: #e8eeff;
+    color: #f0f4ff;
     font-size: 13.5px;
   }
   
@@ -203,5 +220,38 @@
         </form>
     </div>
 </div>
+
+<script>
+  function filterStudents(input) {
+    const searchTerm = input.value.toLowerCase();
+    const table = input.closest('.table-wrap')?.querySelector('table');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+  }
+  
+  function dropStudent(studentId, studentName, classId) {
+    if (!confirm(`Are you sure you want to drop ${studentName} from this class?`)) {
+      return;
+    }
+    
+    // Submit drop request to backend
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/professor/students/drop';
+    form.innerHTML = `
+      @csrf
+      <input type="hidden" name="student_id" value="${studentId}">
+      <input type="hidden" name="class_id" value="${classId}">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  }
+</script>
 
 @endsection
