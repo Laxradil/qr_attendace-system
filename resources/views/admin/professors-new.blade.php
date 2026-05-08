@@ -30,7 +30,6 @@
   <div class="toolbar">
     <a href="{{ route('admin.users.create') }}" class="btn primary">＋ Add Professor</a>
     <div class="tools">
-      <div class="search-bar" style="width:220px;height:40px">🔍 <span style="font-size:13px">Search table...</span></div>
       <button class="btn">☰ Filter</button>
     </div>
   </div>
