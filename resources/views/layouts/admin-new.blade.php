@@ -784,6 +784,9 @@
   <div class="orb orb-3"></div>
   <div class="orb orb-4"></div>
 
+  <div id="flashSuccess" data-message="{{ session('success') ?? '' }}" hidden></div>
+  <div id="flashError" data-message="{{ session('error') ?? '' }}" hidden></div>
+
   <div class="toast-container" id="toastContainer"></div>
 
   <div class="app">
@@ -911,6 +914,17 @@
       t.style.borderColor = color+'55';
       tc.appendChild(t);
       setTimeout(()=>t.remove(), 3200);
+    }
+
+    const flashSuccess = document.getElementById('flashSuccess')?.dataset.message?.trim() ?? '';
+    const flashError = document.getElementById('flashError')?.dataset.message?.trim() ?? '';
+
+    if (flashSuccess) {
+      showToast(flashSuccess, '✓', '#18f08b');
+    }
+
+    if (flashError) {
+      showToast(flashError, '!', '#ff3d72');
     }
 
     if(!sessionStorage.getItem('admin_welcomed')){
