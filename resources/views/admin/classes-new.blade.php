@@ -16,6 +16,7 @@
       <thead>
         <tr>
           <th>Class Code</th>
+          <th>Room Code</th>
           <th>Class Name</th>
           <th>Professor</th>
           <th>Students</th>
@@ -27,11 +28,13 @@
         @forelse($classes as $class)
         <tr>
           <td><span style="font-family:var(--mono);font-size:13px">{{ $class->code }}</span></td>
+          <td><span style="font-family:var(--mono);font-size:13px">{{ $class->room_code ?? '—' }}</span></td>
           <td><b>{{ $class->name }}</b></td>
           <td>{{ $class->professor->name ?? 'N/A' }}</td>
           <td>{{ $class->students->count() }} students</td>
           <td><span class="pill green">Active</span></td>
           <td>
+            <a href="{{ route('admin.classes.enroll', $class) }}" class="btn slim">Enroll</a>
             <a href="{{ route('admin.classes.edit', $class) }}" class="btn slim">Edit</a>
             <form method="POST" action="{{ route('admin.classes.delete', $class) }}" style="display:inline" onsubmit="return confirm('Delete this class?')">
               @csrf
@@ -42,7 +45,7 @@
         </tr>
         @empty
         <tr>
-          <td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No classes found</td>
+          <td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No classes found</td>
         </tr>
         @endforelse
       </tbody>
