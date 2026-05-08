@@ -8,6 +8,11 @@
 @section('subheader', 'View and manage your assigned classes')
 
 @section('content')
+<style>
+  .search-bar {
+    display: none !important;
+  }
+</style>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px;margin-top:6px">
   <div class="stat glass">
@@ -51,15 +56,15 @@
     <div class="class-card">
       <div class="class-head">
         <div>
-          <h3>{{ $class->subject_code }} — {{ $class->subject_name }}</h3>
-          <div class="class-code">{{ $class->subject_code }}</div>
+          <h3>{{ $class->display_name ?? 'Class' }}</h3>
+          <div class="class-code">{{ $class->code ?? 'N/A' }}</div>
         </div>
-        <div class="class-room">{{ $class->room ?? 'TBA' }}</div>
+        <div class="class-room">{{ $class->schedules->first()?->room ?? 'TBA' }}</div>
       </div>
       <div class="class-meta">
         <div class="class-meta-row">
           <div class="meta-icon">📅</div>
-          Days: <strong>{{ $class->schedules->pluck('day_of_week')->unique()->join(', ') ?? 'N/A' }}</strong>
+          Days: <strong>{{ $class->schedules->first()?->days ?? 'N/A' }}</strong>
         </div>
         <div class="class-meta-row">
           <div class="meta-icon">🕓</div>
