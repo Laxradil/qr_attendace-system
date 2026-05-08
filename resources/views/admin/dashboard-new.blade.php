@@ -58,7 +58,7 @@
     align-items:center;
     justify-content:center;
     width:100%;
-    height:50px;
+    height:46px;
     border-radius:18px;
     font-size:15px;
     font-weight:800;
@@ -73,6 +73,66 @@
     transform:translateY(-2px);
     filter:saturate(1.05);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 14px 34px rgba(78,88,255,.36);
+  }
+  .attendance-panel .mini-grid{
+    grid-template-columns:repeat(4, 145px);
+    gap:6px;
+    align-content:start;
+    justify-content:center;
+    margin-bottom:12px;
+  }
+  .attendance-panel .mini{
+    aspect-ratio:1 / 1;
+    min-height:145px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:10px;
+    padding:10px;
+  }
+  .attendance-panel .mini b{
+    font-size:38px;
+    line-height:1;
+  }
+  .attendance-panel .mini small{
+    margin-top:0;
+    font-size:12px;
+  }
+  .attendance-panel .mini .mini-icon{
+    width:48px;
+    height:48px;
+    border-radius:13px;
+    font-size:20px;
+  }
+  .attendance-panel .mini > div:last-child{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    align-items:center;
+  }
+  @media (max-width: 900px){
+    .attendance-panel .mini-grid{
+      grid-template-columns:repeat(2, minmax(120px, 1fr));
+      justify-content:normal;
+    }
+    .attendance-panel .mini{
+      aspect-ratio:1 / 1;
+      min-height:120px;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+    .attendance-panel .mini b{
+      font-size:34px;
+    }
+  }
+  @media (max-width: 560px){
+    .attendance-panel .mini-grid{
+      grid-template-columns:1fr;
+    }
   }
   .quick-grid .quick div{
     color:#fff;
