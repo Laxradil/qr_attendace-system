@@ -508,17 +508,16 @@
         </div>
       </div>
 
-      <div class="profile-card">
-        <div class="avatar" style="position:relative">
-          {{ substr(Auth::user()->name, 0, 1) }}
+      <a href="{{ route('student.settings') }}" class="profile-card" style="text-decoration:none;cursor:pointer;transition:.2s ease;display:flex;align-items:center;gap:10px;">
+        <div class="avatar">{{ strtoupper(substr(auth()->user()->name ?? 'S', 0, 1)) }}
           <div class="avatar-status"></div>
         </div>
         <div class="profile-info">
-          <h2>{{ Auth::user()->name }} <span class="tag">Student</span></h2>
-          <p>{{ Auth::user()->email }}</p>
+          <h2>{{ auth()->user()->name }} <span class="tag">Student</span></h2>
+          <p>{{ auth()->user()->email }}</p>
           <div class="online-badge"><span class="dot"></span> Online</div>
         </div>
-      </div>
+      </a>
 
       <div class="nav-label">Menu</div>
       <nav class="nav">
@@ -533,6 +532,10 @@
         <a href="{{ route('student.attendance') }}" class="nav-btn {{ request()->routeIs('student.attendance') ? 'active' : '' }}">
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
+        </a>
+        <a href="{{ route('student.settings') }}" class="nav-btn {{ request()->routeIs('student.settings') ? 'active' : '' }}">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
         </a>
       </nav>
 
