@@ -289,6 +289,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes|max:20',
+            'room_code' => 'required|string|max:50',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professors' => 'required|array|min:1',
@@ -300,6 +301,7 @@ class AdminController extends Controller
 
         $classe = Classe::create([
             'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
             'name' => $validated['name'],
             'description' => $validated['description'],
             'professor_id' => $primaryProfessorId,
@@ -334,6 +336,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes,code,' . $classe->id . '|max:20',
+            'room_code' => 'required|string|max:50',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professors' => 'required|array|min:1',
@@ -346,6 +349,7 @@ class AdminController extends Controller
 
         $classe->update([
             'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
             'name' => $validated['name'],
             'description' => $validated['description'],
             'professor_id' => $primaryProfessorId,
@@ -400,7 +404,17 @@ class AdminController extends Controller
             return back()->with('error', 'Please select valid students to enroll.');
         }
 
-        $classe->students()->syncWithoutDetaching($studentIds);
+        $alreadyEnrolledStudents = $classe->students()
+            ->whereIn('users.id', $studentIds)
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
+        if (!empty($alreadyEnrolledStudents)) {
+            return back()->with('error', 'The following student(s) are already enrolled in this class: ' . implode(', ', $alreadyEnrolledStudents));
+        }
+
+        $classe->students()->attach($studentIds);
 
         SystemLog::create([
             'user_id' => Auth::id(),
