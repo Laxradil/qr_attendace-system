@@ -7,6 +7,11 @@
 @section('subheader', 'Web Scanner — Scan QR codes to record student attendance')
 
 @section('content')
+<style>
+  .search-bar {
+    display: none !important;
+  }
+</style>
 <div class="scanner-layout">
   <!-- Left: Scanner Box -->
   <div style="display:flex;flex-direction:column;height:100%">
@@ -16,15 +21,15 @@
         <div class="scan-status"><span class="dot"></span> Ready to Scan</div>
       </div>
       <div class="scanner-tabs">
-        <button class="scanner-tab active">📷 Camera Mode</button>
-        <button class="scanner-tab">⌨ Hardware Scanner</button>
+        <button type="button" class="scanner-tab active" data-mode="camera">📷 Camera Mode</button>
+        <button type="button" class="scanner-tab" data-mode="hardware">⌨ Hardware Scanner</button>
       </div>
       <div class="cam-viewport" style="flex:1;aspect-ratio:unset">
         <div class="cam-inner"></div>
       </div>
       <div class="cam-btns" style="margin-top:12px">
-        <button class="cam-btn start">▶ Start Camera</button>
-        <button class="cam-btn stop">⏹ Stop Camera</button>
+        <button type="button" class="cam-btn start">▶ Start Camera</button>
+        <button type="button" class="cam-btn stop" disabled>⏹ Stop Camera</button>
       </div>
     </div>
   </div>
@@ -41,7 +46,7 @@
         <select class="att-select" name="class_id" required>
           <option value="">Choose a class...</option>
           @forelse($classes as $class)
-            <option value="{{ $class->id }}">{{ $class->subject_code }} — {{ $class->subject_name }}</option>
+            <option value="{{ $class->id }}">{{ $class->code }} — {{ $class->name }}</option>
           @empty
             <option value="" disabled>No classes available</option>
           @endforelse
@@ -203,13 +208,18 @@
     transition: .2s ease;
   }
   
+  .cam-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
   .cam-btn.start {
     background: linear-gradient(135deg,rgba(139,92,255,.9),rgba(67,166,255,.55));
     color: #fff;
     box-shadow: 0 8px 24px rgba(80,94,255,.25);
   }
   
-  .cam-btn.start:hover {
+  .cam-btn.start:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 14px 32px rgba(80,94,255,.4);
   }
@@ -220,7 +230,7 @@
     color: #ff8298;
   }
   
-  .cam-btn.stop:hover {
+  .cam-btn.stop:hover:not(:disabled) {
     background: rgba(255,61,114,.2);
   }
   
@@ -286,4 +296,132 @@
     .scanner-layout{grid-template-columns:1fr}
   }
 </style>
+
+<script>
+  let stream = null;
+  let currentMode = 'camera';
+  const camViewport = document.querySelector('.cam-inner');
+  const startBtn = document.querySelector('.cam-btn.start');
+  const stopBtn = document.querySelector('.cam-btn.stop');
+  const qrInput = document.querySelector('input[name="qr_code"]');
+  const classSelect = document.querySelector('select[name="class_id"]');
+  const studentSelect = document.querySelector('select[name="student_id"]');
+  const scannerTabs = document.querySelectorAll('.scanner-tab');
+  const cameraControls = document.querySelector('.cam-btns');
+  
+  // Tab switching
+  scannerTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      scannerTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentMode = tab.dataset.mode;
+      
+      if (currentMode === 'hardware') {
+        // Stop camera if running
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+          stream = null;
+        }
+        camViewport.innerHTML = '';
+        cameraControls.style.display = 'none';
+        qrInput.focus();
+        qrInput.placeholder = 'Scan QR code with hardware scanner...';
+      } else {
+        cameraControls.style.display = 'grid';
+        qrInput.placeholder = 'QR code will appear here...';
+      }
+    });
+  });
+  
+  // Update student list when class changes
+  classSelect.addEventListener('change', function() {
+    const classId = this.value;
+    if (classId) {
+      // Get students for selected class
+      fetch(`/professor/class/${classId}/students`)
+        .then(r => r.json())
+        .then(students => {
+          studentSelect.innerHTML = '<option value="">Select a student...</option>';
+          students.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            studentSelect.appendChild(opt);
+          });
+        })
+        .catch(e => console.error('Error loading students:', e));
+    }
+  });
+  
+  startBtn.addEventListener('click', async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' },
+        audio: false 
+      });
+      
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.borderRadius = '12px';
+      video.style.objectFit = 'cover';
+      
+      camViewport.innerHTML = '';
+      camViewport.appendChild(video);
+      
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      
+      // Initialize QR code detection
+      initQRDetection(video);
+    } catch (err) {
+      alert('Error accessing camera: ' + err.message);
+    }
+  });
+  
+  stopBtn.addEventListener('click', () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    camViewport.innerHTML = '';
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+  });
+  
+  function initQRDetection(video) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    function detectQR() {
+      if (!stream) return;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      
+      try {
+        // Try to detect QR code using jsQR if available
+        if (typeof jsQR !== 'undefined') {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, canvas.width, canvas.height);
+          if (code) {
+            qrInput.value = code.data;
+            qrInput.dispatchEvent(new Event('input'));
+          }
+        }
+      } catch (e) {
+        // QR library not available
+      }
+      
+      requestAnimationFrame(detectQR);
+    }
+    
+    detectQR();
+  }
+</script>
+
 @endsection

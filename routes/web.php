@@ -141,6 +141,9 @@ Route::prefix('student')->middleware(['auth', 'role:student'])->group(function (
     Route::get('/dashboard', [App\Http\Controllers\StudentController::class, 'dashboard'])->name('student.dashboard');
     Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
     Route::get('/classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.classes');
+    Route::get('/settings', [App\Http\Controllers\StudentController::class, 'settings'])->name('student.settings');
+    Route::put('/settings', [App\Http\Controllers\StudentController::class, 'updateSettings'])->name('student.settings.update');
+    Route::put('/settings/password', [App\Http\Controllers\StudentController::class, 'updatePassword'])->name('student.settings.password');
 });
 
 // DEBUG: Test student UI without auth (remove in production)
