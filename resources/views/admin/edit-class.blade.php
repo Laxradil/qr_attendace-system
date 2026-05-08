@@ -47,8 +47,13 @@
   }
   .form-row{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(3,minmax(0,1fr));
     gap:16px;
+  }
+  @media (max-width: 980px){
+    .form-row{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
   }
   @media (max-width: 760px){
     .form-row{
@@ -164,6 +169,10 @@
       <div class="form-group">
         <label for="code">Class Code *</label>
         <input type="text" id="code" name="code" value="{{ $classe->code }}" maxlength="20" placeholder="Enter class code" required>
+      </div>
+      <div class="form-group">
+        <label for="room_code">Room Code *</label>
+        <input type="text" id="room_code" name="room_code" value="{{ $classe->room_code }}" placeholder="Enter room code" required>
       </div>
       <div class="form-group">
         <label for="name">Class Name *</label>
