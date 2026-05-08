@@ -6,9 +6,9 @@
 
 @section('content')
 <div class="glass-table glass">
-  <div class="toolbar">
+  <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <a href="{{ route('admin.classes.create') }}" class="btn primary">＋ Add Class</a>
-    <div class="search-bar" style="height:42px;width:260px">🔍 <span style="font-size:13px">Search classes...</span></div>
+    <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
   </div>
 
   <div class="table-wrap">
@@ -49,4 +49,18 @@
     </table>
   </div>
 </div>
+
+<script>
+function filterTable(input) {
+  const searchValue = input.value.toLowerCase();
+  const table = input.closest('.glass-table').querySelector('table');
+  const rows = table.querySelectorAll('tbody tr');
+  
+  rows.forEach(row => {
+    if (row.querySelector('td[colspan]')) return;
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  });
+}
+</script>
 @endsection

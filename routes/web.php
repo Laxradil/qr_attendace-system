@@ -118,6 +118,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // System logs
     Route::get('/logs', [AdminController::class, 'logs'])->name('admin.logs');
 
+    // Admin settings
+    Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    Route::put('/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
+    Route::put('/settings/password', [AdminController::class, 'updatePassword'])->name('admin.settings.password');
+
     // Debug: return current user stats (admin-only)
     Route::get('/_debug/user-stats', [AdminController::class, 'debugUserStats'])->name('admin.debug.user-stats');
 });

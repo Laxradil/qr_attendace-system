@@ -6,9 +6,12 @@
 
 @section('content')
 <div class="glass-table glass">
-  <div class="toolbar">
-    <h3 style="font-size:16px;font-weight:800">Student QR Codes</h3>
-    <button class="btn primary" onclick="alert('Bulk download started')">📥 Download All</button>
+  <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <h3 style="font-size:16px;font-weight:800;margin:0">Student QR Codes</h3>
+      <button class="btn primary" onclick="downloadAllQRCodes()">📥 Download All</button>
+    </div>
+    <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
   </div>
 
   <div class="table-wrap">
@@ -50,7 +53,7 @@
           </td>
           <td>
             <a href="{{ route('admin.students.qr-code', $student) }}" class="btn slim">Open</a>
-            <button class="btn primary slim" onclick="alert('Downloading QR for {{ $student->name }}')">↓ PNG</button>
+            <button class="btn primary slim" data-url="{{ route('admin.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
           </td>
         </tr>
         @empty
@@ -71,4 +74,48 @@
     </div>
   </div>
 </div>
+
+<script>
+function filterTable(input) {
+  const searchValue = input.value.toLowerCase();
+  const table = input.closest('.glass-table').querySelector('table');
+  const rows = table.querySelectorAll('tbody tr');
+
+  rows.forEach(row => {
+    if (row.querySelector('td[colspan]')) return;
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  });
+}
+
+function downloadQRCode(url, studentName) {
+  const link = document.createElement('a');
+  link.href = url;
+  const safeFileName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
+  link.download = safeFileName + '-qr.png';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function downloadAllQRCodes() {
+  const rows = document.querySelectorAll('tbody tr');
+  let count = 0;
+  rows.forEach((row, index) => {
+    const nameCell = row.querySelector('.user-cell');
+    const openBtn = row.querySelector('a[href*="qr-code"]');
+    if (nameCell && openBtn) {
+      const studentName = nameCell.textContent.trim();
+      const qrUrl = openBtn.href;
+      setTimeout(() => {
+        downloadQRCode(qrUrl, studentName);
+      }, index * 500);
+      count++;
+    }
+  });
+  if (count > 0) {
+    alert(`Downloading ${count} QR codes...`);
+  }
+}
+</script>
 @endsection
