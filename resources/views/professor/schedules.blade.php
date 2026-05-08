@@ -5,6 +5,11 @@
 @section('subheader', 'View all your scheduled classes (read-only)')
 
 @section('content')
+<style>
+  .search-bar {
+    display: none !important;
+  }
+</style>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px;margin-top:6px">
   <div class="stat glass">
@@ -44,12 +49,11 @@
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
           <h3 style="font-size:15px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px">
-            {{ $schedule->subject_code ?? 'N/A' }} — {{ $schedule->subject_name ?? 'Class' }}
+            {{ $schedule->subject_name ?? 'Class' }}
           </h3>
-          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">{{ $schedule->subject_code ?? 'CODE' }}</div>
         </div>
         <div style="font-size:26px;font-weight:900;font-family:var(--mono);color:rgba(139,92,255,.9);letter-spacing:-.03em">
-          {{ $schedule->room ?? 'TBA' }}
+          {{ $schedule->room ?? 'F-107' }}
         </div>
       </div>
       

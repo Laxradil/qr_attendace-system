@@ -77,7 +77,7 @@
         @empty
         <div class="empty-state" style="padding:20px 0;font-size:12.5px">No classes enrolled</div>
         @endforelse
-        <a href="{{ route('student.classes') }}" class="btn" style="width:100%;margin-top:auto;padding-top:11px;padding-bottom:11px;text-align:center;text-decoration:none">View All Classes →</a>
+        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none">View All Classes →</a>
       </div>
     </div>
 
@@ -110,7 +110,7 @@
         <div class="empty-state" style="padding:20px 0;font-size:12.5px">No records yet.</div>
         @endforelse
 
-        <a href="{{ route('student.attendance') }}" class="btn" style="width:100%;margin-top:auto;text-align:center;text-decoration:none;display:block">View All Records →</a>
+        <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Records →</a>
       </div>
 
       <!-- Quick Actions -->
@@ -142,8 +142,8 @@
         <div class="qr-student-id">Student ID: {{ Auth::user()->id }}</div>
         <div class="qr-hint">Show to professor for attendance</div>
         <div class="qr-actions">
-          <button class="btn primary" onclick="openQRModal()">Show QR</button>
-          <button class="btn" onclick="showToast('Downloading QR...','📥','#4dffa0')">Download</button>
+          <button class="btn btn-pill primary" onclick="openQRModal()">Show QR</button>
+          <button class="btn btn-pill" onclick="showToast('Downloading QR...','📥','#4dffa0')">Download</button>
         </div>
         <div class="qr-status">
           <span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(24,240,139,.8);display:inline-block"></span>
