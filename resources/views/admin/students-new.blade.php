@@ -118,8 +118,9 @@
   }
 </style>
 
-<div class="info-strip glass students-note">
-  ℹ️ Students are grouped by subject. Expand each subject card to view enrolled students.
+<div class="info-strip glass students-note" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+  <span style="flex:1">ℹ️ Students are grouped by subject. Expand each subject card to view enrolled students.</span>
+  <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterStudentTable(this)">
 </div>
 
 <div class="students-list">
@@ -198,6 +199,31 @@
     </div>
   @endforelse
 </div>
+
+<script>
+function filterStudentTable(input) {
+  const searchValue = input.value.toLowerCase();
+  const classes = document.querySelectorAll('.student-class');
+  
+  classes.forEach(classCard => {
+    const rows = classCard.querySelectorAll('tbody tr');
+    let anyVisibleRow = false;
+    
+    rows.forEach(row => {
+      if (row.querySelector('td[colspan]')) {
+        row.style.display = 'none';
+        return;
+      }
+      const text = row.textContent.toLowerCase();
+      const isVisible = text.includes(searchValue);
+      row.style.display = isVisible ? '' : 'none';
+      if (isVisible) anyVisibleRow = true;
+    });
+    
+    classCard.style.display = anyVisibleRow || searchValue === '' ? '' : 'none';
+  });
+}
+</script>
 
 <script>
   document.querySelectorAll('.student-class').forEach((details) => {
