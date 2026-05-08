@@ -142,3 +142,12 @@ Route::prefix('student')->middleware(['auth', 'role:student'])->group(function (
     Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
     Route::get('/classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.classes');
 });
+
+// DEBUG: Test student UI without auth (remove in production)
+if (env('APP_DEBUG', false)) {
+    Route::get('/_debug/student-dashboard', function() {
+        $user = \App\Models\User::where('email', 'student@example.com')->firstOrFail();
+        Auth::login($user);
+        return redirect()->route('student.dashboard');
+    });
+}
