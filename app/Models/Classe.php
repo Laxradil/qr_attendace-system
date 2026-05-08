@@ -6,6 +6,7 @@ namespace App\Models;
 /**
  * @property int $id
  * @property string $code
+ * @property string|null $room_code
  * @property string $name
  * @property string|null $description
  * @property int $professor_id
@@ -29,6 +30,7 @@ class Classe extends Model
 
     protected $fillable = [
         'code',
+        'room_code',
         'name',
         'description',
         'professor_id',
