@@ -18,7 +18,6 @@
     <div class="tools">
       <button class="btn">☰ Filter</button>
       <button class="btn" onclick="alert('Exporting CSV...')">📤 Export</button>
-      <div class="search-bar" style="height:42px;width:240px">🔍 <span style="font-size:13px">Search records...</span></div>
     </div>
   </div>
 
