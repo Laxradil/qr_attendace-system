@@ -29,7 +29,7 @@
   }
 
   .student-summary{
-    list-style:none;
+    list-style:none !important; /* Force hide default browser arrow marker */
     cursor:pointer;
     display:flex;
     justify-content:space-between;
@@ -38,7 +38,7 @@
     padding:18px 20px;
   }
 
-  .student-summary::-webkit-details-marker{display:none}
+  .student-summary::-webkit-details-marker{display:none !important;} /* Force hide default Safari marker */
 
   .student-title{
     font-size:18px;
@@ -130,8 +130,8 @@
         <div>
           <h3 class="student-title">{{ $classe->code }} — {{ $classe->name }}</h3>
           <div class="student-meta">
-            <span>👥 {{ $classe->students->count() }} students</span>
-            <span>Prof: {{ $classe->professor->name ?? 'N/A' }}</span>
+            <span style="color: #ffffff;">{{ $classe->students->count() }} students</span>
+            <span style="color: #ffffff; font-weight: 700;">Prof: {{ $classe->professor->name ?? 'N/A' }}</span>
             <span class="pill green"><span class="status-dot" style="background:var(--green);color:var(--green)"></span> Active</span>
           </div>
         </div>
@@ -228,9 +228,11 @@ function filterStudentTable(input) {
 <script>
   document.querySelectorAll('.student-class').forEach((details) => {
     const toggle = details.querySelector('.student-toggle');
+    if (!toggle) return;
 
     const sync = () => {
-      toggle.textContent = details.open ? '⌃ Collapse' : '⌄ Expand';
+      // Cleaned toggle button output to omit any arrows (^ and v)
+      toggle.textContent = details.open ? 'Collapse' : 'Expand';
     };
 
     sync();
