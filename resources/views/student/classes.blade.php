@@ -174,7 +174,7 @@
         <div class="qr-hint">Show to professor for attendance</div>
         <div class="qr-actions">
           <button class="btn btn-pill primary" onclick="openQRModal()">Show</button>
-          <a class="btn btn-pill" href="#" onclick="downloadQR()">Download</a>
+          <button class="btn btn-pill" href="#" onclick="downloadQR()">Download</button>
         </div>
 
         <!-- Divider -->
