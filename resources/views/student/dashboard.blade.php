@@ -4,10 +4,9 @@
 @section('subtitle', 'Welcome back, ' . auth()->user()->name . '. Here is your attendance overview.')
 
 @section('content')
-<!-- ══ DASHBOARD ══ -->
+@php /** @var \Illuminate\Support\Collection $classes */ @endphp
 <section class="page" id="dashboard">
 
-  <!-- Stat row -->
   <div class="stats">
     <div class="stat glass">
       <div class="stat-icon blue">▤</div>
@@ -46,18 +45,15 @@
     </div>
   </div>
 
-  <!-- 3-column dashboard -->
   <div class="dash-grid">
 
-    <!-- Col 1: Your Classes -->
     <div class="dash-col">
       <div class="card glass stretch">
         <div class="section-head">
           <h3>📚 Your Classes</h3>
-          <a href="{{ route('student.classes') }}">View all →</a>
         </div>
-        @php $classList = collect($classes); @endphp
-        @forelse($classList->take(3) as $class)
+        @php /** @var \Illuminate\Support\Collection $classes */ @endphp
+        @forelse($classes->take(3) as $class)
         <div class="class-row">
           <div class="class-row-left">
             <div class="class-row-name">{{ $class->code }} — {{ $class->name }}</div>
@@ -71,20 +67,19 @@
           </div>
         </div>
         @empty
-        <div class="empty-state" style="padding:20px 0;font-size:12.5px">No classes enrolled</div>
+        <div class="empty-state" style="padding:30px 10px;font-size:13px;color:#ffffff;text-align:center;font-weight:500;">
+          No classes enrolled
+        </div>
         @endforelse
-        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none">View All Classes →</a>
+        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Classes →</a>
       </div>
     </div>
 
-    <!-- Col 2: Recent Attendance + Quick Actions -->
     <div class="dash-col">
       <div class="card glass stretch">
         <div class="section-head">
           <h3>📋 Recent Attendance</h3>
-          <a href="{{ route('student.attendance') }}">View all →</a>
         </div>
-        <!-- Progress bar -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <span style="font-size:12.5px;color:var(--muted);font-weight:600">Attendance Rate</span>
           <span style="font-size:13px;font-weight:800;color:#4dffa0">{{ $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0 }}%</span>
@@ -103,31 +98,60 @@
           </span>
         </div>
         @empty
-        <div class="empty-state" style="padding:20px 0;font-size:12.5px">No records yet.</div>
+        <div class="empty-state" style="padding:30px 10px;font-size:13px;color:#ffffff;text-align:center;font-weight:500;">
+          No records yet.
+        </div>
         @endforelse
 
         <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Records →</a>
       </div>
 
-      <!-- Quick Actions -->
       <div class="card glass" style="flex-shrink:0">
         <div class="section-head">
-          <h3>⚡ Quick Actions</h3>
+          <h3>🕒 Next class</h3>
         </div>
-        <div class="quick-grid">
-          <a href="{{ route('student.classes') }}" class="quick" style="text-decoration:none;color:inherit">
-            <div class="stat-icon blue" style="width:38px;height:38px;border-radius:11px;font-size:16px;flex-shrink:0">▤</div>
-            <div><strong>My Classes</strong><span>View enrolled</span></div>
-          </a>
-          <a href="{{ route('student.attendance') }}" class="quick" style="text-decoration:none;color:inherit">
-            <div class="stat-icon yellow" style="width:38px;height:38px;border-radius:11px;font-size:16px;flex-shrink:0">📋</div>
-            <div><strong>Attendance</strong><span>View records</span></div>
-          </a>
+        @php
+          $nextClass = $classes->first();
+          $nextSchedule = optional($nextClass)->schedules->first();
+          $nextProfessor = optional($nextClass)->professors->first();
+          $nextStart = $nextSchedule && $nextSchedule->start_time ? \Carbon\Carbon::parse($nextSchedule->start_time)->format('g:i A') : null;
+          $nextEnd = $nextSchedule && $nextSchedule->end_time ? \Carbon\Carbon::parse($nextSchedule->end_time)->format('g:i A') : null;
+          $nextTimeLabel = $nextStart && $nextEnd ? "{$nextStart} — {$nextEnd}" : ($nextSchedule->time ?? null);
+          $timerLabel = $nextSchedule && $nextStart ? ($nextStart . ' · Room ' . ($nextSchedule->room ?? 'TBD')) : 'Room TBD';
+          $timerProgress = $nextSchedule ? 55 : 0;
+        @endphp
+        @if($nextClass && $nextSchedule)
+        <div style="display:grid;gap:20px">
+          <div style="display:grid;grid-template-columns:1fr;gap:14px;">
+            <div>
+              <div style="font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:6px">Time until class</div>
+              <div style="font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em">39:25</div>
+            </div>
+            <div>
+              <div class="prog-bar" style="margin:0 0 10px"><div class="prog-fill" style="width:{{ $timerProgress }}%"></div></div>
+              <div style="font-size:13px;color:var(--muted);font-weight:600">{{ $timerLabel }}</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+            <div style="font-size:16px;font-weight:800;line-height:1.2">{{ $nextClass->code }} — {{ $nextClass->name }}</div>
+            <div style="font-size:13px;color:var(--muted);font-weight:700">{{ $nextProfessor?->name ?? 'Professor not assigned' }}</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.5">Room {{ $nextSchedule->room ?? 'TBD' }} · {{ $nextTimeLabel }}</div>
+            <span class="pill green" style="padding:8px 12px;font-size:12px;justify-self:start">QR ready</span>
+          </div>
         </div>
+        @elseif($nextClass)
+        <div class="empty-state" style="padding:30px 10px;font-size:13px;color:#ffffff;text-align:center;font-weight:500;">
+          No scheduled classes for today.
+        </div>
+        @else
+        <div class="empty-state" style="padding:30px 10px;font-size:13px;color:#ffffff;text-align:center;font-weight:500;">
+          You are not enrolled in any classes yet.
+        </div>
+        @endif
       </div>
     </div>
 
-    <!-- Col 3: QR Code (Big) -->
     <div class="dash-col">
       <div class="card glass qr-container stretch">
         <div class="qr-label">Your QR Code</div>
@@ -148,10 +172,8 @@
       </div>
     </div>
 
-  </div><!-- /dash-grid -->
-</section>
+  </div></section>
 
-<!-- ════ QR FULLSCREEN MODAL ════ -->
 <div class="qr-modal" id="qrModal">
   <div class="qr-modal-overlay"></div>
   <div class="qr-modal-content glass">
