@@ -5,7 +5,7 @@
 
 @section('content')
 <!-- ══ DASHBOARD ══ -->
-<section class="page active" id="dashboard">
+<section class="page" id="dashboard">
 
   <!-- Stat row -->
   <div class="stats">
@@ -14,7 +14,7 @@
       <div class="stat-body">
         <strong>{{ $classes->count() }}</strong>
         <span class="stat-label">Enrolled Classes</span>
-        <a onclick="navigate('classes')">View classes →</a>
+        <a href="{{ route('student.classes') }}">View classes →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -22,7 +22,7 @@
       <div class="stat-body">
         <strong>{{ $totalPresent }}</strong>
         <span class="stat-label">Present</span>
-        <a onclick="navigate('attendance')">View attendance →</a>
+        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -30,7 +30,7 @@
       <div class="stat-body">
         <strong>{{ $totalLate }}</strong>
         <span class="stat-label">Late</span>
-        <a onclick="navigate('attendance')">View attendance →</a>
+        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -38,7 +38,7 @@
       <div class="stat-body">
         <strong>{{ $totalAbsent }}</strong>
         <span class="stat-label">Absent</span>
-        <a onclick="navigate('attendance')">View attendance →</a>
+        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
     <div class="stat glass">
@@ -46,7 +46,7 @@
       <div class="stat-body">
         <strong>{{ $totalExcused ?? 0 }}</strong>
         <span class="stat-label">Excused</span>
-        <a onclick="navigate('attendance')">View attendance →</a>
+        <a href="{{ route('student.attendance') }}">View attendance →</a>
       </div>
     </div>
   </div>
@@ -59,7 +59,7 @@
       <div class="card glass stretch">
         <div class="section-head">
           <h3>📚 Your Classes</h3>
-          <a onclick="navigate('classes')">View all →</a>
+          <a href="{{ route('student.classes') }}">View all →</a>
         </div>
         @forelse($classes->take(3) as $class)
         <div class="class-row">
@@ -77,7 +77,7 @@
         @empty
         <div class="empty-state" style="padding:20px 0;font-size:12.5px">No classes enrolled</div>
         @endforelse
-        <button class="btn" style="width:100%;margin-top:auto;padding-top:11px;padding-bottom:11px" onclick="navigate('classes')">View All Classes →</button>
+        <a href="{{ route('student.classes') }}" class="btn" style="width:100%;margin-top:auto;padding-top:11px;padding-bottom:11px;text-align:center;text-decoration:none">View All Classes →</a>
       </div>
     </div>
 
@@ -86,7 +86,7 @@
       <div class="card glass stretch">
         <div class="section-head">
           <h3>📋 Recent Attendance</h3>
-          <a onclick="navigate('attendance')">View all →</a>
+          <a href="{{ route('student.attendance') }}">View all →</a>
         </div>
         <!-- Progress bar -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -110,7 +110,7 @@
         <div class="empty-state" style="padding:20px 0;font-size:12.5px">No records yet.</div>
         @endforelse
 
-        <button class="btn" style="width:100%;margin-top:auto" onclick="navigate('attendance')">View All Records →</button>
+        <a href="{{ route('student.attendance') }}" class="btn" style="width:100%;margin-top:auto;text-align:center;text-decoration:none;display:block">View All Records →</a>
       </div>
 
       <!-- Quick Actions -->
@@ -119,14 +119,14 @@
           <h3>⚡ Quick Actions</h3>
         </div>
         <div class="quick-grid">
-          <div class="quick" onclick="navigate('classes')">
+          <a href="{{ route('student.classes') }}" class="quick" style="text-decoration:none;color:inherit">
             <div class="stat-icon blue" style="width:38px;height:38px;border-radius:11px;font-size:16px;flex-shrink:0">▤</div>
             <div><strong>My Classes</strong><span>View enrolled</span></div>
-          </div>
-          <div class="quick" onclick="navigate('attendance')">
+          </a>
+          <a href="{{ route('student.attendance') }}" class="quick" style="text-decoration:none;color:inherit">
             <div class="stat-icon yellow" style="width:38px;height:38px;border-radius:11px;font-size:16px;flex-shrink:0">📋</div>
             <div><strong>Attendance</strong><span>View records</span></div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -142,7 +142,7 @@
         <div class="qr-student-id">Student ID: {{ Auth::user()->id }}</div>
         <div class="qr-hint">Show to professor for attendance</div>
         <div class="qr-actions">
-          <button class="btn primary" onclick="showToast('QR displayed fullscreen','▦','#b9c4ff')">Show QR</button>
+          <button class="btn primary" onclick="openQRModal()">Show QR</button>
           <button class="btn" onclick="showToast('Downloading QR...','📥','#4dffa0')">Download</button>
         </div>
         <div class="qr-status">
@@ -155,6 +155,27 @@
   </div><!-- /dash-grid -->
 </section>
 
+<!-- ════ QR FULLSCREEN MODAL ════ -->
+<div class="qr-modal" id="qrModal">
+  <div class="qr-modal-overlay"></div>
+  <div class="qr-modal-content glass">
+    <button class="qr-modal-close" onclick="closeQRModal()">✕</button>
+    <div class="qr-modal-body">
+      <div style="text-align:center">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)">Your QR Code</div>
+        <div class="qr-modal-frame">
+          <canvas id="qrModalCanvas"></canvas>
+        </div>
+        <div style="margin-top:16px">
+          <div style="font-size:16px;font-weight:800;color:var(--text)">{{ Auth::user()->name }}</div>
+          <div style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-top:4px">Student ID: {{ Auth::user()->id }}</div>
+          <div style="font-size:12px;color:var(--faint);margin-top:8px">Show to professor for attendance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   // Generate QR code for dashboard
   setTimeout(function() {
@@ -165,6 +186,22 @@
       email: '{{ Auth::user()->email }}'
     });
     generateQR('qrDashboard', qrData);
+    generateQR('qrModalCanvas', qrData);
   }, 100);
+
+  function openQRModal() {
+    document.getElementById('qrModal').classList.add('active');
+  }
+
+  function closeQRModal() {
+    document.getElementById('qrModal').classList.remove('active');
+  }
+
+  // Close modal on escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('qrModal').classList.contains('active')) {
+      closeQRModal();
+    }
+  });
 </script>
 @endsection

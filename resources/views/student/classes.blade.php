@@ -5,12 +5,12 @@
 
 @section('content')
 <!-- ══ MY CLASSES ══ -->
-<section class="page active" id="classes">
+<section class="page" id="classes">
   <div class="classes-layout">
 
     <!-- Left: enrolled classes -->
     <div>
-      <div style="font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px">Your Enrolled Classes</div>
+      <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px">Your Enrolled Classes</div>
 
       @forelse($classes as $class)
       <div class="class-card glass">
@@ -30,8 +30,6 @@
       @empty
       <div style="text-align:center;color:var(--faint);padding:40px 0;">Not enrolled in any classes.</div>
       @endforelse
-
-      <button class="btn" style="width:100%;margin-top:4px" onclick="navigate('dashboard')">← Back to Dashboard</button>
     </div>
 
     <!-- Right: QR + Quick Stats (unified card) -->

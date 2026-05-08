@@ -5,7 +5,7 @@
 
 @section('content')
 <!-- ══ ATTENDANCE ══ -->
-<section class="page active" id="attendance">
+<section class="page" id="attendance">
   <div class="att-stats stats">
     <div class="stat glass">
       <div class="stat-icon green">✓</div>
@@ -79,6 +79,11 @@
         </tbody>
       </table>
     </div>
+    @if($attendanceRecords->hasPages())
+    <div style="margin-top:14px;padding:0 16px 16px">
+      {{ $attendanceRecords->links() }}
+    </div>
+    @endif
   </div>
 </section>
 @endsection

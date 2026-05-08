@@ -77,6 +77,7 @@
       background:linear-gradient(90deg,transparent,rgba(255,255,255,.55) 50%,transparent);
       pointer-events:none;
     }
+    .stat.glass::after{display:none}
 
     /* ═══ LAYOUT ═══ */
     .app{display:grid;grid-template-columns:260px 1fr;height:100vh;overflow:hidden;position:relative;z-index:1}
@@ -122,20 +123,20 @@
 
     .nav-label{margin:2px 8px 0;color:var(--faint);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;flex-shrink:0}
     .nav{display:grid;gap:2px;flex-shrink:0}
-    .nav button{
+    .nav a, .nav button{
       border:0;color:rgba(234,240,255,.75);background:transparent;
       padding:8px 10px;border-radius:13px;display:flex;align-items:center;gap:10px;
       font-weight:600;cursor:pointer;transition:.2s cubic-bezier(.4,0,.2,1);
-      text-align:left;font-size:13.5px;font-family:var(--font);width:100%;
+      text-align:left;font-size:13.5px;font-family:var(--font);width:100%;text-decoration:none;
     }
     .nav-icon{
       width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;
       background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);flex-shrink:0;transition:.2s ease;
     }
-    .nav button:hover{background:rgba(255,255,255,.08);color:var(--text);transform:translateX(3px)}
-    .nav button:hover .nav-icon{background:rgba(255,255,255,.12)}
-    .nav button.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff;box-shadow:0 12px 28px rgba(80,94,255,.26),inset 0 1px 0 rgba(255,255,255,.28)}
-    .nav button.active .nav-icon{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.25)}
+    .nav a:hover, .nav button:hover{background:rgba(255,255,255,.08);color:var(--text);transform:translateX(3px)}
+    .nav a:hover .nav-icon, .nav button:hover .nav-icon{background:rgba(255,255,255,.12)}
+    .nav a.active, .nav button.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff;box-shadow:0 12px 28px rgba(80,94,255,.26),inset 0 1px 0 rgba(255,255,255,.28)}
+    .nav a.active .nav-icon, .nav button.active .nav-icon{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.25)}
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;flex-shrink:0}
     .logout{
@@ -174,17 +175,16 @@
 
     /* ═══ CONTENT ═══ */
     .content{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
-    .page{display:none}
-    .page.active{display:block}
+    .page{display:block}
     @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-    .page.active{animation:fadein .28s cubic-bezier(.4,0,.2,1)}
+    .page{animation:fadein .28s cubic-bezier(.4,0,.2,1)}
 
     /* ═══ STAT CARDS ═══ */
     .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;flex-shrink:0;padding-top:6px}
     .stat{
       border-radius:22px;padding:16px;display:flex;gap:12px;align-items:flex-start;
       position:relative;z-index:1;
-      border:1px solid transparent;
+      border:none;
       background:transparent;
       backdrop-filter:none;-webkit-backdrop-filter:none;
       box-shadow:none;
@@ -198,6 +198,8 @@
       box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 24px 60px rgba(0,0,0,.4);
       z-index:10;
     }
+    .stat.glass{border:none}
+    .stat.glass:hover{border-color:transparent}
     .stat-icon{
       width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:18px;flex-shrink:0;
     }
@@ -268,7 +270,7 @@
       flex:1;min-height:0;
     }
     .qr-label{
-      font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:.18em;
+      font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.18em;
       text-transform:uppercase;margin-bottom:16px;flex-shrink:0;
     }
     .qr-frame{
@@ -391,12 +393,12 @@
       position:sticky;top:0;
     }
     .qr-sidebar .qr-frame{max-width:220px}
-    .quick-stats-title{font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;display:block;width:100%}
+    .quick-stats-title{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;display:block;width:100%}
 
     /* ─── ATTENDANCE PAGE ─── */
     .att-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;padding-top:6px}
     .att-table-wrap{overflow-x:auto;border-radius:var(--radius-md);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.12) transparent}
-    table{width:100%;border-collapse:separate;border-spacing:0}
+    table{width:100%;border-collapse:separate;border-spacing:0;background:rgba(255,255,255,.02)}
     th,td{padding:14px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle}
     th{
       background:rgba(255,255,255,.055);color:var(--faint);font-size:11px;letter-spacing:.12em;
@@ -404,9 +406,10 @@
     }
     th:first-child{border-radius:var(--radius-md) 0 0 0}
     th:last-child{border-radius:0 var(--radius-md) 0 0}
+    tbody tr{transition:.15s ease}
+    tbody tr:hover{background:rgba(255,255,255,.05)}
     td{color:#e8eeff;font-size:14px}
     tr:last-child td{border-bottom:0}
-    tr:hover td{background:rgba(255,255,255,.028)}
     .muted{color:var(--muted);font-weight:400}
 
     /* Empty state */
@@ -436,6 +439,35 @@
     }
     @keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
     @keyframes toast-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(20px)}}
+
+    /* QR Modal */
+    .qr-modal{position:fixed;inset:0;display:none;z-index:2000;align-items:center;justify-content:center}
+    .qr-modal.active{display:flex}
+    .qr-modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+    .qr-modal-content{
+      position:relative;z-index:10;border-radius:var(--radius-lg);padding:32px;max-width:420px;width:90vw;max-height:90vh;overflow-y:auto;
+      border:1px solid var(--stroke);box-shadow:0 64px 128px rgba(0,0,0,.6);
+    }
+    .qr-modal-close{
+      position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;
+      background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;
+      font-size:20px;font-weight:700;cursor:pointer;transition:.2s ease;display:grid;place-items:center;
+    }
+    .qr-modal-close:hover{background:rgba(255,255,255,.15);transform:scale(1.08)}
+    .qr-modal-body{padding-top:20px}
+    .qr-modal-frame{
+      width:300px;height:300px;background:#fff;border-radius:20px;display:grid;place-items:center;
+      margin:0 auto;overflow:hidden;box-shadow:0 0 0 6px rgba(255,255,255,.08),0 20px 60px rgba(0,0,0,.5);
+      position:relative;
+    }
+    .qr-modal-frame canvas{width:100%!important;height:100%!important;display:block}
+    .qr-modal-frame::before,.qr-modal-frame::after{
+      content:"";position:absolute;width:26px;height:26px;
+      border-color:rgba(139,92,255,.8);border-style:solid;
+      pointer-events:none;z-index:2;
+    }
+    .qr-modal-frame::before{top:8px;left:8px;border-width:3px 0 0 3px;border-radius:5px 0 0 0}
+    .qr-modal-frame::after{bottom:8px;right:8px;border-width:0 3px 3px 0;border-radius:0 0 5px 0}
 
     /* Scrollbar */
     ::-webkit-scrollbar{width:5px;height:5px}
@@ -489,18 +521,18 @@
 
       <div class="nav-label">Menu</div>
       <nav class="nav">
-        <button class="nav-btn active" data-page="dashboard">
+        <a href="{{ route('student.dashboard') }}" class="nav-btn {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
           <span class="nav-icon">⌂</span>
           <span>Dashboard</span>
-        </button>
-        <button class="nav-btn" data-page="classes">
+        </a>
+        <a href="{{ route('student.classes') }}" class="nav-btn {{ request()->routeIs('student.classes') ? 'active' : '' }}">
           <span class="nav-icon">▤</span>
           <span>My Classes</span>
-        </button>
-        <button class="nav-btn" data-page="attendance">
+        </a>
+        <a href="{{ route('student.attendance') }}" class="nav-btn {{ request()->routeIs('student.attendance') ? 'active' : '' }}">
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
-        </button>
+        </a>
       </nav>
 
       <div class="logout-wrap">
@@ -538,35 +570,6 @@
   </div>
 
   <script>
-    // ─── Navigation ───
-    function navigate(page) {
-      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-      const btn = document.querySelector(`.nav-btn[data-page="${page}"]`);
-      if(btn) btn.classList.add('active');
-      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-      const pg = document.getElementById(page);
-      if(pg) pg.classList.add('active');
-    }
-
-    // Initialize first page on DOM ready
-    if(document.readyState === 'loading'){
-      document.addEventListener('DOMContentLoaded', function(){
-        const dashboard = document.getElementById('dashboard');
-        if(dashboard && !dashboard.classList.contains('active')){
-          dashboard.classList.add('active');
-        }
-      });
-    } else {
-      const dashboard = document.getElementById('dashboard');
-      if(dashboard && !dashboard.classList.contains('active')){
-        dashboard.classList.add('active');
-      }
-    }
-
-    document.querySelectorAll('.nav-btn').forEach(btn=>{
-      btn.onclick = ()=>navigate(btn.dataset.page);
-    });
-
     // ─── Live Clock ───
     function updateClock(){
       const now = new Date();
