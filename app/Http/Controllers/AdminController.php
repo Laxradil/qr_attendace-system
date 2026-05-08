@@ -613,4 +613,62 @@ class AdminController extends Controller
         });
         return view('admin.logs-new', ['logs' => $logs]);
     }
+
+    // Settings
+    public function settings(): View
+    {
+        return view('admin.settings');
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
+        ]);
+
+        Auth::user()->update($validated);
+
+        // Log the activity
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'update',
+            'model_type' => 'User',
+            'model_id' => Auth::id(),
+            'description' => 'Updated profile settings',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => 'nullable|string|min:8|confirmed',
+            'password_confirmation' => 'nullable|string',
+        ]);
+
+        if (!empty($validated['password'])) {
+            Auth::user()->update([
+                'password' => bcrypt($validated['password']),
+            ]);
+
+            // Log the activity
+            SystemLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'update',
+                'model_type' => 'User',
+                'model_id' => Auth::id(),
+                'description' => 'Changed password',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Password updated successfully.');
+        }
+
+        return back()->with('info', 'No password change made.');
+    }
 }
