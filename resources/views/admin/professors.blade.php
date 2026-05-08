@@ -11,7 +11,7 @@
 
 <div class="tbl-wrap">
     <table>
-        <thead><tr><th>ID</th><th>Professor</th><th>Email</th><th>Status</th><th>Date Joined</th><th>Actions</th></tr></thead>
+        <thead><tr><th>ID</th><th>Professor</th><th>Email</th><th>Status</th><th>Date Joined</th><th style="width:220px;">Actions</th></tr></thead>
         <tbody>
             @forelse($professors as $professor)
                 <tr>
@@ -22,9 +22,15 @@
                     <td style="font-size:10px;color:var(--text2);">{{ $professor->email }}</td>
                     <td><span class="badge {{ $professor->is_active ? 'bg' : 'br' }}">{{ $professor->is_active ? 'Active' : 'Inactive' }}</span></td>
                     <td class="td-mono">{{ $professor->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
-                    <td style="display:flex;gap:4px;">
-                        <a href="{{ route('admin.users.edit', $professor) }}" class="btn btn-sm">Edit</a>
-                        <form action="{{ route('admin.users.delete', $professor) }}" method="POST" onsubmit="return confirm('Delete this professor?')">@csrf @method('DELETE')<button class="btn btn-sm btn-d" type="submit">Delete</button></form>
+                    <td style="vertical-align:middle;">
+                        <div style="display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap;white-space:nowrap;">
+                            <a href="{{ route('admin.users.edit', $professor) }}" class="btn btn-sm">Edit</a>
+                            <form action="{{ route('admin.users.delete', $professor) }}" method="POST" onsubmit="return confirm('Delete this professor?')" style="margin:0;">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-d" type="submit">Delete</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty

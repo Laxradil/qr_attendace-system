@@ -5,11 +5,13 @@
 @section('subheader', 'View and manage all attendance records.')
 
 @section('content')
-<div class="stats stats-4" style="margin-bottom:12px;">
-    <div class="stat stat-row"><div class="stat-icon" style="background:var(--blue-bg);"></div><div><div class="stat-val">{{ $records->total() }}</div><div class="stat-label">Total Records</div></div></div>
-    <div class="stat stat-row"><div class="stat-icon" style="background:var(--green-bg);"></div><div><div class="stat-val" style="color:var(--green);">{{ \App\Models\AttendanceRecord::where('status', 'present')->count() }}</div><div class="stat-label">Present</div></div></div>
-    <div class="stat stat-row"><div class="stat-icon" style="background:var(--amber-bg);"></div><div><div class="stat-val" style="color:var(--amber);">{{ \App\Models\AttendanceRecord::where('status', 'late')->count() }}</div><div class="stat-label">Late</div></div></div>
-    <div class="stat stat-row"><div class="stat-icon" style="background:var(--red-bg);"></div><div><div class="stat-val" style="color:var(--red);">{{ \App\Models\AttendanceRecord::where('status', 'absent')->count() }}</div><div class="stat-label">Absent</div></div></div>
+<!-- DEBUG: {{ json_encode(['total' => $totalRecords, 'present' => $presentCount, 'late' => $lateCount, 'absent' => $absentCount, 'excused' => $excusedCount]) }} -->
+<div class="stats stats-5" style="margin-bottom:12px;">
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--blue-bg);"></div><div><div class="stat-val">{{ $totalRecords }}</div><div class="stat-label">Total Records</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--green-bg);"></div><div><div class="stat-val" style="color:var(--green);">{{ $presentCount }}</div><div class="stat-label">Present</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--amber-bg);"></div><div><div class="stat-val" style="color:var(--amber);">{{ $lateCount }}</div><div class="stat-label">Late</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--red-bg);"></div><div><div class="stat-val" style="color:var(--red);">{{ $absentCount }}</div><div class="stat-label">Absent</div></div></div>
+    <div class="stat stat-row"><div class="stat-icon" style="background:var(--purple-bg);"></div><div><div class="stat-val" style="color:var(--purple);">{{ $excusedCount }}</div><div class="stat-label">Excused</div></div></div>
 </div>
 
 <div class="tbl-wrap">
@@ -37,6 +39,8 @@
                             <span class="badge bg">Present</span>
                         @elseif($record->status === 'late')
                             <span class="badge ba">Late</span>
+                        @elseif($record->status === 'excused')
+                            <span class="badge" style="background:var(--purple-bg);color:var(--purple);">Excused</span>
                         @else
                             <span class="badge br">Absent</span>
                         @endif
