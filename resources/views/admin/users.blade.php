@@ -5,6 +5,11 @@
 @section('subheader', 'Manage all system users and their access.')
 
 @section('content')
+@php
+    $roleFilter = $filters['role'] ?? null;
+    $statusFilter = $filters['status'] ?? null;
+@endphp
+
 <div class="stats stats-4" style="margin-bottom:12px;">
     <div class="stat stat-row"><div class="stat-icon" style="background:var(--blue-bg);"></div><div><div class="stat-val">{{ $stats['total'] }}</div><div class="stat-label">Total Users</div></div></div>
     <div class="stat stat-row"><div class="stat-icon" style="background:var(--red-bg);"></div><div><div class="stat-val">{{ $stats['admins'] }}</div><div class="stat-label">Administrators</div></div></div>
@@ -18,17 +23,17 @@
     <!-- Filter Buttons -->
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Filter by Role:</span>
-        <a href="{{ route('admin.users') }}" class="filter-btn {{ !$filters['role'] ? 'active' : '' }}" style="background:{{ !$filters['role'] ? 'var(--purple)' : 'var(--surface2)' }};color:{{ !$filters['role'] ? 'white' : 'var(--text2)' }};">All Roles</a>
-        <a href="{{ route('admin.users', ['role' => 'admin']) }}" class="filter-btn {{ $filters['role'] === 'admin' ? 'active' : '' }}" style="background:{{ $filters['role'] === 'admin' ? 'var(--red)' : 'var(--surface2)' }};color:{{ $filters['role'] === 'admin' ? 'white' : 'var(--text2)' }};">Admin</a>
-        <a href="{{ route('admin.users', ['role' => 'professor']) }}" class="filter-btn {{ $filters['role'] === 'professor' ? 'active' : '' }}" style="background:{{ $filters['role'] === 'professor' ? 'var(--purple)' : 'var(--surface2)' }};color:{{ $filters['role'] === 'professor' ? 'white' : 'var(--text2)' }};">Professor</a>
-        <a href="{{ route('admin.users', ['role' => 'student']) }}" class="filter-btn {{ $filters['role'] === 'student' ? 'active' : '' }}" style="background:{{ $filters['role'] === 'student' ? 'var(--green)' : 'var(--surface2)' }};color:{{ $filters['role'] === 'student' ? 'white' : 'var(--text2)' }};">Student</a>
+        <a href="{{ route('admin.users') }}" class="filter-btn {{ !$roleFilter ? 'active role-all' : '' }}">All Roles</a>
+        <a href="{{ route('admin.users', ['role' => 'admin']) }}" class="filter-btn {{ $roleFilter === 'admin' ? 'active role-admin' : '' }}">Admin</a>
+        <a href="{{ route('admin.users', ['role' => 'professor']) }}" class="filter-btn {{ $roleFilter === 'professor' ? 'active role-professor' : '' }}">Professor</a>
+        <a href="{{ route('admin.users', ['role' => 'student']) }}" class="filter-btn {{ $roleFilter === 'student' ? 'active role-student' : '' }}">Student</a>
     </div>
 
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Filter by Status:</span>
-        <a href="{{ route('admin.users', array_filter(['role' => $filters['role']])) }}" class="filter-btn {{ $filters['status'] === null ? 'active' : '' }}" style="background:{{ $filters['status'] === null ? 'var(--purple)' : 'var(--surface2)' }};color:{{ $filters['status'] === null ? 'white' : 'var(--text2)' }};">All</a>
-        <a href="{{ route('admin.users', array_filter(array_merge(['status' => '1'], ['role' => $filters['role']]))) }}" class="filter-btn {{ $filters['status'] === '1' ? 'active' : '' }}" style="background:{{ $filters['status'] === '1' ? 'var(--green)' : 'var(--surface2)' }};color:{{ $filters['status'] === '1' ? 'white' : 'var(--text2)' }};">Active</a>
-        <a href="{{ route('admin.users', array_filter(array_merge(['status' => '0'], ['role' => $filters['role']]))) }}" class="filter-btn {{ $filters['status'] === '0' ? 'active' : '' }}" style="background:{{ $filters['status'] === '0' ? 'var(--amber)' : 'var(--surface2)' }};color:{{ $filters['status'] === '0' ? '#000' : 'var(--text2)' }};">Inactive</a>
+        <a href="{{ route('admin.users', array_filter(['role' => $roleFilter])) }}" class="filter-btn {{ $statusFilter === null ? 'active status-all' : '' }}">All</a>
+        <a href="{{ route('admin.users', array_filter(array_merge(['status' => '1'], ['role' => $roleFilter]))) }}" class="filter-btn {{ $statusFilter === '1' ? 'active status-active' : '' }}">Active</a>
+        <a href="{{ route('admin.users', array_filter(array_merge(['status' => '0'], ['role' => $roleFilter]))) }}" class="filter-btn {{ $statusFilter === '0' ? 'active status-inactive' : '' }}">Inactive</a>
     </div>
 </div>
 
@@ -45,6 +50,25 @@
     }
     .filter-btn:hover {
         opacity: 0.9;
+    }
+    .filter-btn.active {
+        color: #fff;
+    }
+    .filter-btn.active.role-all,
+    .filter-btn.active.role-professor,
+    .filter-btn.active.status-all {
+        background: var(--purple);
+    }
+    .filter-btn.active.role-admin {
+        background: var(--red);
+    }
+    .filter-btn.active.role-student,
+    .filter-btn.active.status-active {
+        background: var(--green);
+    }
+    .filter-btn.active.status-inactive {
+        background: var(--amber);
+        color: #000;
     }
 </style>
 

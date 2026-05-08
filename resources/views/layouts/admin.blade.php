@@ -333,8 +333,10 @@
     setInterval(updateDateTime, 1000);
 
     // Number Counter Animation
-    function animateCounter(element) {
-        const target = parseInt(element.textContent, 10);
+    function animateCounter(element, target) {
+        if (isNaN(target) || target < 0) {
+            return;
+        }
         const duration = 800;
         const start = Date.now();
         
@@ -360,7 +362,7 @@
             const value = parseInt(el.textContent, 10);
             if (!isNaN(value) && value > 0) {
                 el.textContent = '0';
-                animateCounter(el);
+                animateCounter(el, value);
             }
         });
     });
@@ -399,10 +401,3 @@
 </script>
 </body>
 </html>
-
-</script>
-</body>
-</html>
-    </script>
-    </body>
-    </html>

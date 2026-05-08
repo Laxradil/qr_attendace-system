@@ -372,10 +372,8 @@ class ProfessorController extends Controller
             $query->whereDate('recorded_at', $date);
         }
 
-        $summaryQuery = clone $query;
-        $summary = $summaryQuery
-            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
-            ->first();
+        $summaryQuery = AttendanceRecord::selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count");
+        $summary = $summaryQuery->first();
 
         $records = $query->with('student', 'classe')
             ->orderBy('recorded_at', 'desc')
