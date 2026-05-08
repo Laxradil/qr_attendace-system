@@ -361,6 +361,10 @@
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>
         </a>
+        <a href="{{ route('professor.reports') }}" class="{{ request()->routeIs('professor.reports') ? 'active' : '' }}">
+          <span class="nav-icon">📊</span>
+          <span>Reports</span>
+        </a>
         <a href="{{ route('professor.logs') }}" class="{{ request()->routeIs('professor.logs') ? 'active' : '' }}">
           <span class="nav-icon">☷</span>
           <span>Logs</span>
