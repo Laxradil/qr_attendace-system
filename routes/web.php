@@ -67,6 +67,7 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::get('/logs', [ProfessorController::class, 'logs'])->name('professor.logs');
     Route::get('/settings', [ProfessorController::class, 'settings'])->name('professor.settings');
     Route::put('/settings', [ProfessorController::class, 'updateSettings'])->name('professor.settings.update');
+    Route::put('/settings/password', [ProfessorController::class, 'updatePassword'])->name('professor.settings.password');
     Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
     Route::post('/drop-request', [ProfessorController::class, 'submitDropRequest'])->name('professor.drop-request');
 });
@@ -141,3 +142,12 @@ Route::prefix('student')->middleware(['auth', 'role:student'])->group(function (
     Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
     Route::get('/classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.classes');
 });
+
+// DEBUG: Test student UI without auth (remove in production)
+if (env('APP_DEBUG', false)) {
+    Route::get('/_debug/student-dashboard', function() {
+        $user = \App\Models\User::where('email', 'student@example.com')->firstOrFail();
+        Auth::login($user);
+        return redirect()->route('student.dashboard');
+    });
+}

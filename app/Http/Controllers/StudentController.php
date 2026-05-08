@@ -28,7 +28,7 @@ class StudentController extends Controller
     public function dashboard(): View
     {
         $user = Auth::user();
-        $classes = $user->enrolledClasses()->with('professor')->get();
+        $classes = $user->enrolledClasses()->with('professors')->get();
 
         // Get recent attendance records
         $recentAttendance = AttendanceRecord::where('student_id', $user->id)
@@ -43,7 +43,8 @@ class StudentController extends Controller
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
                 SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
-                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused
             ")
             ->first();
 
@@ -53,7 +54,8 @@ class StudentController extends Controller
             'totalPresent' => $stats->present ?? 0,
             'totalLate' => $stats->late ?? 0,
             'totalAbsent' => $stats->absent ?? 0,
-            'studentQrDataUri' => 'data:image/svg+xml;charset=utf-8,' . rawurlencode($this->createStudentQrSvg($user)),
+            'totalExcused' => $stats->excused ?? 0,
+            'totalRecords' => $stats->total ?? 0,
         ]);
     }
 
@@ -62,7 +64,7 @@ class StudentController extends Controller
         $user = Auth::user();
 
         $attendanceRecords = AttendanceRecord::where('student_id', $user->id)
-            ->with(['classe', 'qrCode'])
+            ->with(['classe'])
             ->orderBy('recorded_at', 'desc')
             ->paginate(20);
 
@@ -72,7 +74,8 @@ class StudentController extends Controller
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
                 SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
-                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused
             ")
             ->first();
 
@@ -81,6 +84,7 @@ class StudentController extends Controller
             'totalPresent' => $stats->present ?? 0,
             'totalLate' => $stats->late ?? 0,
             'totalAbsent' => $stats->absent ?? 0,
+            'totalExcused' => $stats->excused ?? 0,
             'totalRecords' => $stats->total ?? 0,
         ]);
     }
@@ -88,11 +92,25 @@ class StudentController extends Controller
     public function myClasses(): View
     {
         $user = Auth::user();
-        $classes = $user->enrolledClasses()->with('professor')->get();
+        $classes = $user->enrolledClasses()->with('professors')->get();
+
+        // Get all attendance statistics
+        $stats = AttendanceRecord::where('student_id', $user->id)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused
+            ")
+            ->first();
 
         return view('student.classes', [
             'classes' => $classes,
-            'studentQrDataUri' => 'data:image/svg+xml;charset=utf-8,' . rawurlencode($this->createStudentQrSvg($user)),
+            'totalPresent' => $stats->present ?? 0,
+            'totalLate' => $stats->late ?? 0,
+            'totalAbsent' => $stats->absent ?? 0,
+            'totalExcused' => $stats->excused ?? 0,
         ]);
     }
 

@@ -1,119 +1,148 @@
-@extends('layouts.professor')
+﻿@extends('layouts.professor')
 
 @section('title', 'Dashboard - Professor')
 @section('header', 'Dashboard')
 @section('subheader', 'Welcome back, ' . auth()->user()->name . '. Here is your class activity overview.')
 
 @section('content')
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.classes') }}">
-        <div class="stat-val">{{ $totalClasses }}</div>
-        <div class="stat-label">Total Classes</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View classes -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.students') }}">
-        <div class="stat-val">{{ $totalStudents }}</div>
-        <div class="stat-label">Students</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View students -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.attendance-records') }}">
-        <div class="stat-val">{{ $totalRecords }}</div>
-        <div class="stat-label">Attendance Records</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View records -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('professor.reports') }}">
-        <div class="stat-val">{{ $attendanceRate }}%</div>
-        <div class="stat-label">Attendance Rate</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;">View reports -></div>
-    </a>
+<div class="stats">
+  <div class="stat glass">
+    <div class="stat-icon blue">▤</div>
+    <div class="stat-body">
+      <strong>{{ $totalClasses }}</strong>
+      <span>Total Classes</span>
+      <div class="trend up">↑ All active</div>
+      <a href="{{ route('professor.classes') }}">View classes →</a>
+    </div>
+  </div>
+  <div class="stat glass">
+    <div class="stat-icon green">🧑‍🎓</div>
+    <div class="stat-body">
+      <strong>{{ $totalStudents }}</strong>
+      <span>Students</span>
+      <div class="trend up">↑ Across all classes</div>
+      <a href="{{ route('professor.students') }}">View students →</a>
+    </div>
+  </div>
+  <div class="stat glass">
+    <div class="stat-icon yellow">📋</div>
+    <div class="stat-body">
+      <strong>{{ $totalRecords }}</strong>
+      <span>Attendance Records</span>
+      <div class="trend up">↑ Today</div>
+      <a href="{{ route('professor.attendance-records') }}">View records →</a>
+    </div>
+  </div>
+  <div class="stat glass">
+    <div class="stat-icon purple">📊</div>
+    <div class="stat-body">
+      <strong>{{ $attendanceRate }}%</strong>
+      <span>Attendance Rate</span>
+      <div class="trend {{ $attendanceRate >= 80 ? 'up' : 'down' }}">{{ $attendanceRate >= 80 ? '↑' : '↓' }} This week</div>
+      <a href="{{ route('professor.attendance-records') }}">View reports →</a>
+    </div>
+  </div>
 </div>
 
-<div class="g-6-4">
-    <div>
-        <div class="sh">Attendance Overview</div>
-        <div class="card">
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--green);">{{ $presentCount }}</div>
-                    <div class="stat-label">Present</div>
-                </div>
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--amber);">{{ $lateCount }}</div>
-                    <div class="stat-label">Late</div>
-                </div>
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--red);">{{ $absentCount }}</div>
-                    <div class="stat-label">Absent</div>
-                </div>
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--purple);">{{ $excusedCount }}</div>
-                    <div class="stat-label">Excused</div>
-                </div>
-                <div>
-                    <div class="stat-val" style="font-size:18px;color:var(--blue);">{{ $totalRecords }}</div>
-                    <div class="stat-label">Total Records</div>
-                </div>
-            </div>
-            <a class="btn btn-sm" href="{{ route('professor.attendance-records') }}" style="width:100%;justify-content:center;margin-top:8px;">Manage Attendance -></a>
+<div class="dashboard">
+  <div class="dash-left">
+    <div class="card glass">
+      <div class="section-head">
+        <h3>📊 Attendance Overview</h3>
+        <a href="{{ route('professor.attendance-records') }}">View Full Report →</a>
+      </div>
+      <div class="mini-grid">
+        <div class="mini">
+          <div class="mini-icon stat-icon green" style="width:32px;height:32px;border-radius:10px;font-size:14px">✓</div>
+          <div><b style="color:#4dffa0">{{ $presentCount }}</b><small>Present</small></div>
         </div>
-
-        <div class="sh">Recent Activities</div>
-        <div class="card">
-            @forelse($recentLogs as $log)
-                <div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border2);align-items:flex-start;">
-                    <div style="width:26px;height:26px;border-radius:6px;background:var(--purple-glow);display:flex;align-items:center;justify-content:center;font-size:10px;">{{ strtoupper(substr($log->action, 0, 1)) }}</div>
-                    <div style="font-size:11px;flex:1;">
-                        <strong>{{ $log->user->name ?? 'System' }}</strong> {{ str_replace('_', ' ', $log->action) }}
-                        @if($log->description)
-                            <div style="font-size:10px;color:var(--text2);margin-top:1px;">{{ $log->description }}</div>
-                        @endif
-                    </div>
-                    <div style="font-size:9px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace;">{{ $log->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('h:i A') }}</div>
-                </div>
-            @empty
-                <div style="color:var(--text2);font-size:11px;">No recent activity.</div>
-            @endforelse
-            <a class="btn btn-sm" href="{{ route('professor.logs') }}" style="width:100%;justify-content:center;margin-top:6px;">View All Activities -></a>
+        <div class="mini">
+          <div class="mini-icon stat-icon yellow" style="width:32px;height:32px;border-radius:10px;font-size:14px">◷</div>
+          <div><b style="color:#ffd584">{{ $lateCount }}</b><small>Late</small></div>
         </div>
+        <div class="mini">
+          <div class="mini-icon stat-icon red" style="width:32px;height:32px;border-radius:10px;font-size:14px">✕</div>
+          <div><b style="color:#ff7f96">{{ $absentCount }}</b><small>Absent</small></div>
+        </div>
+        <div class="mini">
+          <div class="mini-icon stat-icon blue" style="width:32px;height:32px;border-radius:10px;font-size:14px">▤</div>
+          <div><b>{{ $totalRecords }}</b><small>Total</small></div>
+        </div>
+      </div>
+      <div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:10px">
+        <div style="height:100%;width:{{ $attendanceRate }}%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;box-shadow:0 0 10px rgba(24,240,139,.5)"></div>
+      </div>
+      <button class="report-btn" onclick="window.location.href='{{ route('professor.attendance-records') }}'">View Full Attendance Report →</button>
     </div>
 
-    <div>
-        <div class="sh">Today's Schedule</div>
-        <div class="card">
-            @forelse($todaySchedules as $schedule)
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border2);gap:12px;">
-                    <div>
-                        <div style="font-size:11px;font-weight:600;">{{ $schedule->subject_name }}</div>
-                        <div style="font-size:10px;color:var(--text2);">{{ $schedule->subject_code }} · Room {{ $schedule->room }}</div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:11px;font-weight:700;">{{ $schedule->time }}</div>
-                        <div style="font-size:9px;color:var(--text3);">{{ $schedule->days }}</div>
-                    </div>
-                </div>
-            @empty
-                <div style="color:var(--text2);font-size:11px;">No classes scheduled for today.</div>
-            @endforelse
+    <div class="card glass">
+      <div class="section-head">
+        <h3>⚡ Recent Activities</h3>
+        <a href="{{ route('professor.logs') }}">View all →</a>
+      </div>
+      @forelse($recentLogs as $log)
+        <div class="activity">
+          <div class="act-icon att">📋</div>
+          <div>
+            <b>{{ ucfirst($log->action) }}</b>
+            <p>{{ $log->description }}</p>
+          </div>
+          <time>{{ $log->created_at->diffForHumans() }}</time>
         </div>
-
-        <div class="sh">Quick Actions</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-            <a class="btn" href="{{ route('professor.scan-qr') }}" style="justify-content:center;">Scan QR</a>
-            <a class="btn" href="{{ route('professor.attendance-records') }}" style="justify-content:center;">Attendance</a>
-            <a class="btn" href="{{ route('professor.classes') }}" style="justify-content:center;">My Classes</a>
-            <a class="btn" href="{{ route('professor.reports') }}" style="justify-content:center;">Reports</a>
-        </div>
+      @empty
+        <div style="padding:14px;color:var(--muted);text-align:center;">No recent activities</div>
+      @endforelse
     </div>
-</div>
+  </div>
 
-<div style="margin-top:14px;background:linear-gradient(135deg,var(--purple2),var(--blue));border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:12px;">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  <div class="dash-right">
+    <div class="card glass">
+      <div class="section-head"><h3>📅 Today's Schedule</h3></div>
+      @forelse($todaySchedules as $schedule)
+        <div class="row-item">
+          <div>
+            <div style="font-weight:800;font-size:13.5px">{{ $schedule->subject_code }} · {{ $schedule->subject_name }}</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:2px">{{ $schedule->subject_code }} · Room {{ $schedule->room }}</div>
+          </div>
+          <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)">{{ \Carbon\Carbon::createFromFormat('H:i:s', $schedule->start_time ?? '00:00:00')->format('g:i A') }}</span>
+        </div>
+      @empty
+        <div style="padding:14px;color:var(--muted);text-align:center;">No classes scheduled for today</div>
+      @endforelse
+    </div>
+
+    <div class="card glass">
+      <div class="section-head"><h3>⚡ Quick Actions</h3></div>
+      <div class="quick-grid">
+        <div class="quick" onclick="window.location.href='{{ route('professor.scan-qr') }}'">
+          <div class="stat-icon blue" style="width:36px;height:36px;border-radius:11px;font-size:16px;flex-shrink:0">▦</div>
+          <div><strong>Scan QR</strong><span>Record attendance</span></div>
+        </div>
+        <div class="quick" onclick="window.location.href='{{ route('professor.attendance-records') }}'">
+          <div class="stat-icon yellow" style="width:36px;height:36px;border-radius:11px;font-size:16px;flex-shrink:0">📋</div>
+          <div><strong>Attendance</strong><span>View records</span></div>
+        </div>
+        <div class="quick" onclick="window.location.href='{{ route('professor.classes') }}'">
+          <div class="stat-icon green" style="width:36px;height:36px;border-radius:11px;font-size:16px;flex-shrink:0">▤</div>
+          <div><strong>My Classes</strong><span>Manage classes</span></div>
+        </div>
+        <div class="quick" onclick="window.location.href='{{ route('professor.reports') }}'">
+          <div class="stat-icon purple" style="width:36px;height:36px;border-radius:11px;font-size:16px;flex-shrink:0">📊</div>
+          <div><strong>Reports</strong><span>View reports</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card glass" style="background:linear-gradient(135deg,rgba(139,92,255,.22),rgba(67,166,255,.12));border-color:rgba(139,92,255,.35)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="font-size:26px">▦</div>
         <div>
-            <div style="font-weight:600;color:#fff;font-size:12px;">Ready to take attendance?</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">Scan a student QR code and record attendance instantly.</div>
+          <div style="font-size:14px;font-weight:800">Ready to take attendance?</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Scan a student QR code and record attendance instantly.</div>
         </div>
+      </div>
+      <button class="report-btn" onclick="window.location.href='{{ route('professor.scan-qr') }}'">Start Scanning →</button>
     </div>
-    <a class="btn" href="{{ route('professor.scan-qr') }}" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25);color:#fff;">Start Scanning →</a>
+  </div>
 </div>
 @endsection
