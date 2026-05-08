@@ -289,7 +289,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes|max:20',
-            'room_code' => 'required|string|max:50',
+            'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professors' => 'required|array|min:1',
@@ -336,7 +336,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes,code,' . $classe->id . '|max:20',
-            'room_code' => 'required|string|max:50',
+            'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professors' => 'required|array|min:1',
