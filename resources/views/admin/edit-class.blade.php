@@ -172,7 +172,7 @@
       </div>
       <div class="form-group">
         <label for="room_code">Room Code *</label>
-        <input type="text" id="room_code" name="room_code" value="{{ $classe->room_code }}" maxlength="50" placeholder="Enter room code" required>
+        <input type="text" id="room_code" name="room_code" value="{{ $classe->room_code }}" placeholder="Enter room code" required>
       </div>
       <div class="form-group">
         <label for="name">Class Name *</label>
