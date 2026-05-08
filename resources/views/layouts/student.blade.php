@@ -112,9 +112,10 @@
       border:2px solid rgba(255,255,255,.3);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 28px rgba(93,71,255,.38);
       flex-shrink:0;position:relative;
+      color: #ffffff; /* Adds white color to the avatar letter */
     }
     .avatar-status{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid rgba(2,4,18,.8);box-shadow:0 0 8px rgba(24,240,139,.6)}
-    .profile-info h2{font-size:14px;font-weight:700;display:flex;gap:6px;align-items:center}
+    .profile-info h2 {font-size: 14px;font-weight: 700; display: flex;gap: 6px;align-items: center;color: #ffffff;/* Adds white color to your name */}
     .tag{font-size:10px;padding:3px 7px;border-radius:999px;background:rgba(139,92,255,.3);color:#efeaff;border:1px solid rgba(139,92,255,.4)}
     .profile-info p{margin-top:3px;color:var(--muted);font-size:11.5px}
     .online-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);margin-top:2px;font-weight:600}
