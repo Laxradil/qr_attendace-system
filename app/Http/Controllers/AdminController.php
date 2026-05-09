@@ -513,7 +513,7 @@ class AdminController extends Controller
         $excusedCount = (int) ($attendanceStats?->excused_count ?? 0);
         
         return view('admin.attendance-records-new', [
-            'records' => $records,
+            'attendanceRecords' => $records,
             'totalRecords' => $totalRecords,
             'presentCount' => $presentCount,
             'lateCount' => $lateCount,
