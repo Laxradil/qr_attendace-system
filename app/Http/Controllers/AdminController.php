@@ -497,8 +497,34 @@ class AdminController extends Controller
     {
         $records = AttendanceRecord::with('student', 'classe')
             ->paginate(20);
+<<<<<<< HEAD
         $attendanceRecords = $records;
         return view('admin.attendance-records-new', ['attendanceRecords' => $attendanceRecords]);
+=======
+        
+        $attendanceStats = AttendanceRecord::selectRaw(
+            'COUNT(*) as total_records, 
+             SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as present_count,
+             SUM(CASE WHEN status = \'late\' THEN 1 ELSE 0 END) as late_count,
+             SUM(CASE WHEN status = \'absent\' THEN 1 ELSE 0 END) as absent_count,
+             SUM(CASE WHEN status = \'excused\' THEN 1 ELSE 0 END) as excused_count'
+        )->first();
+        
+        $totalRecords = (int) ($attendanceStats?->total_records ?? 0);
+        $presentCount = (int) ($attendanceStats?->present_count ?? 0);
+        $lateCount = (int) ($attendanceStats?->late_count ?? 0);
+        $absentCount = (int) ($attendanceStats?->absent_count ?? 0);
+        $excusedCount = (int) ($attendanceStats?->excused_count ?? 0);
+        
+        return view('admin.attendance-records', [
+            'records' => $records,
+            'totalRecords' => $totalRecords,
+            'presentCount' => $presentCount,
+            'lateCount' => $lateCount,
+            'absentCount' => $absentCount,
+            'excusedCount' => $excusedCount,
+        ]);
+>>>>>>> origin/branch_shon
     }
 
     // Reports
