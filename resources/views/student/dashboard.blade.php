@@ -71,7 +71,7 @@
           No classes enrolled
         </div>
         @endforelse
-        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Classes →</a>
+        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Classes</a>
       </div>
     </div>
 
@@ -103,7 +103,7 @@
         </div>
         @endforelse
 
-        <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Records →</a>
+        <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex">View All Records</a>
       </div>
 
       <div class="card glass" style="flex-shrink:0">
