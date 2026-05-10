@@ -1,6 +1,6 @@
 @extends('layouts.student')
 
-@section('title', 'Settings - Student')
+@section('title', 'Settings & Profile')
 @section('header', 'My Settings')
 @section('subheader', 'Manage your profile and account settings')
 
