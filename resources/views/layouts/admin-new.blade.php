@@ -260,8 +260,8 @@
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:12px}
     .logout{
-      border:1px solid rgba(255,61,114,.2);
-      background:rgba(255,61,114,.07);
+      border:1px solid transparent;
+      background:transparent;
       color:#ff8298;
       padding:11px 12px;
       border-radius:15px;
@@ -272,7 +272,11 @@
       font-family:var(--font);
       width:100%;
     }
-    .logout:hover{background:rgba(255,61,114,.14);transform:translateX(3px)}
+    .logout:hover{
+      border-color:rgba(255,61,114,.2);
+      background:rgba(255,61,114,.14);
+      transform:translateX(3px)
+    }
     .logout-icon{
       width:34px;height:34px;border-radius:11px;
       display:grid;place-items:center;font-size:16px;
