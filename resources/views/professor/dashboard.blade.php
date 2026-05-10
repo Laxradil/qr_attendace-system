@@ -97,23 +97,21 @@
       <button class="report-btn" onclick="window.location.href='{{ route('professor.attendance-records') }}'">View Full Attendance Report →</button>
     </div>
 
-    <div class="card glass">
-      <div class="section-head">
-        <h3 style="font-size:16px">⚡ Recent Activities</h3>
-        <a href="{{ route('professor.logs') }}">View all →</a>
-      </div>
-      @forelse($recentLogs as $log)
-        <div class="activity">
-          <div class="act-icon @if($log->action == 'create') create @elseif($log->action == 'update') edit @elseif($log->action == 'delete') drop @elseif($log->action == 'scan_qr') scan @else add @endif">
-            @if($log->action == 'create') ✨ @elseif($log->action == 'update') ✏️ @elseif($log->action == 'delete') 🗑 @elseif($log->action == 'scan_qr') 📷 @else ➕ @endif
-          </div>
-          <div><b style="font-size:14px">{{ $log->user->name }} {{ ucwords(str_replace('_', ' ', $log->action)) }}</b><p style="font-size:12px;color:#c5d3ff">{{ $log->description }}</p></div>
-          <time style="font-size:12px">{{ $log->created_at->format('h:i A') }}</time>
-        </div>
-      @empty
-        <p style="color:#c5d3ff;padding:20px;text-align:center;font-size:13px">No recent activities</p>
-      @endforelse
+    <div class="section-head">
+      <h3 style="font-size:16px; margin-top: 12px;">⚡ Recent Activities</h3>
+      <a href="{{ route('professor.logs') }}" style="color: #ffffff;">View all →</a>
     </div>
+    @forelse($recentLogs as $log)
+      <div class="activity">
+        <div class="act-icon @if($log->action == 'create') create @elseif($log->action == 'update') edit @elseif($log->action == 'delete') drop @elseif($log->action == 'scan_qr') scan @else add @endif">
+          @if($log->action == 'create') ✨ @elseif($log->action == 'update') ✏️ @elseif($log->action == 'delete') 🗑 @elseif($log->action == 'scan_qr') 📷 @else ➕ @endif
+        </div>
+        <div><b style="font-size:14px;color:#ffffff">{{ $log->user->name }} {{ ucwords(str_replace('_', ' ', $log->action)) }}</b><p style="font-size:12px;color:#ffffff">{{ $log->description }}</p></div>
+        <time style="font-size:12px">{{ $log->created_at->format('h:i A') }}</time>
+      </div>
+    @empty
+      <p style="color:#ffffff;padding:20px;text-align:center;font-size:13px">No recent activities</p>
+    @endforelse
   </div>
 
   <div class="dash-right" style="display:flex;flex-direction:column;gap:12px">
@@ -123,48 +121,36 @@
         <div class="row-item">
           <div>
             <div style="font-weight:800;font-size:14px">{{ $schedule->subject_code }} · {{ $schedule->subject_name }}</div>
-            <div style="font-size:12px;color:#c5d3ff;margin-top:2px">{{ $schedule->subject_code }} · Room {{ $schedule->room }}</div>
+            <div style="font-size:12px;color:#ffffff;margin-top:2px">{{ $schedule->subject_code }} · Room {{ $schedule->room }}</div>
           </div>
           <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)">{{ \Carbon\Carbon::createFromFormat('H:i:s', $schedule->start_time ?? '00:00:00')->format('g:i A') }}</span>
         </div>
       @empty
-        <div style="padding:14px;color:#c5d3ff;text-align:center;">No classes scheduled for today</div>
+        <div style="padding:14px;color:#ffffff;text-align:center;">No classes scheduled for today</div>
       @endforelse
     </div>
 
-    <div class="card glass" style="padding:8px;height:320px;display:flex;flex-direction:column;">
-      <div class="section-head" style="margin-bottom:8px;"><h3 style="font-size:16px">⚡ Quick Actions</h3></div>
-      <div class="quick-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-content:start;flex:1;height:100%">
-        <div class="quick" style="min-height:70px;height:100%;width:100%;flex:1;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:14px;border:1px solid rgba(67,166,255,.3);background:rgba(67,166,255,.06);transition:.2s ease;cursor:pointer;position:relative;overflow:hidden" onclick="window.location.href='{{ route('professor.scan-qr') }}'">
-          <div class="stat-icon blue" style="width:26px;height:26px;border-radius:8px;font-size:12px;display:grid;place-items:center;">▦</div>
-          <strong style="font-size:12px;line-height:1.1;text-align:center;">Scan QR</strong>
-          <span style="font-size:10px;color:#aab4dd;line-height:1;">Record</span>
-        </div>
-        <div class="quick" style="min-height:70px;height:100%;width:100%;flex:1;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:14px;border:1px solid rgba(255,199,90,.3);background:rgba(255,199,90,.06);transition:.2s ease;cursor:pointer;position:relative;overflow:hidden" onclick="window.location.href='{{ route('professor.attendance-records') }}'">
-          <div class="stat-icon yellow" style="width:26px;height:26px;border-radius:8px;font-size:12px;display:grid;place-items:center;">📋</div>
-          <strong style="font-size:12px;line-height:1.1;text-align:center;">Attendance</strong>
-          <span style="font-size:10px;color:#aab4dd;line-height:1;">Records</span>
-        </div>
-        <div class="quick" style="min-height:70px;height:100%;width:100%;flex:1;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:14px;border:1px solid rgba(24,240,139,.3);background:rgba(24,240,139,.06);transition:.2s ease;cursor:pointer;position:relative;overflow:hidden" onclick="window.location.href='{{ route('professor.classes') }}'">
-          <div class="stat-icon green" style="width:26px;height:26px;border-radius:8px;font-size:12px;display:grid;place-items:center;">▤</div>
-          <strong style="font-size:12px;line-height:1.1;text-align:center;">Classes</strong>
-          <span style="font-size:10px;color:#aab4dd;line-height:1;">Manage</span>
-        </div>
-        <div class="quick" style="min-height:70px;height:100%;width:100%;flex:1;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:14px;border:1px solid rgba(255,199,90,.3);background:rgba(255,199,90,.06);transition:.2s ease;cursor:pointer;position:relative;overflow:hidden" onclick="window.location.href='{{ route('professor.schedules') }}'">
-          <div class="stat-icon yellow" style="width:26px;height:26px;border-radius:8px;font-size:12px;display:grid;place-items:center;">📅</div>
-          <strong style="font-size:12px;line-height:1.1;text-align:center;">Schedules</strong>
-          <span style="font-size:10px;color:#aab4dd;line-height:1;">View</span>
-        </div>
-        <div class="quick" style="min-height:70px;height:100%;width:100%;flex:1;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:14px;border:1px solid rgba(24,240,139,.3);background:rgba(24,240,139,.06);transition:.2s ease;cursor:pointer;position:relative;overflow:hidden" onclick="window.location.href='{{ route('professor.students') }}'">
-          <div class="stat-icon green" style="width:26px;height:26px;border-radius:8px;font-size:12px;display:grid;place-items:center;">🧑‍🎓</div>
-          <strong style="font-size:12px;line-height:1.1;text-align:center;">Students</strong>
-          <span style="font-size:10px;color:#aab4dd;line-height:1;">View</span>
-        </div>
-        <div class="quick" style="min-height:70px;height:100%;width:100%;flex:1;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:14px;border:1px solid rgba(139,92,255,.3);background:rgba(139,92,255,.06);transition:.2s ease;cursor:pointer;position:relative;overflow:hidden" onclick="window.location.href='{{ route('professor.reports') }}'">
-          <div class="stat-icon purple" style="width:26px;height:26px;border-radius:8px;font-size:12px;display:grid;place-items:center;">📊</div>
-          <strong style="font-size:12px;line-height:1.1;text-align:center;">Reports</strong>
-          <span style="font-size:10px;color:#aab4dd;line-height:1;">View</span>
-        </div>
+    <div style="padding:8px;height:320px;display:flex;flex-direction:column;">
+      <div class="section-head" style="margin-bottom:8px;"><h3 style="font-size:16px">🏆 Attendance Leaderboard</h3></div>
+      <div style="overflow-y:auto;max-height:260px;">
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <thead>
+            <tr style="background:rgba(139,92,255,0.12);color:#ffffff;border-bottom:3px solid rgba(139,92,255,0.6);">
+              <th style="text-align:left;padding:8px 10px;font-weight:600;font-size:12px;color:#ffffff;">Class</th>
+              <th style="text-align:left;padding:8px 10px;font-weight:600;font-size:12px;color:#ffffff;">Attendance %</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($leaderboard as $row)
+              <tr style="border-bottom:2px solid rgba(139,92,255,0.85);color:#ffffff;">
+                <td style="padding:10px 12px;color:#ffffff;font-size:13px;">{{ $row['name'] }}</td>
+                <td style="padding:10px 12px;text-align:right;font-weight:700;color:#18f08b;font-size:13px;">{{ $row['rate'] }}%</td>
+              </tr>
+            @empty
+              <tr><td colspan="2" style="padding:18px;text-align:center;color:#ffffff;">No attendance data yet</td></tr>
+            @endforelse
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
