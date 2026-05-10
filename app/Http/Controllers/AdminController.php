@@ -510,7 +510,7 @@ class AdminController extends Controller
         ]);
     }
 
-    private function buildStudentQrPng(User $student): string
+    private function buildStudentQrSvg(User $student): string
     {
         $qrCode = QRCode::where('student_id', $student->id)->first();
 
@@ -523,7 +523,7 @@ class AdminController extends Controller
             'generated_at' => now()->toIso8601String(),
         ]);
 
-        return QrCodeFacade::format('png')
+        return QrCodeFacade::format('svg')
             ->size(180)
             ->margin(1)
             ->encoding('UTF-8')
