@@ -499,7 +499,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <div class="app">
-    <!-- ════ SIDEBAR ════ -->
     <aside class="sidebar">
       <div class="brand">
         <div class="logo">▦</div>
@@ -551,7 +550,6 @@
       </div>
     </aside>
 
-    <!-- ════ MAIN ════ -->
     <main>
       <header class="topbar">
         <div class="page-title">
@@ -570,21 +568,27 @@
 
       <div class="content">
         @yield('content')
-      </div><!-- /content -->
-    </main>
+      </div></main>
   </div>
 
   <script>
-    // ─── Live Clock ───
+    // ─── Live Clock (12-hour format with AM/PM) ───
     function updateClock(){
       const now = new Date();
-      const h = now.getHours().toString().padStart(2,'0');
-      const m = now.getMinutes().toString().padStart(2,'0');
-      const s = now.getSeconds().toString().padStart(2,'0');
-      document.getElementById('clockTime').textContent = `${h}:${m}:${s}`;
+      let hours = now.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      hours = hours % 12;
+      hours = hours ? hours : 12; // Converts 0 hour to 12
+      
+      const h = hours.toString().padStart(2, '0');
+      const m = now.getMinutes().toString().padStart(2, '0');
+      const s = now.getSeconds().toString().padStart(2, '0');
+      
+      document.getElementById('clockTime').textContent = `${h}:${m}:${s} ${ampm}`;
     }
     updateClock();
-    setInterval(updateClock,1000);
+    setInterval(updateClock, 1000);
 
     // ─── Toast ───
     function showToast(msg, icon='✓', color='#4dffa0'){
