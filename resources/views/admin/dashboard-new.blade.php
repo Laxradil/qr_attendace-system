@@ -13,7 +13,7 @@
 
 <style>
   .dashboard-stats{
-    gap:12px;
+    gap:10px;
   }
   .dashboard-stats .stat{
     border:none;
@@ -21,13 +21,13 @@
     box-shadow:none;
     backdrop-filter:none;
     -webkit-backdrop-filter:none;
-    padding:16px;
+    padding:12px 14px;
     cursor:pointer;
     transition:transform .25s ease, background .25s ease, box-shadow .25s ease, border-color .25s ease, padding .25s ease;
   }
   .dashboard-stats .stat:hover{
     transform:translateY(-3px);
-    padding:22px;
+    padding:18px;
     border:1px solid rgba(255,255,255,.22);
     background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.03) 40%,rgba(255,255,255,.07));
     backdrop-filter:var(--blur);
@@ -58,9 +58,9 @@
     align-items:center;
     justify-content:center;
     width:100%;
-    height:46px;
-    border-radius:18px;
-    font-size:15px;
+    height:42px;
+    border-radius:16px;
+    font-size:14px;
     font-weight:800;
     letter-spacing:.01em;
     background:linear-gradient(90deg,#8f5bff 0%,#5d63ff 45%,#2d68b8 100%);
@@ -75,43 +75,63 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 14px 34px rgba(78,88,255,.36);
   }
   .attendance-panel .mini-grid{
-    grid-template-columns:repeat(4, 145px);
-    gap:6px;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:10px;
     align-content:start;
-    justify-content:center;
-    margin-bottom:12px;
+    justify-content:stretch;
+    margin-bottom:10px;
   }
   .attendance-panel .mini{
     aspect-ratio:1 / 1;
-    min-height:145px;
+    min-height:144px;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     text-align:center;
-    gap:10px;
-    padding:10px;
+    gap:6px;
+    padding:12px;
+    background:rgba(255,255,255,.055);
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.10);
+    transition:transform .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .attendance-panel .mini:hover{
+    transform:translateY(-3px);
+    background:rgba(255,255,255,.085);
+    box-shadow:0 12px 24px rgba(0,0,0,.22);
   }
   .attendance-panel .mini b{
-    font-size:38px;
+    font-size:36px;
     line-height:1;
   }
   .attendance-panel .mini small{
-    margin-top:0;
+    margin-top:2px;
     font-size:12px;
+    line-height:1;
   }
   .attendance-panel .mini .mini-icon{
-    width:48px;
-    height:48px;
-    border-radius:13px;
+    width:34px;
+    height:34px;
+    border-radius:50%;
     font-size:20px;
+    margin-bottom:4px;
   }
   .attendance-panel .mini > div:last-child{
     display:flex;
     flex-direction:column;
-    gap:2px;
+    gap:0;
     align-items:center;
   }
+  .attendance-panel .mini .mini-label{
+    font-size:13px;
+    margin-top:4px;
+    font-weight:700;
+  }
+  .attendance-panel .mini.present{ border-bottom:3px solid #18f08b; }
+  .attendance-panel .mini.late{ border-bottom:3px solid #ffc75a; }
+  .attendance-panel .mini.absent{ border-bottom:3px solid #ff3d72; }
+  .attendance-panel .mini.total{ border-bottom:3px solid #43a6ff; }
   @media (max-width: 900px){
     .attendance-panel .mini-grid{
       grid-template-columns:repeat(2, minmax(120px, 1fr));
@@ -128,6 +148,9 @@
     .attendance-panel .mini b{
       font-size:34px;
     }
+    .attendance-panel .mini .mini-label{
+      font-size:14px;
+    }
   }
   @media (max-width: 560px){
     .attendance-panel .mini-grid{
@@ -136,6 +159,38 @@
   }
   .quick-grid .quick div{
     color:#fff;
+  }
+  .dashboard > div:first-child{
+    gap:12px !important;
+  }
+  .dashboard .card{
+    padding:18px;
+  }
+  .dashboard .section-head{
+    margin-bottom:12px;
+  }
+  .dashboard .activity{
+    padding:10px 0;
+  }
+  .dashboard .activity b{
+    font-size:13px;
+  }
+  .dashboard .activity p,
+  .dashboard .activity time,
+  .dashboard .row-item,
+  .dashboard .quick span{
+    font-size:11.5px;
+  }
+  .dashboard .row-item{
+    padding:8px 10px;
+  }
+  .dashboard .quick{
+    padding:10px 12px;
+  }
+  .dashboard .card.system-overview-card,
+  .dashboard .card:nth-child(2),
+  .dashboard .card:nth-child(3){
+    padding:16px;
   }
 </style>
 
@@ -184,24 +239,35 @@
     <div class="card glass attendance-panel">
       <div class="section-head">
         <h3>📊 Attendance Overview</h3>
-        <a href="{{ route('admin.attendance-records') }}">View Full Report →</a>
       </div>
       <div class="mini-grid">
-        <div class="mini">
-          <div class="mini-icon stat-icon green" style="width:38px;height:38px;border-radius:12px;font-size:16px">✓</div>
-          <div><b style="color:#4dffa0">{{ App\Models\AttendanceRecord::where('status', 'present')->count() }}</b><small>Present</small></div>
+        <div class="mini present">
+          <div class="mini-icon" style="background:rgba(24,240,139,.18)">👤</div>
+          <div>
+            <b style="color:#18f08b">{{ App\Models\AttendanceRecord::where('status', 'present')->count() }}</b>
+            <div class="mini-label" style="color:#18f08b">Present</div>
+          </div>
         </div>
-        <div class="mini">
-          <div class="mini-icon stat-icon yellow" style="width:38px;height:38px;border-radius:12px;font-size:16px">◷</div>
-          <div><b style="color:#ffd584">{{ App\Models\AttendanceRecord::where('status', 'late')->count() }}</b><small>Late</small></div>
+        <div class="mini late">
+          <div class="mini-icon" style="background:rgba(255,199,90,.18)">⏱️</div>
+          <div>
+            <b style="color:#ffc75a">{{ App\Models\AttendanceRecord::where('status', 'late')->count() }}</b>
+            <div class="mini-label" style="color:#ffc75a">Late</div>
+          </div>
         </div>
-        <div class="mini">
-          <div class="mini-icon stat-icon red" style="width:38px;height:38px;border-radius:12px;font-size:16px">✕</div>
-          <div><b style="color:#ff7f96">{{ App\Models\AttendanceRecord::where('status', 'absent')->count() }}</b><small>Absent</small></div>
+        <div class="mini absent">
+          <div class="mini-icon" style="background:rgba(255,61,114,.18)">⊘</div>
+          <div>
+            <b style="color:#ff3d72">{{ App\Models\AttendanceRecord::where('status', 'absent')->count() }}</b>
+            <div class="mini-label" style="color:#ff3d72">Absent</div>
+          </div>
         </div>
-        <div class="mini">
-          <div class="mini-icon stat-icon blue" style="width:38px;height:38px;border-radius:12px;font-size:16px">▤</div>
-          <div><b>{{ App\Models\AttendanceRecord::count() }}</b><small>Total</small></div>
+        <div class="mini total">
+          <div class="mini-icon" style="background:rgba(67,166,255,.18)">👥</div>
+          <div>
+            <b style="color:#43a6ff">{{ App\Models\AttendanceRecord::count() }}</b>
+            <div class="mini-label" style="color:#43a6ff">Total</div>
+          </div>
         </div>
       </div>
       <a href="{{ route('admin.attendance-records') }}" class="report-btn">View Full Attendance Report →</a>
