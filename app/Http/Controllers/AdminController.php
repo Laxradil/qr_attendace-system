@@ -489,8 +489,8 @@ class AdminController extends Controller
 
         foreach ($students as $student) {
             $fileName = preg_replace('/[^A-Za-z0-9_-]+/', '_', trim($student->name)) ?: 'student';
-            $qrSvg = $this->buildStudentQrSvg($student);
-            $zip->addFromString($fileName . '-qr.svg', $qrSvg);
+            $qrPng = $this->buildStudentQrPng($student);
+            $zip->addFromString($fileName . '-qr.png', $qrPng);
         }
 
         $zip->close();
@@ -510,7 +510,7 @@ class AdminController extends Controller
         ]);
     }
 
-    private function buildStudentQrSvg(User $student): string
+    private function buildStudentQrPng(User $student): string
     {
         $qrCode = QRCode::where('student_id', $student->id)->first();
 
@@ -523,7 +523,7 @@ class AdminController extends Controller
             'generated_at' => now()->toIso8601String(),
         ]);
 
-        return QrCodeFacade::format('svg')
+        return QrCodeFacade::format('png')
             ->size(180)
             ->margin(1)
             ->encoding('UTF-8')
