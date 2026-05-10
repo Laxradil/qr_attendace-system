@@ -5,6 +5,7 @@
 @section('pageSubtitle', 'View and manage student attendance QR codes.')
 
 @section('content')
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
   .qr-modal {
     position: fixed;
@@ -73,7 +74,7 @@
   <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <div style="display:flex;align-items:center;gap:12px">
       <h3 style="font-size:16px;font-weight:800;margin:0">Student QR Codes</h3>
-      <a class="btn primary" href="{{ route('admin.qr-codes.download-all') }}">📥 Download All</a>
+      <button class="btn primary" type="button" onclick="downloadAllQRCodes()">📥 Download All</button>
     </div>
     <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
   </div>
@@ -124,7 +125,7 @@
               data-student-id="{{ $student->id }}"
               onclick="openQRCodeModal(this.dataset.url, this.dataset.studentName, this.dataset.studentId)"
             >Open</button>
-            <button class="btn primary slim" data-url="{{ route('admin.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
+            <button class="btn primary slim" type="button" data-url="{{ route('admin.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
           </td>
         </tr>
         @empty
@@ -177,14 +178,96 @@ function filterTable(input) {
   });
 }
 
-function downloadQRCode(url, studentName) {
-  const link = document.createElement('a');
-  link.href = url;
+async function svgUrlToPngDataUrl(url) {
+  const response = await fetch(url, { credentials: 'same-origin' });
+  if (!response.ok) {
+    throw new Error('Failed to load QR image');
+  }
+
+  const svgText = await response.text();
+  const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+  const svgUrl = URL.createObjectURL(svgBlob);
+
+  try {
+    const image = new Image();
+    const imageLoaded = new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = reject;
+    });
+
+    image.src = svgUrl;
+    await imageLoaded;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 180;
+    canvas.height = 180;
+
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    return canvas.toDataURL('image/png');
+  } finally {
+    URL.revokeObjectURL(svgUrl);
+  }
+}
+
+async function downloadQRCode(url, studentName) {
   const safeFileName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
-  link.download = safeFileName + '-qr.png';
+
+  try {
+    const dataUrl = await svgUrlToPngDataUrl(url);
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = safeFileName + '-qr.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error(error);
+    alert('Could not generate the PNG download. Please try again.');
+  }
+}
+
+async function downloadAllQRCodes() {
+  if (!window.JSZip) {
+    alert('QR ZIP download is not available right now. Please refresh the page and try again.');
+    return;
+  }
+
+  const rows = document.querySelectorAll('tbody tr');
+  const zip = new JSZip();
+  let count = 0;
+
+  for (const row of rows) {
+    if (row.querySelector('td[colspan]')) continue;
+
+    const payloadBtn = row.querySelector('button[data-url]');
+    const nameCell = row.querySelector('.user-cell');
+    if (!payloadBtn || !nameCell) continue;
+
+    const studentName = payloadBtn.dataset.studentName || nameCell.textContent.trim();
+    const safeFileName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
+    const url = payloadBtn.dataset.url;
+
+    const dataUrl = await svgUrlToPngDataUrl(url);
+
+    const base64 = dataUrl.split(',')[1];
+    zip.file(`${safeFileName}-qr.png`, base64, { base64: true });
+    count++;
+  }
+
+  if (count === 0) return;
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'student-qr-codes.zip';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
 function openQRCodeModal(url, studentName, studentId) {
