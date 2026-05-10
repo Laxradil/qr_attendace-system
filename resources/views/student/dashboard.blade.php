@@ -80,7 +80,7 @@
       <div class="card glass" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
         <div class="section-head" style="margin-bottom: 16px;">
           <h3 style="font-size: 16px; margin: 0;">📋 Recent Attendance</h3>
-          <a href="{{ route('student.attendance') }}" style="font-size: 13px; color: #ffffff; font-weight: 600; text-decoration: none;">View all →</a>
+          <a href="{{ route('student.attendance') }}" style="font-size: 13px; color: #ffffff; font-weight: 600; text-decoration: none;">View all</a>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <span style="font-size:12px;color:var(--muted);font-weight:600">Attendance Rate</span>
@@ -112,18 +112,18 @@
       <div class="card glass" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
         <div class="section-head" style="margin-bottom: 16px;">
           <h3 style="font-size: 16px; margin: 0;">📚 Your Classes</h3>
-          <a href="{{ route('student.classes') }}" style="font-size: 13px; color: #ffffff; font-weight: 600; text-decoration: none;">View all →</a>
+          <a href="{{ route('student.classes') }}" style="font-size: 13px; color: #ffffff; font-weight: 600; text-decoration: none;">View all</a>
         </div>
         
         <div style="flex-grow: 1; overflow: hidden; padding-right: 4px;">
           @php $classList = collect($classes); @endphp
           @forelse($classList->take(3) as $class)
-          <div class="class-row" style="padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border-radius: 10px;">
-            <div class="class-row-left" style="flex-grow: 1; padding-right: 16px;">
-              <div class="class-row-name" style="font-size: 14px; font-weight: 600; margin-bottom: 2px;">{{ $class->code }} — {{ $class->name }}</div>
-              <div class="class-row-code" style="font-size: 12px; color: var(--muted);">{{ $class->code }}</div>
+          <div class="class-row" style="padding: 10px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border-radius: 8px;">
+            <div class="class-row-left" style="flex-grow: 1; padding-right: 12px;">
+              <div class="class-row-name" style="font-size: 13.5px; font-weight: 600; margin-bottom: 2px;">{{ $class->code }} — {{ $class->name }}</div>
+              <div class="class-row-code" style="font-size: 11px; color: var(--muted);">{{ $class->code }}</div>
             </div>
-            <div class="class-row-prof" style="font-size: 12px; text-align: right; min-width: 120px;">
+            <div class="class-row-prof" style="font-size: 11px; text-align: right; min-width: 100px;">
               @if($class->professors->first())
               <strong style="display: block; color: #ffffff; margin-bottom: 2px;">{{ $class->professors->first()->name }}</strong>
               <span style="color: var(--muted);">Professor</span>
@@ -131,11 +131,11 @@
             </div>
           </div>
           @empty
-          <div class="empty-state" style="padding:15px 0;font-size:13px">No classes enrolled</div>
+          <div class="empty-state" style="padding:10px 0;font-size:12px">No classes enrolled</div>
           @endforelse
         </div>
         
-        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;padding: 8px;font-size:13px; color: #ffffff; background: rgba(255, 255, 255, 0.1); display:flex;">View All Classes →</a>
+        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;padding: 8px;font-size:13px; color: #ffffff; background: rgba(255, 255, 255, 0.1); display:flex;">View All Classes</a>
       </div>
 
     </div>
