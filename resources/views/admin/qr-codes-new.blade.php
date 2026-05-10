@@ -5,6 +5,70 @@
 @section('pageSubtitle', 'View and manage student attendance QR codes.')
 
 @section('content')
+<style>
+  .qr-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .qr-modal.active {
+    display: flex;
+  }
+
+  .qr-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(1, 4, 18, 0.75);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+
+  .qr-modal-content {
+    position: relative;
+    width: min(420px, 92vw);
+    border-radius: 24px;
+    padding: 20px;
+    z-index: 1;
+  }
+
+  .qr-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .qr-modal-frame {
+    background: #fff;
+    border-radius: 12px;
+    padding: 8px;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  }
+
+  .qr-modal-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+  }
+</style>
+
 <div class="glass-table glass">
   <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <div style="display:flex;align-items:center;gap:12px">
@@ -52,7 +116,14 @@
             </div>
           </td>
           <td>
-            <a href="{{ route('admin.students.qr-code', $student) }}" class="btn slim">Open</a>
+            <button
+              type="button"
+              class="btn slim"
+              data-url="{{ route('admin.students.qr-code', $student) }}"
+              data-student-name="{{ $student->name }}"
+              data-student-id="{{ $student->id }}"
+              onclick="openQRCodeModal(this.dataset.url, this.dataset.studentName, this.dataset.studentId)"
+            >Open</button>
             <button class="btn primary slim" data-url="{{ route('admin.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
           </td>
         </tr>
@@ -71,6 +142,24 @@
       <button>‹</button>
       <a class="current">1</a>
       <button>›</button>
+    </div>
+  </div>
+</div>
+
+<div class="qr-modal" id="qrModal">
+  <div class="qr-modal-overlay" onclick="closeQRCodeModal()"></div>
+  <div class="qr-modal-content glass">
+    <button class="qr-modal-close" type="button" onclick="closeQRCodeModal()">×</button>
+    <div style="text-align:center">
+      <div style="font-size:16px;font-weight:700;margin-bottom:14px">Student QR Code</div>
+      <div class="qr-modal-frame">
+        <img id="qrModalImage" src="" alt="Student QR code">
+      </div>
+      <div style="margin-top:14px">
+        <div id="qrModalStudentName" style="font-size:18px;font-weight:800"></div>
+        <div id="qrModalStudentId" style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-top:4px"></div>
+        <div style="font-size:12px;color:var(--faint);margin-top:8px">Show to professor for attendance</div>
+      </div>
     </div>
   </div>
 </div>
@@ -103,10 +192,10 @@ function downloadAllQRCodes() {
   let count = 0;
   rows.forEach((row, index) => {
     const nameCell = row.querySelector('.user-cell');
-    const openBtn = row.querySelector('a[href*="qr-code"]');
-    if (nameCell && openBtn) {
+    const openBtn = row.querySelector('button[data-url]');
+    if (nameCell && openBtn && openBtn.dataset.url) {
       const studentName = nameCell.textContent.trim();
-      const qrUrl = openBtn.href;
+      const qrUrl = openBtn.dataset.url;
       setTimeout(() => {
         downloadQRCode(qrUrl, studentName);
       }, index * 500);
@@ -117,5 +206,26 @@ function downloadAllQRCodes() {
     alert(`Downloading ${count} QR codes...`);
   }
 }
+
+function openQRCodeModal(url, studentName, studentId) {
+  const modal = document.getElementById('qrModal');
+  document.getElementById('qrModalImage').src = url;
+  document.getElementById('qrModalImage').alt = 'QR code for ' + studentName;
+  document.getElementById('qrModalStudentName').textContent = studentName;
+  document.getElementById('qrModalStudentId').textContent = 'Student ID: ' + studentId;
+  modal.classList.add('active');
+}
+
+function closeQRCodeModal() {
+  const modal = document.getElementById('qrModal');
+  modal.classList.remove('active');
+}
+
+document.addEventListener('keydown', function (event) {
+  const modal = document.getElementById('qrModal');
+  if (event.key === 'Escape' && modal.classList.contains('active')) {
+    closeQRCodeModal();
+  }
+});
 </script>
 @endsection
