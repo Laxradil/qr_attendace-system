@@ -465,10 +465,53 @@ class AdminController extends Controller
         return view('admin.qr-codes-new', compact('students'));
     }
 
+    public function downloadAllQrCodesZip()
+    {
+        $students = User::where('role', 'student')
+            ->with(['enrolledClasses', 'studentQrCode'])
+            ->orderBy('name')
+            ->get();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'qr_codes_zip_');
+
+        if ($zipPath === false) {
+            abort(500, 'Unable to create temporary archive.');
+        }
+
+        $zipFile = $zipPath . '.zip';
+        @unlink($zipPath);
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Unable to create QR code archive.');
+        }
+
+        foreach ($students as $student) {
+            $fileName = preg_replace('/[^A-Za-z0-9_-]+/', '_', trim($student->name)) ?: 'student';
+            $qrSvg = $this->buildStudentQrSvg($student);
+            $zip->addFromString($fileName . '-qr.svg', $qrSvg);
+        }
+
+        $zip->close();
+
+        return response()->download($zipFile, 'student-qr-codes.zip')->deleteFileAfterSend(true);
+    }
+
     public function studentQrCode(User $student)
     {
         abort_if(!$student->isStudent(), 404);
 
+        $svg = $this->buildStudentQrSvg($student);
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
+    }
+
+    private function buildStudentQrSvg(User $student): string
+    {
         $qrCode = QRCode::where('student_id', $student->id)->first();
 
         $qrData = json_encode([
@@ -480,16 +523,11 @@ class AdminController extends Controller
             'generated_at' => now()->toIso8601String(),
         ]);
 
-        $svg = QrCodeFacade::format('svg')
+        return QrCodeFacade::format('svg')
             ->size(180)
             ->margin(1)
             ->encoding('UTF-8')
             ->generate($qrData);
-
-        return response($svg, 200, [
-            'Content-Type' => 'image/svg+xml',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-        ]);
     }
 
     // Attendance Management

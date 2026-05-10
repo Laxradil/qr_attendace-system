@@ -103,6 +103,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     
     // Student QR management
     Route::get('/qr-codes', [AdminController::class, 'qrCodes'])->name('admin.qr-codes');
+    Route::get('/qr-codes/download-all', [AdminController::class, 'downloadAllQrCodesZip'])->name('admin.qr-codes.download-all');
     
     // Attendance records
     Route::get('/attendance-records', [AdminController::class, 'attendanceRecords'])->name('admin.attendance-records');
