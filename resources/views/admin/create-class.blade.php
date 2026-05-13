@@ -205,4 +205,61 @@ function moveOptions(fromId, toId) {
   });
 }
 </script>
+
+<style>
+  body.theme-light .glass,
+  body.theme-light .glass-table {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .form-group label {
+    color: #000000 !important;
+  }
+  
+  body.theme-light .form-group input,
+  body.theme-light .form-group select,
+  body.theme-light .form-group textarea {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .form-group input:focus,
+  body.theme-light .form-group select:focus,
+  body.theme-light .form-group textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+  }
+  
+  body.theme-light .form-group input::placeholder,
+  body.theme-light .form-group textarea::placeholder {
+    color: #9ca3af !important;
+  }
+  
+  body.theme-light .professor-list label {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .professor-list select {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .professor-list select:focus {
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+  }
+  
+  body.theme-light .btn {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .btn.primary {
+    background: #3b82f6 !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+  }
+</style>
 @endsection

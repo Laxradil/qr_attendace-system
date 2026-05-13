@@ -75,7 +75,7 @@
       </div>
 
       <a href="#" style="color:rgba(139,92,255,.9);font-size:12.5px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
-        View details →
+       
       </a>
     </div>
   @empty
@@ -146,6 +146,43 @@
     font-weight: 500;
     margin-top: 3px;
     display: block;
+  }
+</style>
+
+<style>
+  /* Light theme solid overrides */
+  body.theme-light .stat-icon.blue {
+    background: #dbeafe;
+    border: 1px solid #3b82f6;
+  }
+  
+  body.theme-light .stat-icon.green {
+    background: #dcfce7;
+    border: 1px solid #10b981;
+  }
+  
+  body.theme-light .stat-icon.yellow {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+  }
+  
+  body.theme-light .stat-icon.purple {
+    background: #ede9fe;
+    border: 1px solid #8b5cff;
+  }
+  
+  body.theme-light .stat:hover {
+    border-color: #e5e7eb;
+  }
+  
+  /* Solid backgrounds for small icons in cards */
+  body.theme-light div[style*="background:rgba(255,255,255,.08)"] {
+    background: #f1f5f9 !important;
+  }
+  
+  /* Solid colors for room and link */
+  body.theme-light div[style*="color:rgba(139,92,255,.9)"] {
+    color: #8b5cff !important;
   }
 </style>
 @endsection
