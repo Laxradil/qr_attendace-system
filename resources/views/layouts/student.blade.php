@@ -32,8 +32,34 @@
       --mono:'Space Mono',monospace;
     }
 
-    body.theme-light{
-      --bg:#ffffff;
+    /* Ensure dashboard header is visible in all modes */
+    .page-title h2, .page-title p {
+      color: var(--text) !important;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    body.theme-light .page-title h2, 
+    body.theme-light .page-title p {
+      color: #1e293b !important;
+      text-shadow: 0 1px 0 #fff, 0 2px 8px rgba(0,0,0,0.08);
+    }
+    body.theme-dark .page-title h2, 
+    body.theme-dark .page-title p,
+    body.theme-onyx .page-title h2, 
+    body.theme-onyx .page-title p,
+    body.theme-dark .page-title h2, 
+    body.theme-dark .page-title p,
+    body.theme-onyx .page-title h2, 
+    body.theme-onyx .page-title p {
+      color: #fff !important;
+      font-weight: 900 !important;
+      text-shadow: 0 4px 16px rgba(0,0,0,0.32), 0 1px 0 #222;
+    }
+    body.theme-ash .page-title h2, 
+    body.theme-ash .page-title p {
+      color: #2d225a !important;
+      font-weight: 900 !important;
+      text-shadow: 0 3px 12px rgba(109,40,217,0.18), 0 1px 0 #fff;
+    }
       --glass:#f5f5f5;
       --glass-strong:#ffffff;
       --stroke:#e5e7eb;
@@ -49,14 +75,50 @@
       --cyan:#0891b2;
       background:#f9fafb;
     }
-    body.theme-light .sidebar{background:#ffffff;border-right-color:#e5e7eb}
-    body.theme-light .brand{border-bottom-color:#f3f4f6}
-    body.theme-light .nav a, body.theme-light .nav button{color:#475569}
-    body.theme-light .nav a .nav-icon, body.theme-light .nav button .nav-icon{background:#f3f4f6;border-color:#e5e7eb}
-    body.theme-light .nav a:hover, body.theme-light .nav button:hover{background:#f0f1f3;color:#0f172a}
-    body.theme-light .nav a.active, body.theme-light .nav button.active{background:linear-gradient(135deg,#7c3aed,.8,#2563eb);color:#fff}
+    body.theme-light .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #e5e7eb !important;
+      box-shadow: 2px 0 16px 0 rgba(0,0,0,0.03);
+      background-image: none !important;
+    }
+    body.theme-light .nav a, body.theme-light .nav button {
+      color: #222 !important;
+    }
+    body.theme-light .nav a .nav-icon, body.theme-light .nav button .nav-icon {
+      color: #5b21b6 !important;
+      background: #ede9fe !important;
+      border-color: #c7d2fe !important;
+    }
+    body.theme-light .nav a.active, body.theme-light .nav button.active {
+      background: linear-gradient(135deg, #5b21b6 80%, #2563eb 100%) !important;
+      color: #fff !important;
+      box-shadow: 0 8px 24px rgba(80,94,255,.18),inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    body.theme-light .nav a.active .nav-icon, body.theme-light .nav button.active .nav-icon {
+      color: #fff !important;
+      background: rgba(91,33,182,0.9) !important;
+      border-color: #5b21b6 !important;
+    }
     body.theme-light .logout-wrap{border-top-color:#f3f4f6}
-    body.theme-light .profile-card{background:#f3f0ff;border-color:#ede9fe}
+    body.theme-light .profile-card{
+      background: #ede9fe !important;
+      border-color: #c4b5fd !important;
+      color: #222 !important;
+    }
+    body.theme-light .profile-card .avatar,
+    body.theme-light .profile-card .tag {
+      color: #fff !important;
+    }
+    body.theme-light .profile-card h2,
+    body.theme-light .profile-card p,
+    body.theme-light .profile-card .online-badge {
+      color: #222 !important;
+    }
+    body.theme-light .nav-icon {
+      color: #222 !important;
+      background: #e0e7ff !important;
+      border-color: #c7d2fe !important;
+    }
     body.theme-light .avatar{background:linear-gradient(145deg,#a78bfa,#7c3aed)}
     body.theme-light .glass,
     body.theme-light .glass-table,
@@ -365,10 +427,13 @@
     .nav-label{margin:2px 8px 0;color:var(--faint);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;flex-shrink:0}
     .nav{display:grid;gap:2px;flex-shrink:0}
     .nav a, .nav button{
-      border:0;color:rgba(234,240,255,.75);background:transparent;
+      border:0;color:#fff;background:transparent;
       padding:8px 10px;border-radius:13px;display:flex;align-items:center;gap:10px;
       font-weight:600;cursor:pointer;transition:.2s cubic-bezier(.4,0,.2,1);
       text-align:left;font-size:13.5px;font-family:var(--font);width:100%;text-decoration:none;
+    }
+    body.theme-light .nav a, body.theme-light .nav button {
+      color: #475569;
     }
     .nav-icon{
       width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;
