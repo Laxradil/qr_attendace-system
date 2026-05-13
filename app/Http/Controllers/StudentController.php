@@ -10,6 +10,48 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class StudentController extends Controller
 {
+    // ...existing code...
+        /**
+         * Show the student settings page.
+         */
+        public function settings(): View
+        {
+            $user = Auth::user();
+            return view('student.settings', [ 'user' => $user ]);
+        }
+
+        /**
+         * Update student profile settings.
+         */
+        public function updateSettings(): \Illuminate\Http\RedirectResponse
+        {
+            $user = Auth::user();
+            request()->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            ]);
+            $user->name = request('name');
+            $user->email = request('email');
+            $user->save();
+            return back()->with('success', 'Profile updated successfully.');
+        }
+
+        /**
+         * Update student password.
+         */
+        public function updatePassword(): \Illuminate\Http\RedirectResponse
+        {
+            $user = Auth::user();
+            request()->validate([
+                'password' => 'nullable|string|min:8|confirmed',
+            ]);
+            if (request('password')) {
+                $user->password = bcrypt(request('password'));
+                $user->save();
+                return back()->with('success', 'Password updated successfully.');
+            }
+            return back()->with('info', 'No password change.');
+        }
     /**
      * Return students enrolled in a class (AJAX)
      */
@@ -28,7 +70,7 @@ class StudentController extends Controller
     public function dashboard(): View
     {
         $user = Auth::user();
-        $classes = $user->enrolledClasses()->with('professor')->get();
+        $classes = $user->enrolledClasses()->with(['professors', 'schedules'])->get();
 
         // Get recent attendance records
         $recentAttendance = AttendanceRecord::where('student_id', $user->id)
@@ -43,7 +85,8 @@ class StudentController extends Controller
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
                 SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
-                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused
             ")
             ->first();
 
@@ -53,6 +96,8 @@ class StudentController extends Controller
             'totalPresent' => $stats->present ?? 0,
             'totalLate' => $stats->late ?? 0,
             'totalAbsent' => $stats->absent ?? 0,
+            'totalExcused' => $stats->excused ?? 0,
+            'totalRecords' => $stats->total ?? 0,
         ]);
     }
 
@@ -61,7 +106,7 @@ class StudentController extends Controller
         $user = Auth::user();
 
         $attendanceRecords = AttendanceRecord::where('student_id', $user->id)
-            ->with(['classe', 'qrCode'])
+            ->with(['classe'])
             ->orderBy('recorded_at', 'desc')
             ->paginate(20);
 
@@ -71,7 +116,8 @@ class StudentController extends Controller
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
                 SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
-                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused
             ")
             ->first();
 
@@ -80,6 +126,7 @@ class StudentController extends Controller
             'totalPresent' => $stats->present ?? 0,
             'totalLate' => $stats->late ?? 0,
             'totalAbsent' => $stats->absent ?? 0,
+            'totalExcused' => $stats->excused ?? 0,
             'totalRecords' => $stats->total ?? 0,
         ]);
     }
@@ -87,11 +134,46 @@ class StudentController extends Controller
     public function myClasses(): View
     {
         $user = Auth::user();
-        $classes = $user->enrolledClasses()->with('professor')->get();
+        $classes = $user->enrolledClasses()->with('professors', 'students')->get();
+
+        // Get all attendance statistics
+        $stats = AttendanceRecord::where('student_id', $user->id)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused
+            ")
+            ->first();
 
         return view('student.classes', [
             'classes' => $classes,
+            'totalPresent' => $stats->present ?? 0,
+            'totalLate' => $stats->late ?? 0,
+            'totalAbsent' => $stats->absent ?? 0,
+            'totalExcused' => $stats->excused ?? 0,
         ]);
+    }
+
+    private function createStudentQrSvg($user): string
+    {
+        $qrCode = QRCode::where('student_id', $user->id)->first();
+
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $user->id,
+            'student_name' => $user->name,
+            'student_email' => $user->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
+
+        return QrCodeFacade::format('svg')
+            ->size(280)
+            ->margin(1)
+            ->encoding('UTF-8')
+            ->generate($qrData);
     }
 
     public function generateStudentQR()

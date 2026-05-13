@@ -109,7 +109,7 @@
             padding: 12px 16px;
             color: #9ca3af;
             text-decoration: none;
-            transition: all 0.3s;
+            transition: all 0.2s cubic-bezier(0.23, 1, 0.320, 1);
             border-left: 3px solid transparent;
         }
 
@@ -118,6 +118,7 @@
             background-color: #2d2c4a;
             color: #6c5ce7;
             border-left-color: #6c5ce7;
+            transform: translateX(6px);
         }
 
         .sidebar-item svg {
@@ -142,6 +143,99 @@
         .logout-button:hover {
             background: rgba(255,255,255,0.1);
             color: #ff6b6b;
+        }
+
+        .content-area {
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #1f2937;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            font-size: 11px;
+            color: #e5e7eb;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            pointer-events: all;
+            animation: slideInRight 0.3s cubic-bezier(0.23,1,0.320,1), slideOutRight 0.3s cubic-bezier(0.23,1,0.320,1) 2.7s;
+            max-width: 320px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.success {
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.12);
+            color: #86efac;
+        }
+
+        .toast.error {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+        }
+
+        .toast.info {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.12);
+            color: #93c5fd;
+        }
+
+        .toast-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(24px);
+            }
         }
     </style>
 </head>
@@ -353,6 +447,38 @@
         }
         updateDateTime();
         setInterval(updateDateTime, 60000);
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = '✓';
+            if (type === 'error') icon = '✕';
+            if (type === 'info') icon = 'ℹ';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">${icon}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // Show success toast from session
     </script>
 </body>
 </html>
