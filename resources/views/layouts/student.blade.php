@@ -1,3 +1,22 @@
+    <style>
+    body.theme-light .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #e5e7eb !important;
+      box-shadow: 0 14px 50px rgba(15,23,42,.06) !important;
+      background-image: none !important;
+      color: #23272f !important;
+    }
+    body.theme-light .sidebar .nav a,
+    body.theme-light .sidebar .nav button {
+      color: #23272f !important;
+    }
+    body.theme-light .sidebar .nav a .nav-icon,
+    body.theme-light .sidebar .nav button .nav-icon {
+      color: #7c3aed !important;
+      background: #ede9fe !important;
+      border-color: #c7d2fe !important;
+    }
+    </style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,7 +97,7 @@
     body.theme-light .sidebar {
       background: #fff !important;
       border-right: 1px solid #e5e7eb !important;
-      box-shadow: 2px 0 16px 0 rgba(0,0,0,0.03);
+      box-shadow: 0 14px 50px rgba(15,23,42,.06) !important;
       background-image: none !important;
     }
     body.theme-light .nav a, body.theme-light .nav button {
@@ -140,22 +159,29 @@
     body.theme-light .theme-option:hover,
     body.theme-light .settings-btn,
     body.theme-light .pill,
-    body.theme-light .btn,
-    body.theme-light .btn.slim,
-    body.theme-light .action-btn,
-    body.theme-light .filter-btn.reset,
-    body.theme-light .filter-select,
-    body.theme-light .filter-input,
-    body.theme-light .search-bar
-    {
-      background: #f8fafb !important;
-      color: #0f172a !important;
-      border-color: #e5e7eb !important;
+    body.theme-light {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --panel2: #f3f0ff;
+      --glass: #f5f5f5;
+      --glass-strong: #ffffff;
+      --stroke: #e5e7eb;
+      --stroke-soft: #f3f4f6;
+      --text: #0f172a;
+      --muted: #475569;
+      --muted2: #475569;
+      --faint: #475569;
+      --purple: #7c3aed;
+      --pl: #a78bfa;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --red: #dc2626;
+      --yellow: #ca8a04;
+      --cyan: #0891b2;
+      --shadow: 0 4px 12px rgba(0,0,0,.08);
+      background: #f9fafb !important;
     }
-
-    body.theme-light .btn:hover,
-    body.theme-light .action-btn:hover,
-    body.theme-light .filter-btn:hover
     {
       background: #f1f5f9 !important;
     }
@@ -386,11 +412,16 @@
 
     /* ═══ SIDEBAR ═══ */
     .sidebar{
-      height:100vh;padding:14px 10px;
+      height:100vh;
+      padding:14px 10px;
       border-right:1px solid rgba(255,255,255,.1);
       background:rgba(2,4,18,.70);
       backdrop-filter:blur(40px) saturate(180%);
-      display:flex;flex-direction:column;gap:8px;overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      overflow:hidden;
+      transition:background .2s;
     }
     .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 12px;border-bottom:1px solid rgba(255,255,255,.09);flex-shrink:0}
     .logo{
@@ -802,7 +833,7 @@
     }
   </style>
 </head>
-<body>
+<body @if((auth()->user()->theme ?? 'light') === 'light') class="theme-light" @elseif((auth()->user()->theme ?? '') === 'ash') class="theme-ash" @elseif((auth()->user()->theme ?? '') === 'dark') class="theme-dark" @elseif((auth()->user()->theme ?? '') === 'onyx') class="theme-onyx" @endif>
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
@@ -810,7 +841,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <div class="app">
-    <aside class="sidebar">
+    <aside class="sidebar @if((auth()->user()->theme ?? 'light') === 'light') bg-white border-r border-gray-200 text-gray-900 @endif">
       <div class="brand">
         <div class="logo">▦</div>
         <div class="brand-text">
@@ -833,19 +864,19 @@
       <div class="nav-label">Menu</div>
       <nav class="nav">
         <a href="{{ route('student.dashboard') }}" class="nav-btn {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon @if((auth()->user()->theme ?? 'light') === 'light') text-indigo-700 bg-indigo-100 border-indigo-200 @endif">⌂</span>
           <span>Dashboard</span>
         </a>
         <a href="{{ route('student.classes') }}" class="nav-btn {{ request()->routeIs('student.classes') ? 'active' : '' }}">
-          <span class="nav-icon">▤</span>
+          <span class="nav-icon @if((auth()->user()->theme ?? 'light') === 'light') text-indigo-700 bg-indigo-100 border-indigo-200 @endif">▤</span>
           <span>My Classes</span>
         </a>
         <a href="{{ route('student.attendance') }}" class="nav-btn {{ request()->routeIs('student.attendance') ? 'active' : '' }}">
-          <span class="nav-icon">📋</span>
+          <span class="nav-icon @if((auth()->user()->theme ?? 'light') === 'light') text-indigo-700 bg-indigo-100 border-indigo-200 @endif">📋</span>
           <span>Attendance</span>
         </a>
         <a href="{{ route('student.settings') }}" class="nav-btn {{ request()->routeIs('student.settings') ? 'active' : '' }}">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon @if((auth()->user()->theme ?? 'light') === 'light') text-indigo-700 bg-indigo-100 border-indigo-200 @endif">⚙️</span>
           <span>Settings</span>
         </a>
       </nav>
@@ -940,14 +971,7 @@
 
     setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
 
-    (function() {
-      const themeKey = 'qr_attendance_theme';
-      const themeNames = ['light','ash','dark','onyx'];
-      const defaultTheme = 'dark';
-      const current = themeNames.includes(localStorage.getItem(themeKey)) ? localStorage.getItem(themeKey) : defaultTheme;
-      document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
-      document.body.classList.add('theme-' + current);
-    })();
+    // Theme is now set only by server-side Blade logic, not localStorage.
   </script>
 </body>
 </html>
