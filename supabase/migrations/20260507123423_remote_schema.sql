@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS "public"."attendance_records" (
     "recorded_at" timestamp(0) without time zone NOT NULL,
     "created_at" timestamp(0) without time zone,
     "updated_at" timestamp(0) without time zone,
-    CONSTRAINT "attendance_records_status_check" CHECK ((("status")::"text" = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying, 'excused'::character varying])::"text"[])))
+    CONSTRAINT "attendance_records_status_check" CHECK ((("status")::"text" = ANY (ARRAY['present'::"text", 'late'::"text", 'absent'::"text", 'excused'::"text"])))
 );
 
 
@@ -1239,15 +1239,9 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 
 drop extension if exists "pg_net";
 
-alter table "public"."attendance_records" drop constraint "attendance_records_status_check";
-
 alter table "public"."system_logs" drop constraint "system_logs_action_check";
 
 alter table "public"."users" drop constraint "users_role_check";
-
-alter table "public"."attendance_records" add constraint "attendance_records_status_check" CHECK (((status)::text = ANY ((ARRAY['present'::character varying, 'late'::character varying, 'absent'::character varying, 'excused'::character varying])::text[]))) not valid;
-
-alter table "public"."attendance_records" validate constraint "attendance_records_status_check";
 
 alter table "public"."system_logs" add constraint "system_logs_action_check" CHECK (((action)::text = ANY ((ARRAY['login'::character varying, 'logout'::character varying, 'scan_qr'::character varying, 'attendance_record'::character varying, 'create_class'::character varying, 'update_class'::character varying, 'delete_class'::character varying, 'add_student'::character varying, 'remove_student'::character varying, 'generate_qr'::character varying, 'update_user'::character varying, 'delete_user'::character varying, 'other'::character varying])::text[]))) not valid;
 

@@ -1,78 +1,85 @@
-@extends('layouts.professor')
+@extends('layouts.student')
 
-@section('title', 'Attendance Records - Student')
-@section('header', 'Attendance Review')
-@section('subheader', 'Track your attendance history across all enrolled classes.')
+@section('title', 'Attendance Review')
+@section('subtitle', 'Track your attendance history across all enrolled classes.')
 
 @section('content')
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.attendance') }}">
-        <div class="stat-val">{{ $totalPresent }}</div>
-        <div class="stat-label">Present</div>
-        <div style="font-size:10px;color:var(--green);margin-top:2px;">{{ round(($totalPresent / ($totalPresent + $totalLate + $totalAbsent)) * 100, 1) }}% rate</div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.attendance') }}">
-        <div class="stat-val">{{ $totalLate }}</div>
-        <div class="stat-label">Late</div>
-        <div style="font-size:10px;color:var(--amber);margin-top:2px;\">View details -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.attendance') }}">
-        <div class="stat-val">{{ $totalAbsent }}</div>
-        <div class="stat-label">Absent</div>
-        <div style="font-size:10px;color:var(--red);margin-top:2px;\">View details -></div>
-    </a>
-    <a class="stat" style="flex:1;min-width:100px;text-decoration:none;" href="{{ route('student.attendance') }}">
-        <div class="stat-val">{{ $totalRecords }}</div>
-        <div class="stat-label">Total Records</div>
-        <div style="font-size:10px;color:var(--blue);margin-top:2px;\">View all -></div>
-    </a>
-</div>
-
-<div class="card">
-    <div class="sh">Attendance History</div>
-    <div class="tbl-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th style="min-width:160px;">Class</th>
-                    <th style="min-width:120px;">Recorded</th>
-                    <th style="min-width:100px;\">Status</th>
-                    <th style="min-width:100px;\">Minutes Late</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($attendanceRecords as $record)
-                    <tr>
-                        <td>
-                            <div style="font-size:12px;font-weight:600;">{{ $record->classe->display_name ?? 'Unknown Class' }}</div>
-                        </td>
-                        <td>
-                            <div style="font-size:11px;">{{ $record->recorded_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</div>
-                            <div style="font-size:10px;color:var(--text2);">{{ $record->recorded_at?->tz('UTC')->setTimezone('Asia/Manila')->format('h:i A') }}</div>
-                        </td>
-                        <td>
-                            @if($record->status === 'present')
-                                <span class="badge bg" style="font-size:10px;\">Present</span>
-                            @elseif($record->status === 'late')
-                                <span class="badge ba" style="font-size:10px;\">Late</span>
-                            @else
-                                <span class="badge br" style="font-size:10px;\">Absent</span>
-                            @endif
-                        </td>
-                        <td style="color:var(--text2);\">{{ $record->minutes_late !== null ? $record->minutes_late . ' min' : '-' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" style="text-align:center;color:var(--text2);\">No attendance records found yet. Scan your student QR with the professor to get started.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+<!-- ══ ATTENDANCE ══ -->
+<section class="page" id="attendance">
+  <div class="att-stats stats">
+    <div class="stat glass">
+      <div class="stat-icon green">✓</div>
+      <div class="stat-body">
+        <strong>{{ $totalPresent }}</strong>
+        <span class="stat-label">Present</span>
+        <div style="font-size:12px;color:var(--green);margin-top:3px;font-weight:700">{{ $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0 }}% rate</div>
+      </div>
     </div>
-    @if($attendanceRecords->count())
-        <div style="display:flex;justify-content:flex-end;margin-top:10px;\">
-            {{ $attendanceRecords->links() }}
-        </div>
+    <div class="stat glass">
+      <div class="stat-icon yellow">◷</div>
+      <div class="stat-body">
+        <strong>{{ $totalLate }}</strong>
+        <span class="stat-label">Late</span>
+      </div>
+    </div>
+    <div class="stat glass">
+      <div class="stat-icon red">✕</div>
+      <div class="stat-body">
+        <strong>{{ $totalAbsent }}</strong>
+        <span class="stat-label">Absent</span>
+      </div>
+    </div>
+    <div class="stat glass">
+      <div class="stat-icon purple">✉</div>
+      <div class="stat-body">
+        <strong>{{ $totalExcused ?? 0 }}</strong>
+        <span class="stat-label">Excused</span>
+      </div>
+    </div>
+    <div class="stat glass">
+      <div class="stat-icon blue">▤</div>
+      <div class="stat-body">
+        <strong>{{ $totalRecords }}</strong>
+        <span class="stat-label">Total Records</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card glass" style="margin-top:4px">
+    <div class="section-head">
+      <h3>📋 Attendance History</h3>
+    </div>
+    <div class="att-table-wrap">
+      <table style="color: white;">
+        <thead>
+          <tr>
+            <th style="color: white;">Class</th>
+            <th style="color: white;">Recorded</th>
+            <th style="color: white;">Status</th>
+            <th style="color: white;">Minutes Late</th>
+          </tr>
+        </thead>
+        <tbody>
+          @forelse($attendanceRecords as $record)
+          <tr>
+            <td style="color: white;"><div style="font-weight:700;font-size:14px">{{ $record->classe->code }} — {{ $record->classe->name }}</div></td>
+            <td style="color: white;"><div style="font-family:var(--mono);font-size:13px">{{ $record->recorded_at->format('M d, Y') }}</div><div class="muted" style="font-size:12px">{{ $record->recorded_at->format('h:i A') }}</div></td>
+            <td style="color: white;"><span class="pill {{ $record->status === 'present' ? 'green' : ($record->status === 'late' ? 'yellow' : ($record->status === 'absent' ? 'red' : 'purple')) }}">{{ ucfirst($record->status) }}</span></td>
+            <td class="muted" style="color: white;">{{ $record->minutes_late ?? 0 }} min</td>
+          </tr>
+          @empty
+          <tr>
+            <td colspan="4" style="text-align:center;padding:40px;color:white;">No attendance records yet.</td>
+          </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+    @if($attendanceRecords->hasPages())
+    <div style="margin-top:14px;padding:0 16px 16px">
+      {{ $attendanceRecords->links() }}
+    </div>
     @endif
-</div>
+  </div>
+</section>
 @endsection

@@ -1,107 +1,269 @@
-@extends('layouts.professor')
+@extends('layouts.student')
 
-@section('title', 'My Classes - Student')
-@section('header', 'My Classes')
-@section('subheader', 'View your enrolled classes and manage your QR code.')
+@section('title', 'My Classes')
+@section('subtitle', 'View your enrolled classes and manage your QR code.')
 
 @section('content')
-<div class="g-6-4">
+<style>
+  .class-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .class-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  .class-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .class-card-expand-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    margin-left: 8px;
+  }
+  
+  .class-card.expanded .class-card-expand-icon {
+    transform: rotate(180deg);
+  }
+  
+  .class-card-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    opacity: 0;
+    margin-top: 0;
+  }
+  
+  .class-card.expanded .class-card-content {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 14px;
+  }
+  
+  .class-card-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.09);
+    margin: 14px 0;
+  }
+  
+  .classmates-section {
+    margin-top: 14px;
+  }
+  
+  .classmates-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+  
+  .classmates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  
+  .classmate-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  
+  .classmate-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  .classmate-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+  
+  .classmate-id {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  
+  .classmates-count {
+    font-size: 11px;
+    color: var(--faint);
+    margin-top: 8px;
+  }
+</style>
+
+<!-- ══ MY CLASSES ══ -->
+<section class="page" id="classes">
+  <div class="classes-layout">
+
+    <!-- Left: enrolled classes -->
     <div>
-        <div class="sh">Your Enrolled Classes</div>
-        <div class="card">
-            @forelse($classes as $class)
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border2);gap:12px;\">
-                    <div style="flex:1;\">
-                        <div style="font-size:12px;font-weight:600;">{{ $class->display_name }}</div>
-                    </div>
-                    <div style="text-align:right;min-width:120px;\">
-                        <div style="font-size:11px;font-weight:600;\">{{ $class->professor->name ?? 'N/A' }}</div>
-                        <div style="font-size:10px;color:var(--text2);\">Professor</div>
-                    </div>
-                </div>
-            @empty
-                <div style="text-align:center;color:var(--text2);\">You are not enrolled in any classes yet.</div>
-            @endforelse
-            @if($classes->count())
-                <a class="btn btn-sm" href="{{ route('student.dashboard') }}" style="width:100%;justify-content:center;margin-top:8px;\">Back to Dashboard -></a>
+      <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px">Your Enrolled Classes</div>
+
+      @forelse($classes as $class)
+      <div class="class-card glass" onclick="toggleClassExpand(this, event)">
+        <div class="class-card-top">
+          <div style="flex: 1;">
+            <div class="class-card-name">{{ $class->code }} — {{ $class->name }}</div>
+            <div class="class-card-code">{{ $class->code }}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="pill green">Active</span>
+            <span class="class-card-expand-icon">▼</span>
+          </div>
+        </div>
+        <div class="class-card-meta">
+          @if($class->professors->first())
+          <div class="class-meta-item">🎓 Professor: <strong>{{ $class->professors->first()->name }}</strong></div>
+          @endif
+        </div>
+        
+        <!-- Expandable Content -->
+        <div class="class-card-content">
+          <div class="class-card-divider"></div>
+          
+          <div class="classmates-section">
+            <span class="classmates-label">Classmates ({{ $class->students->count() }})</span>
+            
+            @if($class->students->count() > 0)
+            <div class="classmates-grid">
+              @foreach($class->students as $student)
+              <div class="classmate-item">
+                <div class="classmate-name">{{ $student->name }}</div>
+                <div class="classmate-id">ID: {{ $student->id }}</div>
+              </div>
+              @endforeach
+            </div>
+            <div class="classmates-count">{{ $class->students->count() }} student{{ $class->students->count() !== 1 ? 's' : '' }} enrolled</div>
+            @else
+            <div style="text-align: center; color: var(--faint); padding: 16px 0; font-size: 12px;">
+              No classmates yet
+            </div>
             @endif
+          </div>
         </div>
+      </div>
+      @empty
+      <div style="text-align:center;color:var(--faint);padding:40px 0;">Not enrolled in any classes.</div>
+      @endforelse
     </div>
 
+    <!-- Right: QR + Quick Stats (unified card) -->
     <div>
-        <div class="sh">Your QR Code</div>
-        <div class="card" style="text-align:center;\">
-            <div style="background:#fff;border-radius:var(--radius);display:inline-flex;padding:12px;margin-bottom:12px;\">
-                <img id="student-qr-img" src="{{ route('student.qr-code') }}" alt="Student QR Code" style="width:140px;height:140px;border-radius:6px;background:#fff;object-fit:contain;\" />
-            </div>
-            <div style="font-size:11px;font-weight:600;\">{{ auth()->user()->name }}</div>
-            <div style="font-size:10px;color:var(--text2);\">Student ID: {{ auth()->id() }}</div>
-            <div style="font-size:10px;color:var(--text3);\">Show to professor for attendance</div>
-            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px;\">
-                <button type="button" class="btn btn-sm btn-p" onclick="showStudentQR()" style="flex:1;min-width:80px;\">Show</button>
-                <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-sm" style="flex:1;min-width:80px;justify-content:center;\">Download</a>
-            </div>
+      <div class="qr-sidebar glass" style="gap:0">
+        <div class="qr-label" style="margin-bottom:14px">Your QR Code</div>
+        <div class="qr-frame">
+          <canvas id="qrClasses"></canvas>
+        </div>
+        <div class="qr-student-name">{{ Auth::user()->name }}</div>
+        <div class="qr-student-id">Student ID: {{ Auth::user()->id }}</div>
+        <div class="qr-hint">Show to professor for attendance</div>
+        <div class="qr-actions">
+          <button class="btn btn-pill primary" onclick="openQRModal()">Show</button>
+          <button class="btn btn-pill" href="#" onclick="downloadQR()">Download</button>
         </div>
 
-        <div class="sh">Quick Stats</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;\">
-            <div style="background:var(--navy3);\;border-radius:var(--radius);\;padding:10px;text-align:center;\">
-                <div style="font-size:18px;font-weight:700;color:var(--green);\">@php
-                    $present = $classes->count() ? 0 : 0;
-                @endphp
-                </div>
-                <div style="font-size:10px;color:var(--text2);\">Present</div>
-            </div>
-            <div style="background:var(--navy3);border-radius:var(--radius);\;padding:10px;text-align:center;\">
-                <div style="font-size:18px;font-weight:700;color:var(--amber);\">0</div>
-                <div style="font-size:10px;color:var(--text2);\">Late</div>
-            </div>
-            <div style="background:var(--navy3);border-radius:var(--radius);\;padding:10px;text-align:center;\">
-                <div style="font-size:18px;font-weight:700;color:var(--red);\">0</div>
-                <div style="font-size:10px;color:var(--text2);\">Absent</div>
-            </div>
-            <div style="background:var(--navy3);border-radius:var(--radius);\;padding:10px;text-align:center;\">
-                <div style="font-size:18px;font-weight:700;color:var(--blue);\">{{ $classes->count() }}</div>
-                <div style="font-size:10px;color:var(--text2);\">Enrolled</div>
-            </div>
+        <!-- Divider -->
+        <div style="width:100%;height:1px;background:rgba(255,255,255,.09);margin:18px 0 16px"></div>
+
+        <span class="quick-stats-title">Quick Stats</span>
+        <div class="quick-stats-grid" style="width:100%">
+          <div class="qs">
+            <span class="qs-val green">{{ $totalPresent }}</span>
+            <span class="qs-lbl">Present</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val yellow">{{ $totalLate }}</span>
+            <span class="qs-lbl">Late</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val red">{{ $totalAbsent }}</span>
+            <span class="qs-lbl">Absent</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val purple">{{ $totalExcused ?? 0 }}</span>
+            <span class="qs-lbl">Excused</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val blue">{{ $classes->count() }}</span>
+            <span class="qs-lbl">Enrolled</span>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<!-- QR Code Modal -->
-<div id="student-qr-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;padding:16px;\">
-    <div style="position:relative;width:100%;max-width:400px;max-height:90vh;background:var(--navy2);border-radius:18px;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,0.45);padding:24px;text-align:center;\">
-        <button onclick="closeStudentQRModal()" class="btn btn-sm btn-d" style="position:absolute;top:16px;right:16px;z-index:10;\">Close</button>
-        <h3 style="margin-bottom:8px;\">Your Student QR Code</h3>
-        <div style="font-size:12px;color:var(--text2);\">{{ auth()->user()->name }}</div>
-        <div style="font-size:10px;color:var(--text3);\">Student ID: {{ auth()->id() }}</div>
-        <div style="background:#fff;border-radius:var(--radius);\;display:inline-flex;padding:12px;margin:16px 0;\">
-            <img id="modal-student-qr-image" src="{{ route('student.qr-code') }}" alt="Student QR" style="width:220px;height:220px;border-radius:6px;background:#fff;object-fit:contain;\" />
+  </div>
+</section>
+
+<!-- QR Modal (reuse dashboard modal) -->
+<div class="qr-modal" id="qrModal" style="display:none">
+  <div class="qr-modal-overlay" onclick="closeQRModal()"></div>
+  <div class="qr-modal-content glass">
+    <button class="qr-modal-close" onclick="closeQRModal()">✕</button>
+    <div class="qr-modal-body">
+      <div style="text-align:center">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)">Your QR Code</div>
+        <div class="qr-modal-frame">
+          <canvas id="qrModalCanvas"></canvas>
         </div>
-        <div style="font-size:10px;color:var(--text2);\">Show this QR code to your professor for attendance scanning</div>
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;\">
-            <a href="{{ route('student.qr-code') }}" download="student-qr.svg" class="btn btn-p" style="flex:1;min-width:100px;justify-content:center;\">Download</a>
-            <button type="button" class="btn btn-sm" onclick="closeStudentQRModal()" style="flex:1;min-width:100px;justify-content:center;\">Close</button>
+        <div style="margin-top:16px">
+          <div style="font-size:16px;font-weight:800;color:var(--text)">{{ Auth::user()->name }}</div>
+          <div style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-top:4px">Student ID: {{ Auth::user()->id }}</div>
+          <div style="font-size:12px;color:var(--faint);margin-top:8px">Show to professor for attendance</div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
-
 <script>
-function showStudentQR() {
-    document.getElementById('student-qr-modal').style.display = 'flex';
-}
+  // Expand/collapse class card
+  function toggleClassExpand(card, event) {
+    // Prevent expansion if clicking on buttons
+    if (event.target.tagName === 'BUTTON' || event.target.tagName === 'A') {
+      return;
+    }
+    
+    card.classList.toggle('expanded');
+  }
 
-function closeStudentQRModal() {
-    document.getElementById('student-qr-modal').style.display = 'none';
-}
-
-const studentQRModal = document.getElementById('student-qr-modal');
-if (studentQRModal) {
-    studentQRModal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeStudentQRModal();
-        }
+  // Generate QR code for classes page
+  setTimeout(function() {
+    const qrDataClasses = JSON.stringify({
+      type: 'student_attendance',
+      student_id: {{ Auth::user()->id }},
+      student_name: '{{ Auth::user()->name }}',
+      email: '{{ Auth::user()->email }}'
     });
-}
+    generateQR('qrClasses', qrDataClasses);
+    generateQR('qrModalCanvas', qrDataClasses);
+  }, 100);
+
+  function openQRModal() {
+    document.getElementById('qrModal').style.display = 'flex';
+  }
+  function closeQRModal() {
+    document.getElementById('qrModal').style.display = 'none';
+  }
+  function downloadQR() {
+    const canvas = document.getElementById('qrClasses');
+    const link = document.createElement('a');
+    link.download = 'student-qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
 </script>
 @endsection
