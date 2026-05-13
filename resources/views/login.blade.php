@@ -36,24 +36,61 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: #090818;
             color: var(--text);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            background: #020205;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(108, 92, 231, 0.12), transparent 24%);
+            pointer-events: none;
+            mix-blend-mode: screen;
         }
 
         .login-container {
-            background: var(--navy2);
-            border: 1px solid var(--border);
+            position: relative;
+            background: rgba(9, 8, 24, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: var(--radius-lg);
             overflow: hidden;
-            max-width: 420px;
+            max-width: 520px;
             width: 100%;
             padding: 2.5rem;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 35px 95px rgba(0, 0, 0, 0.35);
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.16), transparent 34%),
+                        linear-gradient(225deg, rgba(0, 243, 255, 0.12), transparent 28%);
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .login-container > * {
+            position: relative;
+            z-index: 1;
         }
 
         .brand-logo {
@@ -269,6 +306,7 @@
     </style>
 </head>
 <body>
+    <canvas id="particle-canvas"></canvas>
     <div class="login-container">
         <div class="brand-logo">
             <i class="fas fa-clock"></i>
@@ -395,6 +433,160 @@
         document.querySelectorAll('input[name="email"], input[name="password"]').forEach(input => {
             input.addEventListener('input', clearErrors);
         });
+
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        const particles = [];
+        const particleCount = 320;
+        const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const rotation = { x: 0, y: 0, targetX: 0, targetY: 0 };
+
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            center.x = window.innerWidth / 2;
+            center.y = window.innerHeight / 2;
+        };
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = (Math.random() - 0.5) * canvas.width * 0.9;
+                this.y = (Math.random() - 0.5) * canvas.height * 0.9;
+                this.z = (Math.random() - 0.5) * canvas.width * 0.6;
+                this.vx = (Math.random() - 0.5) * 0.05;
+                this.vy = (Math.random() - 0.5) * 0.05;
+                this.vz = (Math.random() - 0.5) * 0.02;
+                this.size = 1.3 + Math.random() * 3.5;
+                this.alpha = 0.12 + Math.random() * 0.28;
+                this.baseSize = this.size;
+                this.phase = Math.random() * Math.PI * 2;
+                this.projX = this.x + center.x;
+                this.projY = this.y + center.y;
+            }
+
+            update() {
+                const drift = 0.004 + Math.abs(this.z) / (canvas.width * 28);
+                this.vx += (Math.random() - 0.5) * 0.004 + this.x * 0.000004;
+                this.vy += (Math.random() - 0.5) * 0.004 + this.y * 0.000003;
+                this.vz += (Math.random() - 0.5) * 0.002 - this.z * 0.00001;
+                this.vx += Math.cos(this.phase * 0.8) * drift * 0.3;
+                this.vy += Math.sin(this.phase * 0.9) * drift * 0.3;
+                this.vz += Math.cos(this.phase * 1.2) * drift * 0.12;
+                this.vx *= 0.986;
+                this.vy *= 0.986;
+                this.vz *= 0.986;
+
+                this.x += this.vx;
+                this.y += this.vy;
+                this.z += this.vz;
+                this.phase += 0.014;
+
+                const boundX = canvas.width * 0.75;
+                const boundY = canvas.height * 0.75;
+                const boundZ = canvas.width * 0.55;
+
+                if (this.x < -boundX) this.x = boundX;
+                if (this.x > boundX) this.x = -boundX;
+                if (this.y < -boundY) this.y = boundY;
+                if (this.y > boundY) this.y = -boundY;
+                if (this.z < -boundZ) this.z = boundZ;
+                if (this.z > boundZ) this.z = -boundZ;
+
+                const perspective = 520;
+                const rotX = rotation.x;
+                const rotY = rotation.y;
+                const x3 = this.x;
+                const y3 = this.y;
+                const z3 = this.z;
+
+                const cosY = Math.cos(rotY);
+                const sinY = Math.sin(rotY);
+                const cosX = Math.cos(rotX);
+                const sinX = Math.sin(rotX);
+
+                const xRot = x3 * cosY - z3 * sinY;
+                const zRot = x3 * sinY + z3 * cosY;
+                const yRot = y3 * cosX - zRot * sinX;
+                const zFinal = y3 * sinX + zRot * cosX;
+
+                const scale = perspective / (perspective + zFinal);
+                this.projX = center.x + xRot * scale;
+                this.projY = center.y + yRot * scale;
+                this.drawSize = Math.max(0.8, this.baseSize * scale * 1.1 + Math.sin(this.phase) * 0.4);
+                const pulse = (Math.sin(this.phase) + 1) * 0.35;
+                this.opacity = Math.max(0.08, Math.min(0.45, this.alpha * Math.max(0.7, scale) + pulse * 0.12));
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(108, 92, 231, ${this.opacity})`;
+                ctx.arc(this.projX, this.projY, this.drawSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const initParticles = () => {
+            particles.length = 0;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        };
+
+        const drawConnections = () => {
+            ctx.strokeStyle = 'rgba(108, 92, 231, 0.06)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < particleCount; i++) {
+                for (let j = i + 1; j < particleCount; j++) {
+                    const p1 = particles[i];
+                    const p2 = particles[j];
+                    const dx = p1.projX - p2.projX;
+                    const dy = p1.projY - p2.projY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 105) {
+                        ctx.globalAlpha = (1 - dist / 105) * 0.18;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.projX, p1.projY);
+                        ctx.lineTo(p2.projX, p2.projY);
+                        ctx.stroke();
+                    }
+                }
+            }
+            ctx.globalAlpha = 1;
+        };
+
+        const render = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            rotation.x += (rotation.targetX - rotation.x) * 0.08;
+            rotation.y += (rotation.targetY - rotation.y) * 0.08;
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            drawConnections();
+            requestAnimationFrame(render);
+        };
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+            rotation.targetX = (event.clientY - center.y) / center.y * 0.18;
+            rotation.targetY = (event.clientX - center.x) / center.x * 0.18;
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+
+        resizeCanvas();
+        initParticles();
+        render();
     </script>
 </body>
 </html>

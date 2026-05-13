@@ -67,6 +67,7 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::get('/logs', [ProfessorController::class, 'logs'])->name('professor.logs');
     Route::get('/settings', [ProfessorController::class, 'settings'])->name('professor.settings');
     Route::put('/settings', [ProfessorController::class, 'updateSettings'])->name('professor.settings.update');
+    Route::put('/settings/password', [ProfessorController::class, 'updatePassword'])->name('professor.settings.password');
     Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
     Route::post('/drop-request', [ProfessorController::class, 'submitDropRequest'])->name('professor.drop-request');
 });
@@ -116,6 +117,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     
     // System logs
     Route::get('/logs', [AdminController::class, 'logs'])->name('admin.logs');
+
+    // Admin settings
+    Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    Route::put('/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
+    Route::put('/settings/password', [AdminController::class, 'updatePassword'])->name('admin.settings.password');
+
+    // Debug: return current user stats (admin-only)
+    Route::get('/_debug/user-stats', [AdminController::class, 'debugUserStats'])->name('admin.debug.user-stats');
 });
 
 // Schedule routes
@@ -137,4 +146,16 @@ Route::prefix('student')->middleware(['auth', 'role:student'])->group(function (
     Route::get('/dashboard', [App\Http\Controllers\StudentController::class, 'dashboard'])->name('student.dashboard');
     Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
     Route::get('/classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.classes');
+    Route::get('/settings', [App\Http\Controllers\StudentController::class, 'settings'])->name('student.settings');
+    Route::put('/settings', [App\Http\Controllers\StudentController::class, 'updateSettings'])->name('student.settings.update');
+    Route::put('/settings/password', [App\Http\Controllers\StudentController::class, 'updatePassword'])->name('student.settings.password');
 });
+
+// DEBUG: Test student UI without auth (remove in production)
+if (env('APP_DEBUG', false)) {
+    Route::get('/_debug/student-dashboard', function() {
+        $user = \App\Models\User::where('email', 'student@example.com')->firstOrFail();
+        Auth::login($user);
+        return redirect()->route('student.dashboard');
+    });
+}

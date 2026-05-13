@@ -31,12 +31,25 @@ class ProfessorController extends Controller
         $user = Auth::user();
         // Use withCount() to get student counts in the initial query instead of calling count() in loop
         $classes = $user->assignedClasses()
-            ->withCount('students')
+            ->withCount(['students',
+                'attendanceRecords as present_count' => function ($query) {
+                    $query->where('status', 'present');
+                },
+                'attendanceRecords as late_count' => function ($query) {
+                    $query->where('status', 'late');
+                },
+                'attendanceRecords as absent_count' => function ($query) {
+                    $query->where('status', 'absent');
+                },
+                'attendanceRecords as excused_count' => function ($query) {
+                    $query->where('status', 'excused');
+                },
+            ])
             ->with(['students', 'schedules'])
             ->get();
         
         $totalClasses = $classes->count();
-        $totalStudents = $classes->sum('students_count'); // Use the counted value, not a new query
+        $totalStudents = $classes->sum('students_count');
 
         $attendanceSummary = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
             ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
@@ -59,6 +72,16 @@ class ProfessorController extends Controller
             ->flatMap(fn($c) => $c->schedules)
             ->filter(fn($s) => str_contains($s->days, now()->format('l')));
 
+        // Prepare leaderboard data sorted by attendance rate
+        $leaderboard = $classes->map(function($c) {
+            $total = ($c->present_count ?? 0) + ($c->late_count ?? 0) + ($c->absent_count ?? 0) + ($c->excused_count ?? 0);
+            $rate = $total > 0 ? round((($c->present_count ?? 0) / $total) * 100, 1) : 0;
+            return [
+                'name' => ($c->code ?? 'Code') . ' - ' . ($c->name ?? 'Class'),
+                'rate' => $rate
+            ];
+        })->sortByDesc('rate')->values();
+
         return view('professor.dashboard', [
             'totalClasses' => $totalClasses,
             'totalStudents' => $totalStudents,
@@ -71,6 +94,7 @@ class ProfessorController extends Controller
             'recentLogs' => $recentLogs,
             'todaySchedules' => $todaySchedules,
             'classes' => $classes,
+            'leaderboard' => $leaderboard,
         ]);
     }
 
@@ -87,9 +111,12 @@ class ProfessorController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email']);
 
+        $totalStudents = $classes->sum('students_count');
+
         return view('professor.classes', [
             'classes' => $classes,
             'availableStudents' => $availableStudents,
+            'totalStudents' => $totalStudents,
         ]);
     }
 
@@ -372,10 +399,8 @@ class ProfessorController extends Controller
             $query->whereDate('recorded_at', $date);
         }
 
-        $summaryQuery = clone $query;
-        $summary = $summaryQuery
-            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
-            ->first();
+        $summaryQuery = AttendanceRecord::selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count");
+        $summary = $summaryQuery->first();
 
         $records = $query->with('student', 'classe')
             ->orderBy('recorded_at', 'desc')
@@ -503,13 +528,14 @@ class ProfessorController extends Controller
             return back()->with('error', 'This student is not enrolled in the selected class.');
         }
 
-        $alreadyPending = DropRequest::where('class_id', $classe->id)
+        $existingRequest = DropRequest::where('class_id', $classe->id)
             ->where('student_id', $student->id)
-            ->where('status', 'pending')
-            ->exists();
+            ->where('professor_id', $user->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->first();
 
-        if ($alreadyPending) {
-            return back()->with('error', 'A drop request for this student is already pending approval.');
+        if ($existingRequest) {
+            return back()->with('error', 'A pending or approved drop request already exists for this student in the selected class.');
         }
 
         DropRequest::create([
@@ -650,6 +676,29 @@ class ProfessorController extends Controller
         $classe->students()->attach($student->id);
 
         return back()->with('success', 'Student added to class successfully');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $user->update([
+            'password' => bcrypt($validated['password']),
+        ]);
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'update_password',
+            'description' => 'Updated password',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Password updated successfully');
     }
 
     /**

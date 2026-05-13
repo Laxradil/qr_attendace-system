@@ -37,19 +37,21 @@
                         </span>
                     </td>
                     <td class="td-mono">{{ $request->created_at->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
-                    <td style="display:flex;gap:6px;flex-wrap:wrap;">
-                        @if($request->status === 'pending')
-                            <form method="POST" action="{{ route('admin.drop-requests.approve', $request) }}">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-p">Approve</button>
-                            </form>
-                            <form method="POST" action="{{ route('admin.drop-requests.reject', $request) }}">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-d">Reject</button>
-                            </form>
-                        @else
-                            <span style="font-size:12px;color:var(--text2);">No actions available</span>
-                        @endif
+                    <td style="vertical-align:middle;">
+                        <div style="display:inline-flex;gap:6px;align-items:center;white-space:nowrap;">
+                            @if($request->status === 'pending')
+                                <form method="POST" action="{{ route('admin.drop-requests.approve', $request) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-p">Approve</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.drop-requests.reject', $request) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-d">Reject</button>
+                                </form>
+                            @else
+                                <span style="font-size:12px;color:var(--text2);">No actions available</span>
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @empty

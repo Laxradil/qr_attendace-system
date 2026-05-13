@@ -19,19 +19,25 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            
-            // Check user role and redirect accordingly
-            $user = Auth::user();
-            if ($user->isAdmin()) {
-                return redirect()->intended('/admin');
-            } elseif ($user->isProfessor()) {
-                return redirect()->intended('/professor');
-            } elseif ($user->isStudent()) {
-                return redirect()->intended('/student/dashboard');
+        try {
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+                
+                // Check user role and redirect accordingly
+                $user = Auth::user();
+                if ($user->isAdmin()) {
+                    return redirect()->intended('/admin');
+                } elseif ($user->isProfessor()) {
+                    return redirect()->intended('/professor');
+                } elseif ($user->isStudent()) {
+                    return redirect()->intended('/student/dashboard');
+                }
+                return redirect()->intended('/dashboard');
             }
-            return redirect()->intended('/dashboard');
+        } catch (\Illuminate\Database\QueryException | \PDOException $exception) {
+            return back()->withErrors([
+                'email' => 'Unable to login: database driver not installed or connection is misconfigured. Please verify DB_CONNECTION and your PHP database extensions.',
+            ])->withInput($request->except('password'));
         }
 
         return back()->withErrors([
@@ -55,15 +61,21 @@ class LoginController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = \App\Models\User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => 'student',
-            'username' => strtolower(str_replace(' ', '_', $request->name)),
-        ]);
+        try {
+            $user = \App\Models\User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'role' => 'student',
+                'username' => strtolower(str_replace(' ', '_', $request->name)),
+            ]);
 
-        Auth::login($user);
-        return redirect('/student/dashboard');
+            Auth::login($user);
+            return redirect('/student/dashboard');
+        } catch (\Illuminate\Database\QueryException | \PDOException $exception) {
+            return back()->withErrors([
+                'email' => 'Unable to register: database driver not installed or connection is misconfigured. Please verify DB_CONNECTION and your PHP database extensions.',
+            ])->withInput($request->except('password'));
+        }
     }
 }
