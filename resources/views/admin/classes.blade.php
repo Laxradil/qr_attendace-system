@@ -5,52 +5,64 @@
 @section('subheader', 'Manage all classes and schedules in the system.')
 
 @section('content')
-<div style="display:flex;gap:8px;margin-bottom:12px;">
-    <a href="{{ route('admin.classes.create') }}" class="btn btn-sm btn-p">+ Add Class</a>
+
+<div class="toolbar">
+    <a href="{{ route('admin.classes.create') }}" class="btn primary">+ Add Class</a>
 </div>
 
-<div class="tbl-wrap">
+<div class="table-wrap">
     <table>
-        <thead><tr><th>Class Code</th><th>Class Name</th><th>Professor</th><th>Enrolled</th><th>Status</th><th style="width:220px;">Actions</th></tr></thead>
+        <thead>
+            <tr>
+                <th>Class Code</th>
+                <th>Class Name</th>
+                <th>Professor</th>
+                <th>Enrolled</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
         <tbody>
             @forelse($classes as $classe)
                 <tr>
                     <td class="td-mono">{{ $classe->code }}</td>
                     <td>
-                        <div style="font-weight:500;font-size:11px;">{{ $classe->name }}</div>
-                        <div style="font-size:9px;color:var(--text3);">{{ $classe->description ?: 'No description' }}</div>
+                        <div style="font-weight:500;font-size:12px;">{{ $classe->name }}</div>
+                        <div style="font-size:11px;color:var(--muted);">{{ $classe->description ?: 'No description' }}</div>
                     </td>
-                    <td style="font-size:10px;">
+                    <td style="font-size:11px;">
                         @if($classe->professors->isNotEmpty())
                             <div style="display:flex;flex-direction:column;gap:4px;">
                                 @foreach($classe->professors as $prof)
-                                    <span class="badge bp">{{ $prof->name }}</span>
+                                    <span class="pill purple">{{ $prof->name }}</span>
                                 @endforeach
                             </div>
                         @else
-                            <span style="color:var(--text3);">N/A</span>
+                            <span class="muted">N/A</span>
                         @endif
                     </td>
-
-                    <td style="font-size:11px;font-weight:600;">{{ $classe->students->count() }}</td>
-                    <td><span class="badge {{ $classe->is_active ? 'bg' : 'ba' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span></td>
+                    <td style="font-size:12px;font-weight:700;">{{ $classe->students->count() }}</td>
                     <td>
-                        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;justify-content:flex-start;white-space:nowrap;">
-                            <a href="{{ route('admin.classes.enroll', $classe) }}" class="btn btn-sm">Enroll</a>
-                            <a href="{{ route('admin.classes.edit', $classe) }}" class="btn btn-sm">Edit</a>
-                            <form action="{{ route('admin.classes.delete', $classe) }}" method="POST" onsubmit="return confirm('Delete this class?')" style="margin:0;">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-d" type="submit">Delete</button>
-                            </form>
-                        </div>
+                        <span class="pill {{ $classe->is_active ? 'green' : 'red' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span>
+                    </td>
+                    <td style="display:flex;gap:6px;align-items:center;white-space:nowrap;">
+                        <a href="{{ route('admin.classes.enroll', $classe) }}" class="btn">Enroll</a>
+                        <a href="{{ route('admin.classes.edit', $classe) }}" class="btn">Edit</a>
+                        <form action="{{ route('admin.classes.delete', $classe) }}" method="POST" onsubmit="return confirm('Delete?')" style="margin:0;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn danger" style="margin:0;">Delete</button>
+                        </form>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" style="text-align:center;color:var(--text2);">No classes found.</td></tr>
+                <tr><td colspan="6" style="text-align:center;color:var(--muted);">No classes found.</td></tr>
             @endforelse
         </tbody>
     </table>
-    <div class="pag"><span>Showing {{ $classes->firstItem() ?? 0 }} to {{ $classes->lastItem() ?? 0 }} of {{ $classes->total() }} classes</span><div>{{ $classes->links() }}</div></div>
+    <div class="footer-bar">
+        <span>Showing {{ $classes->firstItem() ?? 0 }}–{{ $classes->lastItem() ?? 0 }} of {{ $classes->total() }} classes</span>
+        <div class="pager">{{ $classes->links() }}</div>
+    </div>
 </div>
 @endsection

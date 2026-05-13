@@ -97,4 +97,15 @@
     </div>
 </div>
 
+<script>
+    (function() {
+        if (window.location.search.includes('action=add-student')) {
+            var modal = document.getElementById('addStudentModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+    })();
+</script>
+
 @endsection

@@ -15,35 +15,40 @@ class MarkAbsentAttendance extends Command
 
     public function handle()
     {
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Manila');
         $today = $now->format('l');
-        $scheduleRecords = Schedule::whereNotNull('end_time')->get();
-        $classEndTimes = [];
+        $scheduleRecords = Schedule::whereNotNull('start_time')->get();
+        $classAbsentTimes = [];
 
         foreach ($scheduleRecords as $schedule) {
             if (!$this->scheduleMatchesDay($schedule, $today)) {
                 continue;
             }
 
+            if (empty($schedule->start_time)) {
+                continue;
+            }
+
             try {
                 // Handle both H:i and H:i:s formats
-                $format = strlen($schedule->end_time) > 5 ? 'H:i:s' : 'H:i';
-                $endTime = Carbon::createFromFormat($format, $schedule->end_time);
+                $format = strlen($schedule->start_time) > 5 ? 'H:i:s' : 'H:i';
+                $startTime = Carbon::createFromFormat($format, $schedule->start_time, 'Asia/Manila');
             } catch (\Exception $e) {
                 continue;
             }
 
-            $scheduleEnd = $endTime->setDate($now->year, $now->month, $now->day);
-            if ($scheduleEnd->greaterThan($now)) {
+            $scheduleStart = $startTime->setDate($now->year, $now->month, $now->day);
+            $absentThreshold = $scheduleStart->copy()->addMinutes(20);
+            if ($absentThreshold->greaterThan($now)) {
                 continue;
             }
 
-            if (!isset($classEndTimes[$schedule->class_id]) || $scheduleEnd->greaterThan($classEndTimes[$schedule->class_id])) {
-                $classEndTimes[$schedule->class_id] = $scheduleEnd;
+            if (!isset($classAbsentTimes[$schedule->class_id]) || $absentThreshold->greaterThan($classAbsentTimes[$schedule->class_id])) {
+                $classAbsentTimes[$schedule->class_id] = $absentThreshold;
             }
         }
 
-        $classIds = array_keys($classEndTimes);
+        $classIds = array_keys($classAbsentTimes);
         $markedAbsent = 0;
         $nowDate = $now->toDateString();
 
@@ -69,7 +74,7 @@ class MarkAbsentAttendance extends Command
                     'qr_code_id' => null,
                     'status' => 'absent',
                     'minutes_late' => 0,
-                    'recorded_at' => $classEndTimes[$classId],
+                    'recorded_at' => $classAbsentTimes[$classId]->copy()->setTimezone('UTC'),
                 ]);
 
                 $markedAbsent++;
