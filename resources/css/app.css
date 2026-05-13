@@ -1,3 +1,86 @@
+/* --- Modern Light Theme (Shared with Admin) --- */
+.glass-table, .glass {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px 0 rgba(60,60,100,0.07);
+    border: 1px solid #e3e6ee;
+}
+.settings-card, .card {
+    padding: 32px;
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px 0 rgba(60,60,100,0.07);
+    border: 1px solid #e3e6ee;
+}
+.stat, .att-row, .class-row {
+    background: #f7f8fa;
+    border-radius: 12px;
+    border: 1px solid #e3e6ee;
+    color: #23272f;
+}
+.btn, .settings-btn {
+    background: #f7f8fa;
+    color: #23272f;
+    border: 1px solid #e3e6ee;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+}
+.btn.primary, .settings-btn.primary {
+    background: linear-gradient(90deg,#8f5bff 0%,#5d63ff 45%,#2d68b8 100%);
+    color: #fff;
+    border: none;
+}
+.btn.btn-pill, .settings-btn {
+    border-radius: 999px;
+}
+.btn:hover, .settings-btn:hover {
+    background: #edeaff;
+    color: #5b4fff;
+}
+.btn.primary:hover, .settings-btn.primary:hover {
+    background: #5b4fff;
+    color: #fff;
+}
+.sidebar, .menu {
+    background: #f3f4f8 !important;
+    color: #23272f;
+}
+.sidebar .active, .menu .active {
+    background: #edeaff !important;
+    color: #5b4fff !important;
+}
+.qr-frame {
+    background: #fff !important;
+    border: 1px solid #e3e6ee;
+    box-shadow: 0 2px 12px rgba(60,60,100,0.07);
+}
+.qr-modal-content {
+    background: #fff !important;
+    color: #23272f;
+}
+.qr-status, .qr-student-id, .att-date, .class-row-code {
+    color: #7a7e87 !important;
+}
+.empty-state {
+    color: #bfc3cc;
+}
+.prog-bar {
+    background: #e3e6ee;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.prog-fill {
+    background: #5b4fff;
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s;
+}
+.pill.green { color: #1ecb81; background: #e6f9f1; border: 1px solid #b7f0d6; }
+.pill.yellow { color: #ffd600; background: #fffbe6; border: 1px solid #fff3b7; }
+.pill.red { color: #ff4d6d; background: #ffe6ec; border: 1px solid #ffb7c9; }
+.pill.purple { color: #a259ff; background: #f3e6ff; border: 1px solid #dab7ff; }
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
