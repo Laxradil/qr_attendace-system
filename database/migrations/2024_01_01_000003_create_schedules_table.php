@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('subject_name', 255);
             $table->unsignedBigInteger('professor_id');
             $table->string('professor', 255);
-            $table->string('days', 20);
+            $table->string('days', 100);
             $table->string('time', 50);
             $table->string('room', 20);
             $table->timestamps();

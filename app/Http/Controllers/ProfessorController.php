@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Classe;
 use App\Models\AttendanceRecord;
 use App\Models\DropRequest;
+use App\Models\Schedule;
 use App\Models\SystemLog;
 use App\Models\User;
 use Carbon\Carbon;
@@ -31,12 +32,25 @@ class ProfessorController extends Controller
         $user = Auth::user();
         // Use withCount() to get student counts in the initial query instead of calling count() in loop
         $classes = $user->assignedClasses()
-            ->withCount('students')
+            ->withCount(['students',
+                'attendanceRecords as present_count' => function ($query) {
+                    $query->where('status', 'present');
+                },
+                'attendanceRecords as late_count' => function ($query) {
+                    $query->where('status', 'late');
+                },
+                'attendanceRecords as absent_count' => function ($query) {
+                    $query->where('status', 'absent');
+                },
+                'attendanceRecords as excused_count' => function ($query) {
+                    $query->where('status', 'excused');
+                },
+            ])
             ->with(['students', 'schedules'])
             ->get();
         
         $totalClasses = $classes->count();
-        $totalStudents = $classes->sum('students_count'); // Use the counted value, not a new query
+        $totalStudents = $classes->sum('students_count');
 
         $attendanceSummary = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
             ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
@@ -87,9 +101,12 @@ class ProfessorController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email']);
 
+        $totalStudents = $classes->sum('students_count');
+
         return view('professor.classes', [
             'classes' => $classes,
             'availableStudents' => $availableStudents,
+            'totalStudents' => $totalStudents,
         ]);
     }
 
@@ -236,10 +253,37 @@ class ProfessorController extends Controller
                     : back()->with('error', $message);
             }
 
-            // Check if already recorded today
+            $currentManila = Carbon::now('Asia/Manila');
+
+            $schedule = $this->findTodayScheduleForClass($classe);
+            if (!$schedule) {
+                $message = 'This class is not scheduled for today.';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 422)
+                    : back()->with('error', $message);
+            }
+
+            if (!$schedule->start_time || !$schedule->end_time) {
+                $message = 'Schedule time information for this class is incomplete.';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 422)
+                    : back()->with('error', $message);
+            }
+
+            $sessionStart = Carbon::parse($schedule->start_time, 'Asia/Manila')->setDate($currentManila->year, $currentManila->month, $currentManila->day);
+            $sessionEnd = Carbon::parse($schedule->end_time, 'Asia/Manila')->setDate($currentManila->year, $currentManila->month, $currentManila->day);
+
+            if ($currentManila->lt($sessionStart) || $currentManila->gt($sessionEnd)) {
+                $message = 'This class is not scheduled for the current time.';
+                return $request->expectsJson()
+                    ? response()->json(['error' => $message], 422)
+                    : back()->with('error', $message);
+            }
+
+            // Check if already recorded today in local Manila date
             $alreadyRecorded = AttendanceRecord::where('student_id', $selectedStudentId)
                 ->where('class_id', $selectedClassId)
-                ->whereDate('recorded_at', today())
+                ->whereDate('recorded_at', $currentManila->toDateString())
                 ->exists();
 
             if ($alreadyRecorded) {
@@ -249,21 +293,22 @@ class ProfessorController extends Controller
                     : back()->with('error', $message);
             }
 
-            $schedule = $this->findTodayScheduleForClass($classe);
             $attendanceStatus = 'present';
             $minutesLate = null;
-            $recordedAt = now();
+            $recordedAtManila = Carbon::now('Asia/Manila');
+            $recordedAt = $recordedAtManila->copy()->setTimezone('UTC');
 
             if ($schedule && $schedule->start_time) {
-                $sessionStart = Carbon::parse($schedule->start_time)->setDate($recordedAt->year, $recordedAt->month, $recordedAt->day);
+                $sessionStart = Carbon::parse($schedule->start_time, 'Asia/Manila')
+                    ->setDate($recordedAtManila->year, $recordedAtManila->month, $recordedAtManila->day);
                 $lateThreshold = $sessionStart->copy()->addMinutes(15);
                 $absentThreshold = $sessionStart->copy()->addMinutes(20);
 
-                if ($recordedAt->greaterThanOrEqualTo($absentThreshold)) {
+                if ($recordedAtManila->greaterThanOrEqualTo($absentThreshold)) {
                     $attendanceStatus = 'absent';
-                } elseif ($recordedAt->greaterThanOrEqualTo($lateThreshold)) {
+                } elseif ($recordedAtManila->greaterThanOrEqualTo($lateThreshold)) {
                     $attendanceStatus = 'late';
-                    $minutesLate = (int) $recordedAt->diffInMinutes($sessionStart);
+                    $minutesLate = (int) $recordedAtManila->diffInMinutes($sessionStart);
                 }
             }
 
@@ -314,6 +359,93 @@ class ProfessorController extends Controller
             ->contains($normalizedDay);
     }
 
+    private function getManilaDateRange(string $date): array
+    {
+        $start = Carbon::createFromFormat('Y-m-d', $date, 'Asia/Manila')
+            ->startOfDay()
+            ->setTimezone('UTC');
+        $end = Carbon::createFromFormat('Y-m-d', $date, 'Asia/Manila')
+            ->endOfDay()
+            ->setTimezone('UTC');
+
+        return [$start, $end];
+    }
+
+    private function markMissingAttendanceAbsent($classes): void
+    {
+        $now = Carbon::now('Asia/Manila');
+        $today = $now->format('l');
+        $classIds = $classes->pluck('id')->filter()->unique()->values()->all();
+
+        if (empty($classIds)) {
+            return;
+        }
+
+        $scheduleRecords = Schedule::whereIn('class_id', $classIds)
+            ->whereNotNull('start_time')
+            ->get();
+
+        $classAbsentTimes = [];
+        foreach ($scheduleRecords as $schedule) {
+            if (!$this->scheduleMatchesDay($schedule, $today)) {
+                continue;
+            }
+
+            if (empty($schedule->start_time)) {
+                continue;
+            }
+
+            try {
+                $format = strlen($schedule->start_time) > 5 ? 'H:i:s' : 'H:i';
+                $startTime = Carbon::createFromFormat($format, $schedule->start_time, 'Asia/Manila');
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            $scheduleStart = $startTime->setDate($now->year, $now->month, $now->day);
+            $absentThreshold = $scheduleStart->copy()->addMinutes(20);
+            if ($absentThreshold->greaterThan($now)) {
+                continue;
+            }
+
+            if (!isset($classAbsentTimes[$schedule->class_id]) || $absentThreshold->greaterThan($classAbsentTimes[$schedule->class_id])) {
+                $classAbsentTimes[$schedule->class_id] = $absentThreshold;
+            }
+        }
+
+        if (empty($classAbsentTimes)) {
+            return;
+        }
+
+        $todayRange = $this->getManilaDateRange($now->toDateString());
+        foreach ($classAbsentTimes as $classId => $absentAt) {
+            $classe = Classe::with('students')->find($classId);
+            if (!$classe) {
+                continue;
+            }
+
+            foreach ($classe->students as $student) {
+                $existing = AttendanceRecord::where('class_id', $classId)
+                    ->where('student_id', $student->id)
+                    ->whereBetween('recorded_at', $todayRange)
+                    ->exists();
+
+                if ($existing) {
+                    continue;
+                }
+
+                AttendanceRecord::create([
+                    'class_id' => $classId,
+                    'student_id' => $student->id,
+                    'qr_code_id' => null,
+                    'status' => 'absent',
+                    'minutes_late' => 0,
+                    'recorded_at' => $absentAt->copy()->setTimezone('UTC'),
+                ]);
+            }
+        }
+    }
+
     private function parseScheduleDays(string $days): array
     {
         $tokens = preg_split('/[\s,;\/]+/', trim($days));
@@ -361,6 +493,7 @@ class ProfessorController extends Controller
         $classes = $user->assignedClasses()->get()->unique('id')->values();
         $classId = $request->query('class_id');
         $date = $request->query('date');
+        $this->markMissingAttendanceAbsent($classes);
 
         $query = AttendanceRecord::whereIn('class_id', $classes->pluck('id'));
 
@@ -369,11 +502,14 @@ class ProfessorController extends Controller
         }
 
         if ($date) {
-            $query->whereDate('recorded_at', $date);
+            [$startUtc, $endUtc] = $this->getManilaDateRange($date);
+            $query->whereBetween('recorded_at', [$startUtc, $endUtc]);
         }
 
-        $summaryQuery = AttendanceRecord::selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count");
-        $summary = $summaryQuery->first();
+        $summaryQuery = clone $query;
+        $summary = $summaryQuery
+            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count, SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused_count")
+            ->first();
 
         $records = $query->with('student', 'classe')
             ->orderBy('recorded_at', 'desc')
@@ -409,40 +545,106 @@ class ProfessorController extends Controller
         /** @var User $user */
         $user = Auth::user();
         $classes = $user->assignedClasses()->with('students')->get();
+        $this->markMissingAttendanceAbsent($classes);
         $classId = request()->query('class_id');
 
         if ($classId) {
             $classe = $classes->find($classId);
             abort_unless($classe, 403);
             $students = $classe->students;
-            
-            // Get ALL attendance data in ONE query (not per-student loops)
-            $allStats = AttendanceRecord::where('class_id', $classe->id)
-                ->selectRaw("student_id, COUNT(*) as total, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present")
-                ->groupBy('student_id')
-                ->get()
-                ->keyBy('student_id');
-
-            // Map students with their attendance stats
-            $attendanceData = $students->map(function($student) use ($allStats) {
-                $stats = $allStats[$student->id] ?? null;
-                $total = $stats?->total ?? 0;
-                $present = $stats?->present ?? 0;
-
-                return [
-                    'student' => $student,
-                    'total' => $total,
-                    'present' => $present,
-                    'percentage' => $total > 0 ? round(($present / $total) * 100) : 0,
-                ];
-            });
+            $attendanceSource = AttendanceRecord::where('class_id', $classe->id);
         } else {
-            $attendanceData = null;
+            $students = $classes->flatMap(fn ($classe) => $classe->students)->unique('id')->values();
+            $attendanceSource = AttendanceRecord::whereIn('class_id', $classes->pluck('id'));
         }
+
+        $date = request('date');
+        if ($date) {
+            [$startUtc, $endUtc] = $this->getManilaDateRange($date);
+            $attendanceSource->whereBetween('recorded_at', [$startUtc, $endUtc]);
+        }
+
+        $search = trim(strtolower(request('search', '')));
+        if ($search !== '') {
+            $students = $students->filter(function ($student) use ($search) {
+                return str_contains(strtolower($student->name ?? ''), $search)
+                    || str_contains(strtolower($student->student_id ?? ''), $search)
+                    || str_contains(strtolower($student->email ?? ''), $search);
+            })->values();
+        }
+
+        $date = request('date');
+        if ($date) {
+            $attendanceSource->whereDate('recorded_at', $date);
+        }
+
+        $summaryStats = (clone $attendanceSource)
+            ->selectRaw("COUNT(*) as total_records, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count")
+            ->first();
+
+        $allStats = $attendanceSource
+            ->selectRaw("student_id, COUNT(*) as total, SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present, SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late, SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent")
+            ->groupBy('student_id')
+            ->get()
+            ->keyBy('student_id');
+
+        $attendanceData = $students->map(function ($student) use ($allStats) {
+            $stats = $allStats[$student->id] ?? null;
+            $total = $stats?->total ?? 0;
+            $present = $stats?->present ?? 0;
+            $late = $stats?->late ?? 0;
+            $absent = $stats?->absent ?? 0;
+
+            return [
+                'student' => $student,
+                'total' => $total,
+                'present' => $present,
+                'late' => $late,
+                'absent' => $absent,
+                'percentage' => $total > 0 ? round(($present / $total) * 100) : 0,
+            ];
+        });
+
+        $rangeEnd = request('date') ? Carbon::parse(request('date'), 'Asia/Manila')->endOfDay() : Carbon::now('Asia/Manila')->endOfDay();
+        $rangeStart = $rangeEnd->copy()->subDays(6)->startOfDay();
+
+        $trendRecords = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
+            ->when($classId, fn ($query) => $query->where('class_id', $classId))
+            ->whereBetween('recorded_at', [$rangeStart->copy()->tz('UTC'), $rangeEnd->copy()->tz('UTC')])
+            ->get();
+
+        $trendMap = $trendRecords->groupBy(fn ($record) => $record->recorded_at->timezone('Asia/Manila')->format('Y-m-d'));
+        $trendLabels = collect(range(0, 6))->map(fn ($offset) => $rangeStart->copy()->addDays($offset)->format('M j'));
+        $trendDates = collect(range(0, 6))->map(fn ($offset) => $rangeStart->copy()->addDays($offset)->format('Y-m-d'));
+
+        $attendanceTrend = $trendDates->map(function ($day) use ($trendMap) {
+            $group = $trendMap[$day] ?? collect();
+            $present = $group->where('status', 'present')->count();
+            $late = $group->where('status', 'late')->count();
+            $absent = $group->where('status', 'absent')->count();
+            $total = $group->count();
+
+            return [
+                'date' => $day,
+                'label' => Carbon::parse($day, 'Asia/Manila')->format('M j'),
+                'present' => $present,
+                'late' => $late,
+                'absent' => $absent,
+                'total' => $total,
+            ];
+        });
 
         return view('professor.reports', [
             'classes' => $classes,
             'attendanceData' => $attendanceData,
+            'attendanceSummary' => [
+                'total_records' => (int) ($summaryStats->total_records ?? 0),
+                'present' => (int) ($summaryStats->present_count ?? 0),
+                'late' => (int) ($summaryStats->late_count ?? 0),
+                'absent' => (int) ($summaryStats->absent_count ?? 0),
+            ],
+            'attendanceTrend' => $attendanceTrend,
+            'trendLabels' => $trendLabels,
         ]);
     }
 
@@ -501,13 +703,14 @@ class ProfessorController extends Controller
             return back()->with('error', 'This student is not enrolled in the selected class.');
         }
 
-        $alreadyPending = DropRequest::where('class_id', $classe->id)
+        $existingRequest = DropRequest::where('class_id', $classe->id)
             ->where('student_id', $student->id)
-            ->where('status', 'pending')
-            ->exists();
+            ->where('professor_id', $user->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->first();
 
-        if ($alreadyPending) {
-            return back()->with('error', 'A drop request for this student is already pending approval.');
+        if ($existingRequest) {
+            return back()->with('error', 'A pending or approved drop request already exists for this student in the selected class.');
         }
 
         DropRequest::create([
@@ -648,6 +851,29 @@ class ProfessorController extends Controller
         $classe->students()->attach($student->id);
 
         return back()->with('success', 'Student added to class successfully');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $user->update([
+            'password' => bcrypt($validated['password']),
+        ]);
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'update_password',
+            'description' => 'Updated password',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Password updated successfully');
     }
 
     /**
