@@ -104,6 +104,11 @@
     color: var(--faint);
     margin-top: 8px;
   }
+  
+  /* Remove purple gradient on expanded class cards */
+  .class-card.expanded {
+    background: inherit !important;
+  }
 </style>
 
 <!-- ══ MY CLASSES ══ -->

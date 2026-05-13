@@ -44,9 +44,9 @@
     width: 100%;
     padding: 11px 14px;
     border-radius: 13px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--text);
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #0f172a;
     font-size: 13px;
     font-family: var(--font);
     outline: none;
@@ -55,13 +55,17 @@
   }
   
   .settings-input:focus {
-    border-color: rgba(139,92,255,.5);
-    box-shadow: 0 0 0 3px rgba(139,92,255,.12);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
   }
   
   .settings-input:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+  
+  .settings-input::placeholder {
+    color: #6b7280;
   }
   
   .form-group {
@@ -91,6 +95,61 @@
     margin-top: 4px;
   }
   
+  .theme-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+  
+  .theme-option {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    color:inherit;
+    cursor:pointer;
+    transition:transform .2s ease,border-color .2s ease,background .2s ease;
+    width:100%;
+    text-align:left;
+  }
+  
+  .theme-option:hover {
+    transform:translateY(-1px);
+    border-color:rgba(255,255,255,.22);
+  }
+  
+  .theme-option.selected {
+    border-color:#6b73ff;
+    box-shadow:0 0 0 2px rgba(107,115,255,.12);
+    background:rgba(107,115,255,.12);
+  }
+  .theme-option.selected .theme-swatch {
+    border-color:rgba(255,255,255,.95);
+    box-shadow:0 0 0 1px rgba(255,255,255,.5);
+  }
+  
+  .theme-swatch {
+    width:34px;
+    height:34px;
+    border-radius:14px;
+    flex-shrink:0;
+    border:1px solid rgba(148,163,184,.45);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  
+  .theme-label {
+    font-size:13px;
+    font-weight:700;
+  }
+  
+  .theme-light { background:#ffffff; }
+  .theme-ash { background:#9ca3af; }
+  .theme-dark { background:#1f2937; }
+  .theme-onyx { background:#0f172a; }
+
   .button-group {
     display: flex;
     gap: 10px;
@@ -204,6 +263,31 @@
         <input type="text" value="{{ $user->username ?? 'N/A' }}" disabled class="settings-input" style="opacity:0.6;cursor:not-allowed;margin-bottom:0">
         <div class="form-note">Cannot be changed</div>
       </div>
+
+      @php $theme = old('theme', $user->theme ?? 'light'); @endphp
+      <div>
+        <label class="label">Theme</label>
+        <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
+        <div class="theme-grid">
+          <button type="button" class="theme-option {{ $theme === 'light' ? 'selected' : '' }}" data-theme="light">
+            <span class="theme-swatch theme-light"></span>
+            <span class="theme-label">Light</span>
+          </button>
+          <button type="button" class="theme-option {{ $theme === 'ash' ? 'selected' : '' }}" data-theme="ash">
+            <span class="theme-swatch theme-ash"></span>
+            <span class="theme-label">Ash</span>
+          </button>
+          <button type="button" class="theme-option {{ $theme === 'dark' ? 'selected' : '' }}" data-theme="dark">
+            <span class="theme-swatch theme-dark"></span>
+            <span class="theme-label">Dark</span>
+          </button>
+          <button type="button" class="theme-option {{ $theme === 'onyx' ? 'selected' : '' }}" data-theme="onyx">
+            <span class="theme-swatch theme-onyx"></span>
+            <span class="theme-label">Onyx</span>
+          </button>
+        </div>
+        <div class="form-note">Choose between Light, Ash, Dark and Onyx.</div>
+      </div>
     </form>
   </div>
 
@@ -266,5 +350,38 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeKey = 'qr_attendance_theme';
+    const themeInput = document.getElementById('theme-input');
+    const themeButtons = document.querySelectorAll('.theme-option');
+    if (!themeInput || !themeButtons.length) return;
+
+    const applyTheme = function (theme) {
+      const validThemes = ['light','ash','dark','onyx'];
+      const activeTheme = validThemes.includes(theme) ? theme : 'dark';
+      document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
+      document.body.classList.add('theme-' + activeTheme);
+      themeInput.value = activeTheme;
+      themeButtons.forEach(function (option) {
+        option.classList.toggle('selected', option.dataset.theme === activeTheme);
+      });
+      return activeTheme;
+    };
+
+    const savedTheme = localStorage.getItem(themeKey);
+    const currentTheme = applyTheme(savedTheme);
+    localStorage.setItem(themeKey, currentTheme);
+
+    themeButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        const theme = button.dataset.theme;
+        const selectedTheme = applyTheme(theme);
+        localStorage.setItem(themeKey, selectedTheme);
+      });
+    });
+  });
+</script>
 
 @endsection
