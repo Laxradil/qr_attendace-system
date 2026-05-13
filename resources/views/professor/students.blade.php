@@ -1,256 +1,341 @@
 @extends('layouts.professor')
 
-@section('title', 'Students - Professor')
+@section('title', 'My Students - Professor')
 @section('header', 'My Students')
 @section('subheader', 'View all students in your assigned classes')
 
 @section('content')
-<div class="content">
-    @if($classes->count())
-        <div style="display:grid;gap:14px;">
-            @foreach($classes as $classe)
-                <details class="class-panel" {{ $loop->index === 0 ? 'open' : '' }}>
-                    <summary>
-                        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;">
-                            <div>
-                                <div style="font-weight:700;">{{ $classe->display_name }}</div>
-                                <div style="font-size:11px;color:var(--text3);margin-top:4px;">
-                                    {{ $classe->students->count() }} student{{ $classe->students->count() === 1 ? '' : 's' }} enrolled
-                                </div>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);">
-                                <span class="badge {{ $classe->is_active ? 'bg' : 'br' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span>
-                                <span>{{ $loop->index === 0 ? 'collapse' : 'expand' }}</span>
-                            </div>
-                        </div>
-                    </summary>
+<style>
+  .search-bar {
+    display: none !important;
+  }
+</style>
+@if($classes && $classes->count())
+  <div style="display:grid;gap:14px">
+    @foreach($classes as $classe)
+      <div class="glass" style="border-radius:var(--radius-lg);padding:20px;transition:.3s ease">
+        <details style="cursor:pointer" {{ $loop->index === 0 ? 'open' : '' }}>
+          <summary style="display:flex;justify-content:space-between;align-items:center;gap:12px;list-style:none;user-select:none">
+            <div>
+              <div style="font-weight:700;font-size:15px">{{ $classe->display_name ?? 'Class' }}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">
+                {{ $classe->students->count() ?? 0 }} student{{ ($classe->students->count() ?? 0) === 1 ? '' : 's' }} enrolled
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex-shrink:0">
+              <span class="pill green">Active</span>
+              <span style="transition:.2s ease" id="chevron-{{ $loop->index }}">▼</span>
+            </div>
+          </summary>
 
-                    <div style="padding-top:14px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                            <span></span>
-                            <button type="button" class="btn btn-p btn-sm" data-class-id="{{ $classe->id }}" onclick="handleAddStudentFromList(this)">+ Add Student</button>
-                        </div>
-                        @if($classe->students->count())
-                            <div class="tbl-wrap" style="margin:0;">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Student ID</th>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($classe->students as $student)
-                                            @php
-                                                $requestKey = $classe->id . '_' . $student->id;
-                                                $pending = $pendingRequests[$requestKey] ?? null;
-                                            @endphp
-                                            <tr>
-                                                <td class="td-mono">{{ $student->student_id ?? 'N/A' }}</td>
-                                                <td style="font-weight:500;">{{ $student->name }}</td>
-                                                <td style="color:var(--text2);">{{ $student->email }}</td>
-                                                <td>
-                                                    <span class="badge {{ $student->is_active ? 'bg' : 'br' }}">
-                                                        {{ $student->is_active ? 'Active' : 'Inactive' }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    @if($pending)
-                                                        <span class="badge br" style="background:rgba(255, 165, 0, 0.16);color:var(--text);border:none;">Request Pending</span>
-                                                    @else
-                                                        <button type="button" class="btn btn-sm btn-d" style="padding:6px 10px;"
-                                                            data-class-id="{{ $classe->id }}"
-                                                            data-student-id="{{ $student->id }}"
-                                                            data-student-name="{{ e($student->name) }}"
-                                                            onclick="openDropRequestModal(this)">
-                                                            Drop
-                                                        </button>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+          <div style="padding-top:14px;border-top:1px solid rgba(255,255,255,.07);margin-top:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
+              <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
+              <button type="button" class="btn primary slim" onclick="alert('Add student feature coming soon')">+ Add Student</button>
+            </div>
+
+            @if($classe->students && $classe->students->count())
+              <div class="table-wrap">
+                <table id="studentsTable">
+                  <thead>
+                    <tr>
+                      <th>Student ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach($classe->students as $student)
+                      <tr>
+                        <td>
+                          <span style="font-family:var(--mono);font-size:12px">{{ $student->student_id ?? 'N/A' }}</span>
+                        </td>
+                        <td>
+                          <div class="user-cell">
+                            <div class="small-avatar">{{ strtoupper(substr($student->name ?? 'S', 0, 1)) }}</div>
+                            <strong>{{ $student->name ?? 'Unknown' }}</strong>
+                          </div>
+                        </td>
+                        <td>{{ $student->email ?? 'N/A' }}</td>
+                        <td>
+                          <span class="pill green">Active</span>
+                        </td>
+                        <td>
+                          @php
+                            $requestKey = "{$classe->id}_{$student->id}";
+                            $pendingRequest = $pendingRequests[$requestKey] ?? null;
+                          @endphp
+                          @if($pendingRequest)
+                            <div>
+                              <span class="pill pending">Pending approval</span>
+                              <div style="font-size:11px;color:var(--muted);margin-top:4px;">Reason: {{ $pendingRequest->reason }}</div>
                             </div>
-                        @else
-                            <div style="padding:18px 0;color:var(--text2);font-size:13px;">No students enrolled in this class yet.</div>
-                        @endif
-                    </div>
-                </details>
-            @endforeach
-        </div>
-    @else
-        <div style="padding:32px;text-align:center;color:var(--text2);">No students found in your assigned classes.</div>
-    @endif
-</div>
+                          @else
+                            <button class="btn slim drop" type="button" onclick='openDropModal({{ $student->id }}, {!! json_encode($student->name) !!}, {{ $classe->id }})'>Drop</button>
+                          @endif
+                        </td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+            @else
+              <div style="text-align:center;padding:24px;color:var(--muted)">
+                <div style="font-size:32px;margin-bottom:8px">👥</div>
+                <div style="font-size:13px">No students enrolled in this class yet.</div>
+              </div>
+            @endif
+          </div>
+        </details>
+      </div>
+    @endforeach
+  </div>
+@else
+  <div class="glass" style="border-radius:var(--radius-lg);padding:40px;text-align:center">
+    <div style="font-size:48px;margin-bottom:12px">📚</div>
+    <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">No Classes Yet</div>
+    <div style="font-size:13px;color:var(--muted)">You haven't been assigned any classes yet.</div>
+  </div>
+@endif
 
 <style>
-    .class-panel {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 14px;
-        transition: box-shadow 120ms ease;
-    }
-    .class-panel[open] {
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
-    }
-    .class-panel summary {
-        list-style: none;
-        cursor: pointer;
-        padding: 0;
-    }
-    .class-panel summary::-webkit-details-marker {
-        display: none;
-    }
-
-    #dropRequestModal .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-    }
-    #dropRequestModal label,
-    #dropRequestModal .card h3,
-    #dropRequestModal .card div,
-    #dropRequestModal option,
-    #dropRequestModal .theme-select {
-        color: var(--text);
-    }
-    #dropRequestModal .theme-select {
-        width: 100%;
-        padding: 12px 14px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 14px;
-        color: var(--text);
-        background: var(--surface);
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        outline: none;
-    }
-    #dropRequestModal .theme-select option {
-        background: var(--surface);
-        color: var(--text);
-    }
-    #dropRequestModal .theme-select:hover,
-    #dropRequestModal .theme-select:focus {
-        border-color: rgba(255,255,255,0.18);
-        background: rgba(255,255,255,0.04);
-    }
-    #dropRequestModal .theme-select option:checked {
-        background: var(--surface);
-        color: var(--text);
-    }
-    #dropRequestModal button.btn-p,
-    #dropRequestModal button.btn-s {
-        min-height: 42px;
-    }
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  .btn {
+    padding: 9px 16px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--font);
+    outline: none;
+    cursor: pointer;
+    transition: .2s ease;
+  }
+  
+  .btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,.13);
+    border-color: rgba(255,255,255,.24);
+  }
+  
+  .btn.primary {
+    background: linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));
+    border-color: rgba(139,92,255,.5);
+    color: #fff;
+  }
+  
+  .btn.primary:hover {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 10px 28px rgba(80,94,255,.38);
+  }
+  
+  .btn.slim {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+  
+  .btn.drop {
+    background: rgba(255,61,114,.15);
+    border-color: rgba(255,61,114,.3);
+    color: #ff3d72;
+  }
+  
+  .btn.drop:hover {
+    background: rgba(255,61,114,.28);
+    border-color: rgba(255,61,114,.5);
+    box-shadow: 0 8px 24px rgba(255,61,114,.2);
+  }
+  
+  .pill {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,.14);
+  }
+  
+  .pill.green {
+    color: #4dffa0;
+    background: rgba(24,240,139,.11);
+    border-color: rgba(24,240,139,.2);
+  }
+  
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    scrollbar-width: thin;
+  }
+  
+  table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  
+  th, td {
+    padding: 14px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  
+  th {
+    background: rgba(255,255,255,.12);
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  
+  td {
+    color: #f0f4ff;
+    font-size: 13.5px;
+  }
+  
+  tr:last-child td {
+    border-bottom: 0;
+  }
+  
+  tr:hover td {
+    background: rgba(255,255,255,.028);
+  }
+  
+  .user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+  }
+  
+  .small-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(145deg,rgba(139,92,255,.36),rgba(67,166,255,.2));
+    font-size: 11px;
+    font-weight: 900;
+    border: 1px solid rgba(139,92,255,.3);
+    flex-shrink: 0;
+  }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    z-index: 999;
+  }
+  .modal-overlay.hidden {
+    display: none;
+  }
+  .modal-box {
+    width: min(560px, 100%);
+    background: rgba(12,14,31,.98);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45);
+  }
+  .modal-box h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .modal-box label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .modal-box select {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    padding: 12px 14px;
+    font-size: 13px;
+    outline: none;
+    margin-bottom: 18px;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pill.pending {
+    color: #ffd66b;
+    background: rgba(255,214,107,.14);
+    border-color: rgba(255,214,107,.24);
+  }
 </style>
 
-<!-- Add Student Modal -->
-<div id="addStudentModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
-    <div class="card" style="width:90%;max-width:400px;padding:24px;">
-        <h3 style="margin:0 0 16px 0;">Add Student to Class</h3>
-        <form action="{{ route('professor.add-student') }}" method="POST">
-            @csrf
-            <input type="hidden" id="modalClassId" name="class_id" value="">
-            <div style="margin-bottom:16px;">
-                <label style="display:block;margin-bottom:6px;font-weight:600;font-size:13px;">Student Email</label>
-                <input type="email" name="student_email" required style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:13px;box-sizing:border-box;">
-            </div>
-            <div style="display:flex;gap:8px;">
-                <button type="submit" class="btn btn-p" style="flex:1;">Add Student</button>
-                <button type="button" class="btn btn-s" style="flex:1;" onclick="closeAddStudentModal()">Cancel</button>
-            </div>
-        </form>
-    </div>
+<div id="drop-modal-overlay" class="modal-overlay hidden" onclick="closeDropModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3>Request Drop Approval</h3>
+    <p id="drop-modal-text" style="margin:0 0 16px;color:var(--muted);">Choose a reason for dropping this student and send the request to admin for approval.</p>
+    <form id="drop-request-form" method="POST" action="{{ route('professor.drop-request') }}">
+      @csrf
+      <input type="hidden" name="student_id" id="drop-student-id">
+      <input type="hidden" name="class_id" id="drop-class-id">
+      <label for="drop-reason">Reason</label>
+      <select id="drop-reason" name="reason" required>
+        <option value="">Select a reason</option>
+        <option value="Schedule conflict">Schedule conflict</option>
+        <option value="Transfer to another section">Transfer to another section</option>
+        <option value="Medical reason">Medical reason</option>
+        <option value="Academic performance">Academic performance</option>
+        <option value="Personal reasons">Personal reasons</option>
+      </select>
+      <div class="modal-actions">
+        <button type="button" class="btn slim" onclick="closeDropModal()">Cancel</button>
+        <button type="submit" class="btn primary slim">Submit Request</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
-function handleAddStudentFromList(button) {
-    const classId = button.dataset.classId;
-    openAddStudentModal(classId);
-}
+  function filterStudents(input) {
+    const searchTerm = input.value.toLowerCase();
+    const table = input.closest('.table-wrap')?.querySelector('table');
+    if (!table) return;
 
-function openAddStudentModal(classId) {
-    document.getElementById('modalClassId').value = classId;
-    document.getElementById('addStudentModal').style.display = 'flex';
-}
-
-function closeAddStudentModal() {
-    document.getElementById('addStudentModal').style.display = 'none';
-}
-
-function openDropRequestModal(button) {
-    const classId = button.dataset.classId;
-    const studentId = button.dataset.studentId;
-    const studentName = button.dataset.studentName;
-
-    document.getElementById('dropClassId').value = classId;
-    document.getElementById('dropStudentId').value = studentId;
-    document.getElementById('dropStudentName').textContent = studentName;
-    document.getElementById('dropReasonSelect').value = '';
-    document.getElementById('dropRequestModal').style.display = 'flex';
-}
-
-function closeDropRequestModal() {
-    document.getElementById('dropRequestModal').style.display = 'none';
-}
-
-// Close modal when clicking outside
-const addStudentModal = document.getElementById('addStudentModal');
-if (addStudentModal) {
-    addStudentModal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeAddStudentModal();
-        }
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchTerm) ? '' : 'none';
     });
-}
+  }
 
-const dropRequestModal = document.getElementById('dropRequestModal');
-if (dropRequestModal) {
-    dropRequestModal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeDropRequestModal();
-        }
-    });
-}
+  function openDropModal(studentId, studentName, classId) {
+    document.getElementById('drop-student-id').value = studentId;
+    document.getElementById('drop-class-id').value = classId;
+    document.getElementById('drop-reason').value = '';
+    document.getElementById('drop-modal-text').textContent = `Drop request for ${studentName}. Please choose a reason and submit to send it to admin for approval.`;
+    document.getElementById('drop-modal-overlay').classList.remove('hidden');
+  }
 
+  function closeDropModal(event) {
+    if (event && event.target.id !== 'drop-modal-overlay') {
+      return;
+    }
+    document.getElementById('drop-modal-overlay').classList.add('hidden');
+  }
 </script>
-
-<!-- Drop Request Modal -->
-<div id="dropRequestModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:1000;justify-content:center;align-items:center;">
-    <div class="card" style="width:90%;max-width:420px;padding:24px;">
-        <h3 style="margin:0 0 16px 0;">Drop student</h3>
-        <form action="{{ route('professor.drop-request') }}" method="POST">
-            @csrf
-            <input type="hidden" id="dropClassId" name="class_id" value="">
-            <input type="hidden" id="dropStudentId" name="student_id" value="">
-            <div style="margin-bottom:16px;">
-                <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Student</div>
-                <div id="dropStudentName" style="padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);"></div>
-            </div>
-            <div style="margin-bottom:18px;">
-                <label for="dropReasonSelect" style="display:block;margin-bottom:6px;font-weight:600;font-size:13px;">Reason for drop</label>
-                <select id="dropReasonSelect" name="reason" required class="theme-select">
-                    <option value="" disabled selected>Select reason</option>
-                    <option value="Schedule conflict">Schedule conflict</option>
-                    <option value="Transfer to another section">Transfer to another section</option>
-                    <option value="Medical reason">Medical reason</option>
-                    <option value="Academic performance">Academic performance</option>
-                    <option value="Personal reasons">Personal reasons</option>
-                </select>
-            </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <button type="submit" class="btn btn-p" style="flex:1;">Send Request</button>
-                <button type="button" class="btn btn-s" style="flex:1;" onclick="closeDropRequestModal()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 @endsection

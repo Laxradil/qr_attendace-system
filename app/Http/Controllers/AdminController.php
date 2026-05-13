@@ -13,6 +13,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class AdminController extends Controller
@@ -67,7 +68,10 @@ class AdminController extends Controller
             return SystemLog::with('user')->latest()->limit(10)->get();
         });
 
-        return view('admin.dashboard', array_merge($stats, ['recentLogs' => $recentLogs]));
+        // Get pending drop requests count
+        $dropRequests = DropRequest::where('status', 'pending')->count();
+
+        return view('admin.dashboard-new', array_merge($stats, ['recentLogs' => $recentLogs, 'dropRequests' => $dropRequests]));
     }
 
     private function getUserStats(): array
@@ -110,7 +114,7 @@ class AdminController extends Controller
 
         $stats = $this->getUserStats();
 
-        return view('admin.users', [
+        return view('admin.users-new', [
             'users' => $users,
             'stats' => $stats,
             'filters' => [
@@ -251,7 +255,7 @@ class AdminController extends Controller
         $professors = Cache::remember('admin_professors_page_' . request('page', 1), 60, function () {
             return User::with('classes')->where('role', 'professor')->paginate(20);
         });
-        return view('admin.professors', ['professors' => $professors]);
+        return view('admin.professors-new', ['professors' => $professors]);
     }
 
     // Students Management
@@ -262,7 +266,7 @@ class AdminController extends Controller
         $classes = Cache::remember('admin_students_by_class_page_' . request('page', 1), 60, function () {
             return Classe::with(['students', 'professors'])->paginate(10);
         });
-        return view('admin.students', ['classes' => $classes]);
+        return view('admin.students-new', ['classes' => $classes]);
     }
 
     // Classes Management
@@ -272,7 +276,7 @@ class AdminController extends Controller
         $classes = Cache::remember('admin_classes_page_' . request('page', 1), 60, function () {
             return Classe::with('professors', 'students')->paginate(20);
         });
-        return view('admin.classes', ['classes' => $classes]);
+        return view('admin.classes-new', ['classes' => $classes]);
     }
 
     public function createClass(): View
@@ -440,11 +444,11 @@ class AdminController extends Controller
     public function qrCodes(): View
     {
         $students = User::where('role', 'student')
-            ->with('enrolledClasses')
+              ->with(['enrolledClasses', 'studentQrCode'])
             ->orderBy('name')
             ->paginate(20, ['*'], 'students_page');
 
-        return view('admin.qr-codes', compact('students'));
+        return view('admin.qr-codes-new', compact('students'));
     }
 
     public function studentQrCode(User $student)
@@ -479,29 +483,8 @@ class AdminController extends Controller
     {
         $records = AttendanceRecord::with('student', 'classe')
             ->paginate(20);
-        
-        $attendanceStats = AttendanceRecord::selectRaw(
-            'COUNT(*) as total_records, 
-             SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as present_count,
-             SUM(CASE WHEN status = \'late\' THEN 1 ELSE 0 END) as late_count,
-             SUM(CASE WHEN status = \'absent\' THEN 1 ELSE 0 END) as absent_count,
-             SUM(CASE WHEN status = \'excused\' THEN 1 ELSE 0 END) as excused_count'
-        )->first();
-        
-        $totalRecords = (int) ($attendanceStats?->total_records ?? 0);
-        $presentCount = (int) ($attendanceStats?->present_count ?? 0);
-        $lateCount = (int) ($attendanceStats?->late_count ?? 0);
-        $absentCount = (int) ($attendanceStats?->absent_count ?? 0);
-        $excusedCount = (int) ($attendanceStats?->excused_count ?? 0);
-        
-        return view('admin.attendance-records', [
-            'records' => $records,
-            'totalRecords' => $totalRecords,
-            'presentCount' => $presentCount,
-            'lateCount' => $lateCount,
-            'absentCount' => $absentCount,
-            'excusedCount' => $excusedCount,
-        ]);
+        $attendanceRecords = $records;
+        return view('admin.attendance-records-new', ['attendanceRecords' => $attendanceRecords]);
     }
 
     // Reports
@@ -544,8 +527,9 @@ class AdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('admin.drop-requests', [
-            'requests' => $requests,
+        $dropRequests = $requests;
+        return view('admin.drop-requests-new', [
+            'dropRequests' => $dropRequests,
         ]);
     }
 
@@ -555,23 +539,46 @@ class AdminController extends Controller
             return back()->with('error', 'Only pending requests can be approved.');
         }
 
-        $dropRequest->update([
-            'status' => 'approved',
-            'admin_id' => Auth::id(),
-            'reviewed_at' => now(),
-        ]);
+        return DB::transaction(function () use ($request, $dropRequest) {
+            $duplicateApproved = DropRequest::where('professor_id', $dropRequest->professor_id)
+                ->where('student_id', $dropRequest->student_id)
+                ->where('class_id', $dropRequest->class_id)
+                ->where('status', 'approved')
+                ->where('id', '!=', $dropRequest->id)
+                ->exists();
 
-        $dropRequest->classe->students()->detach($dropRequest->student_id);
+            if ($duplicateApproved) {
+                $dropRequest->delete();
 
-        SystemLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'other',
-            'description' => 'Approved drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+                SystemLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'other',
+                    'description' => 'Skipped duplicate drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
 
-        return back()->with('success', 'Drop request approved and student removed from the class.');
+                return back()->with('warning', 'That drop request was already approved. The duplicate request was removed.');
+            }
+
+            $dropRequest->update([
+                'status' => 'approved',
+                'admin_id' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
+
+            $dropRequest->classe->students()->detach($dropRequest->student_id);
+
+            SystemLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'other',
+                'description' => 'Approved drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Drop request approved and student removed from the class.');
+        });
     }
 
     public function rejectDropRequest(Request $request, DropRequest $dropRequest): RedirectResponse
@@ -604,6 +611,6 @@ class AdminController extends Controller
         $logs = Cache::remember('admin_logs_page_' . request('page', 1), 60, function () {
             return SystemLog::with('user')->latest()->paginate(20);
         });
-        return view('admin.logs', ['logs' => $logs]);
+        return view('admin.logs-new', ['logs' => $logs]);
     }
 }

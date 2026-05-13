@@ -1,48 +1,165 @@
 @extends('layouts.professor')
 
-@section('title', 'Schedules - Professor')
+@section('title', 'Class Schedules - Professor')
 @section('header', 'Class Schedules')
 @section('subheader', 'View all your scheduled classes (read-only)')
 
 @section('content')
-<div class="content">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;">
-        @forelse($schedules as $schedule)
-            <div class="card" style="margin-bottom:0;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
-                    <div>
-                        <div style="font-size:13px;font-weight:700;">{{ $schedule->subject_name }}</div>
-                        <div style="font-size:10px;color:var(--text2);margin-top:2px;font-family:'JetBrains Mono',monospace;">{{ $schedule->subject_code }}</div>
-                    </div>
-                    <div style="font-size:18px;font-weight:700;color:var(--blue);">{{ $schedule->room }}</div>
-                </div>
-                
-                <div style="display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--border);">
-                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;">
-                        <span style="color:var(--text2);">📅 Days:</span>
-                        <span style="font-weight:600;color:var(--text);">{{ $schedule->days }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;">
-                        <span style="color:var(--text2);">⏰ Time:</span>
-                        <span style="font-weight:600;color:var(--text);">{{ $schedule->time }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;">
-                        <span style="color:var(--text2);">👨‍🏫 Professor:</span>
-                        <span style="font-weight:600;color:var(--text);">{{ $schedule->professor }}</span>
-                    </div>
-                </div>
-
-                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:9px;color:var(--text3);">View-only</span>
-                </div>
-            </div>
-        @empty
-            <div style="grid-column:1 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;">
-                <div style="width:60px;height:60px;border-radius:50%;background:var(--navy3);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:24px;">📅</div>
-                <div style="font-size:13px;color:var(--text2);">No schedules available</div>
-                <div style="font-size:10px;color:var(--text3);margin-top:4px;">Your class schedules will appear here</div>
-            </div>
-        @endforelse
+<style>
+  .search-bar {
+    display: none !important;
+  }
+</style>
+<!-- Overview stats -->
+<div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px;margin-top:6px">
+  <div class="stat glass">
+    <div class="stat-icon blue"><span class="icon-dot">▬</span></div>
+    <div class="stat-body">
+      <strong>{{ count($schedules ?? []) }}</strong>
+      <span>Total Schedules</span>
     </div>
+  </div>
+  <div class="stat glass">
+    <div class="stat-icon green"><span class="icon-dot">◯</span></div>
+    <div class="stat-body">
+      <strong>{{ collect($schedules ?? [])->pluck('professor')->unique()->count() }}</strong>
+      <span>Professors</span>
+    </div>
+  </div>
+  <div class="stat glass">
+    <div class="stat-icon yellow"><span class="icon-dot">◻</span></div>
+    <div class="stat-body">
+      <strong>{{ count($schedules ?? []) }}</strong>
+      <span>Subjects</span>
+    </div>
+  </div>
+  <div class="stat glass">
+    <div class="stat-icon purple"><span class="icon-dot">□</span></div>
+    <div class="stat-body">
+      <strong>{{ count($schedules ?? []) }}</strong>
+      <span>Active Rooms</span>
+    </div>
+  </div>
 </div>
+
+<!-- Schedule cards grid -->
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+  @forelse($schedules ?? [] as $schedule)
+    <div class="glass" style="border-radius:var(--radius-lg);padding:20px;transition:.3s ease">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <h3 style="font-size:15px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px">
+            {{ $schedule->subject_name ?? 'Class' }}
+          </h3>
+        </div>
+        <div style="font-size:26px;font-weight:900;font-family:var(--mono);color:rgba(139,92,255,.9);letter-spacing:-.03em">
+          {{ $schedule->room ?? 'F-107' }}
+        </div>
+      </div>
+      
+      <div style="display:grid;gap:8px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+          <div class="detail-icon"><span class="icon-dot">▨</span></div>
+          <span style="color:var(--muted)">Days:</span> <strong style="color:var(--text)">{{ $schedule->days ?? 'N/A' }}</strong>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+          <div class="detail-icon"><span class="icon-dot">◐</span></div>
+          <span style="color:var(--muted)">Time:</span> <strong style="color:var(--text);font-family:var(--mono)">{{ $schedule->start_time ?? 'N/A' }} - {{ $schedule->end_time ?? 'N/A' }}</strong>
+        </div>
+        @if($schedule->professor)
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+            <div class="detail-icon"><span class="icon-dot">◎</span></div>
+            <span style="color:var(--muted)">Professor:</span> <strong style="color:var(--text)">{{ $schedule->professor }}</strong>
+          </div>
+        @endif
+      </div>
+
+    </div>
+  @empty
+    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">
+      <div style="font-size:48px;margin-bottom:12px"></div>
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">No Schedules Yet</div>
+      <div style="font-size:13px">Your schedule will appear here when it's set up.</div>
+    </div>
+  @endforelse
+</div>
+
+<style>
+  .stat {
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: .3s ease;
+  }
+  
+  .stat:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,.3);
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .icon-dot {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,.85);
+    font-size: 12px;
+  }
+  .detail-icon {
+    width:22px;
+    height:22px;
+    border-radius:6px;
+    display:grid;
+    place-items:center;
+    font-size:11px;
+    background:rgba(255,255,255,.08);
+  }
+  
+  .stat-icon.blue {
+    background: rgba(67,166,255,.18);
+    border: 1px solid rgba(67,166,255,.25);
+  }
+  
+  .stat-icon.green {
+    background: rgba(24,240,139,.15);
+    border: 1px solid rgba(24,240,139,.2);
+  }
+  
+  .stat-icon.yellow {
+    background: rgba(255,199,90,.15);
+    border: 1px solid rgba(255,199,90,.2);
+  }
+  
+  .stat-icon.purple {
+    background: rgba(139,92,255,.18);
+    border: 1px solid rgba(139,92,255,.22);
+  }
+  
+  .stat-body strong {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    display: block;
+    line-height: 1;
+  }
+  
+  .stat-body span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 3px;
+    display: block;
+  }
+</style>
 @endsection

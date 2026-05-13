@@ -40,7 +40,7 @@ class ScheduleController extends Controller
             'subject_code' => 'required|string|max:20',
             'subject_name' => 'required|string|max:255',
             'professor_id' => 'required|exists:users,id',
-            'days' => 'required|string|max:20',
+            'days' => 'required|string|max:100',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'room' => 'required|string|max:20',
@@ -78,7 +78,7 @@ class ScheduleController extends Controller
         $request->validate([
             'subject_code' => 'required|string|max:20',
             'subject_name' => 'required|string|max:255',
-            'days' => 'required|string|max:20',
+            'days' => 'required|string|max:100',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'room' => 'required|string|max:20',
