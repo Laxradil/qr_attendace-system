@@ -156,3 +156,81 @@
   </div>
 </div>
 @endsection
+
+<style>
+  /* Light theme solid overrides */
+  body.theme-light .ghost-stat {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .ghost-stat:hover {
+    background: #f3e8ff !important;
+    border-color: #8b5cff !important;
+  }
+  
+  /* Overview cards */
+  body.theme-light div[style*="background:rgba(255,255,255,.055)"] {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  /* Icon backgrounds in overview */
+  body.theme-light div[style*="background:rgba(24,240,139,.18)"] {
+    background: #dcfce7 !important;
+  }
+  
+  body.theme-light div[style*="background:rgba(255,199,90,.18)"] {
+    background: #fef3c7 !important;
+  }
+  
+  body.theme-light div[style*="background:rgba(255,61,114,.18)"] {
+    background: #fee2e2 !important;
+  }
+  
+  body.theme-light div[style*="background:rgba(139,92,255,.18)"] {
+    background: #ede9fe !important;
+  }
+  
+  body.theme-light div[style*="background:rgba(67,166,255,.18)"] {
+    background: #dbeafe !important;
+  }
+  
+  /* Leaderboard table */
+  body.theme-light tr[style*="background:rgba(139,92,255,0.12)"] {
+    background: #f3e8ff !important;
+  }
+  
+  body.theme-light tr[style*="border-bottom:3px solid rgba(139,92,255,0.6)"] {
+    border-bottom: 3px solid #8b5cff !important;
+  }
+  
+  body.theme-light tr[style*="border-bottom:2px solid rgba(139,92,255,0.85)"] {
+    border-bottom: 2px solid #8b5cff !important;
+  }
+  
+  /* Text colors */
+  body.theme-light [style*="color:#ffffff"] {
+    color: #000000 !important;
+  }
+  
+  body.theme-light [style*="color:#18f08b"] {
+    color: #166534 !important;
+  }
+  
+  body.theme-light [style*="color:#ffc75a"] {
+    color: #92400e !important;
+  }
+  
+  body.theme-light [style*="color:#ff3d72"] {
+    color: #991b1b !important;
+  }
+  
+  body.theme-light [style*="color:#8b5cff"] {
+    color: #7c3aed !important;
+  }
+  
+  body.theme-light [style*="color:#43a6ff"] {
+    color: #2563eb !important;
+  }
+</style>

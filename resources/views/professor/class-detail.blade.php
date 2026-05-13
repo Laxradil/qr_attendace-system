@@ -97,4 +97,54 @@
     </div>
 </div>
 
+<style>
+  body.theme-light #addStudentModal {
+    background: rgba(0,0,0,0.5) !important;
+  }
+  
+  body.theme-light .card {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light input {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .btn {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .btn-p {
+    background: #3b82f6 !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+  }
+  
+  body.theme-light .btn-s {
+    background: #f9fafb !important;
+    border-color: #e5e7eb !important;
+    color: #374151 !important;
+  }
+  
+  body.theme-light table th {
+    background: #f9fafb !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light table td {
+    color: #000000 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .td-mono {
+    color: #000000 !important;
+  }
+</style>
+
 @endsection

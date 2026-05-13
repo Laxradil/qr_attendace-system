@@ -76,3 +76,27 @@ function filterTable(input) {
   </div>
 </div>
 @endsection
+
+<style>
+  /* Light theme solid overrides */
+  body.theme-light #tableSearch {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill.green {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+  }
+  
+  body.theme-light .pill.yellow {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+  }
+  
+  body.theme-light .pill.red {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+  }
+</style>

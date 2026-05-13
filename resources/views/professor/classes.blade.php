@@ -252,4 +252,70 @@
     .class-grid { grid-template-columns: 1fr; }
   }
 </style>
+
+<style>
+  body.theme-light .glass {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .chip {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .chip:hover {
+    background: #f9fafb !important;
+  }
+  
+  body.theme-light .chip.active {
+    background: #3b82f6 !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+  }
+  
+  body.theme-light .class-card {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  }
+  
+  body.theme-light .class-card::after {
+    background: linear-gradient(90deg,transparent,#e5e7eb 50%,transparent) !important;
+  }
+  
+  body.theme-light .class-card:hover {
+    border-color: #d1d5db !important;
+  }
+  
+  body.theme-light .class-code {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .class-room {
+    color: #000000 !important;
+  }
+  
+  body.theme-light .class-meta-row {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .class-meta-row strong {
+    color: #000000 !important;
+  }
+  
+  body.theme-light .meta-icon {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .view-link {
+    color: #3b82f6 !important;
+  }
+  
+  body.theme-light .view-link:hover {
+    color: #2563eb !important;
+  }
+</style>
 @endsection

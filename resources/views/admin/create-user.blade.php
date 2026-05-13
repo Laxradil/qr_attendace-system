@@ -135,4 +135,28 @@
   </form>
 </div>
 
+<style>
+  /* Light theme solid overrides */
+  body.theme-light .form-group label {
+    color: #000000;
+  }
+  
+  body.theme-light .form-group input,
+  body.theme-light .form-group select {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #000000;
+  }
+  
+  body.theme-light .form-group input:focus,
+  body.theme-light .form-group select:focus {
+    border-color: #8b5cff;
+    box-shadow: inset 0 0 0 2px rgba(139, 92, 255, 0.1), 0 0 16px rgba(139, 92, 255, 0.1);
+  }
+  
+  body.theme-light .form-group input::placeholder {
+    color: #9ca3af;
+  }
+</style>
+
 @endsection

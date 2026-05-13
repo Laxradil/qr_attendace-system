@@ -63,3 +63,84 @@
   </div>
 </div>
 @endsection
+
+<style>
+  body.theme-light .glass-table {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .btn.active {
+    background: #e0e7ff !important;
+    border-color: #c7d2fe !important;
+    color: #3730a3 !important;
+  }
+  
+  body.theme-light .chip {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light th {
+    background: #f9fafb !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light td {
+    color: #000000 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .muted {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .small-avatar {
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill {
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill.blue {
+    background: #eff6ff !important;
+    border-color: #dbeafe !important;
+    color: #1d4ed8 !important;
+  }
+  
+  body.theme-light .pill.yellow {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    color: #92400e !important;
+  }
+  
+  body.theme-light .pill.red {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+  }
+  
+  body.theme-light .pill.green {
+    background: #ecfdf5 !important;
+    border-color: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  
+  body.theme-light .pill.purple {
+    background: #faf5ff !important;
+    border-color: #f3e8ff !important;
+    color: #7c3aed !important;
+  }
+  
+  body.theme-light .btn {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+</style>
