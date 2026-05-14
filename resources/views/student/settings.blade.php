@@ -7,7 +7,7 @@
 @section('content')
 <style>
   .search-bar { display: none !important; }
-  .settings-container { max-width: 520px; margin: 0 auto; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.10); border-radius: 28px; padding: 32px; }
+  .settings-container { max-width: 1040px; margin: 0 auto; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.10); border-radius: 28px; padding: 32px; }
   .settings-section { margin-bottom: 28px; }
   .settings-section:last-child { margin-bottom: 0; }
   .settings-section h3 { font-size: 15px; font-weight: 800; margin-bottom: 18px; letter-spacing: -.03em; }

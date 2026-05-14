@@ -757,41 +757,6 @@
             border-color: var(--pl);
         }
         
-        /* Notifications */
-        .notif-btn {
-            position: relative;
-        }
-        
-        .notif-panel {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            width: 320px;
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55);
-            overflow: hidden;
-            z-index: 999;
-            margin-top: 8px;
-        }
-        
-        .notif-panel.show {
-            display: block;
-        }
-        
-        .notif-item {
-            display: flex;
-            gap: 10px;
-            border-bottom: 1px solid var(--line2);
-            padding: 12px;
-        }
-        
-        .notif-item:last-child {
-            border-bottom: 0;
-        }
-        
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 7px;
@@ -871,24 +836,6 @@
             </div>
             <div class="topbar-right">
                 <div class="clock" id="clock">08:15 AM</div>
-                <button class="btn notif-btn" onclick="toggleNotif(event)">🔔
-                    <div class="notif-panel" id="notifPanel">
-                        <div class="notif-item">
-                            <span class="badge green">Soon</span>
-                            <div style="flex: 1;">
-                                <b style="font-size: 11px;">CS301 session starts in 10 min</b><br>
-                                <span class="log-time">Room Lab 1</span>
-                            </div>
-                        </div>
-                        <div class="notif-item">
-                            <span class="badge red">Alert</span>
-                            <div style="flex: 1;">
-                                <b style="font-size: 11px;">3 students below 75%</b><br>
-                                <span class="log-time">Review now</span>
-                            </div>
-                        </div>
-                    </div>
-                </button>
             </div>
         </div>
         
@@ -1516,15 +1463,6 @@
     function togglePanel(element) {
         element.closest('.panel').classList.toggle('open');
     }
-    
-    function toggleNotif(e) {
-        e.stopPropagation();
-        document.getElementById('notifPanel').classList.toggle('show');
-    }
-    
-    document.addEventListener('click', () => {
-        document.getElementById('notifPanel').classList.remove('show');
-    });
     
     function setTheme(btn, mode) {
         document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
