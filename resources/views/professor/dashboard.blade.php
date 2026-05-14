@@ -32,7 +32,7 @@
     <div class="stat-body" style="transition:opacity 0.3s ease">
       <strong>{{ $totalClasses }}</strong>
       <span>Total Classes</span>
-      <div class="trend up" style="font-size:12px;color:#a8b8ff">↑ All active</div>
+      <div class="trend up" style="font-size:12px;color:#8b5cff">↑ All active</div>
     </div>
   </div>
   <div class="stat ghost-stat" style="transition:all 0.3s ease">
@@ -40,7 +40,7 @@
     <div class="stat-body" style="transition:opacity 0.3s ease">
       <strong>{{ $totalStudents }}</strong>
       <span>Students</span>
-      <div class="trend up" style="font-size:12px;color:#a8b8ff">↑ Across all classes</div>
+      <div class="trend up" style="font-size:12px;color:#8b5cff">↑ Across all classes</div>
     </div>
   </div>
   <div class="stat ghost-stat" style="transition:all 0.3s ease">
@@ -48,7 +48,7 @@
     <div class="stat-body" style="transition:opacity 0.3s ease">
       <strong>{{ $totalRecords }}</strong>
       <span>Attendance Records</span>
-      <div class="trend up" style="font-size:12px;color:#a8b8ff">↑ Today</div>
+      <div class="trend up" style="font-size:12px;color:#8b5cff">↑ Today</div>
     </div>
   </div>
   <div class="stat ghost-stat" style="transition:all 0.3s ease">
@@ -56,7 +56,7 @@
     <div class="stat-body" style="transition:opacity 0.3s ease">
       <strong>{{ $attendanceRate }}%</strong>
       <span>Attendance Rate</span>
-      <div class="trend {{ $attendanceRate >= 80 ? 'up' : 'down' }}" style="font-size:12px;color:#a8b8ff">{{ $attendanceRate >= 80 ? '↑' : '↓' }} This week</div>
+      <div class="trend {{ $attendanceRate >= 80 ? 'up' : 'down' }}" style="font-size:12px;color:#8b5cff">{{ $attendanceRate >= 80 ? '↑' : '↓' }} This week</div>
     </div>
   </div>
 </div>
@@ -99,7 +99,7 @@
 
     <div class="section-head">
       <h3 style="font-size:16px; margin-top: 12px;">⚡ Recent Activities</h3>
-      <a href="{{ route('professor.logs') }}" style="color: #ffffff;">View all →</a>
+      <a href="{{ route('professor.logs') }}" style="color: #8b5cff">View all →</a>
     </div>
     @forelse($recentLogs as $log)
       <div class="activity">
