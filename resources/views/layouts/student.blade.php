@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
     <style>
     body.theme-light .sidebar {
       background: #fff !important;
@@ -19,7 +17,6 @@
       border-color: #c7d2fe !important;
     }
     </style>
->>>>>>> origin/branch-ni-kirb
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,8 +51,6 @@
       --mono:'Space Mono',monospace;
     }
 
-<<<<<<< HEAD
-=======
     /* Ensure dashboard header is visible in all modes */
     .page-title h2, .page-title p {
       color: var(--text) !important;
@@ -566,7 +561,6 @@
       border-color: rgba(15,23,42,.2) !important;
     }
 
->>>>>>> origin/branch-ni-kirb
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow:hidden}
     body{
@@ -581,8 +575,6 @@
         radial-gradient(ellipse at 50% 50%, rgba(0,229,255,.03) 0%, transparent 60%),
         linear-gradient(135deg, #020510 0%, #06091a 40%, #0a0d22 70%, #030713 100%);
     }
-<<<<<<< HEAD
-=======
     
     /* Theme-specific body backgrounds */
     body.theme-light{
@@ -600,7 +592,6 @@
     body.theme-onyx{
       background:radial-gradient(circle at top left, rgba(79,70,229,.14), transparent 20%), linear-gradient(180deg, #080a14 0%, #0d1527 100%) !important;
     }
->>>>>>> origin/branch-ni-kirb
     body::before{
       content:"";position:fixed;inset:0;pointer-events:none;
       background-image:
@@ -622,11 +613,7 @@
     /* Glass */
     .glass{
       border:1px solid var(--stroke);
-<<<<<<< HEAD
-      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
-=======
       background:rgba(255,255,255,.18);
->>>>>>> origin/branch-ni-kirb
       backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.18),var(--shadow);
       position:relative;overflow:hidden;
@@ -643,13 +630,6 @@
 
     /* ═══ SIDEBAR ═══ */
     .sidebar{
-<<<<<<< HEAD
-      height:100vh;padding:14px 10px;
-      border-right:1px solid rgba(255,255,255,.1);
-      background:rgba(2,4,18,.70);
-      backdrop-filter:blur(40px) saturate(180%);
-      display:flex;flex-direction:column;gap:8px;overflow:hidden;
-=======
       height:100vh;
       padding:14px 10px;
       border-right:1px solid rgba(255,255,255,.1);
@@ -660,7 +640,6 @@
       gap:8px;
       overflow:hidden;
       transition:background .2s;
->>>>>>> origin/branch-ni-kirb
     }
     .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 12px;border-bottom:1px solid rgba(255,255,255,.09);flex-shrink:0}
     .logo{
@@ -684,16 +663,10 @@
       border:2px solid rgba(255,255,255,.3);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 28px rgba(93,71,255,.38);
       flex-shrink:0;position:relative;
-<<<<<<< HEAD
-    }
-    .avatar-status{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid rgba(2,4,18,.8);box-shadow:0 0 8px rgba(24,240,139,.6)}
-    .profile-info h2{font-size:14px;font-weight:700;display:flex;gap:6px;align-items:center}
-=======
       color: #ffffff; /* Adds white color to the avatar letter */
     }
     .avatar-status{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid rgba(2,4,18,.8);box-shadow:0 0 8px rgba(24,240,139,.6)}
     .profile-info h2 {font-size: 14px;font-weight: 700; display: flex;gap: 6px;align-items: center;color: #ffffff;/* Adds white color to your name */}
->>>>>>> origin/branch-ni-kirb
     .tag{font-size:10px;padding:3px 7px;border-radius:999px;background:rgba(139,92,255,.3);color:#efeaff;border:1px solid rgba(139,92,255,.4)}
     .profile-info p{margin-top:3px;color:var(--muted);font-size:11.5px}
     .online-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);margin-top:2px;font-weight:600}
@@ -703,34 +676,24 @@
     .nav-label{margin:2px 8px 0;color:var(--faint);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;flex-shrink:0}
     .nav{display:grid;gap:2px;flex-shrink:0}
     .nav a, .nav button{
-<<<<<<< HEAD
-      border:0;color:rgba(234,240,255,.75);background:transparent;
-=======
       border:0;color:#fff;background:transparent;
->>>>>>> origin/branch-ni-kirb
       padding:8px 10px;border-radius:13px;display:flex;align-items:center;gap:10px;
       font-weight:600;cursor:pointer;transition:.2s cubic-bezier(.4,0,.2,1);
       text-align:left;font-size:13.5px;font-family:var(--font);width:100%;text-decoration:none;
     }
-<<<<<<< HEAD
-=======
     body.theme-light .nav a, body.theme-light .nav button {
       color: #475569;
     }
->>>>>>> origin/branch-ni-kirb
     .nav-icon{
       width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;
       background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);flex-shrink:0;transition:.2s ease;
     }
     .nav a:hover, .nav button:hover{background:rgba(255,255,255,.08);color:var(--text);transform:translateX(3px)}
     .nav a:hover .nav-icon, .nav button:hover .nav-icon{background:rgba(255,255,255,.12)}
-<<<<<<< HEAD
-=======
     body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover{background:linear-gradient(135deg,#7c3aed,.8,#2563eb);color:#fff;transform:none}
     body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover{background:linear-gradient(135deg,#6d28d9,.8,#2563eb);color:#fff;transform:none}
     body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff;transform:none}
     body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover{background:linear-gradient(135deg,rgba(124,58,237,.8),rgba(96,165,250,.5));color:#fff;transform:none}
->>>>>>> origin/branch-ni-kirb
     .nav a.active, .nav button.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff;box-shadow:0 12px 28px rgba(80,94,255,.26),inset 0 1px 0 rgba(255,255,255,.28)}
     .nav a.active .nav-icon, .nav button.active .nav-icon{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.25)}
 
@@ -748,19 +711,12 @@
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px;flex-shrink:0}
     .page-title h2{
       font-size:26px;font-weight:800;letter-spacing:-.06em;line-height:1;
-<<<<<<< HEAD
-      background:linear-gradient(135deg,#fff 40%,rgba(200,210,255,.7));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
-    .page-title p{margin-top:4px;color:var(--muted);font-size:13px;font-weight:500}
-=======
       color:#0f172a;
       background:none;
       -webkit-background-clip:unset;
       -webkit-text-fill-color:unset;
     }
     .page-title p{margin-top:4px;color:#334155;font-size:13px;font-weight:500}
->>>>>>> origin/branch-ni-kirb
     .top-right{display:flex;align-items:center;gap:12px}
     .clock-pill{
       display:flex;align-items:center;gap:8px;padding:0 14px;height:44px;
@@ -1095,11 +1051,7 @@
     }
   </style>
 </head>
-<<<<<<< HEAD
-<body>
-=======
 <body @if((auth()->user()->theme ?? 'light') === 'light') class="theme-light" @elseif((auth()->user()->theme ?? '') === 'ash') class="theme-ash" @elseif((auth()->user()->theme ?? '') === 'dark') class="theme-dark" @elseif((auth()->user()->theme ?? '') === 'onyx') class="theme-onyx" @endif>
->>>>>>> origin/branch-ni-kirb
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
@@ -1107,12 +1059,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <div class="app">
-<<<<<<< HEAD
-    <!-- ════ SIDEBAR ════ -->
-    <aside class="sidebar">
-=======
     <aside class="sidebar @if((auth()->user()->theme ?? 'light') === 'light') bg-white border-r border-gray-200 text-gray-900 @endif">
->>>>>>> origin/branch-ni-kirb
       <div class="brand">
         <div class="logo">▦</div>
         <div class="brand-text">
@@ -1121,19 +1068,6 @@
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div class="profile-card">
-        <div class="avatar" style="position:relative">
-          {{ substr(Auth::user()->name, 0, 1) }}
-          <div class="avatar-status"></div>
-        </div>
-        <div class="profile-info">
-          <h2>{{ Auth::user()->name }} <span class="tag">Student</span></h2>
-          <p>{{ Auth::user()->email }}</p>
-          <div class="online-badge"><span class="dot"></span> Online</div>
-        </div>
-      </div>
-=======
       <a href="{{ route('student.settings') }}" class="profile-card" style="text-decoration:none;cursor:pointer;transition:.2s ease;display:flex;align-items:center;gap:10px;">
         <div class="avatar">{{ strtoupper(substr(auth()->user()->name ?? 'S', 0, 1)) }}
           <div class="avatar-status"></div>
@@ -1144,24 +1078,10 @@
           <div class="online-badge"><span class="dot"></span> Online</div>
         </div>
       </a>
->>>>>>> origin/branch-ni-kirb
 
       <div class="nav-label">Menu</div>
       <nav class="nav">
         <a href="{{ route('student.dashboard') }}" class="nav-btn {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
-<<<<<<< HEAD
-          <span class="nav-icon">⌂</span>
-          <span>Dashboard</span>
-        </a>
-        <a href="{{ route('student.classes') }}" class="nav-btn {{ request()->routeIs('student.classes') ? 'active' : '' }}">
-          <span class="nav-icon">▤</span>
-          <span>My Classes</span>
-        </a>
-        <a href="{{ route('student.attendance') }}" class="nav-btn {{ request()->routeIs('student.attendance') ? 'active' : '' }}">
-          <span class="nav-icon">📋</span>
-          <span>Attendance</span>
-        </a>
-=======
           <span class="nav-icon @if((auth()->user()->theme ?? 'light') === 'light') text-indigo-700 bg-indigo-100 border-indigo-200 @endif">⌂</span>
           <span>Dashboard</span>
         </a>
@@ -1177,7 +1097,6 @@
           <span class="nav-icon @if((auth()->user()->theme ?? 'light') === 'light') text-indigo-700 bg-indigo-100 border-indigo-200 @endif">⚙️</span>
           <span>Settings</span>
         </a>
->>>>>>> origin/branch-ni-kirb
       </nav>
 
       <div class="logout-wrap">
@@ -1191,10 +1110,6 @@
       </div>
     </aside>
 
-<<<<<<< HEAD
-    <!-- ════ MAIN ════ -->
-=======
->>>>>>> origin/branch-ni-kirb
     <main>
       <header class="topbar">
         <div class="page-title">
@@ -1213,23 +1128,6 @@
 
       <div class="content">
         @yield('content')
-<<<<<<< HEAD
-      </div><!-- /content -->
-    </main>
-  </div>
-
-  <script>
-    // ─── Live Clock ───
-    function updateClock(){
-      const now = new Date();
-      const h = now.getHours().toString().padStart(2,'0');
-      const m = now.getMinutes().toString().padStart(2,'0');
-      const s = now.getSeconds().toString().padStart(2,'0');
-      document.getElementById('clockTime').textContent = `${h}:${m}:${s}`;
-    }
-    updateClock();
-    setInterval(updateClock,1000);
-=======
       </div></main>
   </div>
 
@@ -1251,7 +1149,6 @@
     }
     updateClock();
     setInterval(updateClock, 1000);
->>>>>>> origin/branch-ni-kirb
 
     // ─── Toast ───
     function showToast(msg, icon='✓', color='#4dffa0'){
@@ -1291,11 +1188,6 @@
     }
 
     setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
-<<<<<<< HEAD
-  </script>
-</body>
-</html>
-=======
 
     // Theme switching via localStorage (matches admin/professor behavior)
     (function() {
@@ -1309,4 +1201,3 @@
   </script>
 </body>
 </html>
->>>>>>> origin/branch-ni-kirb

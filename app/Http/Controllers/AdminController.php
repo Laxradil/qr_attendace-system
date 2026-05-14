@@ -463,8 +463,6 @@ class AdminController extends Controller
             ->paginate(20, ['*'], 'students_page');
 
         return view('admin.qr-codes-new', compact('students'));
-<<<<<<< HEAD
-=======
     }
 
     public function downloadAllQrCodesZip()
@@ -498,7 +496,6 @@ class AdminController extends Controller
         $zip->close();
 
         return response()->download($zipFile, 'student-qr-codes.zip')->deleteFileAfterSend(true);
->>>>>>> origin/branch-ni-kirb
     }
 
     public function studentQrCode(User $student)
@@ -538,10 +535,6 @@ class AdminController extends Controller
     {
         $records = AttendanceRecord::with('student', 'classe')
             ->paginate(20);
-<<<<<<< HEAD
-        $attendanceRecords = $records;
-        return view('admin.attendance-records-new', ['attendanceRecords' => $attendanceRecords]);
-=======
         
         $attendanceStats = AttendanceRecord::selectRaw(
             'COUNT(*) as total_records, 
@@ -565,7 +558,6 @@ class AdminController extends Controller
             'absentCount' => $absentCount,
             'excusedCount' => $excusedCount,
         ]);
->>>>>>> origin/branch-ni-kirb
     }
 
     // Reports
@@ -693,8 +685,6 @@ class AdminController extends Controller
             return SystemLog::with('user')->latest()->paginate(20);
         });
         return view('admin.logs-new', ['logs' => $logs]);
-<<<<<<< HEAD
-=======
     }
 
     // Settings
@@ -753,6 +743,5 @@ class AdminController extends Controller
         }
 
         return back()->with('info', 'No password change made.');
->>>>>>> origin/branch-ni-kirb
     }
 }

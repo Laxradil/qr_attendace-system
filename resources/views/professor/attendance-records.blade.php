@@ -81,11 +81,7 @@
         <tbody>
           @forelse($records as $record)
             <tr>
-<<<<<<< HEAD
-              <td>{{ $record->recorded_at->setTimezone('Asia/Manila')->format('M d, Y h:i A T') }}</td>
-=======
               <td>{{ $record->created_at->format('M d, Y H:i A') }}</td>
->>>>>>> origin/branch-ni-kirb
               <td>
                 <div class="user-cell">
                   <div class="small-avatar">{{ strtoupper(substr($record->student->name ?? 'S', 0, 1)) }}</div>
@@ -327,8 +323,6 @@
   }
 </style>
 
-<<<<<<< HEAD
-=======
 <style>
   body.theme-light .glass {
     background: #ffffff !important;
@@ -413,7 +407,6 @@
   }
 </style>
 
->>>>>>> origin/branch-ni-kirb
 <script>
   // Auto-submit filter on change
   const classSelect = document.querySelector('select[name="class_id"]');
