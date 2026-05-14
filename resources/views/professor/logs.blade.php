@@ -6,17 +6,36 @@
 
 @section('content')
 <style>
-    .logs-toolbar{display:flex;gap:9px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-    .filter-chips{display:flex;gap:8px;flex-wrap:wrap}
+    .search-bar{display:none !important;}
+    
+    .logs-toolbar{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+    .filter-chips{display:flex;gap:10px;flex-wrap:wrap}
     .chip{
-        display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.15);
-        background:rgba(255,255,255,.06);color:#dde5ff;border-radius:999px;padding:8px 14px;
-        font-weight:700;font-size:13px;cursor:pointer;transition:.2s ease;font-family:var(--font);
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        border:1px solid rgba(255,255,255,.18);
+        background:rgba(255,255,255,.08);
+        color:#eef2ff;
+        border-radius:999px;
+        padding:10px 18px;
+        font-weight:700;
+        font-size:13px;
+        cursor:pointer;
+        transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease;
+        font-family:var(--font);
+        backdrop-filter: blur(10px);
     }
-    .chip:hover{background:rgba(255,255,255,.1)}
+    .chip:hover{
+        transform:translateY(-1px);
+        background:rgba(255,255,255,.16);
+        border-color:rgba(255,255,255,.24);
+    }
     .chip.active{
-        background:linear-gradient(135deg,rgba(139,92,255,.85),rgba(67,166,255,.45));
-        border-color:transparent;box-shadow:0 8px 24px rgba(80,94,255,.2);
+        background:linear-gradient(135deg,rgba(139,92,255,.95),rgba(67,166,255,.9));
+        border-color:transparent;
+        box-shadow:0 18px 40px rgba(80,94,255,.2);
+        color:#ffffff;
     }
     .logs-actions{display:flex;gap:9px;margin-left:auto;flex-wrap:wrap}
     .action-btn{
@@ -25,6 +44,7 @@
         font-weight:700;cursor:pointer;transition:.2s ease;font-size:13px;font-family:var(--font);
     }
     .action-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24)}
+    .search-bar{display:flex !important;}
     
     .logs-table-wrap{
         background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);
@@ -74,15 +94,99 @@
     .log-desc.muted{color:var(--muted)}
 </style>
 
+<style>
+  /* Light mode styles */
+  body.theme-light .chip {
+    background: rgba(15,23,42,.08);
+    border-color: rgba(15,23,42,.15);
+    color: #0f172a;
+  }
+  
+  body.theme-light .chip:hover {
+    background: rgba(15,23,42,.12);
+  }
+  
+  body.theme-light .chip.active {
+    background: linear-gradient(135deg,#7c3aed 0%,#2563eb 100%) !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+    box-shadow: 0 18px 40px rgba(67,46,255,.18) !important;
+  }
+  
+  body.theme-light .action-btn {
+    background: rgba(15,23,42,.08);
+    border-color: rgba(15,23,42,.15);
+    color: #0f172a;
+  }
+  
+  body.theme-light .action-btn:hover {
+    background: #f1f5f9;
+  }
+  
+  body.theme-light .logs-table-wrap {
+    background: rgba(15,23,42,.04);
+    border-color: rgba(15,23,42,.08);
+  }
+  
+  body.theme-light .logs-table-wrap th {
+    background: rgba(15,23,42,.08);
+    color: #475569;
+    border-bottom-color: rgba(15,23,42,.12);
+  }
+  
+  body.theme-light .logs-table-wrap td {
+    color: #0f172a;
+    border-bottom-color: rgba(15,23,42,.08);
+  }
+  
+  body.theme-light .logs-table-wrap tbody tr:hover td {
+    background: rgba(15,23,42,.04);
+  }
+  
+  body.theme-light .log-desc {
+    color: #0f172a;
+  }
+  
+  body.theme-light .log-desc.muted {
+    color: #475569;
+  }
+  
+  body.theme-light .pager button {
+    background: rgba(15,23,42,.08);
+    border-color: rgba(15,23,42,.15);
+    color: #0f172a;
+  }
+  
+  body.theme-light .pager button:hover {
+    background: rgba(15,23,42,.12);
+  }
+  
+  body.theme-light .pager .current {
+    background: linear-gradient(135deg,rgba(139,92,255,.95),rgba(67,166,255,.55));
+    border-color: transparent;
+    color: #ffffff;
+  }
+  
+  body.theme-light .search-bar {
+    background: rgba(15,23,42,.08) !important;
+    border-color: rgba(15,23,42,.15) !important;
+    color: #0f172a !important;
+  }
+  
+  body.theme-light .search-bar::placeholder {
+    color: #64748b !important;
+  }
+</style>
+
 <div class="logs-toolbar">
     <div class="filter-chips">
-        <div class="chip active" onclick="filterLogs('all')">⊙ All Actions</div>
-        <div class="chip" onclick="filterLogs('add-student')">➕ Add Student</div>
-        <div class="chip" onclick="filterLogs('update-user')">🔄 Update User</div>
-        <div class="chip" onclick="filterLogs('scan-qr')">▦ Scan QR</div>
+        <div class="chip active" onclick="filterLogs(this, 'all')">⊙ All Actions</div>
+        <div class="chip" onclick="filterLogs(this, 'add_student')">➕ Add Student</div>
+        <div class="chip" onclick="filterLogs(this, 'update_user')">🔄 Update User</div>
+        <div class="chip" onclick="filterLogs(this, 'scan_qr')">▦ Scan QR</div>
     </div>
     <div style="display:flex;gap:9px;margin-left:auto;flex-wrap:wrap;align-items:center;flex:1;justify-content:flex-end">
-        <input type="text" id="logsSearchInput" placeholder="Search logs..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;width:200px" oninput="searchLogs()">
+        <input type="text" id="logsSearchInput" placeholder="Search logs..." onkeyup="searchLogs()" style="padding:9px 14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;border-radius:13px;font-size:13px;font-family:var(--font);width:200px;outline:none;transition:.2s ease;" class="search-bar">
         <div class="logs-actions">
             <button class="action-btn" onclick="location.reload()">🔄 Refresh</button>
             <button class="action-btn" onclick="exportLogs()">⬇ Export</button>
@@ -150,11 +254,11 @@
 <script>
     let currentFilter = 'all';
     
-    function filterLogs(action) {
+    function filterLogs(chip, action) {
         currentFilter = action;
         const chips = document.querySelectorAll('.chip');
-        chips.forEach(chip => chip.classList.remove('active'));
-        event.target.classList.add('active');
+        chips.forEach(ch => ch.classList.remove('active'));
+        chip.classList.add('active');
         
         applyFiltersAndSearch();
     }
@@ -164,7 +268,8 @@
     }
     
     function applyFiltersAndSearch() {
-        const searchTerm = document.getElementById('logsSearchInput').value.toLowerCase();
+        const searchInput = document.getElementById('logsSearchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
         const rows = document.querySelectorAll('#logsTableBody tr');
         
         rows.forEach(row => {
@@ -174,7 +279,16 @@
             // Apply action filter
             let actionMatch = true;
             if (currentFilter !== 'all') {
-                actionMatch = rowAction.includes(currentFilter.toLowerCase());
+                // Use same logic as PHP badge determination
+                if (currentFilter === 'add_student') {
+                    actionMatch = rowAction.includes('student');
+                } else if (currentFilter === 'update_user') {
+                    actionMatch = rowAction.includes('update');
+                } else if (currentFilter === 'scan_qr') {
+                    actionMatch = rowAction.includes('scan');
+                } else {
+                    actionMatch = rowAction.includes(currentFilter.toLowerCase());
+                }
             }
             
             // Apply search filter

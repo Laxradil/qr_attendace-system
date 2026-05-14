@@ -129,6 +129,43 @@
     color: #fff;
     border-color: transparent;
   }
+
+  .scanner-tab:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  .scanner-tab.active:hover {
+    background: linear-gradient(135deg,rgba(139,92,255,.9),rgba(67,166,255,.6));
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(80,94,255,.18);
+  }
+
+  body.theme-light .scanner-tab {
+    background: rgba(15,23,42,.08) !important;
+    border: 1px solid rgba(15,23,42,.15) !important;
+    color: #0f172a !important;
+  }
+
+  body.theme-light .scanner-tab:hover {
+    background: rgba(15,23,42,.12) !important;
+    border-color: rgba(15,23,42,.2) !important;
+    color: #0f172a !important;
+  }
+
+  body.theme-light .scanner-tab.active {
+    background: linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5)) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+  }
+
+  body.theme-light .scanner-tab.active:hover {
+    background: linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5)) !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 24px rgba(80,94,255,.18) !important;
+  }
   
   .cam-viewport {
     width: 100%;
@@ -185,10 +222,16 @@
     border-radius: 999px;
     font-size: 11.5px;
     font-weight: 700;
-    background: rgba(24,240,139,.12);
-    border: 1px solid rgba(24,240,139,.25);
-    color: #4dffa0;
+    background: rgba(24,240,139,.18);
+    border: 1px solid rgba(24,240,139,.4);
+    color: #18f08b;
     margin-bottom: 12px;
+  }
+
+  body.theme-light .scan-status {
+    background: rgba(24,240,139,.15) !important;
+    border-color: rgba(24,240,139,.35) !important;
+    color: #059669 !important;
   }
   
   .cam-btns {
@@ -233,7 +276,60 @@
   .cam-btn.stop:hover:not(:disabled) {
     background: rgba(255,61,114,.2);
   }
-  
+
+  body.theme-light .cam-btn.start {
+    background: linear-gradient(135deg,rgba(139,92,255,.9),rgba(67,166,255,.55)) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 24px rgba(80,94,255,.25) !important;
+  }
+
+  body.theme-light .cam-btn.start:hover:not(:disabled) {
+    background: linear-gradient(135deg,rgba(122,64,255,.95),rgba(56,142,255,.6)) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 14px 32px rgba(80,94,255,.4) !important;
+  }
+
+  body.theme-light .cam-btn.stop {
+    background: rgba(255,61,114,.12) !important;
+    border: 1px solid rgba(255,61,114,.25) !important;
+    color: #ff8298 !important;
+  }
+
+  body.theme-light .cam-btn.stop:hover:not(:disabled) {
+    background: rgba(255,61,114,.22) !important;
+  }
+
+  body.theme-light .report-btn {
+    background: linear-gradient(135deg,rgba(139,92,255,.85),rgba(67,166,255,.45)) !important;
+    color: #fff !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(80,94,255,.2) !important;
+  }
+
+  body.theme-light .report-btn:hover {
+    background: linear-gradient(135deg,rgba(122,64,255,.95),rgba(56,142,255,.6)) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 14px 32px rgba(80,94,255,.35) !important;
+  }
+
+  body.theme-light .scanner-tab {
+    background: rgba(15,23,42,.08) !important;
+    border: 1px solid rgba(15,23,42,.15) !important;
+    color: #0f172a !important;
+  }
+
+  body.theme-light .scanner-tab.active {
+    background: linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5)) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+  }
+
+  body.theme-light .scanner-tab:hover {
+    background: linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5)) !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 24px rgba(80,94,255,.18) !important;
+  }
+
   .att-recording {
     border-radius: var(--radius-lg);
     padding: 20px;
@@ -297,9 +393,27 @@
   }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+@php
+  $scanClasses = $classes->map(function($class) {
+      return [
+          'id' => $class->id,
+          'studentIds' => $class->students->pluck('id')->values(),
+          'schedules' => $class->schedules->map(function($schedule) {
+              return [
+                  'days' => $schedule->days,
+                  'start_time' => $schedule->start_time,
+                  'end_time' => $schedule->end_time,
+              ];
+          }),
+      ];
+  });
+@endphp
 <script>
   let stream = null;
   let currentMode = 'camera';
+  const classesData = @json($scanClasses);
+  const selectedClassQuery = "{{ $selectedClassId ?? '' }}";
   const camViewport = document.querySelector('.cam-inner');
   const startBtn = document.querySelector('.cam-btn.start');
   const stopBtn = document.querySelector('.cam-btn.stop');
@@ -308,7 +422,63 @@
   const studentSelect = document.querySelector('select[name="student_id"]');
   const scannerTabs = document.querySelectorAll('.scanner-tab');
   const cameraControls = document.querySelector('.cam-btns');
-  
+
+  if (selectedClassQuery) {
+    classSelect.value = selectedClassQuery;
+    classSelect.dispatchEvent(new Event('change'));
+  }
+
+  function parseScheduleDays(days) {
+    if (!days) return [];
+    return days
+      .split(/[,;\/\s]+/)
+      .map(d => d.trim())
+      .filter(Boolean)
+      .map(d => {
+        const normalized = d.toLowerCase();
+        return {
+          mon: 'Monday', monday: 'Monday', tue: 'Tuesday', tues: 'Tuesday', tuesday: 'Tuesday',
+          wed: 'Wednesday', wednesday: 'Wednesday', thu: 'Thursday', thur: 'Thursday', thurs: 'Thursday', thursday: 'Thursday',
+          fri: 'Friday', friday: 'Friday', sat: 'Saturday', saturday: 'Saturday', sun: 'Sunday', sunday: 'Sunday'
+        }[normalized];
+      })
+      .filter(Boolean);
+  }
+
+  function scheduleMatchesDay(schedule, day) {
+    const normalizedDay = day.toLowerCase();
+    return parseScheduleDays(schedule.days).some(d => d.toLowerCase() === normalizedDay);
+  }
+
+  function scheduleMatchesNow(schedule) {
+    if (!schedule.start_time || !schedule.end_time) return false;
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const start = new Date(`${today}T${schedule.start_time}`);
+    const end = new Date(`${today}T${schedule.end_time}`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return false;
+    }
+    return now >= start && now <= end;
+  }
+
+  function findBestClassForStudent(studentId) {
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const candidates = classesData.filter(cls => cls.studentIds.includes(studentId));
+    if (!candidates.length) {
+      return null;
+    }
+
+    const currentMatches = candidates.filter(cls => cls.schedules.some(schedule => scheduleMatchesDay(schedule, today) && scheduleMatchesNow(schedule)));
+    if (currentMatches.length === 1) return currentMatches[0].id;
+    if (currentMatches.length > 1) return currentMatches[0].id;
+
+    const todayMatches = candidates.filter(cls => cls.schedules.some(schedule => scheduleMatchesDay(schedule, today)));
+    if (todayMatches.length === 1) return todayMatches[0].id;
+
+    return candidates[0].id;
+  }
+
   // Tab switching
   scannerTabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -348,6 +518,11 @@
             opt.textContent = s.name;
             studentSelect.appendChild(opt);
           });
+
+          if (studentSelect.dataset.pendingValue) {
+            studentSelect.value = studentSelect.dataset.pendingValue;
+            studentSelect.dataset.pendingValue = '';
+          }
         })
         .catch(e => console.error('Error loading students:', e));
     }
@@ -395,6 +570,7 @@
   function initQRDetection(video) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+    let lastDetectedValue = null;
     
     function detectQR() {
       if (!stream) return;
@@ -408,9 +584,29 @@
         if (typeof jsQR !== 'undefined') {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const code = jsQR(imageData.data, canvas.width, canvas.height);
-          if (code) {
+          if (code && code.data !== lastDetectedValue) {
+            lastDetectedValue = code.data;
             qrInput.value = code.data;
             qrInput.dispatchEvent(new Event('input'));
+
+            try {
+              const decoded = JSON.parse(code.data);
+              if (decoded.type === 'student_attendance' && decoded.student_id) {
+                const studentId = decoded.student_id.toString();
+                if (studentSelect.querySelector(`option[value="${studentId}"]`)) {
+                  studentSelect.value = studentId;
+                }
+
+                const inferredClassId = findBestClassForStudent(studentId);
+                if (inferredClassId) {
+                  studentSelect.dataset.pendingValue = studentId;
+                  classSelect.value = inferredClassId;
+                  classSelect.dispatchEvent(new Event('change'));
+                }
+              }
+            } catch (e) {
+              // not a JSON attendance payload
+            }
           }
         }
       } catch (e) {

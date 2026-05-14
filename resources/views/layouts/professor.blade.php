@@ -69,18 +69,45 @@
     body.theme-light .theme-option,
     body.theme-light .theme-option.selected
     {
-      background: #ffffff !important;
-      border: 1px solid #e5e7eb !important;
+      background: rgba(15,23,42,.04) !important;
+      border: 1px solid rgba(15,23,42,.08) !important;
       color: #0f172a !important;
       box-shadow: 0 14px 50px rgba(15,23,42,.06) !important;
+    }
+    body.theme-light .theme-option.selected {
+      border-color:#6b73ff !important;
+      border-width:2px;
+      background:rgba(107,115,255,.12);
+    }
+    body.theme-light .theme-option.selected:hover {
+      border-color:#6b73ff !important;
+      border-width:2px;
     }
     body.theme-light .theme-option:hover,
     body.theme-light .settings-btn,
     body.theme-light .pill,
     body.theme-light .btn,
-    body.theme-light .btn.slim
+    body.theme-light .btn.slim,
+    body.theme-light .action-btn,
+    body.theme-light .filter-btn.reset,
+    body.theme-light .filter-select,
+    body.theme-light .filter-input,
+    body.theme-light .search-bar,
+    body.theme-light .report-btn,
+    body.theme-light .cam-btn
     {
-      background: #f8fafb !important;
+      background: rgba(15,23,42,.08) !important;
+      color: #0f172a !important;
+      border-color: rgba(15,23,42,.15) !important;
+    }
+
+    body.theme-light .btn:hover,
+    body.theme-light .action-btn:hover,
+    body.theme-light .filter-btn:hover,
+    body.theme-light .report-btn:hover,
+    body.theme-light .cam-btn:hover
+    {
+      background: #f1f5f9 !important;
     }
     body.theme-light [style*="background:rgba(8,12,30,.58)"] {
       background: #ffffff !important;
@@ -339,6 +366,22 @@
     body.theme-onyx .logout-wrap{border-top-color:rgba(255,255,255,.08)}
     body.theme-onyx .profile-card{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)}
     body.theme-onyx .avatar{background:linear-gradient(145deg,#a78bfa,#7c3aed)}
+
+    body.theme-dark .table thead th,
+    body.theme-dark .table-wrap th,
+    body.theme-dark .logs-table-wrap th,
+    body.theme-dark .table-responsive th,
+    body.theme-dark .table thead th {
+      color: #ffffff !important;
+    }
+
+    body.theme-onyx .table thead th,
+    body.theme-onyx .table-wrap th,
+    body.theme-onyx .logs-table-wrap th,
+    body.theme-onyx .table-responsive th,
+    body.theme-onyx .table thead th {
+      color: #ffffff !important;
+    }
 
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow:hidden}
