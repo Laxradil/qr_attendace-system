@@ -50,26 +50,26 @@
       <h3>📋 Attendance History</h3>
     </div>
     <div class="att-table-wrap">
-      <table style="color: white;">
+      <table>
         <thead>
           <tr>
-            <th style="color: white;">Class</th>
-            <th style="color: white;">Recorded</th>
-            <th style="color: white;">Status</th>
-            <th style="color: white;">Minutes Late</th>
+            <th>Class</th>
+            <th>Recorded</th>
+            <th>Status</th>
+            <th>Minutes Late</th>
           </tr>
         </thead>
         <tbody>
           @forelse($attendanceRecords as $record)
           <tr>
-            <td style="color: white;"><div style="font-weight:700;font-size:14px">{{ $record->classe->code }} — {{ $record->classe->name }}</div></td>
-            <td style="color: white;"><div style="font-family:var(--mono);font-size:13px">{{ $record->recorded_at->format('M d, Y') }}</div><div class="muted" style="font-size:12px">{{ $record->recorded_at->format('h:i A') }}</div></td>
-            <td style="color: white;"><span class="pill {{ $record->status === 'present' ? 'green' : ($record->status === 'late' ? 'yellow' : ($record->status === 'absent' ? 'red' : 'purple')) }}">{{ ucfirst($record->status) }}</span></td>
-            <td class="muted" style="color: white;">{{ $record->minutes_late ?? 0 }} min</td>
+            <td><div style="font-weight:700;font-size:14px">{{ $record->classe->code }} — {{ $record->classe->name }}</div></td>
+            <td><div style="font-family:var(--mono);font-size:13px">{{ $record->recorded_at->format('M d, Y') }}</div><div class="muted" style="font-size:12px">{{ $record->recorded_at->format('h:i A') }}</div></td>
+            <td><span class="pill {{ $record->status === 'present' ? 'green' : ($record->status === 'late' ? 'yellow' : ($record->status === 'absent' ? 'red' : 'purple')) }}">{{ ucfirst($record->status) }}</span></td>
+            <td class="muted">{{ $record->minutes_late ?? 0 }} min</td>
           </tr>
           @empty
           <tr>
-            <td colspan="4" style="text-align:center;padding:40px;color:white;">No attendance records yet.</td>
+            <td colspan="4" style="text-align:center;padding:40px;">No attendance records yet.</td>
           </tr>
           @endforelse
         </tbody>

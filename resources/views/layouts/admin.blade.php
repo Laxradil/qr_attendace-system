@@ -292,7 +292,7 @@
     /* Glass base */
     .glass{
       border:1px solid var(--stroke);
-      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
+      background:rgba(255,255,255,.18);
       backdrop-filter:var(--blur);
       -webkit-backdrop-filter:var(--blur);
       box-shadow:
@@ -569,30 +569,6 @@
     }
     .clock-date{color:var(--muted);font-size:12px}
 
-    /* Notif bell */
-    .notif-btn{
-      width:44px;height:44px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.07);
-      display:grid;place-items:center;
-      cursor:pointer;
-      font-size:18px;
-      position:relative;
-      transition:.2s ease;
-    }
-    .notif-btn:hover{background:rgba(255,255,255,.12);transform:scale(1.06)}
-    .notif-dot{
-      position:absolute;
-      top:8px;right:9px;
-      width:8px;height:8px;
-      border-radius:50%;
-      background:var(--red);
-      border:2px solid rgba(2,4,18,.9);
-      box-shadow:0 0 8px rgba(255,61,114,.7);
-      animation:pulse-dot 2s infinite;
-    }
-
     /* Top avatar */
     .top-avatar{
       width:44px;height:44px;
@@ -638,7 +614,7 @@
     .stat-icon.blue{background:linear-gradient(145deg,rgba(9,132,227,.55),rgba(108,92,231,.28))}
     .stat-icon.green{background:linear-gradient(145deg,rgba(0,184,148,.42),rgba(9,132,227,.12))}
     .stat-icon.yellow{background:linear-gradient(145deg,rgba(253,203,110,.45),rgba(255,100,50,.15))}
-    .stat-icon.purple{background:linear-gradient(145deg,rgba(108,92,231,.62),rgba(9,132,227,.22))}
+    .stat-icon.purple{background:rgba(139,92,255,.18);border:1px solid rgba(139,92,255,.22)}
     .stat-icon.red{background:linear-gradient(145deg,rgba(214,48,49,.55),rgba(255,100,50,.15))}
     .stat-body strong{display:block;font-size:24px;font-weight:900;letter-spacing:-.06em;font-variant-numeric:tabular-nums;}
     .stat-body span{display:block;color:#c9c7d9;font-weight:600;font-size:12px;margin-top:2px}
@@ -863,7 +839,6 @@
             &nbsp;·&nbsp;
             <span id="clockTime" style="font-family:var(--mono);font-size:12px">—</span>
           </div>
-          <div class="notif-btn">🔔<span class="notif-dot"></span></div>
           <div class="top-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</div>
         </div>
       </header>
