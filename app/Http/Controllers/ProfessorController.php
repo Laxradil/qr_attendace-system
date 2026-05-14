@@ -206,7 +206,7 @@ class ProfessorController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $classes = $user->assignedClasses()->with('students')->get();
+        $classes = $user->assignedClasses()->with(['students', 'schedules'])->get();
         $selectedClassId = request()->query('class_id');
 
         return view('professor.scan-qr', [
@@ -225,8 +225,12 @@ class ProfessorController extends Controller
 
         if ($decoded && isset($decoded['type']) && $decoded['type'] === 'student_attendance') {
             $selectedClassId = $request->input('class_id');
-            $selectedStudentId = $request->input('student_id');
+            $selectedStudentId = $request->input('student_id') ?: $decoded['student_id'];
             $studentName = $decoded['student_name'] ?? 'Unknown';
+
+            if (!$selectedClassId && $selectedStudentId) {
+                $selectedClassId = $this->inferClassForStudentAttendance($selectedStudentId);
+            }
 
             if (!$selectedClassId || !$selectedStudentId) {
                 $message = 'Please select a class and student before submitting.';
@@ -356,6 +360,69 @@ class ProfessorController extends Controller
     {
         $today = now()->format('l');
         return $classe->schedules->first(fn($schedule) => $this->scheduleMatchesDay($schedule, $today));
+    }
+
+    private function inferClassForStudentAttendance(int $studentId): ?int
+    {
+        $user = Auth::user();
+        $classes = $user->assignedClasses()
+            ->with(['students', 'schedules'])
+            ->whereHas('students', function ($query) use ($studentId) {
+                $query->where('users.id', $studentId);
+            })
+            ->get();
+
+        if ($classes->isEmpty()) {
+            return null;
+        }
+
+        $now = Carbon::now('Asia/Manila');
+        $today = $now->format('l');
+        $currentMatches = [];
+        $todayMatches = [];
+
+        foreach ($classes as $classe) {
+            foreach ($classe->schedules as $schedule) {
+                if (!$this->scheduleMatchesDay($schedule, $today)) {
+                    continue;
+                }
+
+                if (empty($schedule->start_time) || empty($schedule->end_time)) {
+                    continue;
+                }
+
+                try {
+                    $format = strlen($schedule->start_time) > 5 ? 'H:i:s' : 'H:i';
+                    $sessionStart = Carbon::createFromFormat($format, $schedule->start_time, 'Asia/Manila')
+                        ->setDate($now->year, $now->month, $now->day);
+                    $sessionEnd = Carbon::createFromFormat(strlen($schedule->end_time) > 5 ? 'H:i:s' : 'H:i', $schedule->end_time, 'Asia/Manila')
+                        ->setDate($now->year, $now->month, $now->day);
+                } catch (\Exception $e) {
+                    continue;
+                }
+
+                if ($now->between($sessionStart, $sessionEnd)) {
+                    $currentMatches[$classe->id] = true;
+                    break;
+                }
+
+                $todayMatches[$classe->id] = true;
+            }
+        }
+
+        if (count($currentMatches) === 1) {
+            return array_key_first($currentMatches);
+        }
+
+        if (!empty($currentMatches)) {
+            return array_key_first($currentMatches);
+        }
+
+        if (count($todayMatches) === 1) {
+            return array_key_first($todayMatches);
+        }
+
+        return null;
     }
 
     private function scheduleMatchesDay($schedule, string $day): bool
