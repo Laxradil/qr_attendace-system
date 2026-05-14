@@ -68,6 +68,7 @@
         </div>
         <div class="class-meta-row">
           <div class="meta-icon">🕓</div>
+<<<<<<< HEAD
           Time: <strong style="font-family:var(--mono)">
             @if($class->schedules->first()?->start_time)
               {{ \Carbon\Carbon::createFromFormat('H:i:s', $class->schedules->first()->start_time)->format('g:i A') }}
@@ -108,6 +109,19 @@
            data-schedule-start="{{ $class->schedules->first()?->start_time }}"
            data-schedule-end="{{ $class->schedules->first()?->end_time }}"
         >Scan QR</a>
+=======
+          Time: <strong style="font-family:var(--mono)">{{ $class->schedules->first()?->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $class->schedules->first()->start_time)->format('H:i') : 'N/A' }}</strong>
+        </div>
+        <div class="class-meta-row">
+          <div class="meta-icon">🎓</div>
+          Professor: <strong>{{ auth()->user()->name }}</strong>
+        </div>
+      </div>
+      <div class="class-actions">
+        <a href="{{ route('professor.class-detail', $class->id) }}" class="view-link">View class →</a>
+        <div style="flex:1"></div>
+        <button class="btn slim" onclick="window.location.href='{{ route('professor.class-detail', $class->id) }}'">Details</button>
+>>>>>>> origin/branch-ni-kirb
       </div>
     </div>
   @empty
@@ -254,11 +268,15 @@
   
   .class-actions {
     display: flex;
+<<<<<<< HEAD
     flex-wrap: wrap;
+=======
+>>>>>>> origin/branch-ni-kirb
     gap: 8px;
     align-items: center;
   }
   
+<<<<<<< HEAD
   .class-actions a {
     text-decoration: none;
   }
@@ -267,6 +285,8 @@
     text-decoration: none;
   }
   
+=======
+>>>>>>> origin/branch-ni-kirb
   .view-link {
     color: rgba(139,92,255,.9);
     font-size: 12.5px;
@@ -289,6 +309,7 @@
   @media(max-width:1200px) {
     .class-grid { grid-template-columns: 1fr; }
   }
+<<<<<<< HEAD
   
   .edit-modal {
     display: none;
@@ -1163,4 +1184,73 @@
     }
   });
 </script>
+=======
+</style>
+
+<style>
+  body.theme-light .glass {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .chip {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .chip:hover {
+    background: #f9fafb !important;
+  }
+  
+  body.theme-light .chip.active {
+    background: #3b82f6 !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+  }
+  
+  body.theme-light .class-card {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  }
+  
+  body.theme-light .class-card::after {
+    background: linear-gradient(90deg,transparent,#e5e7eb 50%,transparent) !important;
+  }
+  
+  body.theme-light .class-card:hover {
+    border-color: #d1d5db !important;
+  }
+  
+  body.theme-light .class-code {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .class-room {
+    color: #000000 !important;
+  }
+  
+  body.theme-light .class-meta-row {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .class-meta-row strong {
+    color: #000000 !important;
+  }
+  
+  body.theme-light .meta-icon {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .view-link {
+    color: #3b82f6 !important;
+  }
+  
+  body.theme-light .view-link:hover {
+    color: #2563eb !important;
+  }
+</style>
+>>>>>>> origin/branch-ni-kirb
 @endsection

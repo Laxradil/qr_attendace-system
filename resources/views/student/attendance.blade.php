@@ -20,7 +20,10 @@
       <div class="stat-body">
         <strong>{{ $totalLate }}</strong>
         <span class="stat-label">Late</span>
+<<<<<<< HEAD
         <a onclick="showToast('Viewing late records','📋','#ffd584')">View details →</a>
+=======
+>>>>>>> origin/branch-ni-kirb
       </div>
     </div>
     <div class="stat glass">
@@ -28,7 +31,10 @@
       <div class="stat-body">
         <strong>{{ $totalAbsent }}</strong>
         <span class="stat-label">Absent</span>
+<<<<<<< HEAD
         <a onclick="showToast('Viewing absent records','📋','#ff8298')">View details →</a>
+=======
+>>>>>>> origin/branch-ni-kirb
       </div>
     </div>
     <div class="stat glass">
@@ -36,7 +42,10 @@
       <div class="stat-body">
         <strong>{{ $totalExcused ?? 0 }}</strong>
         <span class="stat-label">Excused</span>
+<<<<<<< HEAD
         <a onclick="showToast('Viewing excused records','📋','#d8cdff')">View details →</a>
+=======
+>>>>>>> origin/branch-ni-kirb
       </div>
     </div>
     <div class="stat glass">
@@ -44,7 +53,10 @@
       <div class="stat-body">
         <strong>{{ $totalRecords }}</strong>
         <span class="stat-label">Total Records</span>
+<<<<<<< HEAD
         <a onclick="showToast('Viewing all records','📋','#80cbff')">View all →</a>
+=======
+>>>>>>> origin/branch-ni-kirb
       </div>
     </div>
   </div>
@@ -73,7 +85,11 @@
           </tr>
           @empty
           <tr>
+<<<<<<< HEAD
             <td colspan="4" style="text-align:center;padding:40px;color:var(--faint);">No attendance records yet.</td>
+=======
+            <td colspan="4" style="text-align:center;padding:40px;">No attendance records yet.</td>
+>>>>>>> origin/branch-ni-kirb
           </tr>
           @endforelse
         </tbody>

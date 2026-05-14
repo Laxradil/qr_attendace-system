@@ -31,6 +31,266 @@
       --mono:'Space Mono',monospace;
     }
 
+<<<<<<< HEAD
+=======
+    body.theme-light{
+      --bg:#ffffff;
+      --glass:#f5f5f5;
+      --glass-strong:#ffffff;
+      --stroke:#e5e7eb;
+      --stroke-soft:#f3f4f6;
+      --text:#0f172a;
+      --muted:#475569;
+      --faint:#475569;
+      --purple:#7c3aed;
+      --blue:#2563eb;
+      --green:#16a34a;
+      --red:#dc2626;
+      --yellow:#ca8a04;
+      --cyan:#0891b2;
+      background:#f9fafb;
+    }
+    body.theme-light .sidebar{
+      background:#ffffff;
+      border-right-color:#e5e7eb;
+    }
+    body.theme-light .brand{border-bottom-color:#f3f4f6}
+    body.theme-light .nav a, body.theme-light .nav form button{color:#475569}
+    body.theme-light .nav a .nav-icon, body.theme-light .nav form button .nav-icon{background:#f3f4f6;border-color:#e5e7eb}
+    body.theme-light .nav a:hover, body.theme-light .nav form button:hover{background:#f0f1f3;color:#0f172a}
+    body.theme-light .nav a:hover .nav-icon, body.theme-light .nav form button:hover .nav-icon{background:#e5e7eb}
+    body.theme-light .nav a.active{background:linear-gradient(135deg,#7c3aed,.8,#2563eb);color:#fff}
+    body.theme-light .logout-wrap{border-top-color:#f3f4f6}
+    body.theme-light .profile-card{background:#f3f0ff;border-color:#ede9fe}
+    body.theme-light .avatar{background:linear-gradient(145deg,#a78bfa,#7c3aed)}
+    body.theme-light .glass,
+    body.theme-light .glass-table,
+    body.theme-light .card,
+    body.theme-light .stat.glass,
+    body.theme-light .page-card,
+    body.theme-light .settings-container,
+    body.theme-light .info-item,
+    body.theme-light .row-item,
+    body.theme-light .activity,
+    body.theme-light .theme-option,
+    body.theme-light .theme-option.selected
+    {
+      background: rgba(15,23,42,.04) !important;
+      border: 1px solid rgba(15,23,42,.08) !important;
+      color: #0f172a !important;
+      box-shadow: 0 14px 50px rgba(15,23,42,.06) !important;
+    }
+    body.theme-light .theme-option.selected {
+      border-color:#6b73ff !important;
+      border-width:2px;
+      background:rgba(107,115,255,.12);
+    }
+    body.theme-light .theme-option:hover,
+    body.theme-light .settings-btn,
+    body.theme-light .pill,
+    body.theme-light .btn,
+    body.theme-light .btn.slim,
+    body.theme-light .action-btn,
+    body.theme-light .filter-btn.reset,
+    body.theme-light .filter-select,
+    body.theme-light .filter-input,
+    body.theme-light .search-bar
+    {
+      background: rgba(15,23,42,.08) !important;
+      color: #0f172a !important;
+      border-color: rgba(15,23,42,.15) !important;
+    }
+
+    body.theme-light .btn:hover,
+    body.theme-light .action-btn:hover,
+    body.theme-light .filter-btn:hover
+    {
+      background: #f1f5f9 !important;
+    }
+    body.theme-light .theme-option.selected:hover {
+      border-color:#6b73ff !important;
+      border-width:2px;
+    }
+    body.theme-light [style*="background:rgba(8,12,30,.58)"] {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #e5e7eb !important;
+    }
+    body.theme-light [style*="background:rgba(255,255,255,.05)"],
+    body.theme-light [style*="background:rgba(255,255,255,.04)"],
+    body.theme-light [style*="background:rgba(255,255,255,.08)"],
+    body.theme-light [style*="background:rgba(255,255,255,.1)"],
+    body.theme-light [style*="background:rgba(255,255,255,.13)"],
+    body.theme-light [style*="background:rgba(255,255,255,.055)"],
+    body.theme-light [style*="background:rgba(255,255,255,.085)"],
+    body.theme-light [style*="background:rgba(255,255,255,.18)"]
+    {
+      background: #f8fafb !important;
+      border-color: #e5e7eb !important;
+    }
+    body.theme-light [style*="color:rgba(255,255,255,.5)"],
+    body.theme-light [style*="color:rgba(255,255,255,.6)"],
+    body.theme-light [style*="color:rgba(255,255,255,.7)"],
+    body.theme-light [style*="color:rgba(255,255,255,.75)"]
+    {
+      color: #475569 !important;
+    }
+    body.theme-light [style*="color:rgba(139,92,255,.9)"] {
+      color: #7c3aed !important;
+    }
+    body.theme-light [style*="border:1px solid rgba(255,255,255,.12)"],
+    body.theme-light [style*="border:1px solid rgba(255,255,255,.14)"],
+    body.theme-light [style*="border:1px solid rgba(255,255,255,.07)"],
+    body.theme-light [style*="border:1px solid rgba(15,23,42,.1)"]
+    {
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light label,
+    body.theme-light .label,
+    body.theme-light .info-label,
+    body.theme-light .form-label,
+    body.theme-light .text-muted,
+    body.theme-light .muted,
+    body.theme-light .form-control::placeholder,
+    body.theme-light .form-select,
+    body.theme-light .input-group-text
+    {
+      color: #1f2937 !important;
+    }
+
+    body.theme-light table,
+    body.theme-light .table-wrap table,
+    body.theme-light .table-wrap,
+    body.theme-light .table-responsive,
+    body.theme-light .table thead th,
+    body.theme-light .table tbody td,
+    body.theme-light .table-striped tbody tr:nth-child(odd),
+    body.theme-light .table-striped tbody tr:nth-child(even)
+    {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light .table-striped tbody tr:nth-child(even) {
+      background: #f8fafb !important;
+    }
+
+    body.theme-light .glass span,
+    body.theme-light .glass p,
+    body.theme-light .glass h1,
+    body.theme-light .glass h2,
+    body.theme-light .glass h3,
+    body.theme-light .glass h4,
+    body.theme-light .glass h5,
+    body.theme-light .glass h6,
+    body.theme-light .glass strong,
+    body.theme-light .glass label,
+    body.theme-light .glass td,
+    body.theme-light .glass th,
+    body.theme-light .glass li,
+    body.theme-light .glass small,
+    body.theme-light .stat-body span
+    {
+      color: #1f2937 !important;
+    }
+
+    body.theme-light .section-head h3 {
+      color: #7c3aed !important;
+    }
+
+    body.theme-ash{
+      --bg:#e2e8f0;
+      --glass:rgba(255,255,255,.92);
+      --glass-strong:rgba(255,255,255,.98);
+      --stroke:rgba(15,23,42,.12);
+      --stroke-soft:rgba(15,23,42,.08);
+      --text:#0f172a;
+      --muted:#475569;
+      --purple:#6d28d9;
+      --blue:#2563eb;
+      --green:#16a34a;
+      --red:#b91c1c;
+      --yellow:#ca8a04;
+      --cyan:#0c4a6e;
+      background:linear-gradient(135deg,#f8fafc 0%,#cbd5e1 100%);
+    }
+    body.theme-ash .sidebar{
+      background:rgba(226,232,240,.80);
+      border-right-color:rgba(15,23,42,.12);
+    }
+    body.theme-ash .brand{border-bottom-color:rgba(15,23,42,.1)}
+    body.theme-ash .nav a, body.theme-ash .nav form button{color:#475569}
+    body.theme-ash .nav a .nav-icon, body.theme-ash .nav form button .nav-icon{background:rgba(15,23,42,.08);border-color:rgba(15,23,42,.1)}
+    body.theme-ash .nav a:hover, body.theme-ash .nav form button:hover{background:rgba(15,23,42,.1);color:#0f172a}
+    body.theme-ash .nav a:hover .nav-icon, body.theme-ash .nav form button:hover .nav-icon{background:rgba(15,23,42,.14)}
+    body.theme-ash .nav a.active{background:linear-gradient(135deg,#6d28d9,.8,#2563eb);color:#fff}
+    body.theme-ash .logout-wrap{border-top-color:rgba(15,23,42,.1)}
+    body.theme-ash .profile-card{background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2)}
+    body.theme-ash .avatar{background:linear-gradient(145deg,#a78bfa,#6d28d9)}
+
+    body.theme-dark{
+      --bg:#020510;
+      --glass:rgba(255,255,255,.08);
+      --glass-strong:rgba(255,255,255,.12);
+      --stroke:rgba(255,255,255,.14);
+      --stroke-soft:rgba(255,255,255,.07);
+      --text:#f0f4ff;
+      --muted:#9ba8cc;
+      --purple:#8b5cff;
+      --blue:#43a6ff;
+      --green:#18f08b;
+      --red:#ff3d72;
+      --yellow:#ffc75a;
+      --cyan:#00e5ff;
+      background:radial-gradient(circle at top left, rgba(67,166,255,.16), transparent 22%), radial-gradient(circle at top right, rgba(139,92,255,.12), transparent 22%), linear-gradient(180deg, #020510 0%, #020511 100%);
+    }
+    body.theme-dark .sidebar{
+      background:rgba(2,4,18,.70);
+      border-right-color:rgba(255,255,255,.1);
+    }
+    body.theme-dark .brand{border-bottom-color:rgba(255,255,255,.09)}
+    body.theme-dark .nav a, body.theme-dark .nav form button{color:rgba(234,240,255,.75)}
+    body.theme-dark .nav a .nav-icon, body.theme-dark .nav form button .nav-icon{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.09)}
+    body.theme-dark .nav a:hover, body.theme-dark .nav form button:hover{background:rgba(255,255,255,.08);color:var(--text)}
+    body.theme-dark .nav a:hover .nav-icon, body.theme-dark .nav form button:hover .nav-icon{background:rgba(255,255,255,.12)}
+    body.theme-dark .nav a.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff}
+    body.theme-dark .logout-wrap{border-top-color:rgba(255,255,255,.08)}
+    body.theme-dark .profile-card{background:rgba(139,92,255,.12);border-color:rgba(139,92,255,.25)}
+    body.theme-dark .avatar{background:linear-gradient(145deg,#9a77ff,#4715d1)}
+
+    body.theme-onyx{
+      --bg:#070a16;
+      --glass:rgba(255,255,255,.07);
+      --glass-strong:rgba(255,255,255,.1);
+      --stroke:rgba(255,255,255,.12);
+      --stroke-soft:rgba(255,255,255,.06);
+      --text:#f4f7ff;
+      --muted:#a5aed4;
+      --purple:#7c3aed;
+      --blue:#60a5fa;
+      --green:#22c55e;
+      --red:#f472b6;
+      --yellow:#facc15;
+      --cyan:#22d3ee;
+      background:radial-gradient(circle at top left, rgba(79,70,229,.14), transparent 20%), linear-gradient(180deg, #080a14 0%, #0d1527 100%);
+    }
+    body.theme-onyx .sidebar{
+      background:rgba(7,10,22,.75);
+      border-right-color:rgba(255,255,255,.1);
+    }
+    body.theme-onyx .brand{border-bottom-color:rgba(255,255,255,.08)}
+    body.theme-onyx .nav a, body.theme-onyx .nav form button{color:rgba(244,247,255,.8)}
+    body.theme-onyx .nav a .nav-icon, body.theme-onyx .nav form button .nav-icon{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+    body.theme-onyx .nav a:hover, body.theme-onyx .nav form button:hover{background:rgba(255,255,255,.08);color:var(--text)}
+    body.theme-onyx .nav a:hover .nav-icon, body.theme-onyx .nav form button:hover .nav-icon{background:rgba(255,255,255,.1)}
+    body.theme-onyx .nav a.active{background:linear-gradient(135deg,rgba(124,58,237,.8),rgba(96,165,250,.5));color:#fff}
+    body.theme-onyx .logout-wrap{border-top-color:rgba(255,255,255,.08)}
+    body.theme-onyx .profile-card{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)}
+    body.theme-onyx .avatar{background:linear-gradient(145deg,#a78bfa,#7c3aed)}
+
+>>>>>>> origin/branch-ni-kirb
     *{box-sizing:border-box;margin:0;padding:0}
 
     body{
@@ -79,7 +339,11 @@
 
     .glass{
       border:1px solid var(--stroke);
+<<<<<<< HEAD
       background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
+=======
+      background:rgba(255,255,255,.18);
+>>>>>>> origin/branch-ni-kirb
       backdrop-filter:var(--blur);
       -webkit-backdrop-filter:var(--blur);
       box-shadow:
@@ -260,8 +524,13 @@
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:12px}
     .logout{
+<<<<<<< HEAD
       border:1px solid rgba(255,61,114,.2);
       background:rgba(255,61,114,.07);
+=======
+      border:1px solid transparent;
+      background:transparent;
+>>>>>>> origin/branch-ni-kirb
       color:#ff8298;
       padding:11px 12px;
       border-radius:15px;
@@ -272,7 +541,15 @@
       font-family:var(--font);
       width:100%;
     }
+<<<<<<< HEAD
     .logout:hover{background:rgba(255,61,114,.14);transform:translateX(3px)}
+=======
+    .logout:hover{
+      border-color:rgba(255,61,114,.2);
+      background:rgba(255,61,114,.14);
+      transform:translateX(3px)
+    }
+>>>>>>> origin/branch-ni-kirb
     .logout-icon{
       width:34px;height:34px;border-radius:11px;
       display:grid;place-items:center;font-size:16px;
@@ -298,10 +575,18 @@
       font-weight:800;
       letter-spacing:-.06em;
       line-height:1;
+<<<<<<< HEAD
       background:linear-gradient(135deg,#fff 40%,rgba(200,210,255,.7));
       background-clip:text;
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
+=======
+      color:var(--text);
+      background:none;
+      background-clip:unset;
+      -webkit-background-clip:unset;
+      -webkit-text-fill-color:unset;
+>>>>>>> origin/branch-ni-kirb
     }
     .page-title p{
       margin-top:7px;
@@ -309,6 +594,38 @@
       font-size:14px;
       font-weight:500;
     }
+<<<<<<< HEAD
+=======
+    
+    /* Theme-specific heading colors */
+    body.theme-light .page-title h2 {
+      color: #0f172a !important;
+    }
+    body.theme-light .page-title p {
+      color: #475569 !important;
+    }
+    
+    body.theme-ash .page-title h2 {
+      color: #0f172a !important;
+    }
+    body.theme-ash .page-title p {
+      color: #475569 !important;
+    }
+    
+    body.theme-dark .page-title h2 {
+      color: #f0f4ff !important;
+    }
+    body.theme-dark .page-title p {
+      color: #9ba8cc !important;
+    }
+    
+    body.theme-onyx .page-title h2 {
+      color: #f4f7ff !important;
+    }
+    body.theme-onyx .page-title p {
+      color: #a5aed4 !important;
+    }
+>>>>>>> origin/branch-ni-kirb
     .top-right{display:flex;align-items:center;gap:12px}
 
     .search-bar{
@@ -343,6 +660,7 @@
     }
     .clock-date{color:var(--muted);font-size:12px}
 
+<<<<<<< HEAD
     .notif-btn{
       width:44px;height:44px;
       border-radius:50%;
@@ -366,6 +684,8 @@
       animation:pulse-dot 2s infinite;
     }
 
+=======
+>>>>>>> origin/branch-ni-kirb
     .top-avatar{
       width:44px;height:44px;
       border-radius:50%;
@@ -376,8 +696,16 @@
       cursor:pointer;
       position:relative;
       transition:.2s ease;
+<<<<<<< HEAD
     }
     .top-avatar:hover{transform:scale(1.06)}
+=======
+      text-decoration:none;
+      color:#fff;
+    }
+    .top-avatar:hover{transform:scale(1.06);color:#fff}
+    .top-avatar:focus{outline:none}
+>>>>>>> origin/branch-ni-kirb
     .top-avatar::after{
       content:"";
       position:absolute;
@@ -418,7 +746,11 @@
     .stat-icon.blue{background:linear-gradient(145deg,rgba(67,166,255,.55),rgba(139,92,255,.28))}
     .stat-icon.green{background:linear-gradient(145deg,rgba(24,240,139,.42),rgba(67,166,255,.12))}
     .stat-icon.yellow{background:linear-gradient(145deg,rgba(255,199,90,.45),rgba(255,100,50,.15))}
+<<<<<<< HEAD
     .stat-icon.purple{background:linear-gradient(145deg,rgba(139,92,255,.62),rgba(67,166,255,.22))}
+=======
+    .stat-icon.purple{background:rgba(139,92,255,.18);border:1px solid rgba(139,92,255,.22)}
+>>>>>>> origin/branch-ni-kirb
     .stat-icon.red{background:linear-gradient(145deg,rgba(255,61,114,.55),rgba(255,100,50,.15))}
     .stat-body strong{
       display:block;
@@ -592,7 +924,11 @@
     }
     th{
       background:rgba(255,255,255,.055);
+<<<<<<< HEAD
       color:var(--faint);
+=======
+      color:#fff;
+>>>>>>> origin/branch-ni-kirb
       font-size:11px;
       letter-spacing:.12em;
       text-transform:uppercase;
@@ -602,7 +938,11 @@
     }
     th:first-child{border-radius:var(--radius-md) 0 0 0}
     th:last-child{border-radius:0 var(--radius-md) 0 0}
+<<<<<<< HEAD
     td{color:#e8eeff;font-size:13.5px}
+=======
+    td{color:#fff;font-size:13.5px}
+>>>>>>> origin/branch-ni-kirb
     tr:last-child td{border-bottom:0}
     tr:hover td{background:rgba(255,255,255,.028)}
     .user-cell{display:flex;align-items:center;gap:10px;font-weight:700}
@@ -781,6 +1121,12 @@
   <div class="orb orb-3"></div>
   <div class="orb orb-4"></div>
 
+<<<<<<< HEAD
+=======
+  <div id="flashSuccess" data-message="{{ session('success') ?? '' }}" hidden></div>
+  <div id="flashError" data-message="{{ session('error') ?? '' }}" hidden></div>
+
+>>>>>>> origin/branch-ni-kirb
   <div class="toast-container" id="toastContainer"></div>
 
   <div class="app">
@@ -845,6 +1191,13 @@
           <span class="nav-icon">☷</span>
           <span>System Logs</span>
         </a>
+<<<<<<< HEAD
+=======
+        <a href="{{ route('admin.settings') }}" class="@if(Route::currentRouteName() === 'admin.settings') active @endif">
+          <span class="nav-icon">⚙</span>
+          <span>Settings</span>
+        </a>
+>>>>>>> origin/branch-ni-kirb
       </nav>
 
       <div class="logout-wrap">
@@ -866,17 +1219,24 @@
           <p>@yield('pageSubtitle', 'Welcome back, Admin!')</p>
         </div>
         <div class="top-right">
+<<<<<<< HEAD
           <div class="search-bar">🔍 <span style="font-size:13.5px">Search...</span></div>
+=======
+>>>>>>> origin/branch-ni-kirb
           <div class="clock-pill">
             📅 <span id="clockDate">{{ now()->format('M d, Y') }}</span>
             &nbsp;·&nbsp;
             <span id="clockTime" style="font-family:var(--mono);font-size:12px">—</span>
           </div>
+<<<<<<< HEAD
           <div class="notif-btn">
             🔔
             <span class="notif-dot"></span>
           </div>
           <div class="top-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+=======
+          <a href="{{ route('admin.settings') }}" class="top-avatar" title="Go to Settings">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</a>
+>>>>>>> origin/branch-ni-kirb
         </div>
       </header>
 
@@ -907,10 +1267,36 @@
       setTimeout(()=>t.remove(), 3200);
     }
 
+<<<<<<< HEAD
+=======
+    const flashSuccess = document.getElementById('flashSuccess')?.dataset.message?.trim() ?? '';
+    const flashError = document.getElementById('flashError')?.dataset.message?.trim() ?? '';
+
+    if (flashSuccess) {
+      showToast(flashSuccess, '✓', '#18f08b');
+    }
+
+    if (flashError) {
+      showToast(flashError, '!', '#ff3d72');
+    }
+
+>>>>>>> origin/branch-ni-kirb
     if(!sessionStorage.getItem('admin_welcomed')){
       sessionStorage.setItem('admin_welcomed', 'true');
       setTimeout(()=>showToast('Welcome back, Admin!','👋','#b9c4ff'), 600);
     }
+<<<<<<< HEAD
+=======
+
+    (function() {
+      const themeKey = 'qr_attendance_theme';
+      const themeNames = ['light','ash','dark','onyx'];
+      const defaultTheme = 'dark';
+      const current = themeNames.includes(localStorage.getItem(themeKey)) ? localStorage.getItem(themeKey) : defaultTheme;
+      document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
+      document.body.classList.add('theme-' + current);
+    })();
+>>>>>>> origin/branch-ni-kirb
   </script>
 
   @yield('scripts')
