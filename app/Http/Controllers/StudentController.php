@@ -10,6 +10,48 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class StudentController extends Controller
 {
+    // ...existing code...
+        /**
+         * Show the student settings page.
+         */
+        public function settings(): View
+        {
+            $user = Auth::user();
+            return view('student.settings', [ 'user' => $user ]);
+        }
+
+        /**
+         * Update student profile settings.
+         */
+        public function updateSettings(): \Illuminate\Http\RedirectResponse
+        {
+            $user = Auth::user();
+            request()->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            ]);
+            $user->name = request('name');
+            $user->email = request('email');
+            $user->save();
+            return back()->with('success', 'Profile updated successfully.');
+        }
+
+        /**
+         * Update student password.
+         */
+        public function updatePassword(): \Illuminate\Http\RedirectResponse
+        {
+            $user = Auth::user();
+            request()->validate([
+                'password' => 'nullable|string|min:8|confirmed',
+            ]);
+            if (request('password')) {
+                $user->password = bcrypt(request('password'));
+                $user->save();
+                return back()->with('success', 'Password updated successfully.');
+            }
+            return back()->with('info', 'No password change.');
+        }
     /**
      * Return students enrolled in a class (AJAX)
      */
@@ -28,7 +70,11 @@ class StudentController extends Controller
     public function dashboard(): View
     {
         $user = Auth::user();
+<<<<<<< HEAD
         $classes = $user->enrolledClasses()->with('professors')->get();
+=======
+        $classes = $user->enrolledClasses()->with(['professors', 'schedules'])->get();
+>>>>>>> origin/branch-ni-kirb
 
         // Get recent attendance records
         $recentAttendance = AttendanceRecord::where('student_id', $user->id)
@@ -92,7 +138,11 @@ class StudentController extends Controller
     public function myClasses(): View
     {
         $user = Auth::user();
+<<<<<<< HEAD
         $classes = $user->enrolledClasses()->with('professors')->get();
+=======
+        $classes = $user->enrolledClasses()->with('professors', 'students')->get();
+>>>>>>> origin/branch-ni-kirb
 
         // Get all attendance statistics
         $stats = AttendanceRecord::where('student_id', $user->id)

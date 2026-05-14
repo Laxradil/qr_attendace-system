@@ -66,7 +66,11 @@
 
     .glass{
       border:1px solid var(--stroke);
+<<<<<<< HEAD
       background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
+=======
+      background:rgba(255,255,255,.18);
+>>>>>>> origin/branch-ni-kirb
       backdrop-filter:var(--blur);
       -webkit-backdrop-filter:var(--blur);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.18),var(--shadow);

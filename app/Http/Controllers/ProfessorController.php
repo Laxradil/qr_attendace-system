@@ -73,6 +73,16 @@ class ProfessorController extends Controller
             ->flatMap(fn($c) => $c->schedules)
             ->filter(fn($s) => str_contains($s->days, now()->format('l')));
 
+        // Prepare leaderboard data sorted by attendance rate
+        $leaderboard = $classes->map(function($c) {
+            $total = ($c->present_count ?? 0) + ($c->late_count ?? 0) + ($c->absent_count ?? 0) + ($c->excused_count ?? 0);
+            $rate = $total > 0 ? round((($c->present_count ?? 0) / $total) * 100, 1) : 0;
+            return [
+                'name' => ($c->code ?? 'Code') . ' - ' . ($c->name ?? 'Class'),
+                'rate' => $rate
+            ];
+        })->sortByDesc('rate')->values();
+
         return view('professor.dashboard', [
             'totalClasses' => $totalClasses,
             'totalStudents' => $totalStudents,
@@ -85,6 +95,7 @@ class ProfessorController extends Controller
             'recentLogs' => $recentLogs,
             'todaySchedules' => $todaySchedules,
             'classes' => $classes,
+            'leaderboard' => $leaderboard,
         ]);
     }
 

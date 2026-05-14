@@ -81,7 +81,11 @@
         <tbody>
           @forelse($records as $record)
             <tr>
+<<<<<<< HEAD
               <td>{{ $record->recorded_at->setTimezone('Asia/Manila')->format('M d, Y h:i A T') }}</td>
+=======
+              <td>{{ $record->created_at->format('M d, Y H:i A') }}</td>
+>>>>>>> origin/branch-ni-kirb
               <td>
                 <div class="user-cell">
                   <div class="small-avatar">{{ strtoupper(substr($record->student->name ?? 'S', 0, 1)) }}</div>
@@ -323,6 +327,93 @@
   }
 </style>
 
+<<<<<<< HEAD
+=======
+<style>
+  body.theme-light .glass {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .glass-table {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .stat-icon.cyan {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .filter-select,
+  body.theme-light .filter-input {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light th {
+    background: #f9fafb !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light td {
+    color: #000000 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light tr:hover td {
+    background: #f3f4f6 !important;
+  }
+  
+  body.theme-light .small-avatar {
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .muted {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .filter-btn.reset {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #374151 !important;
+  }
+  
+  body.theme-light .pill {
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill.green {
+    background: #ecfdf5 !important;
+    border-color: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  
+  body.theme-light .pill.red {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #991b1b !important;
+  }
+  
+  body.theme-light .pill.yellow {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    color: #92400e !important;
+  }
+  
+  body.theme-light .live-search {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+</style>
+
+>>>>>>> origin/branch-ni-kirb
 <script>
   // Auto-submit filter on change
   const classSelect = document.querySelector('select[name="class_id"]');
