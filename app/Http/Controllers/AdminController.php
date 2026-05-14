@@ -289,6 +289,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes|max:20',
+            'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professors' => 'required|array|min:1',
@@ -300,6 +301,7 @@ class AdminController extends Controller
 
         $classe = Classe::create([
             'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
             'name' => $validated['name'],
             'description' => $validated['description'],
             'professor_id' => $primaryProfessorId,
@@ -334,6 +336,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes,code,' . $classe->id . '|max:20',
+            'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'professors' => 'required|array|min:1',
@@ -346,6 +349,7 @@ class AdminController extends Controller
 
         $classe->update([
             'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
             'name' => $validated['name'],
             'description' => $validated['description'],
             'professor_id' => $primaryProfessorId,
@@ -400,7 +404,17 @@ class AdminController extends Controller
             return back()->with('error', 'Please select valid students to enroll.');
         }
 
-        $classe->students()->syncWithoutDetaching($studentIds);
+        $alreadyEnrolledStudents = $classe->students()
+            ->whereIn('users.id', $studentIds)
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
+        if (!empty($alreadyEnrolledStudents)) {
+            return back()->with('error', 'The following student(s) are already enrolled in this class: ' . implode(', ', $alreadyEnrolledStudents));
+        }
+
+        $classe->students()->attach($studentIds);
 
         SystemLog::create([
             'user_id' => Auth::id(),
@@ -449,12 +463,58 @@ class AdminController extends Controller
             ->paginate(20, ['*'], 'students_page');
 
         return view('admin.qr-codes-new', compact('students'));
+<<<<<<< HEAD
+=======
+    }
+
+    public function downloadAllQrCodesZip()
+    {
+        $students = User::where('role', 'student')
+            ->with(['enrolledClasses', 'studentQrCode'])
+            ->orderBy('name')
+            ->get();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'qr_codes_zip_');
+
+        if ($zipPath === false) {
+            abort(500, 'Unable to create temporary archive.');
+        }
+
+        $zipFile = $zipPath . '.zip';
+        @unlink($zipPath);
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Unable to create QR code archive.');
+        }
+
+        foreach ($students as $student) {
+            $fileName = preg_replace('/[^A-Za-z0-9_-]+/', '_', trim($student->name)) ?: 'student';
+            $qrPng = $this->buildStudentQrPng($student);
+            $zip->addFromString($fileName . '-qr.png', $qrPng);
+        }
+
+        $zip->close();
+
+        return response()->download($zipFile, 'student-qr-codes.zip')->deleteFileAfterSend(true);
+>>>>>>> origin/branch-ni-kirb
     }
 
     public function studentQrCode(User $student)
     {
         abort_if(!$student->isStudent(), 404);
 
+        $svg = $this->buildStudentQrSvg($student);
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
+    }
+
+    private function buildStudentQrSvg(User $student): string
+    {
         $qrCode = QRCode::where('student_id', $student->id)->first();
 
         $qrData = json_encode([
@@ -466,16 +526,11 @@ class AdminController extends Controller
             'generated_at' => now()->toIso8601String(),
         ]);
 
-        $svg = QrCodeFacade::format('svg')
+        return QrCodeFacade::format('svg')
             ->size(180)
             ->margin(1)
             ->encoding('UTF-8')
             ->generate($qrData);
-
-        return response($svg, 200, [
-            'Content-Type' => 'image/svg+xml',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-        ]);
     }
 
     // Attendance Management
@@ -483,8 +538,34 @@ class AdminController extends Controller
     {
         $records = AttendanceRecord::with('student', 'classe')
             ->paginate(20);
+<<<<<<< HEAD
         $attendanceRecords = $records;
         return view('admin.attendance-records-new', ['attendanceRecords' => $attendanceRecords]);
+=======
+        
+        $attendanceStats = AttendanceRecord::selectRaw(
+            'COUNT(*) as total_records, 
+             SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as present_count,
+             SUM(CASE WHEN status = \'late\' THEN 1 ELSE 0 END) as late_count,
+             SUM(CASE WHEN status = \'absent\' THEN 1 ELSE 0 END) as absent_count,
+             SUM(CASE WHEN status = \'excused\' THEN 1 ELSE 0 END) as excused_count'
+        )->first();
+        
+        $totalRecords = (int) ($attendanceStats?->total_records ?? 0);
+        $presentCount = (int) ($attendanceStats?->present_count ?? 0);
+        $lateCount = (int) ($attendanceStats?->late_count ?? 0);
+        $absentCount = (int) ($attendanceStats?->absent_count ?? 0);
+        $excusedCount = (int) ($attendanceStats?->excused_count ?? 0);
+        
+        return view('admin.attendance-records-new', [
+            'attendanceRecords' => $records,
+            'totalRecords' => $totalRecords,
+            'presentCount' => $presentCount,
+            'lateCount' => $lateCount,
+            'absentCount' => $absentCount,
+            'excusedCount' => $excusedCount,
+        ]);
+>>>>>>> origin/branch-ni-kirb
     }
 
     // Reports
@@ -612,5 +693,66 @@ class AdminController extends Controller
             return SystemLog::with('user')->latest()->paginate(20);
         });
         return view('admin.logs-new', ['logs' => $logs]);
+<<<<<<< HEAD
+=======
+    }
+
+    // Settings
+    public function settings(): View
+    {
+        return view('admin.settings');
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
+        ]);
+
+        Auth::user()->update($validated);
+
+        // Log the activity
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'update',
+            'model_type' => 'User',
+            'model_id' => Auth::id(),
+            'description' => 'Updated profile settings',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => 'nullable|string|min:8|confirmed',
+            'password_confirmation' => 'nullable|string',
+        ]);
+
+        if (!empty($validated['password'])) {
+            Auth::user()->update([
+                'password' => bcrypt($validated['password']),
+            ]);
+
+            // Log the activity
+            SystemLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'update',
+                'model_type' => 'User',
+                'model_id' => Auth::id(),
+                'description' => 'Changed password',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Password updated successfully.');
+        }
+
+        return back()->with('info', 'No password change made.');
+>>>>>>> origin/branch-ni-kirb
     }
 }
