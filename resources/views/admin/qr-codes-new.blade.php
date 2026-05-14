@@ -5,12 +5,6 @@
 @section('pageSubtitle', 'View and manage student attendance QR codes.')
 
 @section('content')
-<<<<<<< HEAD
-<div class="glass-table glass">
-  <div class="toolbar">
-    <h3 style="font-size:16px;font-weight:800">Student QR Codes</h3>
-    <button class="btn primary" onclick="alert('Bulk download started')">📥 Download All</button>
-=======
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
   .qr-modal {
@@ -83,7 +77,6 @@
       <button class="btn primary" type="button" onclick="downloadAllQRCodes()">📥 Download All</button>
     </div>
     <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
->>>>>>> origin/branch-ni-kirb
   </div>
 
   <div class="table-wrap">
@@ -108,11 +101,7 @@
           </td>
           <td class="muted">{{ $student->email }}</td>
           <td>
-<<<<<<< HEAD
-            @forelse($student->classes as $classe)
-=======
             @forelse($student->enrolledClasses as $classe)
->>>>>>> origin/branch-ni-kirb
               <span class="pill purple" style="margin:2px">{{ $classe->code }}</span>
             @empty
               <span class="muted">No classes</span>
@@ -128,10 +117,6 @@
             </div>
           </td>
           <td>
-<<<<<<< HEAD
-            <a href="{{ route('admin.students.qr-code', $student) }}" class="btn slim">Open</a>
-            <button class="btn primary slim" onclick="alert('Downloading QR for {{ $student->name }}')">↓ PNG</button>
-=======
             <button
               type="button"
               class="btn slim"
@@ -141,7 +126,6 @@
               onclick="openQRCodeModal(this.dataset.url, this.dataset.studentName, this.dataset.studentId)"
             >Open</button>
             <button class="btn primary slim" type="button" data-url="{{ route('admin.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
->>>>>>> origin/branch-ni-kirb
           </td>
         </tr>
         @empty
@@ -162,8 +146,6 @@
     </div>
   </div>
 </div>
-<<<<<<< HEAD
-=======
 
 <div class="qr-modal" id="qrModal">
   <div class="qr-modal-overlay" onclick="closeQRCodeModal()"></div>
@@ -382,5 +364,4 @@ document.addEventListener('keydown', function (event) {
   }
 </style>
 
->>>>>>> origin/branch-ni-kirb
 @endsection

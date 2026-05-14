@@ -70,11 +70,7 @@ class StudentController extends Controller
     public function dashboard(): View
     {
         $user = Auth::user();
-<<<<<<< HEAD
-        $classes = $user->enrolledClasses()->with('professors')->get();
-=======
         $classes = $user->enrolledClasses()->with(['professors', 'schedules'])->get();
->>>>>>> origin/branch-ni-kirb
 
         // Get recent attendance records
         $recentAttendance = AttendanceRecord::where('student_id', $user->id)
@@ -138,11 +134,7 @@ class StudentController extends Controller
     public function myClasses(): View
     {
         $user = Auth::user();
-<<<<<<< HEAD
-        $classes = $user->enrolledClasses()->with('professors')->get();
-=======
         $classes = $user->enrolledClasses()->with('professors', 'students')->get();
->>>>>>> origin/branch-ni-kirb
 
         // Get all attendance statistics
         $stats = AttendanceRecord::where('student_id', $user->id)

@@ -6,18 +6,12 @@
 
 @section('content')
 <div class="glass-table glass">
-<<<<<<< HEAD
-  <div class="section-head" style="margin-bottom:16px">
-    <h3>📋 Drop Requests</h3>
-    <span class="pill yellow">{{ $dropRequests->where('status', 'pending')->count() }} Pending</span>
-=======
   <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <div style="display:flex;align-items:center;gap:12px">
       <h3 style="font-size:16px;font-weight:800;margin:0">📋 Drop Requests</h3>
       <span class="pill yellow">{{ $dropRequests->where('status', 'pending')->count() }} Pending</span>
     </div>
     <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
->>>>>>> origin/branch-ni-kirb
   </div>
 
   <div class="table-wrap">
@@ -61,16 +55,6 @@
           </td>
           <td>
             @if($drop->status == 'pending')
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('admin.drop-requests.approve', $drop) }}" style="display:inline">
-                @csrf
-                <button type="submit" class="btn primary slim">Approve</button>
-              </form>
-              <form method="POST" action="{{ route('admin.drop-requests.reject', $drop) }}" style="display:inline">
-                @csrf
-                <button type="submit" class="btn danger slim">Reject</button>
-              </form>
-=======
               <div class="action-button-group">
                 <form method="POST" action="{{ route('admin.drop-requests.approve', $drop) }}">
                   @csrf
@@ -81,7 +65,6 @@
                   <button type="submit" class="btn danger slim">Reject</button>
                 </form>
               </div>
->>>>>>> origin/branch-ni-kirb
             @else
               <span class="muted" style="font-size:13px">No action available</span>
             @endif
@@ -96,8 +79,6 @@
     </table>
   </div>
 </div>
-<<<<<<< HEAD
-=======
 
 <script>
 function filterTable(input) {
@@ -206,5 +187,4 @@ function filterTable(input) {
   }
 </style>
 
->>>>>>> origin/branch-ni-kirb
 @endsection

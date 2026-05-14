@@ -97,18 +97,6 @@
     </div>
 </div>
 
-<<<<<<< HEAD
-<script>
-    (function() {
-        if (window.location.search.includes('action=add-student')) {
-            var modal = document.getElementById('addStudentModal');
-            if (modal) {
-                modal.style.display = 'flex';
-            }
-        }
-    })();
-</script>
-=======
 <style>
   body.theme-light #addStudentModal {
     background: rgba(0,0,0,0.5) !important;
@@ -158,6 +146,5 @@
     color: #000000 !important;
   }
 </style>
->>>>>>> origin/branch-ni-kirb
 
 @endsection

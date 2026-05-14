@@ -13,44 +13,28 @@
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px;margin-top:6px">
   <div class="stat glass">
-<<<<<<< HEAD
-    <div class="stat-icon blue"><span class="icon-dot">▬</span></div>
-=======
     <div class="stat-icon blue">📅</div>
->>>>>>> origin/branch-ni-kirb
     <div class="stat-body">
       <strong>{{ count($schedules ?? []) }}</strong>
       <span>Total Schedules</span>
     </div>
   </div>
   <div class="stat glass">
-<<<<<<< HEAD
-    <div class="stat-icon green"><span class="icon-dot">◯</span></div>
-=======
     <div class="stat-icon green">👨‍🏫</div>
->>>>>>> origin/branch-ni-kirb
     <div class="stat-body">
       <strong>{{ collect($schedules ?? [])->pluck('professor')->unique()->count() }}</strong>
       <span>Professors</span>
     </div>
   </div>
   <div class="stat glass">
-<<<<<<< HEAD
-    <div class="stat-icon yellow"><span class="icon-dot">◻</span></div>
-=======
     <div class="stat-icon yellow">📚</div>
->>>>>>> origin/branch-ni-kirb
     <div class="stat-body">
       <strong>{{ count($schedules ?? []) }}</strong>
       <span>Subjects</span>
     </div>
   </div>
   <div class="stat glass">
-<<<<<<< HEAD
-    <div class="stat-icon purple"><span class="icon-dot">□</span></div>
-=======
     <div class="stat-icon purple">✓</div>
->>>>>>> origin/branch-ni-kirb
     <div class="stat-body">
       <strong>{{ count($schedules ?? []) }}</strong>
       <span>Active Rooms</span>
@@ -75,39 +59,21 @@
       
       <div style="display:grid;gap:8px;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-<<<<<<< HEAD
-          <div class="detail-icon"><span class="icon-dot">▨</span></div>
-          <span style="color:var(--muted)">Days:</span> <strong style="color:var(--text)">{{ $schedule->days ?? 'N/A' }}</strong>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-          <div class="detail-icon"><span class="icon-dot">◐</span></div>
-=======
           <div style="width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;background:rgba(255,255,255,.08)">📅</div>
           <span style="color:var(--muted)">Days:</span> <strong style="color:var(--text)">{{ $schedule->days ?? 'N/A' }}</strong>
         </div>
         <div style="display:flex;align-items:center;gap:8px;font-size:13px">
           <div style="width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;background:rgba(255,255,255,.08)">🕓</div>
->>>>>>> origin/branch-ni-kirb
           <span style="color:var(--muted)">Time:</span> <strong style="color:var(--text);font-family:var(--mono)">{{ $schedule->start_time ?? 'N/A' }} - {{ $schedule->end_time ?? 'N/A' }}</strong>
         </div>
         @if($schedule->professor)
           <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-<<<<<<< HEAD
-            <div class="detail-icon"><span class="icon-dot">◎</span></div>
-=======
             <div style="width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;background:rgba(255,255,255,.08)">👨‍🏫</div>
->>>>>>> origin/branch-ni-kirb
             <span style="color:var(--muted)">Professor:</span> <strong style="color:var(--text)">{{ $schedule->professor }}</strong>
           </div>
         @endif
       </div>
 
-<<<<<<< HEAD
-    </div>
-  @empty
-    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">
-      <div style="font-size:48px;margin-bottom:12px"></div>
-=======
       <a href="#" style="color:rgba(139,92,255,.9);font-size:12.5px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
        
       </a>
@@ -115,7 +81,6 @@
   @empty
     <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">
       <div style="font-size:48px;margin-bottom:12px">📚</div>
->>>>>>> origin/branch-ni-kirb
       <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">No Schedules Yet</div>
       <div style="font-size:13px">Your schedule will appear here when it's set up.</div>
     </div>
@@ -143,32 +108,9 @@
     border-radius: 12px;
     display: grid;
     place-items: center;
-<<<<<<< HEAD
-    flex-shrink: 0;
-  }
-  .icon-dot {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255,255,255,.85);
-    font-size: 12px;
-  }
-  .detail-icon {
-    width:22px;
-    height:22px;
-    border-radius:6px;
-    display:grid;
-    place-items:center;
-    font-size:11px;
-    background:rgba(255,255,255,.08);
-  }
-=======
     font-size: 18px;
     flex-shrink: 0;
   }
->>>>>>> origin/branch-ni-kirb
   
   .stat-icon.blue {
     background: rgba(67,166,255,.18);
@@ -206,8 +148,6 @@
     display: block;
   }
 </style>
-<<<<<<< HEAD
-=======
 
 <style>
   /* Light theme solid overrides */
@@ -245,5 +185,4 @@
     color: #8b5cff !important;
   }
 </style>
->>>>>>> origin/branch-ni-kirb
 @endsection

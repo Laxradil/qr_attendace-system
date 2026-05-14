@@ -15,10 +15,6 @@
     </div>
     <div class="tools">
       <button class="btn" onclick="location.reload()">⟳ Refresh</button>
-<<<<<<< HEAD
-      <button class="btn" onclick="alert('Exporting logs CSV...')">⇩ Export</button>
-=======
->>>>>>> origin/branch-ni-kirb
     </div>
   </div>
 
@@ -67,8 +63,6 @@
   </div>
 </div>
 @endsection
-<<<<<<< HEAD
-=======
 
 <style>
   body.theme-light .glass-table {
@@ -150,4 +144,3 @@
     color: #000000 !important;
   }
 </style>
->>>>>>> origin/branch-ni-kirb
