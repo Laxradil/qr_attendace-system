@@ -29,11 +29,7 @@
   }
 
   .student-summary{
-<<<<<<< HEAD
-    list-style:none;
-=======
     list-style:none !important; /* Force hide default browser arrow marker */
->>>>>>> origin/branch-ni-kirb
     cursor:pointer;
     display:flex;
     justify-content:space-between;
@@ -42,11 +38,7 @@
     padding:18px 20px;
   }
 
-<<<<<<< HEAD
-  .student-summary::-webkit-details-marker{display:none}
-=======
   .student-summary::-webkit-details-marker{display:none !important;} /* Force hide default Safari marker */
->>>>>>> origin/branch-ni-kirb
 
   .student-title{
     font-size:18px;
@@ -126,14 +118,9 @@
   }
 </style>
 
-<<<<<<< HEAD
-<div class="info-strip glass students-note">
-  ℹ️ Students are grouped by subject. Expand each subject card to view enrolled students.
-=======
 <div class="info-strip glass students-note" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
   <span style="flex:1">ℹ️ Students are grouped by subject. Expand each subject card to view enrolled students.</span>
   <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterStudentTable(this)">
->>>>>>> origin/branch-ni-kirb
 </div>
 
 <div class="students-list">
@@ -143,13 +130,8 @@
         <div>
           <h3 class="student-title">{{ $classe->code }} — {{ $classe->name }}</h3>
           <div class="student-meta">
-<<<<<<< HEAD
-            <span>👥 {{ $classe->students->count() }} students</span>
-            <span>Prof: {{ $classe->professor->name ?? 'N/A' }}</span>
-=======
             <span style="color: #ffffff;">{{ $classe->students->count() }} students</span>
             <span style="color: #ffffff; font-weight: 700;">Prof: {{ $classe->professor->name ?? 'N/A' }}</span>
->>>>>>> origin/branch-ni-kirb
             <span class="pill green"><span class="status-dot" style="background:var(--green);color:var(--green)"></span> Active</span>
           </div>
         </div>
@@ -219,13 +201,6 @@
 </div>
 
 <script>
-<<<<<<< HEAD
-  document.querySelectorAll('.student-class').forEach((details) => {
-    const toggle = details.querySelector('.student-toggle');
-
-    const sync = () => {
-      toggle.textContent = details.open ? '⌃ Collapse' : '⌄ Expand';
-=======
 function filterStudentTable(input) {
   const searchValue = input.value.toLowerCase();
   const classes = document.querySelectorAll('.student-class');
@@ -258,15 +233,10 @@ function filterStudentTable(input) {
     const sync = () => {
       // Cleaned toggle button output to omit any arrows (^ and v)
       toggle.textContent = details.open ? 'Collapse' : 'Expand';
->>>>>>> origin/branch-ni-kirb
     };
 
     sync();
     details.addEventListener('toggle', sync);
   });
 </script>
-<<<<<<< HEAD
 @endsection
-=======
-@endsection
->>>>>>> origin/branch-ni-kirb

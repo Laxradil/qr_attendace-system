@@ -27,18 +27,9 @@
 </div>
 
 <div class="glass-table glass">
-<<<<<<< HEAD
-  <div class="toolbar">
-    <a href="{{ route('admin.users.create') }}" class="btn primary">＋ Add Professor</a>
-    <div class="tools">
-      <div class="search-bar" style="width:220px;height:40px">🔍 <span style="font-size:13px">Search table...</span></div>
-      <button class="btn">☰ Filter</button>
-    </div>
-=======
   <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <a href="{{ route('admin.users.create') }}" class="btn primary">＋ Add Professor</a>
     <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
->>>>>>> origin/branch-ni-kirb
   </div>
 
   <div class="table-wrap">
@@ -84,8 +75,6 @@
     </table>
   </div>
 </div>
-<<<<<<< HEAD
-=======
 
 <script>
 function filterTable(input) {
@@ -165,5 +154,4 @@ function filterTable(input) {
   }
 </style>
 
->>>>>>> origin/branch-ni-kirb
 @endsection

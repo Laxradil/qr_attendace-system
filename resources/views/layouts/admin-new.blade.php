@@ -31,8 +31,6 @@
       --mono:'Space Mono',monospace;
     }
 
-<<<<<<< HEAD
-=======
     body.theme-light{
       --bg:#ffffff;
       --glass:#f5f5f5;
@@ -290,7 +288,6 @@
     body.theme-onyx .profile-card{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)}
     body.theme-onyx .avatar{background:linear-gradient(145deg,#a78bfa,#7c3aed)}
 
->>>>>>> origin/branch-ni-kirb
     *{box-sizing:border-box;margin:0;padding:0}
 
     body{
@@ -339,11 +336,7 @@
 
     .glass{
       border:1px solid var(--stroke);
-<<<<<<< HEAD
-      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
-=======
       background:rgba(255,255,255,.18);
->>>>>>> origin/branch-ni-kirb
       backdrop-filter:var(--blur);
       -webkit-backdrop-filter:var(--blur);
       box-shadow:
@@ -524,13 +517,8 @@
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:12px}
     .logout{
-<<<<<<< HEAD
-      border:1px solid rgba(255,61,114,.2);
-      background:rgba(255,61,114,.07);
-=======
       border:1px solid transparent;
       background:transparent;
->>>>>>> origin/branch-ni-kirb
       color:#ff8298;
       padding:11px 12px;
       border-radius:15px;
@@ -541,15 +529,11 @@
       font-family:var(--font);
       width:100%;
     }
-<<<<<<< HEAD
-    .logout:hover{background:rgba(255,61,114,.14);transform:translateX(3px)}
-=======
     .logout:hover{
       border-color:rgba(255,61,114,.2);
       background:rgba(255,61,114,.14);
       transform:translateX(3px)
     }
->>>>>>> origin/branch-ni-kirb
     .logout-icon{
       width:34px;height:34px;border-radius:11px;
       display:grid;place-items:center;font-size:16px;
@@ -575,18 +559,11 @@
       font-weight:800;
       letter-spacing:-.06em;
       line-height:1;
-<<<<<<< HEAD
-      background:linear-gradient(135deg,#fff 40%,rgba(200,210,255,.7));
-      background-clip:text;
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-=======
       color:var(--text);
       background:none;
       background-clip:unset;
       -webkit-background-clip:unset;
       -webkit-text-fill-color:unset;
->>>>>>> origin/branch-ni-kirb
     }
     .page-title p{
       margin-top:7px;
@@ -594,8 +571,6 @@
       font-size:14px;
       font-weight:500;
     }
-<<<<<<< HEAD
-=======
     
     /* Theme-specific heading colors */
     body.theme-light .page-title h2 {
@@ -625,7 +600,6 @@
     body.theme-onyx .page-title p {
       color: #a5aed4 !important;
     }
->>>>>>> origin/branch-ni-kirb
     .top-right{display:flex;align-items:center;gap:12px}
 
     .search-bar{
@@ -660,32 +634,6 @@
     }
     .clock-date{color:var(--muted);font-size:12px}
 
-<<<<<<< HEAD
-    .notif-btn{
-      width:44px;height:44px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.07);
-      display:grid;place-items:center;
-      cursor:pointer;
-      font-size:18px;
-      position:relative;
-      transition:.2s ease;
-    }
-    .notif-btn:hover{background:rgba(255,255,255,.12);transform:scale(1.06)}
-    .notif-dot{
-      position:absolute;
-      top:8px;right:9px;
-      width:8px;height:8px;
-      border-radius:50%;
-      background:var(--red);
-      border:2px solid rgba(2,4,18,.9);
-      box-shadow:0 0 8px rgba(255,61,114,.7);
-      animation:pulse-dot 2s infinite;
-    }
-
-=======
->>>>>>> origin/branch-ni-kirb
     .top-avatar{
       width:44px;height:44px;
       border-radius:50%;
@@ -696,16 +644,11 @@
       cursor:pointer;
       position:relative;
       transition:.2s ease;
-<<<<<<< HEAD
-    }
-    .top-avatar:hover{transform:scale(1.06)}
-=======
       text-decoration:none;
       color:#fff;
     }
     .top-avatar:hover{transform:scale(1.06);color:#fff}
     .top-avatar:focus{outline:none}
->>>>>>> origin/branch-ni-kirb
     .top-avatar::after{
       content:"";
       position:absolute;
@@ -746,11 +689,7 @@
     .stat-icon.blue{background:linear-gradient(145deg,rgba(67,166,255,.55),rgba(139,92,255,.28))}
     .stat-icon.green{background:linear-gradient(145deg,rgba(24,240,139,.42),rgba(67,166,255,.12))}
     .stat-icon.yellow{background:linear-gradient(145deg,rgba(255,199,90,.45),rgba(255,100,50,.15))}
-<<<<<<< HEAD
-    .stat-icon.purple{background:linear-gradient(145deg,rgba(139,92,255,.62),rgba(67,166,255,.22))}
-=======
     .stat-icon.purple{background:rgba(139,92,255,.18);border:1px solid rgba(139,92,255,.22)}
->>>>>>> origin/branch-ni-kirb
     .stat-icon.red{background:linear-gradient(145deg,rgba(255,61,114,.55),rgba(255,100,50,.15))}
     .stat-body strong{
       display:block;
@@ -924,11 +863,7 @@
     }
     th{
       background:rgba(255,255,255,.055);
-<<<<<<< HEAD
-      color:var(--faint);
-=======
       color:#fff;
->>>>>>> origin/branch-ni-kirb
       font-size:11px;
       letter-spacing:.12em;
       text-transform:uppercase;
@@ -938,11 +873,7 @@
     }
     th:first-child{border-radius:var(--radius-md) 0 0 0}
     th:last-child{border-radius:0 var(--radius-md) 0 0}
-<<<<<<< HEAD
-    td{color:#e8eeff;font-size:13.5px}
-=======
     td{color:#fff;font-size:13.5px}
->>>>>>> origin/branch-ni-kirb
     tr:last-child td{border-bottom:0}
     tr:hover td{background:rgba(255,255,255,.028)}
     .user-cell{display:flex;align-items:center;gap:10px;font-weight:700}
@@ -1121,12 +1052,9 @@
   <div class="orb orb-3"></div>
   <div class="orb orb-4"></div>
 
-<<<<<<< HEAD
-=======
   <div id="flashSuccess" data-message="{{ session('success') ?? '' }}" hidden></div>
   <div id="flashError" data-message="{{ session('error') ?? '' }}" hidden></div>
 
->>>>>>> origin/branch-ni-kirb
   <div class="toast-container" id="toastContainer"></div>
 
   <div class="app">
@@ -1191,13 +1119,10 @@
           <span class="nav-icon">☷</span>
           <span>System Logs</span>
         </a>
-<<<<<<< HEAD
-=======
         <a href="{{ route('admin.settings') }}" class="@if(Route::currentRouteName() === 'admin.settings') active @endif">
           <span class="nav-icon">⚙</span>
           <span>Settings</span>
         </a>
->>>>>>> origin/branch-ni-kirb
       </nav>
 
       <div class="logout-wrap">
@@ -1219,24 +1144,12 @@
           <p>@yield('pageSubtitle', 'Welcome back, Admin!')</p>
         </div>
         <div class="top-right">
-<<<<<<< HEAD
-          <div class="search-bar">🔍 <span style="font-size:13.5px">Search...</span></div>
-=======
->>>>>>> origin/branch-ni-kirb
           <div class="clock-pill">
             📅 <span id="clockDate">{{ now()->format('M d, Y') }}</span>
             &nbsp;·&nbsp;
             <span id="clockTime" style="font-family:var(--mono);font-size:12px">—</span>
           </div>
-<<<<<<< HEAD
-          <div class="notif-btn">
-            🔔
-            <span class="notif-dot"></span>
-          </div>
-          <div class="top-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
-=======
           <a href="{{ route('admin.settings') }}" class="top-avatar" title="Go to Settings">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</a>
->>>>>>> origin/branch-ni-kirb
         </div>
       </header>
 
@@ -1267,8 +1180,6 @@
       setTimeout(()=>t.remove(), 3200);
     }
 
-<<<<<<< HEAD
-=======
     const flashSuccess = document.getElementById('flashSuccess')?.dataset.message?.trim() ?? '';
     const flashError = document.getElementById('flashError')?.dataset.message?.trim() ?? '';
 
@@ -1280,13 +1191,10 @@
       showToast(flashError, '!', '#ff3d72');
     }
 
->>>>>>> origin/branch-ni-kirb
     if(!sessionStorage.getItem('admin_welcomed')){
       sessionStorage.setItem('admin_welcomed', 'true');
       setTimeout(()=>showToast('Welcome back, Admin!','👋','#b9c4ff'), 600);
     }
-<<<<<<< HEAD
-=======
 
     (function() {
       const themeKey = 'qr_attendance_theme';
@@ -1296,7 +1204,6 @@
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);
     })();
->>>>>>> origin/branch-ni-kirb
   </script>
 
   @yield('scripts')

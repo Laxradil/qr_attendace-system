@@ -44,15 +44,9 @@
     width: 100%;
     padding: 11px 14px;
     border-radius: 13px;
-<<<<<<< HEAD
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--text);
-=======
     background: #ffffff;
     border: 1px solid #d1d5db;
     color: #0f172a;
->>>>>>> origin/branch-ni-kirb
     font-size: 13px;
     font-family: var(--font);
     outline: none;
@@ -61,13 +55,8 @@
   }
   
   .settings-input:focus {
-<<<<<<< HEAD
-    border-color: rgba(139,92,255,.5);
-    box-shadow: 0 0 0 3px rgba(139,92,255,.12);
-=======
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59,130,246,.12);
->>>>>>> origin/branch-ni-kirb
   }
   
   .settings-input:disabled {
@@ -75,13 +64,10 @@
     cursor: not-allowed;
   }
   
-<<<<<<< HEAD
-=======
   .settings-input::placeholder {
     color: #6b7280;
   }
   
->>>>>>> origin/branch-ni-kirb
   .form-group {
     display: grid;
     gap: 14px;
@@ -109,111 +95,6 @@
     margin-top: 4px;
   }
   
-<<<<<<< HEAD
-  .button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
-  
-  .settings-btn {
-    padding: 11px 20px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--text);
-    font-size: 13px;
-    font-family: var(--font);
-    font-weight: 600;
-    outline: none;
-    cursor: pointer;
-    transition: .2s ease;
-    flex: 1;
-  }
-  
-  .settings-btn:hover {
-    transform: translateY(-2px);
-    background: rgba(255,255,255,.13);
-    border-color: rgba(255,255,255,.24);
-  }
-  
-  .settings-btn.primary {
-    background: linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));
-    border-color: rgba(139,92,255,.5);
-    color: #fff;
-  }
-  
-  .settings-btn.primary:hover {
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 10px 28px rgba(80,94,255,.38);
-  }
-  
-  .info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: rgba(255,255,255,.04);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.07);
-    margin-bottom: 10px;
-  }
-  
-  .info-item:last-child {
-    margin-bottom: 0;
-  }
-  
-  .info-label {
-    color: var(--muted);
-    font-size: 13px;
-  }
-  
-  .info-value {
-    font-weight: 700;
-    letter-spacing: .02em;
-  }
-  
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    border: 1px solid rgba(255,255,255,.14);
-  }
-  
-  .pill.green {
-    color: #4dffa0;
-    background: rgba(24,240,139,.11);
-    border-color: rgba(24,240,139,.2);
-  }
-</style>
-
-<div class="settings-container">
-  <!-- Profile Settings -->
-  <div class="settings-section">
-    <h3>Profile Settings</h3>
-    
-    <form action="{{ route('professor.settings.update') ?? '#' }}" method="POST" class="form-group">
-      @csrf
-      @method('PUT')
-
-      <!-- Full Name -->
-      <div>
-        <label class="label">Full Name</label>
-        <input type="text" name="name" value="{{ $user->name ?? '' }}" required class="settings-input">
-        @error('name')
-          <div class="error-text">{{ $message }}</div>
-        @enderror
-      </div>
-
-      <!-- Email -->
-      <div>
-        <label class="label">Email Address</label>
-        <input type="email" name="email" value="{{ $user->email ?? '' }}" required class="settings-input">
-        @error('email')
-=======
   .theme-grid {
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
@@ -363,41 +244,10 @@
         <label class="label">Full Name</label>
         <input type="text" name="name" value="{{ $user->name ?? '' }}" required class="settings-input">
         @error('name')
->>>>>>> origin/branch-ni-kirb
           <div class="error-text">{{ $message }}</div>
         @enderror
       </div>
 
-<<<<<<< HEAD
-      <!-- Username (read-only) -->
-      <div>
-        <label class="label">Username</label>
-        <input type="text" value="{{ $user->username ?? 'N/A' }}" disabled class="settings-input" style="opacity:0.6;cursor:not-allowed;margin-bottom:0">
-        <div class="form-note">Cannot be changed</div>
-      </div>
-    </form>
-  </div>
-
-  <div class="settings-divider"></div>
-
-  <!-- Change Password Section -->
-  <div class="settings-section">
-    <h3>Change Password</h3>
-    
-    <form action="{{ route('professor.settings.password') ?? '#' }}" method="POST" class="form-group">
-      @csrf
-      @method('PUT')
-
-      <!-- New Password -->
-      <div>
-        <label class="label">New Password</label>
-        <input type="password" name="password" placeholder="Leave blank to keep current" class="settings-input">
-        @error('password')
-          <div class="error-text">{{ $message }}</div>
-        @enderror
-      </div>
-
-=======
       <!-- Email -->
       <div>
         <label class="label">Email Address</label>
@@ -460,7 +310,6 @@
         @enderror
       </div>
 
->>>>>>> origin/branch-ni-kirb
       <!-- Confirm Password -->
       <div>
         <label class="label">Confirm Password</label>
@@ -502,8 +351,6 @@
   </div>
 </div>
 
-<<<<<<< HEAD
-=======
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const themeKey = 'qr_attendance_theme';
@@ -537,5 +384,4 @@
   });
 </script>
 
->>>>>>> origin/branch-ni-kirb
 @endsection

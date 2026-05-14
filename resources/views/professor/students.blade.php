@@ -63,22 +63,7 @@
                           <span class="pill green">Active</span>
                         </td>
                         <td>
-<<<<<<< HEAD
-                          @php
-                            $requestKey = "{$classe->id}_{$student->id}";
-                            $pendingRequest = $pendingRequests[$requestKey] ?? null;
-                          @endphp
-                          @if($pendingRequest)
-                            <div>
-                              <span class="pill pending">Pending approval</span>
-                              <div style="font-size:11px;color:var(--muted);margin-top:4px;">Reason: {{ $pendingRequest->reason }}</div>
-                            </div>
-                          @else
-                            <button class="btn slim drop" type="button" onclick='openDropModal({{ $student->id }}, {!! json_encode($student->name) !!}, {{ $classe->id }})'>Drop</button>
-                          @endif
-=======
                           <button class="btn slim drop" onclick="dropStudent({{ $student->id }}, '{{ $student->name }}', {{ $classe->id }})">Drop</button>
->>>>>>> origin/branch-ni-kirb
                         </td>
                       </tr>
                     @endforeach
@@ -230,89 +215,6 @@
     border: 1px solid rgba(139,92,255,.3);
     flex-shrink: 0;
   }
-<<<<<<< HEAD
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.65);
-    display: grid;
-    place-items: center;
-    padding: 20px;
-    z-index: 999;
-  }
-  .modal-overlay.hidden {
-    display: none;
-  }
-  .modal-box {
-    width: min(560px, 100%);
-    background: rgba(12,14,31,.98);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 24px;
-    padding: 28px;
-    box-shadow: 0 30px 80px rgba(0,0,0,.45);
-  }
-  .modal-box h3 {
-    margin: 0 0 10px;
-    font-size: 18px;
-    font-weight: 700;
-  }
-  .modal-box label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-  .modal-box select {
-    width: 100%;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.05);
-    color: var(--text);
-    padding: 12px 14px;
-    font-size: 13px;
-    outline: none;
-    margin-bottom: 18px;
-  }
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .pill.pending {
-    color: #ffd66b;
-    background: rgba(255,214,107,.14);
-    border-color: rgba(255,214,107,.24);
-  }
-</style>
-
-<div id="drop-modal-overlay" class="modal-overlay hidden" onclick="closeDropModal(event)">
-  <div class="modal-box" onclick="event.stopPropagation()">
-    <h3>Request Drop Approval</h3>
-    <p id="drop-modal-text" style="margin:0 0 16px;color:var(--muted);">Choose a reason for dropping this student and send the request to admin for approval.</p>
-    <form id="drop-request-form" method="POST" action="{{ route('professor.drop-request') }}">
-      @csrf
-      <input type="hidden" name="student_id" id="drop-student-id">
-      <input type="hidden" name="class_id" id="drop-class-id">
-      <label for="drop-reason">Reason</label>
-      <select id="drop-reason" name="reason" required>
-        <option value="">Select a reason</option>
-        <option value="Schedule conflict">Schedule conflict</option>
-        <option value="Transfer to another section">Transfer to another section</option>
-        <option value="Medical reason">Medical reason</option>
-        <option value="Academic performance">Academic performance</option>
-        <option value="Personal reasons">Personal reasons</option>
-      </select>
-      <div class="modal-actions">
-        <button type="button" class="btn slim" onclick="closeDropModal()">Cancel</button>
-        <button type="submit" class="btn primary slim">Submit Request</button>
-      </div>
-    </form>
-  </div>
-=======
 </style>
 
 <style>
@@ -390,7 +292,6 @@
             </div>
         </form>
     </div>
->>>>>>> origin/branch-ni-kirb
 </div>
 
 <script>
@@ -398,33 +299,13 @@
     const searchTerm = input.value.toLowerCase();
     const table = input.closest('.table-wrap')?.querySelector('table');
     if (!table) return;
-<<<<<<< HEAD
-
-=======
     
->>>>>>> origin/branch-ni-kirb
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
       const text = row.textContent.toLowerCase();
       row.style.display = text.includes(searchTerm) ? '' : 'none';
     });
   }
-<<<<<<< HEAD
-
-  function openDropModal(studentId, studentName, classId) {
-    document.getElementById('drop-student-id').value = studentId;
-    document.getElementById('drop-class-id').value = classId;
-    document.getElementById('drop-reason').value = '';
-    document.getElementById('drop-modal-text').textContent = `Drop request for ${studentName}. Please choose a reason and submit to send it to admin for approval.`;
-    document.getElementById('drop-modal-overlay').classList.remove('hidden');
-  }
-
-  function closeDropModal(event) {
-    if (event && event.target.id !== 'drop-modal-overlay') {
-      return;
-    }
-    document.getElementById('drop-modal-overlay').classList.add('hidden');
-=======
   
   function dropStudent(studentId, studentName, classId) {
     if (!confirm(`Are you sure you want to drop ${studentName} from this class?`)) {
@@ -443,7 +324,6 @@
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
->>>>>>> origin/branch-ni-kirb
   }
 </script>
 

@@ -11,10 +11,6 @@
   $attendanceProgress = $attendanceTotal > 0 ? ($attendancePresent / $attendanceTotal) * 100 : 0;
 @endphp
 
-<<<<<<< HEAD
-<div class="stats">
-  <div class="stat glass">
-=======
 <style>
   .dashboard-stats{
     gap:10px;
@@ -200,7 +196,6 @@
 
 <div class="stats dashboard-stats">
   <div class="stat">
->>>>>>> origin/branch-ni-kirb
     <div class="stat-icon blue">👥</div>
     <div class="stat-body">
       <strong>{{ App\Models\User::count() }}</strong>
@@ -209,11 +204,7 @@
       <a href="{{ route('admin.users') }}">View all →</a>
     </div>
   </div>
-<<<<<<< HEAD
-  <div class="stat glass">
-=======
   <div class="stat">
->>>>>>> origin/branch-ni-kirb
     <div class="stat-icon green">🎓</div>
     <div class="stat-body">
       <strong>{{ App\Models\User::where('role', 'professor')->count() }}</strong>
@@ -222,11 +213,7 @@
       <a href="{{ route('admin.professors') }}">View all →</a>
     </div>
   </div>
-<<<<<<< HEAD
-  <div class="stat glass">
-=======
   <div class="stat">
->>>>>>> origin/branch-ni-kirb
     <div class="stat-icon yellow">🧑‍🎓</div>
     <div class="stat-body">
       <strong>{{ App\Models\User::where('role', 'student')->count() }}</strong>
@@ -235,11 +222,7 @@
       <a href="{{ route('admin.students') }}">View all →</a>
     </div>
   </div>
-<<<<<<< HEAD
-  <div class="stat glass">
-=======
   <div class="stat">
->>>>>>> origin/branch-ni-kirb
     <div class="stat-icon purple">📘</div>
     <div class="stat-body">
       <strong>{{ App\Models\Classe::count() }}</strong>
@@ -253,35 +236,6 @@
 <div class="dashboard">
   <div style="display:grid;gap:16px">
     <!-- Attendance overview -->
-<<<<<<< HEAD
-    <div class="card glass">
-      <div class="section-head">
-        <h3>📊 Attendance Overview</h3>
-        <a href="{{ route('admin.attendance-records') }}">View Full Report →</a>
-      </div>
-      <div class="mini-grid">
-        <div class="mini">
-          <div class="mini-icon stat-icon green" style="width:38px;height:38px;border-radius:12px;font-size:16px">✓</div>
-          <div><b style="color:#4dffa0">{{ App\Models\AttendanceRecord::where('status', 'present')->count() }}</b><small>Present</small></div>
-        </div>
-        <div class="mini">
-          <div class="mini-icon stat-icon yellow" style="width:38px;height:38px;border-radius:12px;font-size:16px">◷</div>
-          <div><b style="color:#ffd584">{{ App\Models\AttendanceRecord::where('status', 'late')->count() }}</b><small>Late</small></div>
-        </div>
-        <div class="mini">
-          <div class="mini-icon stat-icon red" style="width:38px;height:38px;border-radius:12px;font-size:16px">✕</div>
-          <div><b style="color:#ff7f96">{{ App\Models\AttendanceRecord::where('status', 'absent')->count() }}</b><small>Absent</small></div>
-        </div>
-        <div class="mini">
-          <div class="mini-icon stat-icon blue" style="width:38px;height:38px;border-radius:12px;font-size:16px">▤</div>
-          <div><b>{{ App\Models\AttendanceRecord::count() }}</b><small>Total</small></div>
-        </div>
-      </div>
-      <!-- Attendance bar -->
-      <div style="height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:16px">
-        <div class="attendance-fill" data-progress="{{ round($attendanceProgress, 2) }}" style="height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;box-shadow:0 0 12px rgba(24,240,139,.5)"></div>
-      </div>
-=======
     <div class="card glass attendance-panel">
       <div class="section-head">
         <h3>📊 Attendance Overview</h3>
@@ -316,7 +270,6 @@
           </div>
         </div>
       </div>
->>>>>>> origin/branch-ni-kirb
       <a href="{{ route('admin.attendance-records') }}" class="report-btn">View Full Attendance Report →</a>
     </div>
 

@@ -6,15 +6,9 @@
 
 @section('content')
 <div class="glass-table glass">
-<<<<<<< HEAD
-  <div class="toolbar">
-    <a href="{{ route('admin.classes.create') }}" class="btn primary">＋ Add Class</a>
-    <div class="search-bar" style="height:42px;width:260px">🔍 <span style="font-size:13px">Search classes...</span></div>
-=======
   <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <a href="{{ route('admin.classes.create') }}" class="btn primary">＋ Add Class</a>
     <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
->>>>>>> origin/branch-ni-kirb
   </div>
 
   <div class="table-wrap">
@@ -22,10 +16,7 @@
       <thead>
         <tr>
           <th>Class Code</th>
-<<<<<<< HEAD
-=======
           <th>Room Code</th>
->>>>>>> origin/branch-ni-kirb
           <th>Class Name</th>
           <th>Professor</th>
           <th>Students</th>
@@ -37,19 +28,13 @@
         @forelse($classes as $class)
         <tr>
           <td><span style="font-family:var(--mono);font-size:13px">{{ $class->code }}</span></td>
-<<<<<<< HEAD
-=======
           <td><span style="font-family:var(--mono);font-size:13px">{{ $class->room_code ?? '—' }}</span></td>
->>>>>>> origin/branch-ni-kirb
           <td><b>{{ $class->name }}</b></td>
           <td>{{ $class->professor->name ?? 'N/A' }}</td>
           <td>{{ $class->students->count() }} students</td>
           <td><span class="pill green">Active</span></td>
           <td>
-<<<<<<< HEAD
-=======
             <a href="{{ route('admin.classes.enroll', $class) }}" class="btn slim">Enroll</a>
->>>>>>> origin/branch-ni-kirb
             <a href="{{ route('admin.classes.edit', $class) }}" class="btn slim">Edit</a>
             <form method="POST" action="{{ route('admin.classes.delete', $class) }}" style="display:inline" onsubmit="return confirm('Delete this class?')">
               @csrf
@@ -60,20 +45,13 @@
         </tr>
         @empty
         <tr>
-<<<<<<< HEAD
-          <td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No classes found</td>
-=======
           <td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No classes found</td>
->>>>>>> origin/branch-ni-kirb
         </tr>
         @endforelse
       </tbody>
     </table>
   </div>
 </div>
-<<<<<<< HEAD
-@endsection
-=======
 
 <script>
 function filterTable(input) {
@@ -103,4 +81,3 @@ function filterTable(input) {
     color: #166534 !important;
   }
 </style>
->>>>>>> origin/branch-ni-kirb
