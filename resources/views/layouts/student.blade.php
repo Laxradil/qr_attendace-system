@@ -54,45 +54,35 @@
     /* Ensure dashboard header is visible in all modes */
     .page-title h2, .page-title p {
       color: var(--text) !important;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.12);
     }
-    body.theme-light .page-title h2, 
+    
+    /* Theme-specific heading colors */
+    body.theme-light .page-title h2 {
+      color: #0f172a !important;
+    }
     body.theme-light .page-title p {
-      color: #1e293b !important;
-      text-shadow: 0 1px 0 #fff, 0 2px 8px rgba(0,0,0,0.08);
+      color: #475569 !important;
     }
-    body.theme-dark .page-title h2, 
-    body.theme-dark .page-title p,
-    body.theme-onyx .page-title h2, 
-    body.theme-onyx .page-title p,
-    body.theme-dark .page-title h2, 
-    body.theme-dark .page-title p,
-    body.theme-onyx .page-title h2, 
-    body.theme-onyx .page-title p {
-      color: #fff !important;
-      font-weight: 900 !important;
-      text-shadow: 0 4px 16px rgba(0,0,0,0.32), 0 1px 0 #222;
+    
+    body.theme-ash .page-title h2 {
+      color: #0f172a !important;
     }
-    body.theme-ash .page-title h2, 
     body.theme-ash .page-title p {
-      color: #2d225a !important;
-      font-weight: 900 !important;
-      text-shadow: 0 3px 12px rgba(109,40,217,0.18), 0 1px 0 #fff;
+      color: #475569 !important;
     }
-      --glass:#f5f5f5;
-      --glass-strong:#ffffff;
-      --stroke:#e5e7eb;
-      --stroke-soft:#f3f4f6;
-      --text:#0f172a;
-      --muted:#475569;
-      --faint:#475569;
-      --purple:#7c3aed;
-      --blue:#2563eb;
-      --green:#16a34a;
-      --red:#dc2626;
-      --yellow:#ca8a04;
-      --cyan:#0891b2;
-      background:#f9fafb;
+    
+    body.theme-dark .page-title h2 {
+      color: #f0f4ff !important;
+    }
+    body.theme-dark .page-title p {
+      color: #9ba8cc !important;
+    }
+    
+    body.theme-onyx .page-title h2 {
+      color: #f4f7ff !important;
+    }
+    body.theme-onyx .page-title p {
+      color: #a5aed4 !important;
     }
     body.theme-light .sidebar {
       background: #fff !important;
@@ -158,7 +148,12 @@
     }
     body.theme-light .theme-option:hover,
     body.theme-light .settings-btn,
-    body.theme-light .pill,
+    body.theme-light .pill
+    {
+      background: #f8fafb !important;
+      border-color: #e5e7eb !important;
+    }
+    
     body.theme-light {
       --bg: #ffffff;
       --panel: #ffffff;
@@ -180,8 +175,11 @@
       --yellow: #ca8a04;
       --cyan: #0891b2;
       --shadow: 0 4px 12px rgba(0,0,0,.08);
-      background: #f9fafb !important;
     }
+    
+    body.theme-light .btn:hover,
+    body.theme-light .action-btn:hover,
+    body.theme-light .filter-btn:hover
     {
       background: #f1f5f9 !important;
     }
@@ -281,6 +279,50 @@
       color: #7c3aed !important;
     }
 
+    /* Light theme: Table elements in attendance and cards */
+    body.theme-light .att-table-wrap table tr,
+    body.theme-light .att-table-wrap table tbody tr,
+    body.theme-light .card table tr,
+    body.theme-light .card table tbody tr
+    {
+      background: #ffffff !important;
+      color: #0f172a !important;
+    }
+
+    body.theme-light .att-table-wrap table tbody tr:nth-child(even),
+    body.theme-light .card table tbody tr:nth-child(even)
+    {
+      background: #f8fafb !important;
+    }
+
+    body.theme-light .att-table-wrap table tbody tr:hover,
+    body.theme-light .card table tbody tr:hover
+    {
+      background: #f1f5f9 !important;
+    }
+
+    body.theme-light .att-table-wrap table td,
+    body.theme-light .att-table-wrap table th,
+    body.theme-light .card table td,
+    body.theme-light .card table th
+    {
+      color: #0f172a !important;
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light .att-stats .stat.glass {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light .att-stats .stat.glass strong,
+    body.theme-light .att-stats .stat.glass .stat-label,
+    body.theme-light .att-stats .stat.glass span
+    {
+      color: #0f172a !important;
+    }
+
     body.theme-ash{
       --bg:#e2e8f0;
       --glass:rgba(255,255,255,.92);
@@ -296,7 +338,6 @@
       --red:#b91c1c;
       --yellow:#ca8a04;
       --cyan:#0c4a6e;
-      background:linear-gradient(135deg,#f8fafc 0%,#cbd5e1 100%);
     }
     body.theme-ash .sidebar{background:rgba(226,232,240,.80);border-right-color:rgba(15,23,42,.12)}
     body.theme-ash .brand{border-bottom-color:rgba(15,23,42,.1)}
@@ -307,6 +348,50 @@
     body.theme-ash .logout-wrap{border-top-color:rgba(15,23,42,.1)}
     body.theme-ash .profile-card{background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2)}
     body.theme-ash .avatar{background:linear-gradient(145deg,#a78bfa,#6d28d9)}
+
+    /* Ash theme: Table elements in attendance and cards */
+    body.theme-ash .att-table-wrap table tr,
+    body.theme-ash .att-table-wrap table tbody tr,
+    body.theme-ash .card table tr,
+    body.theme-ash .card table tbody tr
+    {
+      background: rgba(255,255,255,.92) !important;
+      color: #0f172a !important;
+    }
+
+    body.theme-ash .att-table-wrap table tbody tr:nth-child(even),
+    body.theme-ash .card table tbody tr:nth-child(even)
+    {
+      background: rgba(255,255,255,.7) !important;
+    }
+
+    body.theme-ash .att-table-wrap table tbody tr:hover,
+    body.theme-ash .card table tbody tr:hover
+    {
+      background: rgba(255,255,255,.8) !important;
+    }
+
+    body.theme-ash .att-table-wrap table td,
+    body.theme-ash .att-table-wrap table th,
+    body.theme-ash .card table td,
+    body.theme-ash .card table th
+    {
+      color: #0f172a !important;
+      border-color: rgba(15,23,42,.12) !important;
+    }
+
+    body.theme-ash .att-stats .stat.glass {
+      background: rgba(255,255,255,.92) !important;
+      color: #0f172a !important;
+      border-color: rgba(15,23,42,.12) !important;
+    }
+
+    body.theme-ash .att-stats .stat.glass strong,
+    body.theme-ash .att-stats .stat.glass .stat-label,
+    body.theme-ash .att-stats .stat.glass span
+    {
+      color: #0f172a !important;
+    }
 
     body.theme-dark{
       --bg:#020510;
@@ -322,7 +407,6 @@
       --red:#ff3d72;
       --yellow:#ffc75a;
       --cyan:#00e5ff;
-      background:radial-gradient(circle at top left, rgba(67,166,255,.16), transparent 22%), radial-gradient(circle at top right, rgba(139,92,255,.12), transparent 22%), linear-gradient(180deg, #020510 0%, #020511 100%);
     }
     body.theme-dark .sidebar{background:rgba(2,4,18,.70);border-right-color:rgba(255,255,255,.1)}
     body.theme-dark .brand{border-bottom-color:rgba(255,255,255,.09)}
@@ -333,6 +417,50 @@
     body.theme-dark .logout-wrap{border-top-color:rgba(255,255,255,.08)}
     body.theme-dark .profile-card{background:rgba(139,92,255,.12);border-color:rgba(139,92,255,.25)}
     body.theme-dark .avatar{background:linear-gradient(145deg,#9a77ff,#4715d1)}
+
+    /* Dark theme: Table elements in attendance and cards */
+    body.theme-dark .att-table-wrap table tr,
+    body.theme-dark .att-table-wrap table tbody tr,
+    body.theme-dark .card table tr,
+    body.theme-dark .card table tbody tr
+    {
+      background: rgba(2,4,18,.58) !important;
+      color: #f0f4ff !important;
+    }
+
+    body.theme-dark .att-table-wrap table tbody tr:nth-child(even),
+    body.theme-dark .card table tbody tr:nth-child(even)
+    {
+      background: rgba(2,4,18,.8) !important;
+    }
+
+    body.theme-dark .att-table-wrap table tbody tr:hover,
+    body.theme-dark .card table tbody tr:hover
+    {
+      background: rgba(2,4,18,.7) !important;
+    }
+
+    body.theme-dark .att-table-wrap table td,
+    body.theme-dark .att-table-wrap table th,
+    body.theme-dark .card table td,
+    body.theme-dark .card table th
+    {
+      color: #f0f4ff !important;
+      border-color: rgba(255,255,255,.14) !important;
+    }
+
+    body.theme-dark .att-stats .stat.glass {
+      background: rgba(255,255,255,.08) !important;
+      color: #f0f4ff !important;
+      border-color: rgba(255,255,255,.14) !important;
+    }
+
+    body.theme-dark .att-stats .stat.glass strong,
+    body.theme-dark .att-stats .stat.glass .stat-label,
+    body.theme-dark .att-stats .stat.glass span
+    {
+      color: #f0f4ff !important;
+    }
 
     body.theme-onyx{
       --bg:#070a16;
@@ -348,7 +476,6 @@
       --red:#f472b6;
       --yellow:#facc15;
       --cyan:#22d3ee;
-      background:radial-gradient(circle at top left, rgba(79,70,229,.14), transparent 20%), linear-gradient(180deg, #080a14 0%, #0d1527 100%);
     }
     body.theme-onyx .sidebar{background:rgba(7,10,22,.75);border-right-color:rgba(255,255,255,.1)}
     body.theme-onyx .brand{border-bottom-color:rgba(255,255,255,.08)}
@@ -359,6 +486,80 @@
     body.theme-onyx .logout-wrap{border-top-color:rgba(255,255,255,.08)}
     body.theme-onyx .profile-card{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)}
     body.theme-onyx .avatar{background:linear-gradient(145deg,#a78bfa,#7c3aed)}
+
+    /* Onyx theme: Table elements in attendance and cards */
+    body.theme-onyx .att-table-wrap table tr,
+    body.theme-onyx .att-table-wrap table tbody tr,
+    body.theme-onyx .card table tr,
+    body.theme-onyx .card table tbody tr
+    {
+      background: rgba(7,10,22,.58) !important;
+      color: #f4f7ff !important;
+    }
+
+    body.theme-onyx .att-table-wrap table tbody tr:nth-child(even),
+    body.theme-onyx .card table tbody tr:nth-child(even)
+    {
+      background: rgba(7,10,22,.75) !important;
+    }
+
+    body.theme-onyx .att-table-wrap table tbody tr:hover,
+    body.theme-onyx .card table tbody tr:hover
+    {
+      background: rgba(7,10,22,.65) !important;
+    }
+
+    body.theme-onyx .att-table-wrap table td,
+    body.theme-onyx .att-table-wrap table th,
+    body.theme-onyx .card table td,
+    body.theme-onyx .card table th
+    {
+      color: #f4f7ff !important;
+      border-color: rgba(255,255,255,.12) !important;
+    }
+
+    body.theme-onyx .att-stats .stat.glass {
+      background: rgba(255,255,255,.07) !important;
+      color: #f4f7ff !important;
+      border-color: rgba(255,255,255,.12) !important;
+    }
+
+    body.theme-onyx .att-stats .stat.glass strong,
+    body.theme-onyx .att-stats .stat.glass .stat-label,
+    body.theme-onyx .att-stats .stat.glass span
+    {
+      color: #f4f7ff !important;
+    }
+
+    /* Light theme: Class card elements */
+    body.theme-light .class-card-divider {
+      background: rgba(15,23,42,.09) !important;
+    }
+
+    body.theme-light .classmate-item {
+      background: rgba(15,23,42,.04) !important;
+      border-color: rgba(15,23,42,.08) !important;
+    }
+
+    body.theme-light .classmate-item:hover {
+      background: rgba(15,23,42,.08) !important;
+      border-color: rgba(15,23,42,.15) !important;
+    }
+
+    /* Ash theme: Class card elements */
+    body.theme-ash .class-card-divider {
+      background: rgba(15,23,42,.1) !important;
+    }
+
+    body.theme-ash .classmate-item {
+      background: rgba(15,23,42,.05) !important;
+      border-color: rgba(15,23,42,.1) !important;
+    }
+
+    body.theme-ash .classmate-item:hover {
+      background: rgba(15,23,42,.1) !important;
+      border-color: rgba(15,23,42,.2) !important;
+    }
 
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow:hidden}
@@ -373,6 +574,23 @@
         radial-gradient(ellipse at 72% 90%, rgba(136,30,82,.16) 0%, transparent 34%),
         radial-gradient(ellipse at 50% 50%, rgba(0,229,255,.03) 0%, transparent 60%),
         linear-gradient(135deg, #020510 0%, #06091a 40%, #0a0d22 70%, #030713 100%);
+    }
+    
+    /* Theme-specific body backgrounds */
+    body.theme-light{
+      background: #f9fafb !important;
+    }
+    
+    body.theme-ash{
+      background:linear-gradient(135deg,#f8fafc 0%,#cbd5e1 100%) !important;
+    }
+    
+    body.theme-dark{
+      background:radial-gradient(circle at top left, rgba(67,166,255,.16), transparent 22%), radial-gradient(circle at top right, rgba(139,92,255,.12), transparent 22%), linear-gradient(180deg, #020510 0%, #020511 100%) !important;
+    }
+    
+    body.theme-onyx{
+      background:radial-gradient(circle at top left, rgba(79,70,229,.14), transparent 20%), linear-gradient(180deg, #080a14 0%, #0d1527 100%) !important;
     }
     body::before{
       content:"";position:fixed;inset:0;pointer-events:none;
@@ -395,7 +613,7 @@
     /* Glass */
     .glass{
       border:1px solid var(--stroke);
-      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
+      background:rgba(255,255,255,.18);
       backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.18),var(--shadow);
       position:relative;overflow:hidden;
@@ -971,7 +1189,15 @@
 
     setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
 
-    // Theme is now set only by server-side Blade logic, not localStorage.
+    // Theme switching via localStorage (matches admin/professor behavior)
+    (function() {
+      const themeKey = 'qr_attendance_theme';
+      const themeNames = ['light','ash','dark','onyx'];
+      const defaultTheme = 'dark';
+      const current = themeNames.includes(localStorage.getItem(themeKey)) ? localStorage.getItem(themeKey) : defaultTheme;
+      document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
+      document.body.classList.add('theme-' + current);
+    })();
   </script>
 </body>
 </html>

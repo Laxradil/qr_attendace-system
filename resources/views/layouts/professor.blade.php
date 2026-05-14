@@ -374,7 +374,7 @@
 
     .glass{
       border:1px solid var(--stroke);
-      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
+      background:rgba(255,255,255,.18);
       backdrop-filter:var(--blur);
       -webkit-backdrop-filter:var(--blur);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.18),var(--shadow);
@@ -455,12 +455,41 @@
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px;flex-shrink:0}
     .page-title h2{
       font-size:26px;font-weight:800;letter-spacing:-.06em;line-height:1;
-      color:#0f172a;
+      color:var(--text);
       background:none;
       -webkit-background-clip:unset;
       -webkit-text-fill-color:unset;
     }
-    .page-title p{margin-top:4px;color:#334155;font-size:13px;font-weight:500}
+    .page-title p{margin-top:4px;color:var(--muted);font-size:13px;font-weight:500}
+    
+    /* Theme-specific heading colors */
+    body.theme-light .page-title h2 {
+      color: #0f172a !important;
+    }
+    body.theme-light .page-title p {
+      color: #475569 !important;
+    }
+    
+    body.theme-ash .page-title h2 {
+      color: #0f172a !important;
+    }
+    body.theme-ash .page-title p {
+      color: #475569 !important;
+    }
+    
+    body.theme-dark .page-title h2 {
+      color: #f0f4ff !important;
+    }
+    body.theme-dark .page-title p {
+      color: #9ba8cc !important;
+    }
+    
+    body.theme-onyx .page-title h2 {
+      color: #f4f7ff !important;
+    }
+    body.theme-onyx .page-title p {
+      color: #a5aed4 !important;
+    }
     .top-right{display:flex;align-items:center;gap:12px}
     .search-bar{
       height:44px;width:280px;border-radius:999px;padding:0 16px;

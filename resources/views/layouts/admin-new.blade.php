@@ -73,10 +73,15 @@
     body.theme-light .theme-option,
     body.theme-light .theme-option.selected
     {
-      background: #ffffff !important;
-      border: 1px solid #e5e7eb !important;
+      background: rgba(15,23,42,.04) !important;
+      border: 1px solid rgba(15,23,42,.08) !important;
       color: #0f172a !important;
       box-shadow: 0 14px 50px rgba(15,23,42,.06) !important;
+    }
+    body.theme-light .theme-option.selected {
+      border-color:#6b73ff !important;
+      border-width:2px;
+      background:rgba(107,115,255,.12);
     }
     body.theme-light .theme-option:hover,
     body.theme-light .settings-btn,
@@ -89,9 +94,9 @@
     body.theme-light .filter-input,
     body.theme-light .search-bar
     {
-      background: #f8fafb !important;
+      background: rgba(15,23,42,.08) !important;
       color: #0f172a !important;
-      border-color: #e5e7eb !important;
+      border-color: rgba(15,23,42,.15) !important;
     }
 
     body.theme-light .btn:hover,
@@ -99,6 +104,10 @@
     body.theme-light .filter-btn:hover
     {
       background: #f1f5f9 !important;
+    }
+    body.theme-light .theme-option.selected:hover {
+      border-color:#6b73ff !important;
+      border-width:2px;
     }
     body.theme-light [style*="background:rgba(8,12,30,.58)"] {
       background: #ffffff !important;
@@ -327,7 +336,7 @@
 
     .glass{
       border:1px solid var(--stroke);
-      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
+      background:rgba(255,255,255,.18);
       backdrop-filter:var(--blur);
       -webkit-backdrop-filter:var(--blur);
       box-shadow:
@@ -550,7 +559,7 @@
       font-weight:800;
       letter-spacing:-.06em;
       line-height:1;
-      color:#0f172a;
+      color:var(--text);
       background:none;
       background-clip:unset;
       -webkit-background-clip:unset;
@@ -558,9 +567,38 @@
     }
     .page-title p{
       margin-top:7px;
-      color:#334155;
+      color:var(--muted);
       font-size:14px;
       font-weight:500;
+    }
+    
+    /* Theme-specific heading colors */
+    body.theme-light .page-title h2 {
+      color: #0f172a !important;
+    }
+    body.theme-light .page-title p {
+      color: #475569 !important;
+    }
+    
+    body.theme-ash .page-title h2 {
+      color: #0f172a !important;
+    }
+    body.theme-ash .page-title p {
+      color: #475569 !important;
+    }
+    
+    body.theme-dark .page-title h2 {
+      color: #f0f4ff !important;
+    }
+    body.theme-dark .page-title p {
+      color: #9ba8cc !important;
+    }
+    
+    body.theme-onyx .page-title h2 {
+      color: #f4f7ff !important;
+    }
+    body.theme-onyx .page-title p {
+      color: #a5aed4 !important;
     }
     .top-right{display:flex;align-items:center;gap:12px}
 
@@ -595,29 +633,6 @@
       color:var(--text);
     }
     .clock-date{color:var(--muted);font-size:12px}
-
-    .notif-btn{
-      width:44px;height:44px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.07);
-      display:grid;place-items:center;
-      cursor:pointer;
-      font-size:18px;
-      position:relative;
-      transition:.2s ease;
-    }
-    .notif-btn:hover{background:rgba(255,255,255,.12);transform:scale(1.06)}
-    .notif-dot{
-      position:absolute;
-      top:8px;right:9px;
-      width:8px;height:8px;
-      border-radius:50%;
-      background:var(--red);
-      border:2px solid rgba(2,4,18,.9);
-      box-shadow:0 0 8px rgba(255,61,114,.7);
-      animation:pulse-dot 2s infinite;
-    }
 
     .top-avatar{
       width:44px;height:44px;
@@ -674,7 +689,7 @@
     .stat-icon.blue{background:linear-gradient(145deg,rgba(67,166,255,.55),rgba(139,92,255,.28))}
     .stat-icon.green{background:linear-gradient(145deg,rgba(24,240,139,.42),rgba(67,166,255,.12))}
     .stat-icon.yellow{background:linear-gradient(145deg,rgba(255,199,90,.45),rgba(255,100,50,.15))}
-    .stat-icon.purple{background:linear-gradient(145deg,rgba(139,92,255,.62),rgba(67,166,255,.22))}
+    .stat-icon.purple{background:rgba(139,92,255,.18);border:1px solid rgba(139,92,255,.22)}
     .stat-icon.red{background:linear-gradient(145deg,rgba(255,61,114,.55),rgba(255,100,50,.15))}
     .stat-body strong{
       display:block;
@@ -1133,10 +1148,6 @@
             📅 <span id="clockDate">{{ now()->format('M d, Y') }}</span>
             &nbsp;·&nbsp;
             <span id="clockTime" style="font-family:var(--mono);font-size:12px">—</span>
-          </div>
-          <div class="notif-btn">
-            🔔
-            <span class="notif-dot"></span>
           </div>
           <a href="{{ route('admin.settings') }}" class="top-avatar" title="Go to Settings">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</a>
         </div>
