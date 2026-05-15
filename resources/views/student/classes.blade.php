@@ -7,11 +7,27 @@
 <style>
   .class-card {
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    box-shadow: none !important;
   }
   
   .class-card:hover {
-    transform: translateY(-2px);
+    transform: none;
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.24);
+    box-shadow: none !important;
+  }
+
+  .class-card::before {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: -30%;
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,255,.12), transparent 70%);
+    pointer-events: none;
   }
   
   .class-card-top {
@@ -108,6 +124,11 @@
   /* Remove purple gradient on expanded class cards */
   .class-card.expanded {
     background: inherit !important;
+  }
+
+  .qr-sidebar.glass {
+    box-shadow: none !important;
+    border: 1px solid rgba(255,255,255,.12);
   }
 </style>
 

@@ -429,15 +429,91 @@
     }
     /* Override inline search input styles for ash theme */
     body.theme-ash input[style*="background:rgba(8,12,30,.58)"],
-    body.theme-ash #tableSearch {
+    body.theme-ash #tableSearch,
+    body.theme-ash input[type="date"],
+    body.theme-ash input[type="datetime-local"]
+    {
       background: rgba(245,247,250,.9) !important;
       border: 1px solid rgba(15,23,42,.15) !important;
       color: #0f172a !important;
     }
     body.theme-ash input[style*="background:rgba(8,12,30,.58)"]::placeholder,
-    body.theme-ash #tableSearch::placeholder {
+    body.theme-ash #tableSearch::placeholder,
+    body.theme-ash input[type="date"]::placeholder,
+    body.theme-ash input[type="datetime-local"]::placeholder {
       color: #475569 !important;
     }
+
+    body.theme-ash input[type="date"]::-webkit-datetime-edit,
+    body.theme-ash input[type="date"]::-webkit-datetime-edit-text,
+    body.theme-ash input[type="date"]::-webkit-datetime-edit-month-field,
+    body.theme-ash input[type="date"]::-webkit-datetime-edit-day-field,
+    body.theme-ash input[type="date"]::-webkit-datetime-edit-year-field,
+    body.theme-ash input[type="datetime-local"]::-webkit-datetime-edit,
+    body.theme-ash input[type="datetime-local"]::-webkit-datetime-edit-text,
+    body.theme-ash input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+    body.theme-ash input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+    body.theme-ash input[type="datetime-local"]::-webkit-datetime-edit-year-field {
+      color: #0f172a !important;
+    }
+
+    body.theme-ash .pill.green {
+      color: #166534 !important;
+      background: #dcfce7 !important;
+      border-color: #bbf7d0 !important;
+    }
+
+    body.theme-ash .table-wrap,
+    body.theme-ash .att-table-wrap {
+      background: rgba(255,255,255,.08) !important;
+      border: 1px solid rgba(255,255,255,.18) !important;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+
+    body.theme-ash .table-wrap table,
+    body.theme-ash .att-table-wrap table {
+      background: transparent !important;
+    }
+
+    body.theme-ash .table-wrap table tr,
+    body.theme-ash .table-wrap table tbody tr,
+    body.theme-ash .att-table-wrap table tr,
+    body.theme-ash .att-table-wrap table tbody tr
+    {
+      background: rgba(255,255,255,.18) !important;
+      color: #0f172a !important;
+    }
+
+    body.theme-ash .table-wrap table tbody tr:nth-child(even),
+    body.theme-ash .att-table-wrap table tbody tr:nth-child(even)
+    {
+      background: rgba(255,255,255,.12) !important;
+    }
+
+    body.theme-ash .table-wrap table tbody tr:hover,
+    body.theme-ash .att-table-wrap table tbody tr:hover
+    {
+      background: rgba(255,255,255,.24) !important;
+    }
+
+    body.theme-ash .table-wrap table td,
+    body.theme-ash .table-wrap table th,
+    body.theme-ash .att-table-wrap table td,
+    body.theme-ash .att-table-wrap table th
+    {
+      color: #0f172a !important;
+      border-color: rgba(15,23,42,.08) !important;
+    }
+
+    body.theme-ash .table-wrap table th,
+    body.theme-ash .att-table-wrap table th {
+      background: rgba(255,255,255,.85) !important;
+      color: #334155 !important;
+      backdrop-filter: blur(12px) !important;
+    }
+
     /* Ash theme button styling */
     body.theme-ash .btn,
     body.theme-ash .btn.slim,
@@ -824,7 +900,7 @@
       display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 11px;
       font-size:11.5px;font-weight:700;border:1px solid rgba(255,255,255,.10);white-space:nowrap;letter-spacing:.01em;
     }
-    .pill.green{color:#4dffa0;background:rgba(24,240,139,.11);border-color:rgba(24,240,139,.2)}
+    .pill.green{color:#166534;background:#dcfce7;border-color:#bbf7d0}
 
     table{width:100%;border-collapse:separate;border-spacing:0}
     th,td{padding:14px 15px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle}

@@ -999,7 +999,7 @@
       border:1px solid rgba(255,255,255,.10);
       white-space:nowrap;letter-spacing:.01em;
     }
-    .pill.green{color:#4dffa0;background:rgba(24,240,139,.11);border-color:rgba(24,240,139,.2)}
+    .pill.green{color:#22c55e;background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.22)}
     .pill.red{color:#ff7f96;background:rgba(255,61,114,.12);border-color:rgba(255,61,114,.22)}
     .pill.yellow{color:#ffd584;background:rgba(255,199,90,.12);border-color:rgba(255,199,90,.22)}
     .pill.blue{color:#80cbff;background:rgba(67,166,255,.12);border-color:rgba(67,166,255,.22)}
