@@ -8,10 +8,10 @@
 <div class="glass-table glass">
   <div class="toolbar">
     <div class="tools">
-      <button class="btn active" style="background:rgba(139,92,255,.25);border-color:rgba(139,92,255,.4)">☰ All Actions</button>
-      <span class="chip">Add Student</span>
-      <span class="chip">Update User</span>
-      <span class="chip">Scan QR</span>
+      <button class="btn active" style="background:rgba(139,92,255,.25);border-color:rgba(139,92,255,.4)" onclick="filterLogs(this, 'all')">☰ All Actions</button>
+      <span class="chip" onclick="filterLogs(this, 'add_student')">Add Student</span>
+      <span class="chip" onclick="filterLogs(this, 'update_user')">Update User</span>
+      <span class="chip" onclick="filterLogs(this, 'scan_qr')">Scan QR</span>
     </div>
     <div class="tools">
       <button class="btn" onclick="location.reload()">⟳ Refresh</button>
@@ -31,7 +31,7 @@
       </thead>
       <tbody>
         @forelse($logs as $log)
-        <tr>
+        <tr data-action="{{ strtolower($log->action ?? '') }}">
           <td>
             <div style="font-family:var(--mono);font-size:12px">{{ $log->created_at->format('M d, Y') }}</div>
             <div class="muted" style="font-size:12px">{{ $log->created_at->format('h:i:s A') }}</div>
@@ -144,3 +144,26 @@
     color: #000000 !important;
   }
 </style>
+
+<script>
+  let currentLogFilter = 'all';
+
+  function filterLogs(element, action) {
+    currentLogFilter = action;
+
+    const buttons = document.querySelectorAll('.toolbar .tools .btn, .toolbar .tools .chip');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+
+    document.querySelectorAll('.table-wrap tbody tr').forEach(row => {
+      const rowAction = (row.dataset.action || '').toLowerCase();
+      if (action === 'all' || (action === 'add_student' && rowAction.includes('student')) ||
+          (action === 'update_user' && rowAction.includes('update')) ||
+          (action === 'scan_qr' && rowAction.includes('scan'))) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+</script>

@@ -40,6 +40,63 @@
         @endphp
         <style>
             .glass-table.glass{border-radius:24px;padding:24px;background:rgba(6,11,29,.95);border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 60px rgba(0,0,0,.2);}
+            body.theme-ash .glass-table.glass,
+            body.theme-ash .glass,
+            body.theme-ash .report-card,
+            body.theme-ash .report-chart,
+            body.theme-ash .distribution-row,
+            body.theme-ash .table-wrap,
+            body.theme-ash th,
+            body.theme-ash td,
+            body.theme-ash .badge {
+                background: var(--glass-strong) !important;
+                border-color: var(--stroke) !important;
+                color: #0f172a !important;
+                box-shadow: 0 18px 40px rgba(15,23,42,.08) !important;
+            }
+            body.theme-ash .report-chart,
+            body.theme-ash .distribution-row {
+                background: var(--glass) !important;
+            }
+            body.theme-ash .chart-line {
+                stroke: #4338ca !important;
+                stroke-width: 2 !important;
+            }
+            body.theme-ash .chart-labels {
+                color: #334155 !important;
+            }
+            body.theme-ash .chart-labels span {
+                color: inherit !important;
+            }
+            body.theme-ash .attendance-ring-inner {
+                background: var(--glass-strong) !important;
+                border-color: var(--stroke) !important;
+            }
+            body.theme-ash .attendance-ring-inner strong,
+            body.theme-ash .attendance-ring-inner span,
+            body.theme-ash .attendance-ring-inner small {
+                color: #0f172a !important;
+            }
+            body.theme-ash .report-filter-field .filter-select,
+            body.theme-ash .report-filter-field .filter-input,
+            body.theme-ash .filter-btn,
+            body.theme-ash .badge,
+            body.theme-ash .table-wrap td,
+            body.theme-ash .table-wrap th,
+            body.theme-ash .table-wrap td a,
+            body.theme-ash .table-wrap td span,
+            body.theme-ash .table-wrap td strong {
+                background: var(--glass) !important;
+                border-color: var(--stroke-soft) !important;
+                color: #0f172a !important;
+            }
+            body.theme-ash .report-filter-field .filter-select,
+            body.theme-ash .report-filter-field .filter-input,
+            body.theme-ash .filter-btn,
+            body.theme-ash .badge {
+                background: var(--glass) !important;
+                border-color: var(--stroke-soft) !important;
+            }
             .report-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;align-items:stretch;}
             .report-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:18px;}
             .report-card h3{margin:0;font-size:14px;font-weight:700;color:#f8fbff;letter-spacing:.01em;}
@@ -107,7 +164,7 @@
             .badge.br{background:rgba(255,61,114,.12);color:#ffb3c4;}
             .table-wrap{overflow-x:auto;border-radius:18px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.12) transparent;}
             table{width:100%;min-width:700px;border-collapse:separate;border-spacing:0;}
-            th, td{padding:13px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle;}
+            th, td{padding:13px 14px;text-align:left;border-bottom:1px solid rgba(15,23,42,.08);vertical-align:middle;}
             th{background:rgba(255,255,255,.02);color:rgba(255,255,255,.75);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;position:sticky;top:0;backdrop-filter:blur(8px);}
             td{color:rgba(255,255,255,.92);font-size:13px;}
             tr:hover td{background:rgba(255,255,255,.03);}
@@ -196,12 +253,100 @@
             color: #475569 !important;
           }
 
+          body.theme-light .glass,
+          body.theme-light .glass-table.glass,
+          body.theme-light .report-card,
+          body.theme-light .report-chart,
+          body.theme-light .distribution-body,
+          body.theme-light .distribution-row,
+          body.theme-light .distribution-pie,
+          body.theme-light .report-filter-row,
+          body.theme-light .report-filter-field,
+          body.theme-light .report-filter-actions,
+          body.theme-light .table-wrap,
+          body.theme-light .table-wrap table,
+          body.theme-light th,
+          body.theme-light td,
+          body.theme-light .badge {
+            background: #ffffff !important;
+            border-color: #e5e7eb !important;
+            color: #0f172a !important;
+          }
+
+          body.theme-light .report-chart {
+            background: #f8fafb !important;
+          }
+
+          body.theme-light .distribution-row {
+            background: #f8fafb !important;
+          }
+
+          body.theme-light .report-filter-field .filter-select,
+          body.theme-light .report-filter-field .filter-input,
+          body.theme-light .filter-btn,
+          body.theme-light .badge {
+            background: #ffffff !important;
+            border-color: #e5e7eb !important;
+            color: #0f172a !important;
+          }
+
+          body.theme-light .filter-btn.apply {
+            background: rgba(139,92,255,.12) !important;
+            color: #0f172a !important;
+            border-color: rgba(139,92,255,.16) !important;
+          }
+
+          body.theme-light .filter-btn.reset {
+            background: rgba(241,245,249,.7) !important;
+            color: #475569 !important;
+          }
+
+          body.theme-light .glass-table.glass {
+            box-shadow: 0 18px 40px rgba(15,23,42,.08) !important;
+          }
+
           body.theme-light .table-wrap {
             box-shadow: 0 14px 24px rgba(15,23,42,.06) !important;
           }
 
           body.theme-light tr:hover td {
             background: rgba(15,23,42,.04) !important;
+          }
+        </style>
+
+        <style>
+          body.theme-ash .table-wrap td .muted,
+          body.theme-ash .table-wrap td,
+          body.theme-ash .table-wrap th,
+          body.theme-ash .table-wrap td a,
+          body.theme-ash .table-wrap td span,
+          body.theme-ash .table-wrap td strong {
+            color: #0f172a !important;
+          }
+
+          body.theme-ash .attendance-ring-inner {
+            background: #f1f5f9 !important;
+            border-color: rgba(15,23,42,.12) !important;
+            box-shadow: inset 0 0 0 1px rgba(15,23,42,.06) !important;
+          }
+
+          body.theme-ash .attendance-ring-inner strong {
+            color: #0f172a !important;
+          }
+
+          body.theme-ash .attendance-ring-inner strong span,
+          body.theme-ash .attendance-ring-inner small {
+            color: #475569 !important;
+          }
+
+          body.theme-ash .distribution-row div:last-child {
+            color: #1f2937 !important;
+          }
+
+          body.theme-ash .distribution-row .distribution-count,
+          body.theme-ash .distribution-row strong,
+          body.theme-ash .distribution-row small {
+            color: #1f2937 !important;
           }
         </style>
 
@@ -260,7 +405,7 @@
                                     <div style="font-size:12px;color:var(--muted);">Present</div>
                                     <div class="distribution-count">{{ $presentCount }}</div>
                                 </div>
-                                <div style="font-size:13px;font-weight:700;color:#18f08b;">{{ $totalRecords > 0 ? round($presentPct) : 0 }}%</div>
+                                <div style="font-size:13px;font-weight:700;color:#047857;">{{ $totalRecords > 0 ? round($presentPct) : 0 }}%</div>
                             </div>
                             <div class="distribution-row">
                                 <span class="distribution-dot yellow"></span>
@@ -268,7 +413,7 @@
                                     <div style="font-size:12px;color:var(--muted);">Late</div>
                                     <div class="distribution-count">{{ $lateCount }}</div>
                                 </div>
-                                <div style="font-size:13px;font-weight:700;color:#ffc75a;">{{ $totalRecords > 0 ? round($latePct) : 0 }}%</div>
+                                <div style="font-size:13px;font-weight:700;color:#b45309;">{{ $totalRecords > 0 ? round($latePct) : 0 }}%</div>
                             </div>
                             <div class="distribution-row">
                                 <span class="distribution-dot red"></span>
@@ -276,7 +421,7 @@
                                     <div style="font-size:12px;color:var(--muted);">Absent</div>
                                     <div class="distribution-count">{{ $absentCount }}</div>
                                 </div>
-                                <div style="font-size:13px;font-weight:700;color:#ff3d72;">{{ $totalRecords > 0 ? round($absentPct) : 0 }}%</div>
+                                <div style="font-size:13px;font-weight:700;color:#b91c1c;">{{ $totalRecords > 0 ? round($absentPct) : 0 }}%</div>
                             </div>
                         </div>
                     </div>

@@ -200,8 +200,8 @@
 
     body.theme-ash{
       --bg:#e2e8f0;
-      --glass:rgba(255,255,255,.92);
-      --glass-strong:rgba(255,255,255,.98);
+      --glass:rgba(220,225,235,.75);
+      --glass-strong:rgba(235,240,245,.85);
       --stroke:rgba(15,23,42,.12);
       --stroke-soft:rgba(15,23,42,.08);
       --text:#0f172a;
@@ -227,6 +227,175 @@
     body.theme-ash .logout-wrap{border-top-color:rgba(15,23,42,.1)}
     body.theme-ash .profile-card{background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2)}
     body.theme-ash .avatar{background:linear-gradient(145deg,#a78bfa,#6d28d9)}
+    /* Override bright white inline styles for ash theme */
+    body.theme-ash [style*="background:rgba(255,255,255,.92)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.98)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.085)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.055)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.1)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.13)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.18)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.05)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.04)"],
+    body.theme-ash [style*="background:rgba(255,255,255,.08)"]
+    {
+      background: rgba(220,225,235,.6) !important;
+      color: #0f172a !important;
+    }
+    body.theme-ash [style*="color:rgba(255,255,255,.5)"],
+    body.theme-ash [style*="color:rgba(255,255,255,.6)"],
+    body.theme-ash [style*="color:rgba(255,255,255,.7)"],
+    body.theme-ash [style*="color:rgba(255,255,255,.75)"],
+    body.theme-ash [style*="color:rgba(255,255,255,.8)"]
+    {
+      color: #0f172a !important;
+    }
+    /* Ash theme text color fixes */
+    body.theme-ash,
+    body.theme-ash h1,
+    body.theme-ash h2,
+    body.theme-ash h3,
+    body.theme-ash h4,
+    body.theme-ash h5,
+    body.theme-ash h6,
+    body.theme-ash p,
+    body.theme-ash span,
+    body.theme-ash label,
+    body.theme-ash b,
+    body.theme-ash strong,
+    body.theme-ash td,
+    body.theme-ash th,
+    body.theme-ash li,
+    body.theme-ash a,
+    body.theme-ash button
+    {
+      color: #0f172a !important;
+    }
+    body.theme-ash .glass h3,
+    body.theme-ash .glass h2,
+    body.theme-ash .glass h1,
+    body.theme-ash .card h3,
+    body.theme-ash .card h2,
+    body.theme-ash .card h1,
+    body.theme-ash .section-head h3
+    {
+      color: #0f172a !important;
+    }
+    body.theme-ash .glass span,
+    body.theme-ash .glass p,
+    body.theme-ash .glass strong,
+    body.theme-ash .glass b,
+    body.theme-ash .glass label,
+    body.theme-ash .glass td,
+    body.theme-ash .glass th,
+    body.theme-ash .card span,
+    body.theme-ash .card p,
+    body.theme-ash .card strong,
+    body.theme-ash .card b,
+    body.theme-ash .card label,
+    body.theme-ash .card td,
+    body.theme-ash .card th
+    {
+      color: #0f172a !important;
+    }
+    body.theme-ash .stat-body span,
+    body.theme-ash .stat-body strong,
+    body.theme-ash .stat-body b
+    {
+      color: #0f172a !important;
+    }
+    body.theme-ash .activity b,
+    body.theme-ash .activity p,
+    body.theme-ash .activity span,
+    body.theme-ash .activity small
+    {
+      color: #0f172a !important;
+    }
+    body.theme-ash .mini b,
+    body.theme-ash .mini strong
+    {
+      color: #0f172a !important;
+    }
+    body.theme-ash .row-item,
+    body.theme-ash .row-item span,
+    body.theme-ash .row-item b,
+    body.theme-ash .row-item strong
+    {
+      color: #0f172a !important;
+    }
+    /* Ash theme search bar styling */
+    body.theme-ash .search-bar {
+      background: rgba(245,247,250,.9) !important;
+      border: 1px solid rgba(15,23,42,.15) !important;
+      color: #0f172a !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8) !important;
+    }
+    body.theme-ash .search-bar:hover {
+      background: rgba(240,243,248,.95) !important;
+      border-color: rgba(15,23,42,.25) !important;
+    }
+    body.theme-ash .search-bar::placeholder {
+      color: #475569 !important;
+    }
+    body.theme-ash .search-bar span {
+      color: #0f172a !important;
+    }
+    /* Override inline search input styles for ash theme */
+    body.theme-ash input[style*="background:rgba(8,12,30,.58)"],
+    body.theme-ash #tableSearch {
+      background: rgba(245,247,250,.9) !important;
+      border: 1px solid rgba(15,23,42,.15) !important;
+      color: #0f172a !important;
+    }
+    body.theme-ash input[style*="background:rgba(8,12,30,.58)"]::placeholder,
+    body.theme-ash #tableSearch::placeholder {
+      color: #475569 !important;
+    }
+    /* Ash theme button styling */
+    body.theme-ash .btn,
+    body.theme-ash .btn.slim,
+    body.theme-ash button,
+    body.theme-ash a.btn {
+      background: linear-gradient(135deg, rgba(109,40,217,.35), rgba(37,99,235,.25)) !important;
+      border: 1.5px solid rgba(109,40,217,.5) !important;
+      color: #0f172a !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 4px 12px rgba(109,40,217,.15) !important;
+      font-weight: 700;
+    }
+    body.theme-ash .btn:hover,
+    body.theme-ash .btn.slim:hover,
+    body.theme-ash button:hover,
+    body.theme-ash a.btn:hover {
+      background: linear-gradient(135deg, rgba(109,40,217,.5), rgba(37,99,235,.4)) !important;
+      border-color: rgba(109,40,217,.7) !important;
+      color: #0f172a !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 6px 16px rgba(109,40,217,.25) !important;
+      transform: translateY(-2px);
+    }
+    body.theme-ash .btn.primary {
+      background: linear-gradient(135deg,#6d28d9,.8,#2563eb) !important;
+      border-color: transparent !important;
+      color: #fff !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 6px 18px rgba(80,94,255,.35) !important;
+    }
+    body.theme-ash .btn.primary:hover {
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 10px 28px rgba(80,94,255,.45) !important;
+      transform: translateY(-2px);
+    }
+    body.theme-ash .btn.danger {
+      background: linear-gradient(135deg, rgba(220,38,38,.3), rgba(239,68,68,.2)) !important;
+      border: 1.5px solid rgba(220,38,38,.5) !important;
+      color: #7f1d1d !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 4px 12px rgba(220,38,38,.15) !important;
+      font-weight: 700;
+    }
+    body.theme-ash .btn.danger:hover {
+      background: linear-gradient(135deg, rgba(220,38,38,.45), rgba(239,68,68,.35)) !important;
+      border-color: rgba(220,38,38,.7) !important;
+      color: #580808 !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 6px 16px rgba(220,38,38,.25) !important;
+      transform: translateY(-2px);
+    }
 
     body.theme-dark{
       --bg:#020510;
@@ -1021,6 +1190,24 @@
 
     hr.divider{border:none;border-top:1px solid rgba(255,255,255,.08);margin:16px 0}
 
+    /* Ash theme final readability cleanup */
+    body.theme-ash th,
+    body.theme-ash td,
+    body.theme-ash .section-head h3,
+    body.theme-ash .section-head a,
+    body.theme-ash .activity b,
+    body.theme-ash .activity p,
+    body.theme-ash .activity time,
+    body.theme-ash .row-item,
+    body.theme-ash .row-item span,
+    body.theme-ash .mini b,
+    body.theme-ash .mini small,
+    body.theme-ash .quick strong,
+    body.theme-ash .quick span
+    {
+      color: #0f172a !important;
+    }
+
     @media(max-width:1200px){
       .app{grid-template-columns:76px 1fr}
       .brand-text,.profile-info,.nav-label,.nav a span{display:none}
@@ -1199,7 +1386,7 @@
     (function() {
       const themeKey = 'qr_attendance_theme';
       const themeNames = ['light','ash','dark','onyx'];
-      const defaultTheme = 'dark';
+      const defaultTheme = 'light';
       const current = themeNames.includes(localStorage.getItem(themeKey)) ? localStorage.getItem(themeKey) : defaultTheme;
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);

@@ -14,9 +14,9 @@
         display:inline-flex;
         align-items:center;
         gap:8px;
-        border:1px solid rgba(255,255,255,.18);
-        background:rgba(255,255,255,.08);
-        color:#eef2ff;
+        border:1px solid rgba(139,92,255,.45);
+        background:rgba(139,92,255,.08);
+        color:#0f172a;
         border-radius:999px;
         padding:10px 18px;
         font-weight:700;
@@ -28,8 +28,8 @@
     }
     .chip:hover{
         transform:translateY(-1px);
-        background:rgba(255,255,255,.16);
-        border-color:rgba(255,255,255,.24);
+        background:rgba(139,92,255,.16);
+        border-color:rgba(139,92,255,.7);
     }
     .chip.active{
         background:linear-gradient(135deg,rgba(139,92,255,.95),rgba(67,166,255,.9));
@@ -97,13 +97,14 @@
 <style>
   /* Light mode styles */
   body.theme-light .chip {
-    background: rgba(15,23,42,.08);
-    border-color: rgba(15,23,42,.15);
+    background: rgba(139,92,255,.08);
+    border-color: rgba(139,92,255,.3);
     color: #0f172a;
   }
   
   body.theme-light .chip:hover {
-    background: rgba(15,23,42,.12);
+    background: rgba(139,92,255,.14);
+    border-color: rgba(139,92,255,.5);
   }
   
   body.theme-light .chip.active {
