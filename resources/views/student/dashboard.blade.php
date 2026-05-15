@@ -47,7 +47,7 @@
   <div class="dash-grid" style="grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; min-height: 0;">
 
     <div class="dash-col" style="display: flex; flex-direction: column;">
-      <div class="card glass qr-container stretch" style="padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%;">
+      <div class="card glass qr-container stretch" style="padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%; color: var(--text);">
         <div class="qr-label" style="font-size: 18px; font-weight: 700; margin-bottom: 24px;">Your QR Code</div>
         
         <div class="qr-frame" style="padding: 15px; margin-bottom: 20px; background: white; border-radius: 12px; width: 100%; max-width: 280px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
@@ -57,7 +57,7 @@
         <div class="qr-student-name" style="font-size: 22px; font-weight: 800; margin-bottom: 6px;">{{ Auth::user()->name }}</div>
         <div class="qr-student-id" style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Student ID: {{ Auth::user()->id }}</div>
         
-        <div class="qr-hint" style="font-size: 14.5px; font-weight: 600; color: #ffffff;">
+        <div class="qr-hint" style="font-size: 14.5px; font-weight: 600; color: var(--text);">
           Show to professor for attendance
         </div>
         
@@ -65,7 +65,7 @@
         
         <div class="qr-actions" style="display: flex; gap: 12px; width: 100%; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
           <button class="btn btn-pill primary" onclick="openQRModal()" style="flex: 1; padding: 10px 20px; font-size: 14px; color: #ffffff;">Show QR</button>
-          <button class="btn btn-pill" onclick="downloadQR()" style="flex: 1; padding: 10px 20px; font-size: 14px; color: #ffffff; background: rgba(255, 255, 255, 0.15);">Download</button>
+          <button class="btn btn-pill" onclick="downloadQR()" style="flex: 1; padding: 10px 20px; font-size: 14px; color: var(--text); background: rgba(255, 255, 255, 0.15);">Download</button>
         </div>
         
         <div class="qr-status" style="font-size: 13px; color: var(--muted); font-weight: 600;">

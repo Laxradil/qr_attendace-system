@@ -32,7 +32,7 @@
     <div class="stat-body" style="transition:opacity 0.3s ease">
       <strong>{{ $totalClasses }}</strong>
       <span>Total Classes</span>
-      <div class="trend up" style="font-size:12px;color:#8b5cff">↑ All active</div>
+      <div class="trend up" style="font-size:12px;color:#5b21b6">↑ All active</div>
     </div>
   </div>
   <div class="stat ghost-stat" style="transition:all 0.3s ease">
@@ -40,7 +40,7 @@
     <div class="stat-body" style="transition:opacity 0.3s ease">
       <strong>{{ $totalStudents }}</strong>
       <span>Students</span>
-      <div class="trend up" style="font-size:12px;color:#8b5cff">↑ Across all classes</div>
+      <div class="trend up" style="font-size:12px;color:#5b21b6">↑ Across all classes</div>
     </div>
   </div>
   <div class="stat ghost-stat" style="transition:all 0.3s ease">
@@ -48,7 +48,7 @@
     <div class="stat-body" style="transition:opacity 0.3s ease">
       <strong>{{ $totalRecords }}</strong>
       <span>Attendance Records</span>
-      <div class="trend up" style="font-size:12px;color:#8b5cff">↑ Today</div>
+      <div class="trend up" style="font-size:12px;color:#5b21b6">↑ Today</div>
     </div>
   </div>
   <div class="stat ghost-stat" style="transition:all 0.3s ease">
@@ -68,30 +68,30 @@
         <h3 style="font-size:16px">📊 Attendance Overview</h3>
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;font-size:14px">
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #18f08b;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(24,240,139,.18);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👤</div>
-          <div style="font-weight:800;font-size:28px;color:#18f08b">{{ $presentCount }}</div>
-          <div style="color:#18f08b;margin-top:8px;font-weight:700;font-size:12px">Present</div>
+        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #047857;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(4,120,87,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👤</div>
+          <div style="font-weight:800;font-size:28px;color:#047857">{{ $presentCount }}</div>
+          <div style="color:#047857;margin-top:8px;font-weight:700;font-size:12px">Present</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #ffc75a;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,199,90,.18);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⏱️</div>
-          <div style="font-weight:800;font-size:28px;color:#ffc75a">{{ $lateCount }}</div>
-          <div style="color:#ffc75a;margin-top:8px;font-weight:700;font-size:12px">Late</div>
+        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #b45309;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(180,83,9,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⏱️</div>
+          <div style="font-weight:800;font-size:28px;color:#b45309">{{ $lateCount }}</div>
+          <div style="color:#b45309;margin-top:8px;font-weight:700;font-size:12px">Late</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #ff3d72;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,61,114,.18);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⊘</div>
-          <div style="font-weight:800;font-size:28px;color:#ff3d72">{{ $absentCount }}</div>
-          <div style="color:#ff3d72;margin-top:8px;font-weight:700;font-size:12px">Absent</div>
+        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #9f1239;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(159,18,57,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⊘</div>
+          <div style="font-weight:800;font-size:28px;color:#9f1239">{{ $absentCount }}</div>
+          <div style="color:#9f1239;margin-top:8px;font-weight:700;font-size:12px">Absent</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #8b5cff;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(139,92,255,.18);display:grid;place-items:center;margin-bottom:12px;font-size:28px">✓</div>
-          <div style="font-weight:800;font-size:28px;color:#8b5cff">{{ $excusedCount }}</div>
-          <div style="color:#8b5cff;margin-top:8px;font-weight:700;font-size:12px">Excused</div>
+        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #5b21b6;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(91,33,182,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">✓</div>
+          <div style="font-weight:800;font-size:28px;color:#5b21b6">{{ $excusedCount }}</div>
+          <div style="color:#5b21b6;margin-top:8px;font-weight:700;font-size:12px">Excused</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #43a6ff;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(67,166,255,.18);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👥</div>
-          <div style="font-weight:800;font-size:28px;color:#43a6ff">{{ $totalRecords }}</div>
-          <div style="color:#43a6ff;margin-top:8px;font-weight:700;font-size:12px">Total</div>
+        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #1d4ed8;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(29,78,216,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👥</div>
+          <div style="font-weight:800;font-size:28px;color:#1d4ed8">{{ $totalRecords }}</div>
+          <div style="color:#1d4ed8;margin-top:8px;font-weight:700;font-size:12px">Total</div>
         </div>
       </div>
       <button class="report-btn" onclick="window.location.href='{{ route('professor.attendance-records') }}'">View Full Attendance Report →</button>
@@ -118,15 +118,15 @@
     <div class="card glass">
       <div class="section-head"><h3 style="font-size:16px">📅 Today's Schedule</h3></div>
       @forelse($todaySchedules as $schedule)
-        <div class="row-item">
+        <div class="row-item" style="color: var(--text);">
           <div>
             <div style="font-weight:800;font-size:14px">{{ $schedule->subject_code }} · {{ $schedule->subject_name }}</div>
-            <div style="font-size:12px;color:#ffffff;margin-top:2px">{{ $schedule->subject_code }} · Room {{ $schedule->room }}</div>
+            <div style="font-size:12px;color:var(--text);margin-top:2px">{{ $schedule->subject_code }} · Room {{ $schedule->room }}</div>
           </div>
           <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)">{{ \Carbon\Carbon::createFromFormat('H:i:s', $schedule->start_time ?? '00:00:00')->format('g:i A') }}</span>
         </div>
       @empty
-        <div style="padding:14px;color:#ffffff;text-align:center;">No classes scheduled for today</div>
+        <div style="padding:14px;color:var(--text);text-align:center;">No classes scheduled for today</div>
       @endforelse
     </div>
 

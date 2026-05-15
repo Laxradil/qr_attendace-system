@@ -11,7 +11,7 @@
   }
   
   .settings-container {
-    max-width: 520px;
+    max-width: 1040px;
     margin: 0 auto;
     background: rgba(255,255,255,.055);
     border: 1px solid rgba(255,255,255,.10);
