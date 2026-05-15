@@ -701,7 +701,7 @@
       display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 11px;
       font-size:11.5px;font-weight:700;border:1px solid rgba(255,255,255,.10);white-space:nowrap;letter-spacing:.01em;
     }
-    .pill.green{color:#00b894;background:rgba(0,184,148,.13);border-color:rgba(0,184,148,.2)}
+    .pill.green{color:#22c55e;background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.22)}
     .pill.red{color:#ff7f96;background:rgba(214,48,49,.12);border-color:rgba(214,48,49,.22)}
     .pill.yellow{color:#ffd584;background:rgba(253,203,110,.12);border-color:rgba(253,203,110,.22)}
     .pill.blue{color:#80cbff;background:rgba(9,132,227,.12);border-color:rgba(9,132,227,.22)}

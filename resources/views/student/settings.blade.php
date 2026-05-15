@@ -237,6 +237,35 @@
   }
 </style>
 
+<style>
+  /* Ash theme overrides (student) */
+  body.theme-ash .settings-container {
+    background: #f3f4f6;
+    border: 1px solid #e6e9ee;
+  }
+
+  body.theme-ash .settings-input {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #0b1220;
+  }
+
+  body.theme-ash .settings-input:focus {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107,115,255,.06);
+  }
+
+  body.theme-ash .settings-divider { background: #e6e9ee; }
+
+  body.theme-ash .settings-btn { background: #ffffff; border: 1px solid #d1d5db; color: #0b1220; }
+  body.theme-ash .settings-btn:hover { background: #f3f4f6; border-color: #c7ccd3; }
+  body.theme-ash .settings-btn.primary { background: linear-gradient(135deg,#3b82f6,#8b5cff); border-color:#3b82f6; color:#fff; }
+
+  body.theme-ash .info-item { background: #ffffff; border: 1px solid #e6e9ee; }
+  body.theme-ash .info-label { color: #6b7280; }
+  body.theme-ash .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+</style>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const themeKey = 'qr_attendance_theme';

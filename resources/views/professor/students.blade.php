@@ -30,7 +30,7 @@
 
           <div style="padding-top:14px;border-top:1px solid rgba(255,255,255,.07);margin-top:14px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
-              <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
+              <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);color:#0b1220;font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
               <button type="button" class="btn primary slim" onclick="alert('Add student feature coming soon')">+ Add Student</button>
             </div>
 
@@ -150,9 +150,9 @@
   }
   
   .pill.green {
-    color: #4dffa0;
-    background: rgba(24,240,139,.11);
-    border-color: rgba(24,240,139,.2);
+    color: #166534;
+    background: #dcfce7;
+    border-color: #bbf7d0;
   }
   
   .table-wrap {

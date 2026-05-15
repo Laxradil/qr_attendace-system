@@ -230,6 +230,75 @@
   }
 </style>
 
+<style>
+  /* Light theme solid overrides */
+  body.theme-light .settings-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+  }
+
+  body.theme-light .settings-input {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    color: #000000;
+  }
+
+  body.theme-light .settings-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+  }
+
+  body.theme-light .settings-divider { background: #e5e7eb; }
+
+  body.theme-light .settings-btn {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    color: #000000;
+  }
+
+  body.theme-light .settings-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+
+  body.theme-light .settings-btn.primary { background: linear-gradient(135deg,#3b82f6,#8b5cff); border-color:#3b82f6; color:#fff; }
+
+  body.theme-light .info-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+  }
+
+  body.theme-light .info-label { color: #6b7280; }
+
+  body.theme-light .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+</style>
+
+<style>
+  /* Ash theme overrides (similar to light but slightly muted) */
+  body.theme-ash .settings-container {
+    background: #f3f4f6;
+    border: 1px solid #e6e9ee;
+  }
+
+  body.theme-ash .settings-input {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #0b1220;
+  }
+
+  body.theme-ash .settings-input:focus {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107,115,255,.06);
+  }
+
+  body.theme-ash .settings-divider { background: #e6e9ee; }
+
+  body.theme-ash .settings-btn { background: #ffffff; border: 1px solid #d1d5db; color: #0b1220; }
+  body.theme-ash .settings-btn:hover { background: #f3f4f6; border-color: #c7ccd3; }
+  body.theme-ash .settings-btn.primary { background: linear-gradient(135deg,#7b6eff,#6aa0ff); border-color:#6b73ff; color:#fff; }
+
+  body.theme-ash .info-item { background: #ffffff; border: 1px solid #e6e9ee; }
+  body.theme-ash .info-label { color: #6b7280; }
+  body.theme-ash .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+</style>
+
 <div class="settings-container">
   <!-- Profile Settings -->
   <div class="settings-section">

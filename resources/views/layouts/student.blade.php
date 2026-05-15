@@ -348,6 +348,15 @@
     body.theme-ash .logout-wrap{border-top-color:rgba(15,23,42,.1)}
     body.theme-ash .profile-card{background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2)}
     body.theme-ash .avatar{background:linear-gradient(145deg,#a78bfa,#6d28d9)}
+    body.theme-ash .pill.green{color:#16a34a;background:rgba(22,163,74,.14);border-color:rgba(22,163,74,.22)}
+    body.theme-ash .qs-val.green{color:#16a34a}
+    body.theme-ash .qr-modal-content{background:rgba(255,255,255,.92) !important;border-color:rgba(255,255,255,.85) !important;color:#0f172a !important;}
+    body.theme-ash .qr-modal-close{background:#ffffff !important;border-color:rgba(15,23,42,.12) !important;color:#0f172a !important;}
+    body.theme-ash .qr-modal-close:hover{background:#f8fafc !important;}
+    body.theme-ash .qr-modal-body,
+    body.theme-ash .qr-modal-body * {
+      color:#0f172a !important;
+    }
     /* Override bright white inline styles for ash theme */
     body.theme-ash [style*="background:rgba(255,255,255,.92)"],
     body.theme-ash [style*="background:rgba(255,255,255,.98)"],
@@ -519,34 +528,55 @@
     }
 
     /* Ash theme: Table elements in attendance and cards */
+    body.theme-ash .att-table-wrap,
+    body.theme-ash .table-wrap {
+      background: rgba(255,255,255,.08) !important;
+      border: 1px solid rgba(255,255,255,.18) !important;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+
+    body.theme-ash .att-table-wrap table,
+    body.theme-ash .table-wrap table {
+      background: transparent !important;
+    }
+
     body.theme-ash .att-table-wrap table tr,
     body.theme-ash .att-table-wrap table tbody tr,
-    body.theme-ash .card table tr,
-    body.theme-ash .card table tbody tr
+    body.theme-ash .table-wrap table tr,
+    body.theme-ash .table-wrap table tbody tr
     {
-      background: rgba(255,255,255,.92) !important;
+      background: rgba(255,255,255,.18) !important;
       color: #0f172a !important;
     }
 
     body.theme-ash .att-table-wrap table tbody tr:nth-child(even),
-    body.theme-ash .card table tbody tr:nth-child(even)
+    body.theme-ash .table-wrap table tbody tr:nth-child(even)
     {
-      background: rgba(255,255,255,.7) !important;
+      background: rgba(255,255,255,.12) !important;
     }
 
     body.theme-ash .att-table-wrap table tbody tr:hover,
-    body.theme-ash .card table tbody tr:hover
+    body.theme-ash .table-wrap table tbody tr:hover
     {
-      background: rgba(255,255,255,.8) !important;
+      background: rgba(255,255,255,.24) !important;
     }
 
     body.theme-ash .att-table-wrap table td,
     body.theme-ash .att-table-wrap table th,
-    body.theme-ash .card table td,
-    body.theme-ash .card table th
+    body.theme-ash .table-wrap table td,
+    body.theme-ash .table-wrap table th
     {
       color: #0f172a !important;
-      border-color: rgba(15,23,42,.12) !important;
+      border-color: rgba(15,23,42,.08) !important;
+    }
+
+    body.theme-ash .att-table-wrap table th,
+    body.theme-ash .table-wrap table th {
+      background: rgba(255,255,255,.85) !important;
+      color: #334155 !important;
+      backdrop-filter: blur(12px) !important;
     }
 
     body.theme-ash .att-stats .stat.glass {
@@ -1071,7 +1101,7 @@
       display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 12px;
       font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.10);white-space:nowrap;
     }
-    .pill.green{color:#4dffa0;background:rgba(24,240,139,.11);border-color:rgba(24,240,139,.2)}
+    .pill.green{color:#22c55e;background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.22)}
     .pill.red{color:#ff7f96;background:rgba(255,61,114,.12);border-color:rgba(255,61,114,.22)}
     .pill.yellow{color:#ffd584;background:rgba(255,199,90,.12);border-color:rgba(255,199,90,.22)}
     .pill.blue{color:#80cbff;background:rgba(67,166,255,.12);border-color:rgba(67,166,255,.22)}
@@ -1177,7 +1207,7 @@
     .qr-modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
     .qr-modal-content{
       position:relative;z-index:10;border-radius:var(--radius-lg);padding:32px;max-width:420px;width:90vw;max-height:90vh;overflow-y:auto;
-      border:1px solid var(--stroke);box-shadow:0 64px 128px rgba(0,0,0,.6);
+      border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.15);box-shadow:0 64px 128px rgba(0,0,0,.6);
     }
     .qr-modal-close{
       position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;

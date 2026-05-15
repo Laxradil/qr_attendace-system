@@ -9,11 +9,17 @@
   .settings-wrapper {
     max-width:1040px;
     margin:0 auto;
+    border-radius:var(--radius-lg);
+    overflow:hidden;
   }
   
   .settings-card {
     padding:32px;
     margin-bottom:20px;
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
   }
   
   .settings-section {
@@ -197,7 +203,8 @@
   }
   
   .info-item:last-child {
-    margin-bottom:0;
+    margin-bottom: 0;
+    border: none;
   }
   
   .info-label {
@@ -234,8 +241,83 @@
   }
 </style>
 
+<style>
+  /* Ash theme overrides (admin) */
+  body.theme-ash .settings-card,
+  body.theme-ash .settings-wrapper {
+    background: #f3f4f6;
+    border: 1px solid #e6e9ee;
+  }
+
+  body.theme-ash .settings-input {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #0b1220;
+  }
+
+  body.theme-ash .settings-input:focus {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107,115,255,.06);
+  }
+
+  body.theme-ash .settings-divider { background: #e6e9ee; }
+
+  body.theme-ash .settings-btn { background: #ffffff; border: 1px solid #d1d5db; color: #0b1220; }
+  body.theme-ash .settings-btn:hover { background: #f3f4f6; border-color: #c7ccd3; }
+  body.theme-ash .settings-btn.primary { background: linear-gradient(90deg,#8f5bff,#5d63ff); border-color:#6b73ff; color:#fff; }
+
+  body.theme-ash .settings-card,
+  body.theme-ash .settings-wrapper,
+  body.theme-ash .settings-section h3,
+  body.theme-ash .settings-input,
+  body.theme-ash .theme-label,
+  body.theme-ash .info-value {
+    color: #0f172a !important;
+  }
+
+  body.theme-ash .label,
+  body.theme-ash .info-label,
+  body.theme-ash .form-note,
+  body.theme-ash .error-text {
+    color: #475569 !important;
+  }
+
+  body.theme-ash .info-item { background: #ffffff; border: 1px solid #e6e9ee; }
+  body.theme-ash .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+</style>
+
+<style>
+  /* Light theme solid overrides */
+  body.theme-light .settings-card,
+  body.theme-light .settings-wrapper {
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.10);
+  }
+
+  body.theme-light .settings-input {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    color: #000000;
+  }
+
+  body.theme-light .settings-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+  }
+
+  body.theme-light .settings-divider { background: #e5e7eb; }
+
+  body.theme-light .settings-btn { background: #f9fafb; border: 1px solid #d1d5db; color: #000000; }
+  body.theme-light .settings-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+  body.theme-light .settings-btn.primary { background: linear-gradient(90deg,#8f5bff 0%,#5d63ff 45%,#2d68b8 100%); border-color:#3b82f6; color:#fff; }
+
+  body.theme-light .info-item { background: #f9fafb; border: 1px solid #e5e7eb; }
+  body.theme-light .info-label { color: #6b7280; }
+  body.theme-light .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+</style>
+ 
 <div class="settings-wrapper">
-  <div class="settings-card glass-table glass">
+  <div class="settings-card">
     <!-- Profile Settings -->
     <div class="settings-section">
       <h3>Profile Settings</h3>
@@ -293,10 +375,6 @@
           <div class="form-note">Choose between Light, Ash, Dark and Onyx.</div>
         </div>
 
-        <div class="button-group" style="margin-top:24px">
-          <button type="submit" class="settings-btn primary">✓ Save Changes</button>
-          <button type="reset" class="settings-btn">Reset</button>
-        </div>
       </form>
     </div>
     

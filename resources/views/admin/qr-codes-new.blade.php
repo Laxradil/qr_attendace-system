@@ -35,6 +35,8 @@
     border-radius: 24px;
     padding: 20px;
     z-index: 1;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
   }
 
   .qr-modal-close {
@@ -152,14 +154,14 @@
   <div class="qr-modal-content glass">
     <button class="qr-modal-close" type="button" onclick="closeQRCodeModal()">×</button>
     <div style="text-align:center">
-      <div style="font-size:16px;font-weight:700;margin-bottom:14px">Student QR Code</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:14px;color:#fff">Student QR Code</div>
       <div class="qr-modal-frame">
         <img id="qrModalImage" src="" alt="Student QR code">
       </div>
       <div style="margin-top:14px">
-        <div id="qrModalStudentName" style="font-size:18px;font-weight:800"></div>
-        <div id="qrModalStudentId" style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-top:4px"></div>
-        <div style="font-size:12px;color:var(--faint);margin-top:8px">Show to professor for attendance</div>
+        <div id="qrModalStudentName" style="font-size:18px;font-weight:800;color:#fff"></div>
+        <div id="qrModalStudentId" style="font-size:13px;color:rgba(255,255,255,.7);font-family:var(--mono);margin-top:4px"></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:8px">Show to professor for attendance</div>
       </div>
     </div>
   </div>
