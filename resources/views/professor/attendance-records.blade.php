@@ -218,6 +218,12 @@
     margin-bottom: 18px;
     align-items: flex-end;
   }
+
+  /* Ensure filter controls render above the table and sticky headers */
+  .filter-row {
+    position: relative;
+    z-index: 60;
+  }
   
   .filter-field {
     display: flex;
@@ -238,13 +244,30 @@
     padding: 9px 12px;
     border-radius: 12px;
     background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
     color: var(--text);
     font-size: 13px;
     font-family: var(--font);
     outline: none;
     transition: .2s ease;
     min-width: 160px;
+    position: relative;
+    z-index: 80;
+  }
+
+  /* Live search input styling (improves border visibility and text contrast) */
+  .live-search {
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.96);
+    border: 1px solid rgba(0,0,0,.08);
+    color: #0b1220;
+    font-size: 13px;
+    font-family: var(--font);
+    outline: none;
+    transition: .2s ease;
+    min-width: 160px;
+    margin-left: auto;
   }
   
   .filter-select:focus,
@@ -299,9 +322,9 @@
   }
   
   .pill.green, .pill.present {
-    color: #4dffa0;
-    background: rgba(24,240,139,.11);
-    border-color: rgba(24,240,139,.2);
+    color: #166534;
+    background: #dcfce7;
+    border-color: #bbf7d0;
   }
   
   .pill.red, .pill.absent {
@@ -429,7 +452,7 @@
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.placeholder = 'Search students...';
-  searchInput.style.cssText = 'padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;min-width:160px;margin-left:auto';
+  searchInput.style.cssText = 'padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);color:#0b1220;font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;min-width:160px;margin-left:auto';
   searchInput.classList.add('live-search');
   
   const filterFieldsContainer = document.querySelector('.filter-row');
