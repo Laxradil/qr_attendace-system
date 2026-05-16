@@ -27,9 +27,9 @@
   .form-group textarea{
     padding:12px 14px;
     border-radius:var(--radius-md);
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(8,12,30,.58);
-    color:#fff;
+    border:1px solid #d1d5db;
+    background:#ffffff;
+    color:#000000;
     font-size:13px;
     transition:border-color .2s ease, box-shadow .2s ease;
     font-family:inherit;
@@ -43,7 +43,7 @@
   }
   .form-group input::placeholder,
   .form-group textarea::placeholder{
-    color:rgba(255,255,255,.3);
+    color:#9ca3af;
   }
   .form-row{
     display:grid;
@@ -88,9 +88,9 @@
     min-height:140px;
     padding:10px;
     border-radius:var(--radius-md);
-    border:none;
-    background:rgba(8,12,30,.58);
-    color:#fff;
+    border:1px solid #d1d5db;
+    background:#ffffff;
+    color:#000000;
     font-size:13px;
   }
   .professor-list select:focus{
@@ -109,6 +109,45 @@
     padding:10px 12px;
     font-size:12px;
     white-space:nowrap;
+  }
+  .checkbox-group{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 14px;
+    border-radius:var(--radius-md);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,12,30,.58);
+    width:fit-content;
+  }
+  .checkbox-group input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    cursor:pointer;
+    accent-color:#8f5bff;
+  }
+  .checkbox-group label{
+    margin:0;
+    font-size:13px;
+    cursor:pointer;
+    text-transform:none;
+    color:#fff;
+    font-weight:600;
+  }
+  body.theme-ash .checkbox-group{
+    background:rgba(255,255,255,.92);
+    border-color:rgba(99,102,241,.3);
+  }
+  body.theme-ash .checkbox-group label{
+    color:#0f172a;
+  }
+  body.theme-ash .checkbox-group input[type="checkbox"]:checked + label{
+    color:var(--purple);
+  }
+  .info-text{
+    font-size:12px;
+    color:#000000;
+    margin-top:8px;
   }
 </style>
 
@@ -177,7 +216,15 @@
           <select id="selected-professors" name="professors[]" multiple required></select>
         </div>
       </div>
-      <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:8px;">Select professors from available list and move them to selected</div>
+      <div class="info-text">Select professors from available list and move them to selected</div>
+    </div>
+
+    <div class="form-group">
+      <input type="hidden" name="is_active" value="0">
+      <div class="checkbox-group">
+        <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active') ? 'checked' : '' }}>
+        <label for="is_active">Active class</label>
+      </div>
     </div>
 
     <div class="form-actions" style="margin-top:32px">
