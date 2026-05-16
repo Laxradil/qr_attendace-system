@@ -41,15 +41,6 @@
   </div>
 </div>
 
-<!-- Semester filter chips -->
-<div class="toolbar" style="margin-bottom:20px">
-  <div class="tools" style="gap:10px">
-    <div class="chip active">All Semesters</div>
-    <div class="chip">1st Sem</div>
-    <div class="chip">2nd Sem</div>
-  </div>
-</div>
-
 <!-- Class cards grid -->
 <div class="class-grid">
   @forelse($classes as $class)
