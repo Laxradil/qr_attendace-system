@@ -68,30 +68,30 @@
         <h3 style="font-size:16px">📊 Attendance Overview</h3>
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;font-size:14px">
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #047857;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(4,120,87,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👤</div>
-          <div style="font-weight:800;font-size:28px;color:#047857">{{ $presentCount }}</div>
-          <div style="color:#047857;margin-top:8px;font-weight:700;font-size:12px">Present</div>
+        <div style="padding:16px;background:rgba(4,120,87,.15);border-radius:12px;text-align:center;border:1px solid rgba(4,120,87,.3);border-bottom:3px solid #10b981;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(16,185,129,.25);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👤</div>
+          <div style="font-weight:800;font-size:28px;color:#10b981">{{ $presentCount }}</div>
+          <div style="color:#10b981;margin-top:8px;font-weight:700;font-size:12px">Present</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #b45309;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(180,83,9,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⏱️</div>
-          <div style="font-weight:800;font-size:28px;color:#b45309">{{ $lateCount }}</div>
-          <div style="color:#b45309;margin-top:8px;font-weight:700;font-size:12px">Late</div>
+        <div style="padding:16px;background:rgba(217,119,6,.15);border-radius:12px;text-align:center;border:1px solid rgba(217,119,6,.3);border-bottom:3px solid #f59e0b;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,.25);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⏱️</div>
+          <div style="font-weight:800;font-size:28px;color:#f59e0b">{{ $lateCount }}</div>
+          <div style="color:#f59e0b;margin-top:8px;font-weight:700;font-size:12px">Late</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #9f1239;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(159,18,57,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⊘</div>
-          <div style="font-weight:800;font-size:28px;color:#9f1239">{{ $absentCount }}</div>
-          <div style="color:#9f1239;margin-top:8px;font-weight:700;font-size:12px">Absent</div>
+        <div style="padding:16px;background:rgba(239,68,68,.15);border-radius:12px;text-align:center;border:1px solid rgba(239,68,68,.3);border-bottom:3px solid #ef4444;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(239,68,68,.25);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⊘</div>
+          <div style="font-weight:800;font-size:28px;color:#ef4444">{{ $absentCount }}</div>
+          <div style="color:#ef4444;margin-top:8px;font-weight:700;font-size:12px">Absent</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #5b21b6;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(91,33,182,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">✓</div>
-          <div style="font-weight:800;font-size:28px;color:#5b21b6">{{ $excusedCount }}</div>
-          <div style="color:#5b21b6;margin-top:8px;font-weight:700;font-size:12px">Excused</div>
+        <div style="padding:16px;background:rgba(168,85,247,.15);border-radius:12px;text-align:center;border:1px solid rgba(168,85,247,.3);border-bottom:3px solid #a855f7;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(168,85,247,.25);display:grid;place-items:center;margin-bottom:12px;font-size:28px">✓</div>
+          <div style="font-weight:800;font-size:28px;color:#a855f7">{{ $excusedCount }}</div>
+          <div style="color:#a855f7;margin-top:8px;font-weight:700;font-size:12px">Excused</div>
         </div>
-        <div style="padding:16px;background:rgba(255,255,255,.055);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.10);border-bottom:3px solid #1d4ed8;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(29,78,216,.14);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👥</div>
-          <div style="font-weight:800;font-size:28px;color:#1d4ed8">{{ $totalRecords }}</div>
-          <div style="color:#1d4ed8;margin-top:8px;font-weight:700;font-size:12px">Total</div>
+        <div style="padding:16px;background:rgba(59,130,246,.15);border-radius:12px;text-align:center;border:1px solid rgba(59,130,246,.3);border-bottom:3px solid #3b82f6;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(59,130,246,.25);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👥</div>
+          <div style="font-weight:800;font-size:28px;color:#3b82f6">{{ $totalRecords }}</div>
+          <div style="color:#3b82f6;margin-top:8px;font-weight:700;font-size:12px">Total</div>
         </div>
       </div>
       <button class="report-btn" onclick="window.location.href='{{ route('professor.attendance-records') }}'">View Full Attendance Report →</button>

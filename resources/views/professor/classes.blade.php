@@ -67,9 +67,8 @@
         </div>
       </div>
       <div class="class-actions">
-        <a href="{{ route('professor.class-detail', $class->id) }}" class="view-link">View class →</a>
         <div style="flex:1"></div>
-        <button class="btn slim" onclick="window.location.href='{{ route('professor.class-detail', $class->id) }}'">Details</button>
+        <a class="btn slim" href="{{ route('professor.schedules') }}?class_id={{ $class->id }}">Details</a>
       </div>
     </div>
   @empty
@@ -237,6 +236,12 @@
     padding: 7px 10px;
     font-size: 12px;
     border-radius: 10px;
+    text-decoration: none;
+  }
+  
+  a.btn,
+  a.btn:hover {
+    text-decoration: none;
   }
   
   @media(max-width:1200px) {

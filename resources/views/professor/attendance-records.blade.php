@@ -299,9 +299,14 @@
   }
   
   .filter-btn.reset {
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--muted);
+    background: rgba(255,61,114,.15);
+    border: 1px solid rgba(255,61,114,.35);
+    color: #ff8298;
+  }
+
+  .filter-btn.reset:hover {
+    background: rgba(255,61,114,.25);
+    border-color: rgba(255,61,114,.45);
   }
   
   .filter-btn:hover {

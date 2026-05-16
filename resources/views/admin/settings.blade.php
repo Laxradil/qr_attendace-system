@@ -284,6 +284,35 @@
 
   body.theme-ash .info-item { background: #ffffff; border: 1px solid #e6e9ee; }
   body.theme-ash .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+
+  /* In Ash theme make theme options neutral like Light: only selected option highlighted */
+  body.theme-ash .theme-option {
+    background: #ffffff !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+    box-shadow: none !important;
+    color: #0b1220 !important;
+  }
+
+  body.theme-ash .theme-option:hover {
+    border-color: rgba(15,23,42,.12) !important;
+  }
+
+  body.theme-ash .theme-option.selected {
+    border-color: #6b73ff !important;
+    box-shadow: 0 0 0 2px rgba(107,115,255,.12) !important;
+    background: rgba(107,115,255,.12) !important;
+    color: #0b1220 !important;
+  }
+
+  body.theme-ash .theme-swatch {
+    border: 1px solid rgba(148,163,184,.45) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05) !important;
+  }
+
+  body.theme-ash .theme-option.selected .theme-swatch {
+    border-color: rgba(255,255,255,.95) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.5) !important;
+  }
 </style>
 
 <style>
@@ -314,6 +343,17 @@
   body.theme-light .info-item { background: #f9fafb; border: 1px solid #e5e7eb; }
   body.theme-light .info-label { color: #6b7280; }
   body.theme-light .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+
+  body.theme-light .settings-section h3,
+  body.theme-light .label,
+  body.theme-light .form-note,
+  body.theme-light .error-text,
+  body.theme-light .theme-label,
+  body.theme-light .info-value,
+  body.theme-light .theme-option {
+    color: #0f172a !important;
+  }
+  body.theme-light .theme-option:hover { color: #0f172a !important; }
 </style>
  
 <div class="settings-wrapper">

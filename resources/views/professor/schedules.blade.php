@@ -45,7 +45,7 @@
 <!-- Schedule cards grid -->
 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
   @forelse($schedules ?? [] as $schedule)
-    <div class="glass" style="border-radius:var(--radius-lg);padding:20px;transition:.3s ease">
+    <div class="glass schedule-card" data-class-id="{{ $schedule->class_id ?? '' }}" id="schedule-{{ $schedule->id }}" style="border-radius:var(--radius-lg);padding:20px;transition:.3s ease">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
           <h3 style="font-size:15px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px">
@@ -185,4 +185,25 @@
     color: #8b5cff !important;
   }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const params = new URLSearchParams(window.location.search);
+  const classId = params.get('class_id');
+  if (!classId) return;
+  const el = document.querySelector('.schedule-card[data-class-id="' + classId + '"]');
+  if (!el) return;
+  el.classList.add('selected-highlight');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+</script>
+
+<style>
+  .selected-highlight {
+    border-color: #6b73ff !important;
+    box-shadow: 0 10px 40px rgba(107,115,255,.12) !important;
+    transform: translateY(-6px) !important;
+  }
+</style>
+
 @endsection

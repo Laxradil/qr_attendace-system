@@ -26,6 +26,11 @@
     border-radius:var(--radius-lg);
     overflow:hidden;
     padding:0;
+    box-shadow:0 10px 22px rgba(0,0,0,.12);
+  }
+
+  .info-strip.glass{
+    box-shadow:0 6px 16px rgba(0,0,0,.08);
   }
 
   .student-summary{

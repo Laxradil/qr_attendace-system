@@ -223,17 +223,17 @@
     font-size: 13px;
     font-weight: 700;
     background: transparent;
-    border: 1.5px solid rgba(0,255,170,.8);
-    color: #00ffaa;
+    border: 1.5px solid rgba(16,185,129,.7);
+    color: #10b981;
     margin-bottom: 12px;
     box-shadow: none;
   }
 
   body.theme-light .scan-status {
-    background: rgba(24,240,139,.2) !important;
-    border-color: rgba(24,240,139,.5) !important;
+    background: rgba(16,185,129,.12) !important;
+    border-color: rgba(16,185,129,.4) !important;
     color: #059669 !important;
-    box-shadow: 0 4px 12px rgba(24,240,139,.12) !important;
+    box-shadow: 0 4px 12px rgba(16,185,129,.08) !important;
   }
   
   .cam-btns {
