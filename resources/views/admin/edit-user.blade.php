@@ -77,6 +77,8 @@
     font-size:13px;
     cursor:pointer;
     text-transform:none;
+    color:#fff;
+    font-weight:600;
   }
 </style>
 

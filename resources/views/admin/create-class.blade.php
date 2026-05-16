@@ -27,9 +27,9 @@
   .form-group textarea{
     padding:12px 14px;
     border-radius:var(--radius-md);
-    border:1px solid #d1d5db;
-    background:#ffffff;
-    color:#000000;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,12,30,.58);
+    color:#fff;
     font-size:13px;
     transition:border-color .2s ease, box-shadow .2s ease;
     font-family:inherit;
@@ -43,7 +43,7 @@
   }
   .form-group input::placeholder,
   .form-group textarea::placeholder{
-    color:#9ca3af;
+    color:rgba(255,255,255,.3);
   }
   .form-row{
     display:grid;
@@ -88,9 +88,9 @@
     min-height:140px;
     padding:10px;
     border-radius:var(--radius-md);
-    border:1px solid #d1d5db;
-    background:#ffffff;
-    color:#000000;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,12,30,.58);
+    color:#fff;
     font-size:13px;
   }
   .professor-list select:focus{
@@ -134,19 +134,9 @@
     color:#fff;
     font-weight:600;
   }
-  body.theme-ash .checkbox-group{
-    background:rgba(255,255,255,.92);
-    border-color:rgba(99,102,241,.3);
-  }
-  body.theme-ash .checkbox-group label{
-    color:#0f172a;
-  }
-  body.theme-ash .checkbox-group input[type="checkbox"]:checked + label{
-    color:var(--purple);
-  }
   .info-text{
     font-size:12px;
-    color:#000000;
+    color:rgba(255,255,255,.6);
     margin-top:8px;
   }
 </style>
@@ -307,6 +297,19 @@ function moveOptions(fromId, toId) {
     background: #3b82f6 !important;
     border-color: #2563eb !important;
     color: #ffffff !important;
+  }
+  
+  body.theme-light .checkbox-group {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+  
+  body.theme-light .checkbox-group label {
+    color: #111827 !important;
+  }
+  
+  body.theme-light .checkbox-group input[type="checkbox"] {
+    accent-color: #2563eb !important;
   }
 </style>
 @endsection

@@ -360,7 +360,6 @@
                     <input type="checkbox" class="form-check-input" id="remember">
                     <label class="form-check-label" for="remember">Remember me</label>
                 </div>
-                <a href="{{ route('password.forgot') }}" class="forgot-link">Forgot password?</a>
             </div>
             
             <button type="submit" class="btn-login">
