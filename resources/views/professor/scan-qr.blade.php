@@ -218,20 +218,22 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 12px;
+    padding: 8px 16px;
     border-radius: 999px;
-    font-size: 11.5px;
+    font-size: 13px;
     font-weight: 700;
-    background: rgba(24,240,139,.18);
-    border: 1px solid rgba(24,240,139,.4);
-    color: #18f08b;
+    background: transparent;
+    border: 1.5px solid rgba(0,255,170,.8);
+    color: #00ffaa;
     margin-bottom: 12px;
+    box-shadow: none;
   }
 
   body.theme-light .scan-status {
-    background: rgba(24,240,139,.15) !important;
-    border-color: rgba(24,240,139,.35) !important;
+    background: rgba(24,240,139,.2) !important;
+    border-color: rgba(24,240,139,.5) !important;
     color: #059669 !important;
+    box-shadow: 0 4px 12px rgba(24,240,139,.12) !important;
   }
   
   .cam-btns {
