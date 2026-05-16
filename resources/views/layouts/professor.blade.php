@@ -707,7 +707,7 @@
     }
     .avatar-status{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid rgba(2,4,18,.8);box-shadow:0 0 8px rgba(24,240,139,.6)}
     .profile-info h2{font-size:14px;font-weight:700;display:flex;gap:6px;align-items:center}
-    .tag{font-size:10px;padding:3px 7px;border-radius:999px;background:rgba(139,92,255,.3);color:#efeaff;border:1px solid rgba(139,92,255,.4)}
+    .tag{font-size:10px;padding:3px 7px;border-radius:999px;background:rgba(139,92,255,.3);color:#000000;border:1px solid rgba(139,92,255,.4)}
     .profile-info p{margin-top:3px;color:var(--muted);font-size:11.5px}
     .online-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);margin-top:2px;font-weight:600}
     .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(24,240,139,.8);animation:pulse-dot 2s infinite}
@@ -1040,7 +1040,6 @@
           <p id="pageSubtitle">@yield('subheader', '')</p>
         </div>
         <div class="top-right">
-          <div class="search-bar">🔍 <span id="searchLabel" style="font-size:13.5px">Search...</span></div>
           <div class="clock-pill">
             📅 <span class="clock-date" id="clock-date">May 7, 2026</span>
             &nbsp;·&nbsp;

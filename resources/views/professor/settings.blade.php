@@ -297,6 +297,39 @@
   body.theme-ash .info-item { background: #ffffff; border: 1px solid #e6e9ee; }
   body.theme-ash .info-label { color: #6b7280; }
   body.theme-ash .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+
+  /* In Ash theme, hide swatch inner borders on unselected options; only show on selected */
+  /* Make Ash theme behave like Light: only the selected option is highlighted.
+     Unselected options should look neutral (white background, subtle border). */
+  body.theme-ash .theme-option {
+    background: #ffffff !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+    box-shadow: none !important;
+    color: #0b1220 !important;
+  }
+
+  body.theme-ash .theme-option:hover {
+    border-color: rgba(15,23,42,.12) !important;
+  }
+
+  /* Keep the selected styling (highlighted) intact for Ash */
+  body.theme-ash .theme-option.selected {
+    border-color: #6b73ff !important;
+    box-shadow: 0 0 0 2px rgba(107,115,255,.12) !important;
+    background: rgba(107,115,255,.12) !important;
+    color: #0b1220 !important;
+  }
+
+  /* Show swatch border for unselected options in Ash to match Light appearance */
+  body.theme-ash .theme-swatch {
+    border: 1px solid rgba(148,163,184,.45) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05) !important;
+  }
+
+  body.theme-ash .theme-option.selected .theme-swatch {
+    border-color: rgba(255,255,255,.95) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.5) !important;
+  }
 </style>
 
 <div class="settings-container">
