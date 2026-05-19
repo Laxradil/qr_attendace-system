@@ -50,6 +50,60 @@
     grid-template-columns:repeat(3,minmax(0,1fr));
     gap:16px;
   }
+  .schedule-panel{
+    border-radius:var(--radius-lg);
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.04);
+    padding:18px;
+  }
+  .section-title{
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.68);
+    margin-bottom:14px;
+  }
+  .days-grid{
+    display:grid;
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:8px;
+  }
+  .day-pill{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 8px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,12,30,.58);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.02em;
+    cursor:pointer;
+    user-select:none;
+    text-align:center;
+    transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .day-pill input{
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+  }
+  .day-pill span{pointer-events:none;}
+  .day-pill.selected{
+    border-color:rgba(143,91,255,.7);
+    background:rgba(143,91,255,.18);
+    box-shadow:inset 0 0 0 1px rgba(143,91,255,.35);
+  }
+  @media (max-width: 980px){
+    .days-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+  }
+  @media (max-width: 760px){
+    .days-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
   @media (max-width: 980px){
     .form-row{
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -186,6 +240,35 @@
       <textarea id="description" name="description" rows="4" placeholder="Enter class description (optional)">{{ old('description') }}</textarea>
     </div>
 
+    <div class="schedule-panel">
+      <div class="section-title">Schedule</div>
+      @php
+        $selectedDays = collect(old('days', []))->map(fn ($day) => trim((string) $day))->filter()->values()->all();
+      @endphp
+      <div class="form-group" style="margin-bottom:14px;">
+        <label>Days *</label>
+        <div class="days-grid">
+          @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $day)
+            <label class="day-pill{{ in_array($day, $selectedDays, true) ? ' selected' : '' }}">
+              <input type="checkbox" name="days[]" value="{{ $day }}" {{ in_array($day, $selectedDays, true) ? 'checked' : '' }}>
+              <span>{{ $day }}</span>
+            </label>
+          @endforeach
+        </div>
+      </div>
+      <div class="form-row" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+        <div class="form-group">
+          <label for="start_time">Start Time *</label>
+          <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" required>
+        </div>
+        <div class="form-group">
+          <label for="end_time">End Time *</label>
+          <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" required>
+        </div>
+      </div>
+      <div class="info-text">This schedule is saved once and shown on professor and student class views.</div>
+    </div>
+
     <div class="form-group">
       <label>Assigned Professors *</label>
       <div class="professor-selector">
@@ -241,6 +324,12 @@ function moveOptions(fromId, toId) {
     to.appendChild(option);
   });
 }
+
+document.querySelectorAll('.day-pill input[type="checkbox"]').forEach((checkbox) => {
+  const syncState = () => checkbox.closest('.day-pill')?.classList.toggle('selected', checkbox.checked);
+  checkbox.addEventListener('change', syncState);
+  syncState();
+});
 </script>
 
 <style>

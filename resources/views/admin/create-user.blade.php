@@ -115,6 +115,10 @@
         <label for="student_id">Student ID</label>
         <input type="text" id="student_id" name="student_id" value="{{ old('student_id') }}" placeholder="Optional - for students only">
       </div>
+      <div class="form-group">
+        <label for="section">Section</label>
+        <input type="text" id="section" name="section" value="{{ old('section') }}" placeholder="Required for students">
+      </div>
     </div>
 
     <div class="form-row">
