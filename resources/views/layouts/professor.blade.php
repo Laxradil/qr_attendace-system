@@ -918,6 +918,35 @@
       box-shadow:inset 0 1px 0 rgba(255,255,255,.14);font-size:13px;font-family:var(--font);
     }
     .btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24)}
+    .toast{
+      position:fixed;right:22px;bottom:22px;z-index:9999;display:inline-flex;align-items:center;gap:12px;
+      padding:14px 18px;border-radius:16px;backdrop-filter:blur(24px);
+      background:rgba(15,23,42,.92);border:1px solid rgba(255,255,255,.16);
+      color:#f8fafc;box-shadow:0 18px 50px rgba(0,0,0,.25);font-size:13.5px;font-weight:700;
+      animation:toast-in .3s ease,toast-out .3s ease 2.8s forwards;max-width:360px;
+    }
+    .toast-icon{font-size:18px;line-height:1}
+    body.theme-light .toast {
+      background: rgba(255,255,255,.96);
+      border-color: rgba(15,23,42,.08);
+      color: #0f172a;
+      box-shadow: 0 18px 40px rgba(15,23,42,.1);
+    }
+    body.theme-ash .toast {
+      background: rgba(255,255,255,.92);
+      border-color: rgba(15,23,42,.12);
+      color: #0f172a;
+      box-shadow: 0 18px 40px rgba(15,23,42,.12);
+    }
+    body.theme-dark .toast,
+    body.theme-onyx .toast {
+      background: rgba(15,23,42,.92);
+      border-color: rgba(255,255,255,.12);
+      color: #f8fafc;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    @keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+    @keyframes toast-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(20px)}}
     .btn-pill{border-radius:999px !important;padding:10px 20px;display:flex;align-items:center;justify-content:center}
 
     ::-webkit-scrollbar{width:5px;height:5px}
@@ -961,6 +990,7 @@
   <div class="orb orb-3"></div>
   <div class="orb orb-4"></div>
 
+  <div id="toast-root"></div>
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
@@ -1091,6 +1121,22 @@
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);
     })();
+
+    function showToast(message, icon = '✓', color = '#4dffa0') {
+      const root = document.getElementById('toast-root');
+      if (!root) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.style.borderColor = color + '33';
+      toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+      root.appendChild(toast);
+      setTimeout(() => toast.remove(), 3200);
+    }
+
+    if (!sessionStorage.getItem('professor_welcomed')) {
+      sessionStorage.setItem('professor_welcomed', 'true');
+      setTimeout(() => showToast('Welcome back!','👋','#b9c4ff'), 600);
+    }
   </script>
 </body>
 </html>

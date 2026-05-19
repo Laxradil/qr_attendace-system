@@ -97,7 +97,7 @@
               </td>
               <td>{{ $record->minutes_late ?? '—' }}</td>
               <td>
-                <a href="#" class="btn slim" onclick="alert('Edit attendance feature coming soon')">Edit</a>
+                <a href="{{ route('professor.attendance-records.edit', $record->id) }}" class="btn slim">Edit</a>
               </td>
             </tr>
           @empty

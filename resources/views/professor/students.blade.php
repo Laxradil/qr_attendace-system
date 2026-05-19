@@ -31,9 +31,8 @@
           <div style="padding-top:14px;border-top:1px solid rgba(255,255,255,.07);margin-top:14px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
               <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);color:#0b1220;font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
-              <button type="button" class="btn primary slim" onclick="alert('Add student feature coming soon')">+ Add Student</button>
+              <button type="button" class="btn primary slim" data-class-id="{{ $classe->id }}" data-class-name="{{ $classe->display_name }}" onclick="showAddStudentModal(this)">+ Add Student</button>
             </div>
-
             @if($classe->students && $classe->students->count())
               <div class="table-wrap">
                 <table id="studentsTable">
@@ -63,7 +62,7 @@
                           <span class="pill green">Active</span>
                         </td>
                         <td>
-                          <button class="btn slim drop" onclick="dropStudent({{ $student->id }}, '{{ $student->name }}', {{ $classe->id }})">Drop</button>
+                          <button class="btn secondary slim" onclick="dropStudent({{ $student->id }}, '{{ $student->name }}', {{ $classe->id }})">Drop</button>
                         </td>
                       </tr>
                     @endforeach
@@ -123,23 +122,24 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 10px 28px rgba(80,94,255,.38);
   }
   
+  .btn.secondary {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(139,92,255,.36);
+    color: #8b5cff;
+  }
+  
+  .btn.secondary:hover {
+    background: rgba(139,92,255,.12);
+    border-color: rgba(139,92,255,.55);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 24px rgba(139,92,255,.18);
+  }
+  
   .btn.slim {
     padding: 7px 10px;
     font-size: 12px;
     border-radius: 10px;
   }
-  
-  .btn.drop {
-    background: rgba(255,61,114,.15);
-    border-color: rgba(255,61,114,.3);
-    color: #ff3d72;
-  }
-  
-  .btn.drop:hover {
-    background: rgba(255,61,114,.28);
-    border-color: rgba(255,61,114,.5);
-    box-shadow: 0 8px 24px rgba(255,61,114,.2);
-  }
+
   
   .pill {
     padding: 4px 10px;
@@ -246,15 +246,15 @@
     color: #ffffff !important;
   }
   
-  body.theme-light .btn.drop {
-    background: #fef2f2 !important;
-    border-color: #fecaca !important;
-    color: #dc2626 !important;
+  body.theme-light .btn.secondary {
+    background: #ffffff !important;
+    border-color: rgba(139,92,255,.4) !important;
+    color: #7c3aed !important;
   }
   
-  body.theme-light .btn.drop:hover {
-    background: #fee2e2 !important;
-    border-color: #fca5a5 !important;
+  body.theme-light .btn.secondary:hover {
+    background: rgba(139,92,255,.12) !important;
+    border-color: #8b5cff !important;
   }
   
   body.theme-light .pill {
@@ -289,9 +289,35 @@
     color: #000000 !important;
   }
 </style>
-            </div>
-        </form>
+
+<div id="addStudentModal" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.22);backdrop-filter:blur(18px);z-index:1050;align-items:center;justify-content:center;">
+  <div class="card glass" style="max-width:420px;width:100%;padding:28px;border-radius:24px;position:relative;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);">Add Student to class</div>
+        <div id="addStudentModalSubtitle" style="font-size:13px;color:var(--muted);margin-top:6px;">Enter the student email to enroll</div>
+      </div>
+      <button type="button" class="btn slim" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18);" onclick="hideAddStudentModal()">✕</button>
     </div>
+
+    <form id="addStudentForm" action="{{ route('professor.add-student') }}" method="POST">
+      @csrf
+      <input type="hidden" id="modal_class_id" name="class_id" value="">
+      <div style="display:grid;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <label style="font-size:13px;font-weight:700;color:var(--text);">Student Email</label>
+          <input type="email" id="modal_student_email" name="student_email" placeholder="Enter a registered student email" required style="width:100%;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.85);color:var(--text);font-size:14px;outline:none;">
+        </div>
+
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;">This will enroll an existing student account into the selected class. If the student does not exist, please ask them to register first.</div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button type="submit" class="btn primary slim" style="flex:1;">Add Student</button>
+          <button type="button" class="btn secondary slim" style="flex:1;" onclick="hideAddStudentModal()">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -307,19 +333,62 @@
     });
   }
   
+  function showAddStudentModal(button) {
+    const classId = button.dataset.classId;
+    const className = button.dataset.className || 'this class';
+    document.getElementById('modal_class_id').value = classId;
+    document.getElementById('addStudentModalSubtitle').textContent = `Add a student to ${className}`;
+    document.getElementById('addStudentModal').style.display = 'flex';
+    document.getElementById('modal_student_email').focus();
+  }
+
+  function hideAddStudentModal() {
+    document.getElementById('addStudentModal').style.display = 'none';
+    document.getElementById('modal_student_email').value = '';
+  }
+
   function dropStudent(studentId, studentName, classId) {
     if (!confirm(`Are you sure you want to drop ${studentName} from this class?`)) {
       return;
     }
-    
-    // Submit drop request to backend
+
+    const reasons = [
+      'Schedule conflict',
+      'Transfer to another section',
+      'Medical reason',
+      'Academic performance',
+      'Personal reasons',
+    ];
+
+    let reason = prompt(
+      `Reason for dropping ${studentName}:\n\n` +
+      reasons.map((r, index) => `${index + 1}. ${r}`).join('\n'),
+      reasons[0]
+    );
+
+    if (!reason) {
+      return;
+    }
+
+    reason = reason.trim();
+    const selectedIndex = parseInt(reason, 10);
+    if (!reasons.includes(reason) && selectedIndex >= 1 && selectedIndex <= reasons.length) {
+      reason = reasons[selectedIndex - 1];
+    }
+
+    if (!reasons.includes(reason)) {
+      alert('Please choose a valid drop reason from the list.');
+      return;
+    }
+
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '/professor/students/drop';
+    form.action = '{{ route('professor.drop-request') }}';
     form.innerHTML = `
       @csrf
       <input type="hidden" name="student_id" value="${studentId}">
       <input type="hidden" name="class_id" value="${classId}">
+      <input type="hidden" name="reason" value="${reason}">
     `;
     document.body.appendChild(form);
     form.submit();

@@ -1198,6 +1198,25 @@
       box-shadow:0 16px 40px rgba(0,0,0,.35);display:flex;align-items:center;gap:10px;
       font-size:13.5px;font-weight:600;animation:toast-in .3s ease,toast-out .3s ease 2.7s forwards;max-width:320px;
     }
+    body.theme-light .toast {
+      background: rgba(255,255,255,.96);
+      border-color: rgba(15,23,42,.08);
+      color: #0f172a;
+      box-shadow: 0 14px 30px rgba(15,23,42,.08);
+    }
+    body.theme-ash .toast {
+      background: rgba(255,255,255,.92);
+      border-color: rgba(15,23,42,.12);
+      color: #0f172a;
+      box-shadow: 0 14px 30px rgba(15,23,42,.12);
+    }
+    body.theme-dark .toast,
+    body.theme-onyx .toast {
+      background: rgba(15,23,42,.92);
+      border-color: rgba(255,255,255,.12);
+      color: #f8fafc;
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+    }
     @keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
     @keyframes toast-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(20px)}}
 
@@ -1404,7 +1423,10 @@
       });
     }
 
-    setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
+    if (!sessionStorage.getItem('student_welcomed')) {
+      sessionStorage.setItem('student_welcomed', 'true');
+      setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
+    }
 
     // Theme switching via localStorage (matches admin/professor behavior)
     (function() {

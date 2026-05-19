@@ -908,6 +908,12 @@
       @keyframes toast-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(20px)}}
     `;
     document.head.appendChild(style);
+
+    if (!sessionStorage.getItem('admin_welcomed')) {
+      sessionStorage.setItem('admin_welcomed', 'true');
+      setTimeout(() => showToast('Welcome back, Admin!','👋','#b9c4ff'), 600);
+    }
+
     (function() {
       const themeKey = 'qr_attendance_theme';
       const themeNames = ['light','ash','dark','onyx'];

@@ -899,11 +899,22 @@ class ProfessorController extends Controller
     {
         $validated = $request->validate([
             'class_id' => 'required|exists:classes,id',
-            'student_id' => 'required|exists:users,id',
+            'student_id' => 'nullable|exists:users,id',
+            'student_email' => 'nullable|email|exists:users,email',
         ]);
 
         $classe = Classe::findOrFail($validated['class_id']);
-        $student = User::findOrFail($validated['student_id']);
+
+        if (!empty($validated['student_id'])) {
+            $student = User::findOrFail($validated['student_id']);
+        } elseif (!empty($validated['student_email'])) {
+            $student = User::where('email', $validated['student_email'])->first();
+            if (! $student) {
+                return back()->with('error', 'The specified student email was not found.');
+            }
+        } else {
+            return back()->with('error', 'Please provide a student email or ID.');
+        }
 
         // Verify the professor is assigned to this class
         if (!$classe->professors()->wherePivot('professor_id', Auth::id())->exists()) {
