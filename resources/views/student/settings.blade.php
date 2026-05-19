@@ -61,7 +61,7 @@
   .pill.green { color: #4dffa0; background: rgba(24,240,139,.11); border-color: rgba(24,240,139,.2); }
 </style>
 
-<div class="settings-container">
+<div class="settings-container" style="overflow-y: auto; min-height: 100vh; max-height: none; padding-bottom: 48px;">
   <!-- Profile Settings -->
   <div class="settings-section">
     <h3>Profile Settings</h3>
@@ -141,7 +141,7 @@
         @enderror
       </div>
       <div class="button-group">
-        <button type="submit" class="settings-btn primary">Update Password</button>
+        <button type="submit" class="settings-btn">Update Password</button>
         <button type="reset" class="settings-btn">Clear</button>
       </div>
     </form>
@@ -207,22 +207,64 @@
   body.theme-light .settings-btn {
     background: #f9fafb;
     border: 1px solid #d1d5db;
-    color: #000000;
+    color: #3b3b3b;
+    font-weight: 700;
+    transition: background 0.2s, color 0.2s, border 0.2s;
   }
-  
-  body.theme-light .settings-btn:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+    body.theme-light .settings-btn:disabled,
+    body.theme-light .settings-btn[disabled] {
+      background: #ede9fe !important;
+      color: #7c3aed !important;
+      border-color: #e5e7eb !important;
+      opacity: 1 !important;
+      box-shadow: 0 0 0 2px #ede9fe !important;
+      font-weight: 700 !important;
+      text-shadow: none !important;
+      pointer-events: none !important;
+    }
+    body.theme-light .settings-btn.primary:disabled,
+    body.theme-light .settings-btn.primary[disabled] {
+      background: linear-gradient(135deg, #ede9fe 80%, #ede9fe 100%) !important;
+      color: #7c3aed !important;
+      border: 1.5px solid #7c3aed !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+      font-weight: 700 !important;
+      text-shadow: none !important;
+      pointer-events: none !important;
+    }
+    body.theme-light .settings-btn.primary:hover,
+    body.theme-light .settings-btn.primary:focus {
+      background: linear-gradient(135deg, #5b21b6 80%, #1e40af 100%) !important;
+      color: #fff !important;
+      outline: none;
+      border: none;
+    }
+    body.theme-light .settings-btn:hover,
+    body.theme-light .settings-btn:focus {
+      background: #ede9fe !important;
+      color: #5b21b6 !important;
+      border-color: #7c3aed !important;
+      outline: none;
+    }
+  body.theme-light .settings-btn:hover,
+  body.theme-light .settings-btn:focus {
+    background: #ede9fe;
+    color: #5b21b6;
+    border-color: #7c3aed;
+    outline: none;
   }
-  
   body.theme-light .settings-btn.primary {
-    background: linear-gradient(135deg, #3b82f6, #8b5cff);
-    border-color: #3b82f6;
-    color: #ffffff;
+    background: linear-gradient(135deg, #7c3aed 80%, #2563eb 100%);
+    border: none;
+    color: #fff;
+    font-weight: 700;
   }
-  
-  body.theme-light .settings-btn.primary:hover {
-    box-shadow: 0 10px 28px rgba(80, 94, 255, 0.2);
+  body.theme-light .settings-btn.primary:hover,
+  body.theme-light .settings-btn.primary:focus {
+    background: linear-gradient(135deg, #5b21b6 80%, #1e40af 100%);
+    color: #fff;
+    outline: none;
   }
   
   body.theme-light .info-item {

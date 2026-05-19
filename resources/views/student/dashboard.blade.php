@@ -7,38 +7,41 @@
 @php
   $attendanceRate = $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0;
 @endphp
-<section class="page" id="dashboard" style="display: flex; flex-direction: column; height: calc(100vh - 100px); overflow: hidden;" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
 
-  <div class="stats" style="margin-bottom: 20px; flex-shrink: 0;">
-    <div class="stat glass">
+
+<section class="page" id="dashboard" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex flex-col min-h-[calc(100vh-100px)]" style="overflow-y: auto; max-height: none; padding-bottom: 48px;">
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full mb-6">
+    <div class="stat glass w-full p-6">
       <div class="stat-icon blue">▤</div>
       <div class="stat-body">
         <strong>{{ $classes->count() }}</strong>
         <span class="stat-label">Enrolled Classes</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass w-full p-6">
       <div class="stat-icon green">✓</div>
       <div class="stat-body">
         <strong>{{ $totalPresent }}</strong>
         <span class="stat-label">Present</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass w-full p-6">
       <div class="stat-icon yellow">◷</div>
       <div class="stat-body">
         <strong>{{ $totalLate }}</strong>
         <span class="stat-label">Late</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass w-full p-6">
       <div class="stat-icon red">✕</div>
       <div class="stat-body">
         <strong>{{ $totalAbsent }}</strong>
         <span class="stat-label">Absent</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass w-full p-6">
       <div class="stat-icon purple">✉</div>
       <div class="stat-body">
         <strong>{{ $totalExcused ?? 0 }}</strong>
@@ -60,15 +63,15 @@
         <div class="qr-student-name" style="font-size: 22px; font-weight: 800; margin-bottom: 6px;">{{ Auth::user()->name }}</div>
         <div class="qr-student-id" style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Student ID: {{ Auth::user()->id }}</div>
         
-        <div class="qr-hint" style="font-size: 14.5px; font-weight: 600; color: var(--text);">
+        <div class="qr-hint" style="font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 28px;">
           Show to professor for attendance
         </div>
         
         <div style="flex-grow: 1;"></div>
         
-        <div class="qr-actions" style="display: flex; gap: 12px; width: 100%; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-          <button class="btn btn-pill primary" onclick="openQRModal()" style="flex: 1; padding: 10px 20px; font-size: 14px; color: #ffffff;">Show QR</button>
-          <button class="btn btn-pill" onclick="downloadQR()" style="flex: 1; padding: 10px 20px; font-size: 14px; color: var(--text); background: rgba(255, 255, 255, 0.15);">Download</button>
+        <div class="qr-actions" style="display: flex; gap: 12px; width: 100%; justify-content: center; margin-top: 0; margin-bottom: 20px;">
+          <button class="btn btn-pill primary" onclick="openQRModal()" style="flex: 1; padding: 10px 20px; font-size: 14px; background: linear-gradient(135deg,#7c3aed 80%,#2563eb 100%); color: #fff; border: none;">Show QR</button>
+          <button class="btn btn-pill" onclick="downloadQR()" style="flex: 1; padding: 10px 20px; font-size: 14px; background: #ede9fe; color: #5b21b6; border: 1.5px solid #7c3aed; font-weight: 700; transition: background 0.2s, color 0.2s;">Download</button>
         </div>
         
         <div class="qr-status" style="font-size: 13px; color: var(--muted); font-weight: 600;">
@@ -109,7 +112,7 @@
           @endforelse
         </div>
 
-        <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex;padding: 8px;font-size:13px; color: #ffffff; background: rgba(255, 255, 255, 0.1);">View All Records →</a>
+        <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex;padding: 8px;font-size:13px; background: #ede9fe; color: #5b21b6; border: 1.5px solid #7c3aed; font-weight: 700; transition: background 0.2s, color 0.2s;">View All Records →</a>
       </div>
 
       <div class="card glass" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
@@ -141,10 +144,12 @@
           @endforelse
         </div>
         
-        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;padding: 8px;font-size:13px; color: #ffffff; background: rgba(255, 255, 255, 0.1); display:flex;">View All Classes</a>
+        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;padding: 8px;font-size:13px; background: #ede9fe; color: #5b21b6; border: 1.5px solid #7c3aed; font-weight: 700; transition: background 0.2s, color 0.2s; display:flex;">View All Classes</a>
       </div>
 
     </div>
+
+  </div>
 
   </div>
 </section>
