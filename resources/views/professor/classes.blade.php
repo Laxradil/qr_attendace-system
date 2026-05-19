@@ -44,22 +44,23 @@
 <!-- Class cards grid -->
 <div class="class-grid">
   @forelse($classes as $class)
+    @php $schedule = $class->schedules->first(); @endphp
     <div class="class-card">
       <div class="class-head">
         <div>
           <h3>{{ $class->display_name ?? 'Class' }}</h3>
           <div class="class-code">{{ $class->code ?? 'N/A' }}</div>
         </div>
-        <div class="class-room">{{ $class->schedules->first()?->room ?? 'TBA' }}</div>
+        <div class="class-room">{{ $schedule?->room ?? 'TBA' }}</div>
       </div>
       <div class="class-meta">
         <div class="class-meta-row">
           <div class="meta-icon">📅</div>
-          Days: <strong>{{ $class->schedules->first()?->days ?? 'N/A' }}</strong>
+          Days: <strong>{{ $schedule?->days ?? 'N/A' }}</strong>
         </div>
         <div class="class-meta-row">
           <div class="meta-icon">🕓</div>
-          Time: <strong style="font-family:var(--mono)">{{ $class->schedules->first()?->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $class->schedules->first()->start_time)->format('H:i') : 'N/A' }}</strong>
+          Time: <strong style="font-family:var(--mono)">{{ $schedule?->time ?? 'N/A' }}</strong>
         </div>
         <div class="class-meta-row">
           <div class="meta-icon">🎓</div>

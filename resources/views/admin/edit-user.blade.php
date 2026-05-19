@@ -80,6 +80,17 @@
     color:#fff;
     font-weight:600;
   }
+  .subsection-title{
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.82);
+    margin:4px 0 0;
+  }
+  .student-only{
+    display:none;
+  }
 </style>
 
 <div class="card glass" style="margin-bottom:16px">
@@ -141,6 +152,17 @@
       </div>
     </div>
 
+    <div class="student-only" id="studentFields">
+      <div class="subsection-title">Student Details</div>
+      <div class="form-row" style="margin-top:8px;">
+        <div class="form-group">
+          <label for="section">Section</label>
+          <input type="text" id="section" name="section" value="{{ $user->section }}" placeholder="Required for students">
+        </div>
+        <div></div>
+      </div>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label for="password">New Password (optional)</label>
@@ -166,5 +188,17 @@
     </div>
   </form>
 </div>
+
+<script>
+  function toggleStudentFields() {
+    const role = document.getElementById('role');
+    const studentFields = document.getElementById('studentFields');
+    if (!role || !studentFields) return;
+    studentFields.style.display = role.value === 'student' ? 'block' : 'none';
+  }
+
+  document.getElementById('role')?.addEventListener('change', toggleStudentFields);
+  toggleStudentFields();
+</script>
 
 @endsection

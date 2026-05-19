@@ -8,6 +8,7 @@ use App\Models\AttendanceRecord;
 use App\Models\DropRequest;
 use App\Models\SystemLog;
 use App\Models\QRCode;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -148,6 +149,7 @@ class AdminController extends Controller
             'password' => 'required|min:8|confirmed',
             'role' => 'required|in:admin,professor,student',
             'student_id' => 'nullable|string|unique:users|max:255',
+            'section' => 'nullable|string|max:255|required_if:role,student',
         ]);
 
         $user = User::create([
@@ -157,6 +159,7 @@ class AdminController extends Controller
             'password' => bcrypt($validated['password']),
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
+            'section' => $validated['role'] === 'student' ? ($validated['section'] ?? null) : null,
         ]);
 
         // Create QR code for students
@@ -194,6 +197,7 @@ class AdminController extends Controller
             'username' => 'required|string|unique:users,username,' . $user->id,
             'role' => 'required|in:admin,professor,student',
             'student_id' => 'nullable|string|unique:users,student_id,' . $user->id,
+            'section' => 'nullable|string|max:255|required_if:role,student',
             'password' => 'nullable|min:8|confirmed',
             'is_active' => 'boolean',
         ]);
@@ -204,6 +208,7 @@ class AdminController extends Controller
             'username' => $validated['username'],
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
+            'section' => $validated['role'] === 'student' ? ($validated['section'] ?? null) : null,
             'is_active' => $validated['is_active'] ?? false,
             'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
         ]);
@@ -292,6 +297,10 @@ class AdminController extends Controller
             'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'days' => 'required|array|min:1',
+            'days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'professors' => 'required|array|min:1',
             'professors.*' => 'required|exists:users,id',
         ]);
@@ -305,6 +314,23 @@ class AdminController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'professor_id' => $primaryProfessorId,
+        ]);
+
+        $primaryProfessor = User::findOrFail($primaryProfessorId);
+
+        $daysValue = implode(', ', $validated['days']);
+
+        Schedule::create([
+            'class_id' => $classe->id,
+            'subject_code' => $validated['code'],
+            'subject_name' => $validated['name'],
+            'professor_id' => $primaryProfessor->id,
+            'professor' => $primaryProfessor->name,
+            'days' => $daysValue,
+            'time' => \Carbon\Carbon::createFromFormat('H:i', $validated['start_time'])->format('g:i A') . ' - ' . \Carbon\Carbon::createFromFormat('H:i', $validated['end_time'])->format('g:i A'),
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'room' => $validated['room_code'],
         ]);
 
         $classe->professors()->attach($professors);
@@ -327,9 +353,13 @@ class AdminController extends Controller
 
     public function editClass(Classe $classe): View
     {
-        $classe->load('professors');
+        $classe->load('professors', 'schedules');
         $professors = User::where('role', 'professor')->get();
-        return view('admin.edit-class', ['classe' => $classe, 'professors' => $professors]);
+        return view('admin.edit-class', [
+            'classe' => $classe,
+            'professors' => $professors,
+            'schedule' => $classe->schedules->first(),
+        ]);
     }
 
     public function updateClass(Request $request, Classe $classe): RedirectResponse
@@ -339,6 +369,10 @@ class AdminController extends Controller
             'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'days' => 'required|array|min:1',
+            'days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'professors' => 'required|array|min:1',
             'professors.*' => 'required|exists:users,id',
             'is_active' => 'boolean',
@@ -355,6 +389,23 @@ class AdminController extends Controller
             'professor_id' => $primaryProfessorId,
             'is_active' => $validated['is_active'] ?? false,
         ]);
+
+        $daysValue = implode(', ', $validated['days']);
+
+        Schedule::updateOrCreate(
+            ['class_id' => $classe->id],
+            [
+                'subject_code' => $validated['code'],
+                'subject_name' => $validated['name'],
+                'professor_id' => $primaryProfessorId,
+                'professor' => User::findOrFail($primaryProfessorId)->name,
+                'days' => $daysValue,
+                'time' => \Carbon\Carbon::createFromFormat('H:i', $validated['start_time'])->format('g:i A') . ' - ' . \Carbon\Carbon::createFromFormat('H:i', $validated['end_time'])->format('g:i A'),
+                'start_time' => $validated['start_time'],
+                'end_time' => $validated['end_time'],
+                'room' => $validated['room_code'],
+            ]
+        );
 
         $classe->professors()->sync($professors);
 

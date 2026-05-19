@@ -133,7 +133,7 @@
 </style>
 
 <!-- ══ MY CLASSES ══ -->
-<section class="page" id="classes">
+<section class="page" id="classes" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
   <div class="classes-layout">
 
     <!-- Left: enrolled classes -->
@@ -141,6 +141,7 @@
       <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px">Your Enrolled Classes</div>
 
       @forelse($classes as $class)
+      @php $schedule = $class->schedules->first(); @endphp
       <div class="class-card glass" onclick="toggleClassExpand(this, event)">
         <div class="class-card-top">
           <div style="flex: 1;">
@@ -156,11 +157,25 @@
           @if($class->professors->first())
           <div class="class-meta-item">🎓 Professor: <strong>{{ $class->professors->first()->name }}</strong></div>
           @endif
+          @if($schedule)
+          <div class="class-meta-item">📅 Schedule: <strong>{{ $schedule->days }}</strong> · <strong>{{ $schedule->time }}</strong> · <strong>{{ $schedule->room }}</strong></div>
+          @endif
         </div>
         
         <!-- Expandable Content -->
         <div class="class-card-content">
           <div class="class-card-divider"></div>
+
+          @if($schedule)
+          <div style="display:grid;gap:8px;margin-bottom:14px;">
+            <span class="classmates-label">Schedule</span>
+            <div style="display:grid;gap:6px;font-size:13px;color:var(--text);">
+              <div>Days: <strong>{{ $schedule->days }}</strong></div>
+              <div>Time: <strong>{{ $schedule->time }}</strong></div>
+              <div>Room: <strong>{{ $schedule->room }}</strong></div>
+            </div>
+          </div>
+          @endif
           
           <div class="classmates-section">
             <span class="classmates-label">Classmates ({{ $class->students->count() }})</span>
@@ -268,12 +283,16 @@
 
   // Generate QR code for classes page
   setTimeout(function() {
-    const qrDataClasses = JSON.stringify({
+    const classesPage = document.getElementById('classes');
+    if (!classesPage) return;
+
+    const qrPayloadClasses = {
       type: 'student_attendance',
-      student_id: {{ Auth::user()->id }},
-      student_name: '{{ Auth::user()->name }}',
-      email: '{{ Auth::user()->email }}'
-    });
+      student_id: Number(classesPage.dataset.studentId),
+      student_name: classesPage.dataset.studentName || '',
+      email: classesPage.dataset.studentEmail || ''
+    };
+    const qrDataClasses = JSON.stringify(qrPayloadClasses);
     generateQR('qrClasses', qrDataClasses);
     generateQR('qrModalCanvas', qrDataClasses);
   }, 100);
