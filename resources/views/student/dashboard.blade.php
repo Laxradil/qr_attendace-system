@@ -4,7 +4,10 @@
 @section('subtitle', 'Welcome back, ' . auth()->user()->name . '. Here is your attendance overview.')
 
 @section('content')
-<section class="page" id="dashboard" style="display: flex; flex-direction: column; height: calc(100vh - 100px); overflow: hidden;">
+@php
+  $attendanceRate = $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0;
+@endphp
+<section class="page" id="dashboard" style="display: flex; flex-direction: column; height: calc(100vh - 100px); overflow: hidden;" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
 
   <div class="stats" style="margin-bottom: 20px; flex-shrink: 0;">
     <div class="stat glass">
@@ -84,9 +87,9 @@
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <span style="font-size:12px;color:var(--muted);font-weight:600">Attendance Rate</span>
-          <span style="font-size:14px;font-weight:800;color:#4dffa0">{{ $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0 }}%</span>
+          <span style="font-size:14px;font-weight:800;color:#4dffa0">{{ $attendanceRate }}%</span>
         </div>
-        <div class="prog-bar" style="height: 6px; margin-bottom: 16px;"><div class="prog-fill" style="width:{{ $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0 }}%"></div></div>
+        <div class="prog-bar" style="height: 6px; margin-bottom: 16px;"><div class="prog-fill" id="attendanceRateFill" data-rate="{{ $attendanceRate }}" style="width:0%"></div></div>
 
         <div style="flex-grow: 1; overflow-y: auto; padding-right: 12px;">
           @forelse($recentAttendance->take(3) as $record)
@@ -122,6 +125,9 @@
             <div class="class-row-left" style="flex-grow: 1; padding-right: 12px;">
               <div class="class-row-name" style="font-size: 13.5px; font-weight: 600; margin-bottom: 2px;">{{ $class->code }} — {{ $class->name }}</div>
               <div class="class-row-code" style="font-size: 11px; color: var(--muted);">{{ $class->code }}</div>
+              @if($class->schedules->first())
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35;">{{ $class->schedules->first()->days }} · {{ $class->schedules->first()->time }} · Room {{ $class->schedules->first()->room }}</div>
+              @endif
             </div>
             <div class="class-row-prof" style="font-size: 11px; text-align: right; min-width: 100px;">
               @if($class->professors->first())
@@ -174,12 +180,23 @@
     }
   // Generate QR code for dashboard
   setTimeout(function() {
-    const qrData = JSON.stringify({
+    const dashboard = document.getElementById('dashboard');
+    if (!dashboard) return;
+
+    const qrPayload = {
       type: 'student_attendance',
-      student_id: {{ Auth::user()->id }},
-      student_name: '{{ Auth::user()->name }}',
-      email: '{{ Auth::user()->email }}'
-    });
+      student_id: Number(dashboard.dataset.studentId),
+      student_name: dashboard.dataset.studentName || '',
+      email: dashboard.dataset.studentEmail || ''
+    };
+    const qrData = JSON.stringify(qrPayload);
+
+    const rateFill = document.getElementById('attendanceRateFill');
+    if (rateFill) {
+      const rate = Number(rateFill.dataset.rate || 0);
+      rateFill.style.width = `${rate}%`;
+    }
+
     generateQR('qrDashboard', qrData);
     generateQR('qrModalCanvas', qrData);
   }, 100);

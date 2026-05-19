@@ -40,6 +40,7 @@
           <th>ID</th>
           <th>User</th>
           <th>Email</th>
+          <th>Section</th>
           <th>Role</th>
           <th>Status</th>
           <th>Date Created</th>
@@ -57,6 +58,7 @@
             </div>
           </td>
           <td class="muted">{{ $user->email }}</td>
+          <td class="muted">{{ $user->role === 'student' ? ($user->section ?: 'N/A') : 'N/A' }}</td>
           <td><span class="pill {{ $user->role === 'admin' ? 'red' : ($user->role === 'professor' ? 'purple' : 'blue') }}">{{ ucfirst($user->role) }}</span></td>
           <td><span class="pill {{ $user->is_active ? 'green' : 'yellow' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span></td>
           <td class="muted">{{ $user->created_at?->tz('UTC')->setTimezone('Asia/Manila')->format('M d, Y') }}</td>
@@ -71,7 +73,7 @@
         </tr>
         @empty
         <tr>
-          <td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No users found</td>
+          <td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No users found</td>
         </tr>
         @endforelse
       </tbody>

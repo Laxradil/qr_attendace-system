@@ -134,7 +134,7 @@ class StudentController extends Controller
     public function myClasses(): View
     {
         $user = Auth::user();
-        $classes = $user->enrolledClasses()->with('professors', 'students')->get();
+        $classes = $user->enrolledClasses()->with('professors', 'students', 'schedules')->get();
 
         // Get all attendance statistics
         $stats = AttendanceRecord::where('student_id', $user->id)
