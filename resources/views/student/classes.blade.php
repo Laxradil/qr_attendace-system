@@ -130,13 +130,25 @@
     box-shadow: none !important;
     border: 1px solid rgba(255,255,255,.12);
   }
+
+  /* ══ FIXED LIGHT MODE HOVER CONTRAST CONFLICTS ══ */
+  .qr-actions button:first-child:hover {
+    background: #ffffff !important;
+    color: #6d28d9 !important;
+    border: 2px solid #6d28d9 !important;
+  }
+
+  .qr-actions button:last-child:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    text-decoration: none !important;
+  }
 </style>
 
-<!-- ══ MY CLASSES ══ -->
 <section class="page" id="classes" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
   <div class="classes-layout">
 
-    <!-- Left: enrolled classes -->
     <div>
       <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px">Your Enrolled Classes</div>
 
@@ -162,7 +174,6 @@
           @endif
         </div>
         
-        <!-- Expandable Content -->
         <div class="class-card-content">
           <div class="class-card-divider"></div>
 
@@ -203,7 +214,6 @@
       @endforelse
     </div>
 
-    <!-- Right: QR + Quick Stats (unified card) -->
     <div>
       <div class="qr-sidebar glass" style="gap:0">
         <div class="qr-label" style="margin-bottom:14px">Your QR Code</div>
@@ -211,14 +221,13 @@
           <canvas id="qrClasses"></canvas>
         </div>
         <div class="qr-student-name">{{ Auth::user()->name }}</div>
-        <div class="qr-student-id">Student ID: {{ Auth::user()->id }}</div>
+        <div class="qr-sidebar-id" style="font-size:13px; color:var(--muted); margin-bottom:12px; font-family:var(--mono);">Student ID: {{ Auth::user()->id }}</div>
         <div class="qr-hint">Show to professor for attendance</div>
         <div class="qr-actions">
           <button class="btn btn-pill primary" onclick="openQRModal()">Show</button>
           <button class="btn btn-pill" href="#" onclick="downloadQR()">Download</button>
         </div>
 
-        <!-- Divider -->
         <div style="width:100%;height:1px;background:rgba(255,255,255,.09);margin:18px 0 16px"></div>
 
         <span class="quick-stats-title">Quick Stats</span>
@@ -250,7 +259,6 @@
   </div>
 </section>
 
-<!-- QR Modal (reuse dashboard modal) -->
 <div class="qr-modal" id="qrModal" style="display:none">
   <div class="qr-modal-overlay" onclick="closeQRModal()"></div>
   <div class="qr-modal-content glass">
@@ -270,6 +278,7 @@
     </div>
   </div>
 </div>
+
 <script>
   // Expand/collapse class card
   function toggleClassExpand(card, event) {
@@ -297,11 +306,12 @@
     generateQR('qrModalCanvas', qrDataClasses);
   }, 100);
 
-  function openQRModal() {
-    document.getElementById('qrModal').style.display = 'flex';
+function openQRModal() {
+    document.getElementById('qrModal').style.display = 'flex'; // Fixed to a single .style
   }
+  
   function closeQRModal() {
-    document.getElementById('qrModal').style.display = 'none';
+    document.getElementById('qrModal').style.display = 'none'; // Fixed to a single .style
   }
   function downloadQR() {
     const canvas = document.getElementById('qrClasses');
