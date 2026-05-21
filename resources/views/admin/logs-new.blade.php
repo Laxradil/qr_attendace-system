@@ -8,14 +8,13 @@
 <div class="glass-table glass">
   <div class="toolbar">
     <div class="tools">
-      <button class="btn active" style="background:rgba(139,92,255,.25);border-color:rgba(139,92,255,.4)">☰ All Actions</button>
-      <span class="chip">Add Student</span>
-      <span class="chip">Update User</span>
-      <span class="chip">Scan QR</span>
+      <button class="btn active" style="background:rgba(139,92,255,.25);border-color:rgba(139,92,255,.4)" onclick="filterLogs(this, 'all')">☰ All Actions</button>
+      <span class="chip" onclick="filterLogs(this, 'add_student')">Add Student</span>
+      <span class="chip" onclick="filterLogs(this, 'update_user')">Update User</span>
+      <span class="chip" onclick="filterLogs(this, 'scan_qr')">Scan QR</span>
     </div>
     <div class="tools">
       <button class="btn" onclick="location.reload()">⟳ Refresh</button>
-      <button class="btn" onclick="alert('Exporting logs CSV...')">⇩ Export</button>
     </div>
   </div>
 
@@ -32,7 +31,7 @@
       </thead>
       <tbody>
         @forelse($logs as $log)
-        <tr>
+        <tr data-action="{{ strtolower($log->action ?? '') }}">
           <td>
             <div style="font-family:var(--mono);font-size:12px">{{ $log->created_at->format('M d, Y') }}</div>
             <div class="muted" style="font-size:12px">{{ $log->created_at->format('h:i:s A') }}</div>
@@ -64,3 +63,107 @@
   </div>
 </div>
 @endsection
+
+<style>
+  body.theme-light .glass-table {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .btn.active {
+    background: #e0e7ff !important;
+    border-color: #c7d2fe !important;
+    color: #3730a3 !important;
+  }
+  
+  body.theme-light .chip {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light th {
+    background: #f9fafb !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light td {
+    color: #000000 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .muted {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .small-avatar {
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill {
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill.blue {
+    background: #eff6ff !important;
+    border-color: #dbeafe !important;
+    color: #1d4ed8 !important;
+  }
+  
+  body.theme-light .pill.yellow {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    color: #92400e !important;
+  }
+  
+  body.theme-light .pill.red {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+  }
+  
+  body.theme-light .pill.green {
+    background: #ecfdf5 !important;
+    border-color: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  
+  body.theme-light .pill.purple {
+    background: #faf5ff !important;
+    border-color: #f3e8ff !important;
+    color: #7c3aed !important;
+  }
+  
+  body.theme-light .btn {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+</style>
+
+<script>
+  let currentLogFilter = 'all';
+
+  function filterLogs(element, action) {
+    currentLogFilter = action;
+
+    const buttons = document.querySelectorAll('.toolbar .tools .btn, .toolbar .tools .chip');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+
+    document.querySelectorAll('.table-wrap tbody tr').forEach(row => {
+      const rowAction = (row.dataset.action || '').toLowerCase();
+      if (action === 'all' || (action === 'add_student' && rowAction.includes('student')) ||
+          (action === 'update_user' && rowAction.includes('update')) ||
+          (action === 'scan_qr' && rowAction.includes('scan'))) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+</script>

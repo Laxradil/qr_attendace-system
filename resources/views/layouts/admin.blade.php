@@ -7,6 +7,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
+      /* Final override: keep active nav tab purple on hover */
+      .nav a.active:hover, .nav button.active:hover,
+      body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+      body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+      body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+      body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+        background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+        color: #fff !important;
+        transform: none !important;
+      }
+      .nav a.active:hover .nav-icon, .nav button.active:hover .nav-icon,
+      body.theme-light .nav a.active:hover .nav-icon, body.theme-light .nav button.active:hover .nav-icon,
+      body.theme-ash .nav a.active:hover .nav-icon, body.theme-ash .nav button.active:hover .nav-icon,
+      body.theme-dark .nav a.active:hover .nav-icon, body.theme-dark .nav button.active:hover .nav-icon,
+      body.theme-onyx .nav a.active:hover .nav-icon, body.theme-onyx .nav button.active:hover .nav-icon {
+        background: rgba(255,255,255,.2) !important;
+        color: #fff !important;
+        border-color: rgba(255,255,255,.25) !important;
+      }
     :root{
       --bg:#090818;
       --panel:#13122a;
@@ -34,6 +53,222 @@
       --radius-sm:12px;
       --font:'DM Sans',system-ui,sans-serif;
       --mono:'Space Mono',monospace;
+    }
+
+    body.theme-light{
+      --bg:#ffffff;
+      --panel:#ffffff;
+      --panel2:#f3f0ff;
+      --glass:#f5f5f5;
+      --glass-strong:#ffffff;
+      --stroke:#e5e7eb;
+      --stroke-soft:#f3f4f6;
+      --text:#0f172a;
+      --muted:#475569;
+      --muted2:#475569;
+      --faint:#475569;
+      --purple:#7c3aed;
+      --pl:#a78bfa;
+      --blue:#2563eb;
+      --green:#16a34a;
+      --amber:#d97706;
+      --red:#dc2626;
+      --yellow:#ca8a04;
+      --cyan:#0891b2;
+      --shadow:0 4px 12px rgba(0,0,0,.08);
+      background:#f9fafb;
+    }
+
+    body.theme-light .glass,
+    body.theme-light .glass-table,
+    body.theme-light .card,
+    body.theme-light .stat.glass,
+    body.theme-light .page-card,
+    body.theme-light .settings-container,
+    body.theme-light .info-item,
+    body.theme-light .row-item,
+    body.theme-light .activity,
+    body.theme-light .theme-option,
+    body.theme-light .theme-option.selected
+    {
+      background: #ffffff !important;
+      border: 1px solid #e5e7eb !important;
+      color: #0f172a !important;
+      box-shadow: 0 14px 50px rgba(15,23,42,.06) !important;
+    }
+    body.theme-light .theme-option:hover,
+    body.theme-light .settings-btn,
+    body.theme-light .pill,
+    body.theme-light .btn,
+    body.theme-light .btn.slim,
+    body.theme-light .action-btn,
+    body.theme-light .filter-btn.reset,
+    body.theme-light .filter-select,
+    body.theme-light .filter-input,
+    body.theme-light .search-bar
+    {
+      background: #f8fafb !important;
+      color: #0f172a !important;
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light .btn:hover,
+    body.theme-light .action-btn:hover,
+    body.theme-light .filter-btn:hover
+    {
+      background: #f1f5f9 !important;
+    }
+    body.theme-light [style*="background:rgba(8,12,30,.58)"] {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #e5e7eb !important;
+    }
+    body.theme-light [style*="background:rgba(255,255,255,.05)"],
+    body.theme-light [style*="background:rgba(255,255,255,.04)"],
+    body.theme-light [style*="background:rgba(255,255,255,.08)"],
+    body.theme-light [style*="background:rgba(255,255,255,.1)"],
+    body.theme-light [style*="background:rgba(255,255,255,.13)"],
+    body.theme-light [style*="background:rgba(255,255,255,.055)"],
+    body.theme-light [style*="background:rgba(255,255,255,.085)"],
+    body.theme-light [style*="background:rgba(255,255,255,.18)"]
+    {
+      background: #f8fafb !important;
+      border-color: #e5e7eb !important;
+    }
+    body.theme-light [style*="color:rgba(255,255,255,.5)"],
+    body.theme-light [style*="color:rgba(255,255,255,.6)"],
+    body.theme-light [style*="color:rgba(255,255,255,.7)"],
+    body.theme-light [style*="color:rgba(255,255,255,.75)"]
+    {
+      color: #475569 !important;
+    }
+    body.theme-light [style*="color:rgba(139,92,255,.9)"] {
+      color: #7c3aed !important;
+    }
+    body.theme-light [style*="border:1px solid rgba(255,255,255,.12)"],
+    body.theme-light [style*="border:1px solid rgba(255,255,255,.14)"],
+    body.theme-light [style*="border:1px solid rgba(255,255,255,.07)"],
+    body.theme-light [style*="border:1px solid rgba(15,23,42,.1)"]
+    {
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light label,
+    body.theme-light .label,
+    body.theme-light .info-label,
+    body.theme-light .form-label,
+    body.theme-light .text-muted,
+    body.theme-light .muted,
+    body.theme-light .form-control::placeholder,
+    body.theme-light .form-select,
+    body.theme-light .input-group-text
+    {
+      color: #1f2937 !important;
+    }
+
+    body.theme-light table,
+    body.theme-light .table-wrap table,
+    body.theme-light .table-wrap,
+    body.theme-light .table-responsive,
+    body.theme-light .table thead th,
+    body.theme-light .table tbody td,
+    body.theme-light .table-striped tbody tr:nth-child(odd),
+    body.theme-light .table-striped tbody tr:nth-child(even)
+    {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light .table-striped tbody tr:nth-child(even) {
+      background: #f8fafb !important;
+    }
+
+    body.theme-light .section-head h3 {
+      color: #7c3aed !important;
+    }
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
+    /* Stronger selector to prevent generic :hover from overriding active tab styles */
+    .nav a.active:hover, .nav button.active:hover,
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+    body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+    body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
+
+    body.theme-ash{
+      --bg:#e2e8f0;
+      --panel:#f8fafc;
+      --panel2:#cbd5e1;
+      --glass:rgba(255,255,255,.92);
+      --glass-strong:rgba(255,255,255,.98);
+      --stroke:rgba(15,23,42,.12);
+      --stroke-soft:rgba(15,23,42,.08);
+      --text:#0f172a;
+      --muted:#475569;
+      --muted2:#64748b;
+      --purple:#6d28d9;
+      --pl:#7c3aed;
+      --blue:#2563eb;
+      --green:#16a34a;
+      --amber:#d97706;
+      --red:#b91c1c;
+      --yellow:#ca8a04;
+      --cyan:#0c4a6e;
+      --shadow:0 32px 90px rgba(15,23,42,.12);
+      background:linear-gradient(135deg,#f8fafc 0%,#cbd5e1 100%);
+    }
+
+    body.theme-dark{
+      --bg:#090818;
+      --panel:#13122a;
+      --panel2:#1a1938;
+      --glass:rgba(255,255,255,.08);
+      --glass-strong:rgba(255,255,255,.12);
+      --stroke:rgba(255,255,255,.14);
+      --stroke-soft:rgba(255,255,255,.07);
+      --text:#e8e6ff;
+      --muted:#9b97cc;
+      --muted2:#5a5880;
+      --purple:#6c5ce7;
+      --pl:#a29bfe;
+      --blue:#0984e3;
+      --green:#00b894;
+      --amber:#fdcb6e;
+      --red:#d63031;
+      --yellow:#fdcb6e;
+      --cyan:#00dfe6;
+      background:radial-gradient(circle at top left, rgba(67,166,255,.16), transparent 22%), radial-gradient(circle at top right, rgba(139,92,255,.12), transparent 22%), linear-gradient(180deg, #090818 0%, #05060f 100%);
+    }
+
+    body.theme-onyx{
+      --bg:#070a16;
+      --panel:#111426;
+      --panel2:#171c34;
+      --glass:rgba(255,255,255,.07);
+      --glass-strong:rgba(255,255,255,.1);
+      --stroke:rgba(255,255,255,.12);
+      --stroke-soft:rgba(255,255,255,.06);
+      --text:#f4f7ff;
+      --muted:#a5aed4;
+      --muted2:#8892bf;
+      --purple:#7c3aed;
+      --pl:#8b5cff;
+      --blue:#60a5fa;
+      --green:#22c55e;
+      --amber:#facc15;
+      --red:#f472b6;
+      --yellow:#facc15;
+      --cyan:#22d3ee;
+      --shadow:0 32px 90px rgba(0,0,0,.38);
+      background:radial-gradient(circle at top left, rgba(79,70,229,.14), transparent 20%), linear-gradient(180deg, #080a14 0%, #0d1527 100%);
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -91,7 +326,7 @@
     /* Glass base */
     .glass{
       border:1px solid var(--stroke);
-      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 40%,rgba(255,255,255,.10));
+      background:rgba(255,255,255,.18);
       backdrop-filter:var(--blur);
       -webkit-backdrop-filter:var(--blur);
       box-shadow:
@@ -321,13 +556,14 @@
       font-weight:800;
       letter-spacing:-.06em;
       line-height:1;
-      background:linear-gradient(135deg,#fff 40%,rgba(200,210,255,.7));
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
+      color:#0f172a;
+      background:none;
+      -webkit-background-clip:unset;
+      -webkit-text-fill-color:unset;
     }
     .page-title p{
       margin-top:4px;
-      color:var(--muted);
+      color:#334155;
       font-size:13px;
       font-weight:500;
     }
@@ -366,30 +602,6 @@
       color:var(--text);
     }
     .clock-date{color:var(--muted);font-size:12px}
-
-    /* Notif bell */
-    .notif-btn{
-      width:44px;height:44px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.07);
-      display:grid;place-items:center;
-      cursor:pointer;
-      font-size:18px;
-      position:relative;
-      transition:.2s ease;
-    }
-    .notif-btn:hover{background:rgba(255,255,255,.12);transform:scale(1.06)}
-    .notif-dot{
-      position:absolute;
-      top:8px;right:9px;
-      width:8px;height:8px;
-      border-radius:50%;
-      background:var(--red);
-      border:2px solid rgba(2,4,18,.9);
-      box-shadow:0 0 8px rgba(255,61,114,.7);
-      animation:pulse-dot 2s infinite;
-    }
 
     /* Top avatar */
     .top-avatar{
@@ -436,7 +648,7 @@
     .stat-icon.blue{background:linear-gradient(145deg,rgba(9,132,227,.55),rgba(108,92,231,.28))}
     .stat-icon.green{background:linear-gradient(145deg,rgba(0,184,148,.42),rgba(9,132,227,.12))}
     .stat-icon.yellow{background:linear-gradient(145deg,rgba(253,203,110,.45),rgba(255,100,50,.15))}
-    .stat-icon.purple{background:linear-gradient(145deg,rgba(108,92,231,.62),rgba(9,132,227,.22))}
+    .stat-icon.purple{background:rgba(139,92,255,.18);border:1px solid rgba(139,92,255,.22)}
     .stat-icon.red{background:linear-gradient(145deg,rgba(214,48,49,.55),rgba(255,100,50,.15))}
     .stat-body strong{display:block;font-size:24px;font-weight:900;letter-spacing:-.06em;font-variant-numeric:tabular-nums;}
     .stat-body span{display:block;color:#c9c7d9;font-weight:600;font-size:12px;margin-top:2px}
@@ -523,7 +735,7 @@
       display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 11px;
       font-size:11.5px;font-weight:700;border:1px solid rgba(255,255,255,.10);white-space:nowrap;letter-spacing:.01em;
     }
-    .pill.green{color:#00b894;background:rgba(0,184,148,.13);border-color:rgba(0,184,148,.2)}
+    .pill.green{color:#22c55e;background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.22)}
     .pill.red{color:#ff7f96;background:rgba(214,48,49,.12);border-color:rgba(214,48,49,.22)}
     .pill.yellow{color:#ffd584;background:rgba(253,203,110,.12);border-color:rgba(253,203,110,.22)}
     .pill.blue{color:#80cbff;background:rgba(9,132,227,.12);border-color:rgba(9,132,227,.22)}
@@ -661,7 +873,6 @@
             &nbsp;·&nbsp;
             <span id="clockTime" style="font-family:var(--mono);font-size:12px">—</span>
           </div>
-          <div class="notif-btn">🔔<span class="notif-dot"></span></div>
           <div class="top-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</div>
         </div>
       </header>
@@ -731,6 +942,43 @@
       @keyframes toast-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(20px)}}
     `;
     document.head.appendChild(style);
+    (function() {
+      const themeKey = 'qr_attendance_theme';
+      const themeNames = ['light','ash','dark','onyx'];
+      const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
+      const stored = localStorage.getItem(themeKey);
+      const current = themeNames.includes(serverTheme)
+        ? serverTheme
+        : themeNames.includes(stored)
+          ? stored
+          : 'dark';
+      if (serverTheme && themeNames.includes(serverTheme)) {
+        try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
+      }
+      document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
+      document.body.classList.add('theme-' + current);
+    })();
   </script>
+  <style>
+    /* Final override: keep active nav tab purple on hover */
+    .nav a.active:hover, .nav button.active:hover,
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+    body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+    body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
+    .nav a.active:hover .nav-icon, .nav button.active:hover .nav-icon,
+    body.theme-light .nav a.active:hover .nav-icon, body.theme-light .nav button.active:hover .nav-icon,
+    body.theme-ash .nav a.active:hover .nav-icon, body.theme-ash .nav button.active:hover .nav-icon,
+    body.theme-dark .nav a.active:hover .nav-icon, body.theme-dark .nav button.active:hover .nav-icon,
+    body.theme-onyx .nav a.active:hover .nav-icon, body.theme-onyx .nav button.active:hover .nav-icon {
+      background: rgba(255,255,255,.2) !important;
+      color: #fff !important;
+      border-color: rgba(255,255,255,.25) !important;
+    }
+  </style>
 </body>
 </html>

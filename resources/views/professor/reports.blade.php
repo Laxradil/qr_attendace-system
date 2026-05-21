@@ -6,6 +6,9 @@
 
 @section('content')
 <div class="content">
+    <style>
+        .search-bar{display:none !important;}
+    </style>
     <div class="glass-table glass">
         @php
             $attendanceSummary = isset($attendanceSummary) ? $attendanceSummary : ['total_records' => 0, 'present' => 0, 'late' => 0, 'absent' => 0];
@@ -37,6 +40,63 @@
         @endphp
         <style>
             .glass-table.glass{border-radius:24px;padding:24px;background:rgba(6,11,29,.95);border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 60px rgba(0,0,0,.2);}
+            body.theme-ash .glass-table.glass,
+            body.theme-ash .glass,
+            body.theme-ash .report-card,
+            body.theme-ash .report-chart,
+            body.theme-ash .distribution-row,
+            body.theme-ash .table-wrap,
+            body.theme-ash th,
+            body.theme-ash td,
+            body.theme-ash .badge {
+                background: var(--glass-strong) !important;
+                border-color: var(--stroke) !important;
+                color: #0f172a !important;
+                box-shadow: 0 18px 40px rgba(15,23,42,.08) !important;
+            }
+            body.theme-ash .report-chart,
+            body.theme-ash .distribution-row {
+                background: var(--glass) !important;
+            }
+            body.theme-ash .chart-line {
+                stroke: #4338ca !important;
+                stroke-width: 2 !important;
+            }
+            body.theme-ash .chart-labels {
+                color: #334155 !important;
+            }
+            body.theme-ash .chart-labels span {
+                color: inherit !important;
+            }
+            body.theme-ash .attendance-ring-inner {
+                background: var(--glass-strong) !important;
+                border-color: var(--stroke) !important;
+            }
+            body.theme-ash .attendance-ring-inner strong,
+            body.theme-ash .attendance-ring-inner span,
+            body.theme-ash .attendance-ring-inner small {
+                color: #0f172a !important;
+            }
+            body.theme-ash .report-filter-field .filter-select,
+            body.theme-ash .report-filter-field .filter-input,
+            body.theme-ash .filter-btn,
+            body.theme-ash .badge,
+            body.theme-ash .table-wrap td,
+            body.theme-ash .table-wrap th,
+            body.theme-ash .table-wrap td a,
+            body.theme-ash .table-wrap td span,
+            body.theme-ash .table-wrap td strong {
+                background: var(--glass) !important;
+                border-color: var(--stroke-soft) !important;
+                color: #0f172a !important;
+            }
+            body.theme-ash .report-filter-field .filter-select,
+            body.theme-ash .report-filter-field .filter-input,
+            body.theme-ash .filter-btn,
+            body.theme-ash .badge {
+                background: var(--glass) !important;
+                border-color: var(--stroke-soft) !important;
+            }
             .report-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;align-items:stretch;}
             .report-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:18px;}
             .report-card h3{margin:0;font-size:14px;font-weight:700;color:#f8fbff;letter-spacing:.01em;}
@@ -68,32 +128,226 @@
             .distribution-dot.yellow{background:#ffc75a;}
             .distribution-dot.red{background:#ff3d72;}
             .distribution-row strong{font-size:13px;color:#f8fbff;}
+            .distribution-row .distribution-count{font-size:12px;font-weight:700;color:#f8fbff;}
             .distribution-row span:last-child{font-size:12px;font-weight:700;color:#f8fbff;}
             .distribution-row small{color:rgba(255,255,255,.6);font-size:11px;}
-            .report-filter-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr)) minmax(180px,260px);gap:16px;align-items:flex-end;margin-bottom:24px;padding:16px;border-radius:20px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);}
-            .report-filter-field{display:flex;flex-direction:column;gap:8px;}
+            
+            .report-filter-row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;margin-bottom:24px;padding:0 0 4px 0;}
+            .report-filter-field{display:flex;flex-direction:column;gap:8px;width:220px;}
             .report-filter-field label{color:rgba(255,255,255,.65);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;}
             .report-filter-field .filter-select,
             .report-filter-field .filter-input{width:100%;min-height:44px;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f8fbff;font-size:13px;transition:.2s ease;}
+            
+            .report-filter-field .filter-select {
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.7)' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 14px center;
+                background-size: 16px;
+                padding-right: 40px;
+            }
             .report-filter-field .filter-select option{background:rgba(10,15,32,.98);color:#f8fbff;}
             .report-filter-field .filter-select:focus,
             .report-filter-field .filter-input:focus{outline:none;border-color:rgba(139,92,255,.6);background:rgba(255,255,255,.08);}
-            .report-filter-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;}
+            
+            .report-filter-actions{display:flex;align-items:center;height:44px;margin-left:auto;}
             .filter-btn{min-height:44px;padding:0 18px;border-radius:14px;border:1px solid rgba(255,255,255,.08);font-weight:700;cursor:pointer;transition:.2s ease;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:rgba(255,255,255,.04);color:#f8fbff;}
             .filter-btn.apply{background:rgba(139,92,255,.12);border-color:rgba(139,92,255,.16);}
             .filter-btn.reset{background:rgba(255,255,255,.02);color:rgba(255,255,255,.85);}
             .filter-btn:hover{transform:translateY(-1px);}
+            
             .badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:6px 11px;font-size:11px;font-weight:700;letter-spacing:.01em;}
             .badge.bg{background:rgba(24,240,139,.12);color:#b8ffde;}
             .badge.ba{background:rgba(255,199,90,.12);color:#fff0b3;}
             .badge.br{background:rgba(255,61,114,.12);color:#ffb3c4;}
             .table-wrap{overflow-x:auto;border-radius:18px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.12) transparent;}
             table{width:100%;min-width:700px;border-collapse:separate;border-spacing:0;}
-            th, td{padding:13px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle;}
+            th, td{padding:13px 14px;text-align:left;border-bottom:1px solid rgba(15,23,42,.08);vertical-align:middle;}
             th{background:rgba(255,255,255,.02);color:rgba(255,255,255,.75);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;position:sticky;top:0;backdrop-filter:blur(8px);}
             td{color:rgba(255,255,255,.92);font-size:13px;}
             tr:hover td{background:rgba(255,255,255,.03);}
             .muted{color:rgba(255,255,255,.65);font-weight:400;}
+        </style>
+
+        <style>
+          body.theme-light .glass-table.glass {
+            background: #ffffff !important;
+            border-color: #e5e7eb !important;
+            box-shadow: 0 18px 40px rgba(15,23,42,.08) !important;
+          }
+
+          body.theme-light .report-card,
+          body.theme-light .report-chart,
+          body.theme-light .distribution-row,
+          body.theme-light .report-filter-field .filter-select,
+          body.theme-light .filter-btn,
+          body.theme-light .table-wrap,
+          body.theme-light th,
+          body.theme-light td {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #e5e7eb !important;
+          }
+
+          /* Explicitly stripping opacity and gray tint overrides from Webkit sub-elements */
+          body.theme-light .report-filter-field .filter-input {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border-color: #e5e7eb !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #000000 !important;
+          }
+          body.theme-light .report-filter-field .filter-input::-webkit-datetime-edit,
+          body.theme-light .report-filter-field .filter-input::-webkit-datetime-edit-fields-wrapper,
+          body.theme-light .report-filter-field .filter-input::-webkit-datetime-edit-text,
+          body.theme-light .report-filter-field .filter-input::-webkit-datetime-edit-month-field,
+          body.theme-light .report-filter-field .filter-input::-webkit-datetime-edit-day-field,
+          body.theme-light .report-filter-field .filter-input::-webkit-datetime-edit-year-field {
+            color: #000000 !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #000000 !important;
+          }
+
+          body.theme-light .attendance-ring-inner {
+            background: #ffffff !important;
+            border-color: #e5e7eb !important;
+          }
+
+          body.theme-light .attendance-ring-inner strong {
+            color: #0f172a !important;
+          }
+
+          body.theme-light .attendance-ring-inner strong span,
+          body.theme-light .attendance-ring-inner span,
+          body.theme-light .attendance-ring-inner small {
+            color: #475569 !important;
+          }
+
+          body.theme-light .report-card h3,
+          body.theme-light .distribution-row strong,
+          body.theme-light .distribution-row .distribution-count,
+          body.theme-light .distribution-row span:last-child,
+          body.theme-light .distribution-row small {
+            color: #0f172a !important;
+          }
+
+          body.theme-light .report-filter-field label {
+            color: #475569 !important;
+          }
+
+          body.theme-light .report-filter-field .filter-select option {
+            background: #ffffff !important;
+            color: #0f172a !important;
+          }
+
+          body.theme-light .filter-btn.apply {
+            background: rgba(139,92,255,.12) !important;
+            color: #0f172a !important;
+            border-color: rgba(139,92,255,.16) !important;
+          }
+
+          body.theme-light .filter-btn.reset {
+            background: rgba(241,245,249,.7) !important;
+            color: #475569 !important;
+          }
+
+          body.theme-light .glass,
+          body.theme-light .glass-table.glass,
+          body.theme-light .report-card,
+          body.theme-light .report-chart,
+          body.theme-light .distribution-body,
+          body.theme-light .distribution-row,
+          body.theme-light .distribution-pie,
+          body.theme-light .report-filter-row,
+          body.theme-light .report-filter-field,
+          body.theme-light .report-filter-actions,
+          body.theme-light .table-wrap,
+          body.theme-light .table-wrap table,
+          body.theme-light th,
+          body.theme-light td,
+          body.theme-light .badge {
+            background: #ffffff !important;
+            border-color: #e5e7eb !important;
+            color: #0f172a !important;
+          }
+
+          body.theme-light .report-chart {
+            background: #f8fafb !important;
+          }
+
+          body.theme-light .distribution-row {
+            background: #f8fafb !important;
+          }
+
+          body.theme-light .report-filter-field .filter-select,
+          body.theme-light .report-filter-field .filter-input,
+          body.theme-light .filter-btn,
+          body.theme-light .badge {
+            background: #ffffff !important;
+            border-color: #e5e7eb !important;
+            color: #0f172a !important;
+          }
+
+          body.theme-light .filter-btn.apply {
+            background: rgba(139,92,255,.12) !important;
+            color: #0f172a !important;
+            border-color: rgba(139,92,255,.16) !important;
+          }
+
+          body.theme-light .filter-btn.reset {
+            background: rgba(241,245,249,.7) !important;
+            color: #475569 !important;
+          }
+
+          body.theme-light .glass-table.glass {
+            box-shadow: 0 18px 40px rgba(15,23,42,.08) !important;
+          }
+
+          body.theme-light .table-wrap {
+            box-shadow: 0 14px 24px rgba(15,23,42,.06) !important;
+          }
+
+          body.theme-light tr:hover td {
+            background: rgba(15,23,42,.04) !important;
+          }
+        </style>
+
+        <style>
+          body.theme-ash .table-wrap td .muted,
+          body.theme-ash .table-wrap td,
+          body.theme-ash .table-wrap th,
+          body.theme-ash .table-wrap td a,
+          body.theme-ash .table-wrap td span,
+          body.theme-ash .table-wrap td strong {
+            color: #0f172a !important;
+          }
+
+          body.theme-ash .attendance-ring-inner {
+            background: #f1f5f9 !important;
+            border-color: rgba(15,23,42,.12) !important;
+            box-shadow: inset 0 0 0 1px rgba(15,23,42,.06) !important;
+          }
+
+          body.theme-ash .attendance-ring-inner strong {
+            color: #0f172a !important;
+          }
+
+          body.theme-ash .attendance-ring-inner strong span,
+          body.theme-ash .attendance-ring-inner small {
+            color: #475569 !important;
+          }
+
+          body.theme-ash .distribution-row div:last-child {
+            color: #1f2937 !important;
+          }
+
+          body.theme-ash .distribution-row .distribution-count,
+          body.theme-ash .distribution-row strong,
+          body.theme-ash .distribution-row small {
+            color: #1f2937 !important;
+          }
         </style>
 
         <form method="GET" action="{{ route('professor.reports') }}">
@@ -113,70 +367,66 @@
                     <label>Date</label>
                     <input type="date" name="date" class="filter-input" value="{{ request('date') }}" onchange="this.form.submit()">
                 </div>
-                <div class="report-filter-field">
-                    <label>Search students</label>
-                    <input type="search" name="search" class="filter-input" placeholder="Search students..." value="{{ request('search') }}" onkeydown="if(event.key === 'Enter') this.form.submit()">
-                </div>
                 <div class="report-filter-actions">
                     <a href="{{ route('professor.reports') }}" class="filter-btn reset">Reset</a>
                 </div>
             </div>
 
             <div class="report-summary-grid">
-            <section class="report-card glass">
-                <div><h3>Attendance Overview (Present Students)</h3></div>
-                <div class="report-chart">
-                    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polyline points="{{ $chartPoints }}" class="chart-line" />
-                    </svg>
-                    <div class="chart-labels">
-                        @foreach($attendanceTrend as $point)
-                            <span>{{ $point['label'] }}</span>
-                        @endforeach
-                    </div>
-                </div>
-            </section>
-            <section class="report-card glass distribution-card">
-                <div class="distribution-header"><h3>Attendance Distribution</h3></div>
-                <div class="distribution-body">
-                    <div class="distribution-pie">
-                        <div class="attendance-ring"></div>
-                        <div class="attendance-ring-inner">
-                            <div style="text-align:center;">
-                                <strong>{{ $attendanceRate }}<span style="font-size:16px;color:var(--muted);">%</span></strong>
-                                <small>Average</small>
-                            </div>
+                <section class="report-card glass">
+                    <div><h3>Attendance Overview (Present Students)</h3></div>
+                    <div class="report-chart">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <polyline points="{{ $chartPoints }}" class="chart-line" />
+                        </svg>
+                        <div class="chart-labels">
+                            @foreach($attendanceTrend as $point)
+                                <span>{{ $point['label'] }}</span>
+                            @endforeach
                         </div>
                     </div>
-                    <div class="distribution-legend">
-                        <div class="distribution-row">
-                            <span class="distribution-dot green"></span>
-                            <div>
-                                <div style="font-size:12px;color:var(--muted);">Present</div>
-                                <div style="font-weight:700;color:#fff;">{{ $presentCount }}</div>
+                </section>
+                <section class="report-card glass distribution-card">
+                    <div class="distribution-header"><h3>Attendance Distribution</h3></div>
+                    <div class="distribution-body">
+                        <div class="distribution-pie">
+                            <div class="attendance-ring"></div>
+                            <div class="attendance-ring-inner">
+                                <div style="text-align:center;">
+                                    <strong>{{ $attendanceRate }}<span style="font-size:16px;color:var(--muted);">%</span></strong>
+                                    <small>Average</small>
+                                </div>
                             </div>
-                            <div style="font-size:13px;font-weight:700;color:#18f08b;">{{ $totalRecords > 0 ? round($presentPct) : 0 }}%</div>
                         </div>
-                        <div class="distribution-row">
-                            <span class="distribution-dot yellow"></span>
-                            <div>
-                                <div style="font-size:12px;color:var(--muted);">Late</div>
-                                <div style="font-weight:700;color:#fff;">{{ $lateCount }}</div>
+                        <div class="distribution-legend">
+                            <div class="distribution-row">
+                                <span class="distribution-dot green"></span>
+                                <div>
+                                    <div style="font-size:12px;color:var(--muted);">Present</div>
+                                    <div class="distribution-count">{{ $presentCount }}</div>
+                                </div>
+                                <div style="font-size:13px;font-weight:700;color:#047857;">{{ $totalRecords > 0 ? round($presentPct) : 0 }}%</div>
                             </div>
-                            <div style="font-size:13px;font-weight:700;color:#ffc75a;">{{ $totalRecords > 0 ? round($latePct) : 0 }}%</div>
-                        </div>
-                        <div class="distribution-row">
-                            <span class="distribution-dot red"></span>
-                            <div>
-                                <div style="font-size:12px;color:var(--muted);">Absent</div>
-                                <div style="font-weight:700;color:#fff;">{{ $absentCount }}</div>
+                            <div class="distribution-row">
+                                <span class="distribution-dot yellow"></span>
+                                <div>
+                                    <div style="font-size:12px;color:var(--muted);">Late</div>
+                                    <div class="distribution-count">{{ $lateCount }}</div>
+                                </div>
+                                <div style="font-size:13px;font-weight:700;color:#b45309;">{{ $totalRecords > 0 ? round($latePct) : 0 }}%</div>
                             </div>
-                            <div style="font-size:13px;font-weight:700;color:#ff3d72;">{{ $totalRecords > 0 ? round($absentPct) : 0 }}%</div>
+                            <div class="distribution-row">
+                                <span class="distribution-dot red"></span>
+                                <div>
+                                    <div style="font-size:12px;color:var(--muted);">Absent</div>
+                                    <div class="distribution-count">{{ $absentCount }}</div>
+                                </div>
+                                <div style="font-size:13px;font-weight:700;color:#b91c1c;">{{ $totalRecords > 0 ? round($absentPct) : 0 }}%</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+            </div>
 
             <div class="table-wrap">
                 <table>

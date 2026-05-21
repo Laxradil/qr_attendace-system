@@ -10,6 +10,63 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class StudentController extends Controller
 {
+    // ...existing code...
+        /**
+         * Show the student settings page.
+         */
+        public function settings(): View
+        {
+            $user = Auth::user();
+            return view('student.settings', [ 'user' => $user ]);
+        }
+
+        /**
+         * Update student profile settings.
+         */
+        public function updateSettings(\Illuminate\Http\Request $request): \Illuminate\Http\RedirectResponse
+        {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            // If only theme is being updated, validate and save theme
+            if ($request->has('theme') && !$request->has('name') && !$request->has('email')) {
+                $request->validate([
+                    'theme' => 'required|in:light,ash,dark,onyx',
+                ]);
+                $user->theme = $request->input('theme');
+                $user->save();
+                return back()->with('success', 'Theme updated successfully.');
+            }
+
+            // Otherwise update profile fields
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            ]);
+
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            $user->save();
+
+            return back()->with('success', 'Profile updated successfully.');
+        }
+
+        /**
+         * Update student password.
+         */
+        public function updatePassword(): \Illuminate\Http\RedirectResponse
+        {
+            $user = Auth::user();
+            request()->validate([
+                'password' => 'nullable|string|min:8|confirmed',
+            ]);
+            if (request('password')) {
+                $user->password = bcrypt(request('password'));
+                $user->save();
+                return back()->with('success', 'Password updated successfully.');
+            }
+            return back()->with('info', 'No password change.');
+        }
     /**
      * Return students enrolled in a class (AJAX)
      */
@@ -28,7 +85,7 @@ class StudentController extends Controller
     public function dashboard(): View
     {
         $user = Auth::user();
-        $classes = $user->enrolledClasses()->with('professors')->get();
+        $classes = $user->enrolledClasses()->with(['professors', 'schedules'])->get();
 
         // Get recent attendance records
         $recentAttendance = AttendanceRecord::where('student_id', $user->id)
@@ -92,7 +149,7 @@ class StudentController extends Controller
     public function myClasses(): View
     {
         $user = Auth::user();
-        $classes = $user->enrolledClasses()->with('professors')->get();
+        $classes = $user->enrolledClasses()->with('professors', 'students', 'schedules')->get();
 
         // Get all attendance statistics
         $stats = AttendanceRecord::where('student_id', $user->id)
