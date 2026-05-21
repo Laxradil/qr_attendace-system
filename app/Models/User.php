@@ -11,6 +11,7 @@ namespace App\Models;
  * @property string $password
  * @property string $role
  * @property string|null $student_id
+ * @property string|null $section
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @method \Illuminate\Database\Eloquent\Relations\HasMany classes()
@@ -51,7 +52,9 @@ class User extends Authenticatable
         'password',
         'role',
         'student_id',
+        'section',
         'is_active',
+        'theme',
     ];
 
     /**

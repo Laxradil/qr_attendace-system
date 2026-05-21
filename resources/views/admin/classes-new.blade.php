@@ -6,9 +6,9 @@
 
 @section('content')
 <div class="glass-table glass">
-  <div class="toolbar">
+  <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <a href="{{ route('admin.classes.create') }}" class="btn primary">＋ Add Class</a>
-    <div class="search-bar" style="height:42px;width:260px">🔍 <span style="font-size:13px">Search classes...</span></div>
+    <input type="text" id="tableSearch" placeholder="Search table..." style="flex:1;min-width:200px;max-width:350px;padding:10px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.12);background:rgba(8,12,30,.58);color:#fff;font-size:13px" onkeyup="filterTable(this)">
   </div>
 
   <div class="table-wrap">
@@ -16,6 +16,7 @@
       <thead>
         <tr>
           <th>Class Code</th>
+          <th>Room Code</th>
           <th>Class Name</th>
           <th>Professor</th>
           <th>Students</th>
@@ -27,11 +28,13 @@
         @forelse($classes as $class)
         <tr>
           <td><span style="font-family:var(--mono);font-size:13px">{{ $class->code }}</span></td>
+          <td><span style="font-family:var(--mono);font-size:13px">{{ $class->room_code ?? '—' }}</span></td>
           <td><b>{{ $class->name }}</b></td>
           <td>{{ $class->professor->name ?? 'N/A' }}</td>
           <td>{{ $class->students->count() }} students</td>
           <td><span class="pill green">Active</span></td>
           <td>
+            <a href="{{ route('admin.classes.enroll', $class) }}" class="btn slim">Enroll</a>
             <a href="{{ route('admin.classes.edit', $class) }}" class="btn slim">Edit</a>
             <form method="POST" action="{{ route('admin.classes.delete', $class) }}" style="display:inline" onsubmit="return confirm('Delete this class?')">
               @csrf
@@ -42,11 +45,39 @@
         </tr>
         @empty
         <tr>
-          <td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No classes found</td>
+          <td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No classes found</td>
         </tr>
         @endforelse
       </tbody>
     </table>
   </div>
 </div>
+
+<script>
+function filterTable(input) {
+  const searchValue = input.value.toLowerCase();
+  const table = input.closest('.glass-table').querySelector('table');
+  const rows = table.querySelectorAll('tbody tr');
+  
+  rows.forEach(row => {
+    if (row.querySelector('td[colspan]')) return;
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  });
+}
+</script>
 @endsection
+
+<style>
+  /* Light theme solid overrides */
+  body.theme-light #tableSearch {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill.green {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+  }
+</style>

@@ -30,7 +30,7 @@
 
           <div style="padding-top:14px;border-top:1px solid rgba(255,255,255,.07);margin-top:14px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
-              <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
+              <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);color:#0b1220;font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
               <button type="button" class="btn primary slim" onclick="alert('Add student feature coming soon')">+ Add Student</button>
             </div>
 
@@ -63,18 +63,7 @@
                           <span class="pill green">Active</span>
                         </td>
                         <td>
-                          @php
-                            $requestKey = "{$classe->id}_{$student->id}";
-                            $pendingRequest = $pendingRequests[$requestKey] ?? null;
-                          @endphp
-                          @if($pendingRequest)
-                            <div>
-                              <span class="pill pending">Pending approval</span>
-                              <div style="font-size:11px;color:var(--muted);margin-top:4px;">Reason: {{ $pendingRequest->reason }}</div>
-                            </div>
-                          @else
-                            <button class="btn slim drop" type="button" onclick='openDropModal({{ $student->id }}, {!! json_encode($student->name) !!}, {{ $classe->id }})'>Drop</button>
-                          @endif
+                          <button class="btn slim drop" onclick="dropStudent({{ $student->id }}, '{{ $student->name }}', {{ $classe->id }})">Drop</button>
                         </td>
                       </tr>
                     @endforeach
@@ -161,9 +150,9 @@
   }
   
   .pill.green {
-    color: #4dffa0;
-    background: rgba(24,240,139,.11);
-    border-color: rgba(24,240,139,.2);
+    color: #166534;
+    background: #dcfce7;
+    border-color: #bbf7d0;
   }
   
   .table-wrap {
@@ -226,87 +215,83 @@
     border: 1px solid rgba(139,92,255,.3);
     flex-shrink: 0;
   }
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.65);
-    display: grid;
-    place-items: center;
-    padding: 20px;
-    z-index: 999;
-  }
-  .modal-overlay.hidden {
-    display: none;
-  }
-  .modal-box {
-    width: min(560px, 100%);
-    background: rgba(12,14,31,.98);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 24px;
-    padding: 28px;
-    box-shadow: 0 30px 80px rgba(0,0,0,.45);
-  }
-  .modal-box h3 {
-    margin: 0 0 10px;
-    font-size: 18px;
-    font-weight: 700;
-  }
-  .modal-box label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-  .modal-box select {
-    width: 100%;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.05);
-    color: var(--text);
-    padding: 12px 14px;
-    font-size: 13px;
-    outline: none;
-    margin-bottom: 18px;
-  }
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .pill.pending {
-    color: #ffd66b;
-    background: rgba(255,214,107,.14);
-    border-color: rgba(255,214,107,.24);
-  }
 </style>
 
-<div id="drop-modal-overlay" class="modal-overlay hidden" onclick="closeDropModal(event)">
-  <div class="modal-box" onclick="event.stopPropagation()">
-    <h3>Request Drop Approval</h3>
-    <p id="drop-modal-text" style="margin:0 0 16px;color:var(--muted);">Choose a reason for dropping this student and send the request to admin for approval.</p>
-    <form id="drop-request-form" method="POST" action="{{ route('professor.drop-request') }}">
-      @csrf
-      <input type="hidden" name="student_id" id="drop-student-id">
-      <input type="hidden" name="class_id" id="drop-class-id">
-      <label for="drop-reason">Reason</label>
-      <select id="drop-reason" name="reason" required>
-        <option value="">Select a reason</option>
-        <option value="Schedule conflict">Schedule conflict</option>
-        <option value="Transfer to another section">Transfer to another section</option>
-        <option value="Medical reason">Medical reason</option>
-        <option value="Academic performance">Academic performance</option>
-        <option value="Personal reasons">Personal reasons</option>
-      </select>
-      <div class="modal-actions">
-        <button type="button" class="btn slim" onclick="closeDropModal()">Cancel</button>
-        <button type="submit" class="btn primary slim">Submit Request</button>
-      </div>
-    </form>
-  </div>
+<style>
+  body.theme-light .glass {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .student-search {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .btn {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .btn:hover {
+    background: #f9fafb !important;
+    border-color: #d1d5db !important;
+  }
+  
+  body.theme-light .btn.primary {
+    background: #3b82f6 !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+  }
+  
+  body.theme-light .btn.drop {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+  }
+  
+  body.theme-light .btn.drop:hover {
+    background: #fee2e2 !important;
+    border-color: #fca5a5 !important;
+  }
+  
+  body.theme-light .pill {
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill.green {
+    background: #ecfdf5 !important;
+    border-color: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  
+  body.theme-light th {
+    background: #f9fafb !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light td {
+    color: #000000 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light tr:hover td {
+    background: #f3f4f6 !important;
+  }
+  
+  body.theme-light .small-avatar {
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: #000000 !important;
+  }
+</style>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -314,27 +299,31 @@
     const searchTerm = input.value.toLowerCase();
     const table = input.closest('.table-wrap')?.querySelector('table');
     if (!table) return;
-
+    
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
       const text = row.textContent.toLowerCase();
       row.style.display = text.includes(searchTerm) ? '' : 'none';
     });
   }
-
-  function openDropModal(studentId, studentName, classId) {
-    document.getElementById('drop-student-id').value = studentId;
-    document.getElementById('drop-class-id').value = classId;
-    document.getElementById('drop-reason').value = '';
-    document.getElementById('drop-modal-text').textContent = `Drop request for ${studentName}. Please choose a reason and submit to send it to admin for approval.`;
-    document.getElementById('drop-modal-overlay').classList.remove('hidden');
-  }
-
-  function closeDropModal(event) {
-    if (event && event.target.id !== 'drop-modal-overlay') {
+  
+  function dropStudent(studentId, studentName, classId) {
+    if (!confirm(`Are you sure you want to drop ${studentName} from this class?`)) {
       return;
     }
-    document.getElementById('drop-modal-overlay').classList.add('hidden');
+    
+    // Submit drop request to backend
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/professor/students/drop';
+    form.innerHTML = `
+      @csrf
+      <input type="hidden" name="student_id" value="${studentId}">
+      <input type="hidden" name="class_id" value="${classId}">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   }
 </script>
 

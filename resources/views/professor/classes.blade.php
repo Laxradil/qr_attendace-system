@@ -7,6 +7,37 @@
 @section('header', 'My Classes')
 @section('subheader', 'View and manage your assigned classes')
 
+@php
+    $studentPayload = $availableStudents->map(function ($student) {
+        return [
+            'id' => $student->id,
+            'name' => $student->name,
+            'email' => $student->email,
+        ];
+    })->values();
+
+    $scanClassesPayload = $classes->map(function ($class) {
+        return [
+            'id' => $class->id,
+            'code' => $class->code,
+            'name' => $class->name,
+            'students' => $class->students->map(function ($student) {
+                return [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                ];
+            })->values(),
+            'schedules' => $class->schedules->map(function ($schedule) {
+                return [
+                    'days' => $schedule->days,
+                    'start_time' => $schedule->start_time,
+                    'end_time' => $schedule->end_time,
+                ];
+            })->values(),
+        ];
+    })->values();
+@endphp
+
 @section('content')
 <style>
   .search-bar {
@@ -41,73 +72,38 @@
   </div>
 </div>
 
-<!-- Semester filter chips -->
-<div class="toolbar" style="margin-bottom:20px">
-  <div class="tools" style="gap:10px">
-    <div class="chip active">All Semesters</div>
-    <div class="chip">1st Sem</div>
-    <div class="chip">2nd Sem</div>
-  </div>
-</div>
-
 <!-- Class cards grid -->
 <div class="class-grid">
   @forelse($classes as $class)
+    @php
+      $schedule = $class->schedules->first();
+      $formattedStart = $schedule?->start_time ? date('g:i A', strtotime($schedule->start_time)) : null;
+      $formattedEnd = $schedule?->end_time ? date('g:i A', strtotime($schedule->end_time)) : null;
+      $timeLabel = $formattedStart && $formattedEnd ? "{$formattedStart} - {$formattedEnd}" : ($formattedStart ?? $formattedEnd ?? 'N/A');
+    @endphp
     <div class="class-card">
       <div class="class-head">
         <div>
           <h3>{{ $class->display_name ?? 'Class' }}</h3>
           <div class="class-code">{{ $class->code ?? 'N/A' }}</div>
         </div>
-        <div class="class-room">{{ $class->schedules->first()?->room ?? 'TBA' }}</div>
+        <div class="class-room">{{ $schedule?->room ?? 'TBA' }}</div>
       </div>
       <div class="class-meta">
         <div class="class-meta-row">
-          <div class="meta-icon">📅</div>
-          Days: <strong>{{ $class->schedules->first()?->days ?? 'N/A' }}</strong>
+          Days: <strong>{{ $schedule?->days ?? 'N/A' }}</strong>
         </div>
         <div class="class-meta-row">
-          <div class="meta-icon">🕓</div>
-          Time: <strong style="font-family:var(--mono)">
-            @if($class->schedules->first()?->start_time)
-              {{ \Carbon\Carbon::createFromFormat('H:i:s', $class->schedules->first()->start_time)->format('g:i A') }}
-              @if($class->schedules->first()?->end_time)
-                – {{ \Carbon\Carbon::createFromFormat('H:i:s', $class->schedules->first()->end_time)->format('g:i A') }}
-              @endif
-            @else
-              N/A
-            @endif
-          </strong>
+          Time: <strong style="font-family:var(--mono)">{{ $timeLabel }}</strong>
         </div>
         <div class="class-meta-row">
-          <div class="meta-icon">🎓</div>
           Professor: <strong>{{ auth()->user()->name }}</strong>
         </div>
       </div>
       <div class="class-actions">
-        <a href="#" class="btn slim btn-p" onclick="event.preventDefault(); openAddStudentModal(this)"
-           data-class-id="{{ $class->id }}"
-           data-class-name="{{ $class->display_name }}"
-           data-enrolled-ids="{{ json_encode($class->students->pluck('id')->toArray()) }}"
-        >Add Student</a>
-        <a href="#" class="btn slim" onclick="event.preventDefault(); openEditClassModal(this)"
-           data-class-id="{{ $class->id }}"
-           data-class-name="{{ $class->display_name }}"
-           data-class-code="{{ $class->code }}"
-           data-class-description="{{ $class->description }}"
-           data-schedule-id="{{ $class->schedules->first()?->id }}"
-           data-schedule-days="{{ $class->schedules->first()?->days }}"
-           data-schedule-start="{{ $class->schedules->first()?->start_time }}"
-           data-schedule-end="{{ $class->schedules->first()?->end_time }}"
-           data-schedule-room="{{ $class->schedules->first()?->room }}"
-        >Edit Class</a>
-        <a href="#" class="btn slim" onclick="event.preventDefault(); openScanQRModal(this)"
-           data-class-id="{{ $class->id }}"
-           data-class-name="{{ $class->display_name }}"
-           data-schedule-days="{{ $class->schedules->first()?->days }}"
-           data-schedule-start="{{ $class->schedules->first()?->start_time }}"
-           data-schedule-end="{{ $class->schedules->first()?->end_time }}"
-        >Scan QR</a>
+        <button type="button" class="btn slim btn-add" data-action="add-student" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}" data-class-room="{{ $schedule?->room }}" data-class-schedule-id="{{ $schedule?->id }}" data-class-days="{{ $schedule?->days }}" data-class-start-time="{{ $schedule?->start_time }}" data-class-end-time="{{ $schedule?->end_time }}" data-current-students='@json($class->students->pluck("id"))'>Add Student</button>
+        <button type="button" class="btn slim btn-edit" data-action="edit-class" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}" data-class-room="{{ $schedule?->room }}" data-class-schedule-id="{{ $schedule?->id }}" data-class-days="{{ $schedule?->days }}" data-class-start-time="{{ $schedule?->start_time }}" data-class-end-time="{{ $schedule?->end_time }}">Edit Class</button>
+        <button type="button" class="btn slim btn-scan" data-action="scan-qr" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}">Scan QR</button>
       </div>
     </div>
   @empty
@@ -117,6 +113,14 @@
       <div style="font-size:13px">You haven't been assigned any classes yet.</div>
     </div>
   @endforelse
+</div>
+
+<!-- Modals -->
+<div id="modalBackdrop" class="modal-backdrop" style="display:none;">
+  <div class="modal-card">
+    <button type="button" class="modal-close" aria-label="Close">×</button>
+    <div id="modalContent"></div>
+  </div>
 </div>
 
 <style>
@@ -251,22 +255,336 @@
     background: rgba(255,255,255,.08);
     flex-shrink: 0;
   }
+
+  .scanner-layout {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 24px;
+    min-height: 0;
+    align-items: start;
+  }
+  
+  .scanner-box,
+  .att-recording,
+  .recent-scans-box {
+    background: rgba(15, 23, 42, 0.95);
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid rgba(255,255,255,.12);
+  }
+
+  .scanner-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .scanner-tab {
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(234,240,255,.85);
+    border-radius: 14px;
+    padding: 11px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+    transition: .2s ease;
+  }
+
+  .scanner-tab.active {
+    background: linear-gradient(135deg,rgba(139,92,255,.9),rgba(67,166,255,.55));
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .cam-viewport {
+    width: 100%;
+    border-radius: 22px;
+    background: rgba(0,0,0,.28);
+    border: 1px dashed rgba(139,92,255,.35);
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+  }
+
+  .cam-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .cam-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .cam-btn {
+    border: 0;
+    border-radius: 14px;
+    padding: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 13px;
+    transition: .2s ease;
+  }
+
+  .scan-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    color: #dbeafe;
+    margin-bottom: 12px;
+  }
+
+  .att-field {
+    margin-bottom: 18px;
+  }
+
+  .att-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+    color: var(--muted);
+  }
+
+  .att-select,
+  .att-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: .2s ease;
+  }
+
+  .att-display {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .att-select:focus,
+  .att-input:focus {
+    border-color: rgba(139,92,255,.5);
+    background: rgba(255,255,255,.12);
+  }
+
+  .att-recording + .recent-scans-box {
+    margin-top: 24px;
+  }
+
+  .recent-scans-box {
+    padding: 20px;
+  }
+
+  .no-scans {
+    text-align: center;
+    padding: 30px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media(max-width:1200px) {
+    .scanner-layout { grid-template-columns: 1fr; }
+  }
   
   .class-actions {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
     align-items: center;
   }
-  
-  .class-actions a {
-    text-decoration: none;
+
+  #modalBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 24px;
   }
-  
-  .class-actions a.btn {
-    text-decoration: none;
+
+  .modal-card {
+    width: min(960px, 96vw);
+    max-height: min(92vh, 1080px);
+    overflow-y: auto;
+    background: rgba(10, 14, 28, 0.98);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    padding: 32px;
+    position: relative;
   }
-  
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+    width: 34px;
+    height: 34px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .modal-card h2 {
+    margin: 0 0 14px;
+    font-size: 22px;
+    letter-spacing: -0.03em;
+  }
+
+  .modal-card p,
+  .modal-card label,
+  .modal-card small {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .modal-card .modal-meta {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .modal-card .modal-meta div {
+    font-size: 13px;
+  }
+
+  .modal-card .modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .modal-card .modal-actions .btn {
+    min-width: 120px;
+  }
+
+  .modal-card .modal-body {
+    display: grid;
+    gap: 14px;
+  }
+
+  .modal-card .modal-field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .modal-card .modal-field input,
+  .modal-card .modal-field textarea,
+  .modal-card .modal-field select {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,.04);
+    color: #f8fafc;
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+
+  .modal-card .modal-field input::placeholder,
+  .modal-card .modal-field textarea::placeholder {
+    color: rgba(255,255,255,.55);
+  }
+
+  .modal-card .modal-note {
+    color: rgba(139,92,255,.9);
+    font-size: 13px;
+  }
+
+  .modal-card .modal-panel {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .modal-card .modal-panel strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+
+  .modal-card .modal-panel span {
+    color: rgba(255,255,255,.75);
+    font-size: 13px;
+  }
+
+  .modal-card .student-search-results {
+    display: grid;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,.03);
+  }
+
+  .modal-card .student-option {
+    width: 100%;
+    text-align: left;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,.04);
+    color: #f8fafc;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+    display: grid;
+    gap: 4px;
+  }
+
+  .modal-card .student-option:hover,
+  .modal-card .student-option.selected {
+    background: rgba(139,92,255,.16);
+    border-color: rgba(139,92,255,.35);
+  }
+
+  .modal-card .student-option small {
+    color: rgba(255,255,255,.65);
+    font-size: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .modal-card {
+      padding: 20px;
+    }
+
+    .modal-card h2 {
+      font-size: 20px;
+    }
+  }
+
   .view-link {
     color: rgba(139,92,255,.9);
     font-size: 12.5px;
@@ -284,883 +602,806 @@
     padding: 7px 10px;
     font-size: 12px;
     border-radius: 10px;
+    text-decoration: none;
+  }
+  
+  a.btn,
+  a.btn:hover {
+    text-decoration: none;
   }
   
   @media(max-width:1200px) {
     .class-grid { grid-template-columns: 1fr; }
   }
-  
-  .edit-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,.55);
-    padding: 20px;
+</style>
+
+<style>
+  body.theme-light .glass {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
   }
   
-  .edit-modal.active {
-    display: flex;
+  body.theme-light .chip {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
   }
   
-  .edit-modal-content {
-    width: min(100%, 560px);
-    background: rgba(18,20,34,.95);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 20px;
-    box-shadow: 0 30px 80px rgba(0,0,0,.35);
-    padding: 24px;
+  body.theme-light .chip:hover {
+    background: #f9fafb !important;
   }
   
-  .edit-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
+  body.theme-light .chip.active {
+    background: #3b82f6 !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
   }
   
-  .edit-modal-header h3 {
-    margin: 0;
-    font-size: 18px;
+  body.theme-light .class-card {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
   }
   
-  .edit-modal-close {
-    border: none;
-    background: transparent;
-    color: var(--text);
-    font-size: 20px;
-    cursor: pointer;
+  body.theme-light .class-card::after {
+    background: linear-gradient(90deg,transparent,#e5e7eb 50%,transparent) !important;
   }
   
-  .edit-modal-content label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
+  body.theme-light .class-card:hover {
+    border-color: #d1d5db !important;
   }
   
-  .edit-modal-content input,
-  .edit-modal-content textarea {
-    width: 100%;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.04);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-bottom: 14px;
-    font-family: inherit;
-    font-size: 13px;
+  body.theme-light .class-code {
+    color: #6b7280 !important;
   }
   
-  .edit-modal-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .add-modal,
-  .scan-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,.55);
-    padding: 20px;
-  }
-
-  .add-modal.active,
-  .scan-modal.active {
-    display: flex;
-  }
-
-  .modal-panel {
-    width: min(100%, 520px);
-    background: rgba(18,20,34,.95);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 20px;
-    box-shadow: 0 30px 80px rgba(0,0,0,.35);
-    padding: 24px;
-  }
-
-  .modal-panel h3 {
-    margin: 0 0 4px 0;
-    font-size: 18px;
-  }
-
-  .modal-panel p {
-    margin: 0 0 16px 0;
-    color: var(--muted);
-    font-size: 13px;
-  }
-
-  .modal-field {
-    margin-bottom: 14px;
-  }
-
-  .modal-field label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-  }
-
-  .modal-field input,
-  .modal-field textarea,
-  .modal-field select,
-  .custom-select {
-    width: 100%;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    color: var(--text);
-    border-radius: 14px;
-    padding: 12px 14px;
-    font-family: inherit;
-    font-size: 13px;
-    transition: border-color .2s ease, background .2s ease, color .2s ease;
+  body.theme-light .class-room {
+    color: #000000 !important;
   }
   
-  .modal-field select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 10px 6px;
-    padding-right: 40px;
+  body.theme-light .class-meta-row {
+    color: #6b7280 !important;
   }
-
-  .modal-field select:focus,
-  .modal-field input:focus,
-  .modal-field textarea:focus,
-  .custom-select:focus {
-    outline: none;
-    border-color: rgba(139,92,255,.9);
-    background: rgba(255,255,255,.08);
+  
+  body.theme-light .class-meta-row strong {
+    color: #000000 !important;
   }
-
-  .custom-select {
-    position: relative;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 52px;
-    padding-right: 40px;
+  
+  body.theme-light .meta-icon {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
   }
-
-  .custom-select::after {
-    content: '';
-    position: absolute;
-    right: 16px;
-    width: 10px;
-    height: 6px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='rgba(255,255,255,0.8)' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-size: 10px 6px;
-    pointer-events: none;
+  
+  body.theme-light .view-link {
+    color: #3b82f6 !important;
   }
-
-  .custom-select-trigger {
-    width: 100%;
-    color: var(--text);
-  }
-
-  .custom-options {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    margin-top: 8px;
-    border-radius: 18px;
-    background: rgba(14,16,30,.96);
-    border: 1px solid rgba(255,255,255,.12);
-    box-shadow: 0 20px 60px rgba(0,0,0,.35);
-    max-height: 260px;
-    overflow-y: auto;
-    z-index: 10;
-  }
-
-  .custom-select.open .custom-options {
-    display: block;
-  }
-
-  .custom-option {
-    padding: 12px 14px;
-    cursor: pointer;
-    color: rgba(255,255,255,.85);
-    transition: background .2s ease, color .2s ease;
-  }
-
-  .custom-option:hover,
-  .custom-option.active {
-    background: rgba(139,92,255,.18);
-    color: #fff;
-  }
-
-  .custom-options::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .custom-options::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,.12);
-    border-radius: 999px;
-  }
-
-  .custom-options::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .camera-preview {
-    position: relative;
-    width: 100%;
-    min-height: 180px;
-    border-radius: 14px;
-    overflow: hidden;
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.12);
-  }
-
-  .camera-preview video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    min-height: 180px;
-    background: #0f111f;
-  }
-
-  .camera-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 16px;
-    color: var(--muted);
-    font-size: 13px;
-    background: rgba(0,0,0,.32);
-    pointer-events: none;
-  }
-
-  .modal-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+  
+  body.theme-light .view-link:hover {
+    color: #2563eb !important;
   }
 </style>
 
-<div id="editClassModal" class="edit-modal" onclick="closeEditClassModal(event)">
-  <div class="edit-modal-content" onclick="event.stopPropagation();">
-    <div class="edit-modal-header">
-      <div>
-        <h3>Edit Class</h3>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Update class details without leaving the page.</div>
-      </div>
-      <button type="button" class="edit-modal-close" onclick="closeEditClassModal(event)">✕</button>
-    </div>
-    <form id="editClassForm" method="POST" action="">
-      @csrf
-      @method('PUT')
-      <input type="hidden" name="schedule_id" id="editClassScheduleId" value="">
-      <label for="editClassName">Class Name</label>
-      <input id="editClassName" type="text" name="name" required>
-      <label for="editClassCode">Class Code</label>
-      <input id="editClassCode" type="text" name="code" required>
-      <label for="editClassDescription">Description</label>
-      <textarea id="editClassDescription" name="description" rows="3"></textarea>
-      <label for="editClassDaysDropdown">Days</label>
-      <div class="custom-select" id="editClassDaysDropdown" tabindex="0" onclick="toggleDaysDropdown(event)">
-        <span class="custom-select-trigger" id="editClassDaysTrigger">Select days</span>
-        <div class="custom-options" id="editClassDaysOptions">
-          @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $day)
-            <div class="custom-option" data-value="{{ $day }}" onclick="toggleDayOption(event, this)">{{ $day }}</div>
-          @endforeach
-        </div>
-      </div>
-      <div id="editClassDaysHiddenInputs"></div>
-      <label for="editClassStart">Start Time</label>
-      <input id="editClassStart" type="time" name="start_time" required>
-      <label for="editClassEnd">End Time</label>
-      <input id="editClassEnd" type="time" name="end_time" required>
-      <label for="editClassRoom">Room</label>
-      <input id="editClassRoom" type="text" name="room" required>
-      <div class="edit-modal-actions">
-        <button type="button" class="btn" onclick="closeEditClassModal(event)">Cancel</button>
-        <button type="submit" class="btn btn-p">Save Changes</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div id="addStudentModal" class="add-modal" onclick="closeAddStudentModal(event)">
-  <div class="modal-panel" onclick="event.stopPropagation();">
-    <div class="edit-modal-header">
-      <div>
-        <h3>Add Student</h3>
-        <p>Add a student to this class without leaving the page.</p>
-      </div>
-      <button type="button" class="edit-modal-close" onclick="closeAddStudentModal(event)">✕</button>
-    </div>
-    <form id="addStudentForm" method="POST" action="{{ route('professor.add-student') }}">
-      @csrf
-      <input type="hidden" name="class_id" id="addStudentClassId" value="">
-      <div class="modal-field">
-        <label for="addStudentClassName">Class</label>
-        <input id="addStudentClassName" type="text" readonly>
-      </div>
-      <div class="modal-field">
-        <label for="addStudentDropdown">Student</label>
-        <div class="custom-select" id="addStudentDropdown" tabindex="0" onclick="toggleAddStudentDropdown(event)">
-          <span class="custom-select-trigger" id="addStudentDropdownTrigger">Select a student</span>
-          <div class="custom-options" id="addStudentDropdownOptions">
-            @foreach($availableStudents as $student)
-              <div class="custom-option" data-id="{{ $student->id }}" onclick="selectAddStudentOption(event, this)">{{ $student->name }} — {{ $student->email }}</div>
-            @endforeach
-          </div>
-        </div>
-        <input type="hidden" name="student_id" id="addStudentStudentId" required>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn" onclick="closeAddStudentModal(event)">Cancel</button>
-        <button type="submit" class="btn btn-p">Add Student</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div id="scanQRModal" class="scan-modal" onclick="closeScanQRModal(event)">
-  <div class="modal-panel" onclick="event.stopPropagation();">
-    <div class="edit-modal-header">
-      <div>
-        <h3>Scan QR</h3>
-        <p>Record attendance for this class inside the popup.</p>
-      </div>
-      <button type="button" class="edit-modal-close" onclick="closeScanQRModal(event)">✕</button>
-    </div>
-    <form id="scanQRForm" method="POST" action="{{ route('professor.attendance.store') }}">
-      @csrf
-      <input type="hidden" name="class_id" id="scanQRClassId" value="">
-      <div class="modal-field">
-        <label for="scanQRClassName">Class</label>
-        <input id="scanQRClassName" type="text" readonly>
-      </div>
-      <div class="modal-field">
-        <label for="scanQRStudentName">Student</label>
-        <input id="scanQRStudentName" type="text" readonly placeholder="Scan a student QR code to record attendance">
-        <input type="hidden" name="student_id" id="scanQRStudentId" value="">
-        <input type="hidden" name="qr_code" id="scanQRCode" value="">
-      </div>
-      <div class="modal-field">
-        <label>Camera</label>
-        <div class="camera-preview">
-          <video id="scanQRVideo" autoplay playsinline muted></video>
-          <div id="scanQRCameraFallback" class="camera-fallback">Point your device camera at a QR code to preview it here.</div>
-        </div>
-        <div id="scanQRStatus" class="scan-status" style="margin-top:10px;color:var(--muted);font-size:12px;">
-          Scanner is ready.
-        </div>
-      </div>
-      <div class="modal-field">
-        <label for="scanQRRawData">QR Data</label>
-        <textarea id="scanQRRawData" readonly rows="3" style="width:100%;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;background:rgba(255,255,255,.04);color:var(--text);font-family:inherit;font-size:13px;resize:none;">No QR data detected yet.</textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn" onclick="closeScanQRModal(event)">Cancel</button>
-        <button type="submit" class="btn btn-p">Record Attendance</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-  var professorClasses = @json($classes->load('students'));
+  document.addEventListener('DOMContentLoaded', function () {
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalContent = document.getElementById('modalContent');
+    const modalClose = modalBackdrop.querySelector('.modal-close');
 
-  function openEditClassModal(element) {
-    var modal = document.getElementById('editClassModal');
-    var form = document.getElementById('editClassForm');
-    var classId = element.dataset.classId;
-    var name = element.dataset.className || '';
-    var code = element.dataset.classCode || '';
-    var description = element.dataset.classDescription || '';
-    var scheduleId = element.dataset.scheduleId || '';
-    var days = element.dataset.scheduleDays || '';
-    var startTime = element.dataset.scheduleStart || '';
-    var endTime = element.dataset.scheduleEnd || '';
-    var room = element.dataset.scheduleRoom || '';
-
-    if (startTime.length === 8) {
-      startTime = startTime.slice(0, 5);
-    }
-    if (endTime.length === 8) {
-      endTime = endTime.slice(0, 5);
-    }
-
-    form.action = "{{ url('/') }}" + "/professor/classes/" + classId;
-    document.getElementById('editClassScheduleId').value = scheduleId;
-    document.getElementById('editClassName').value = name;
-    document.getElementById('editClassCode').value = code;
-    document.getElementById('editClassDescription').value = description;
-    populateDaysSelection(days);
-    document.getElementById('editClassStart').value = startTime;
-    document.getElementById('editClassEnd').value = endTime;
-    document.getElementById('editClassRoom').value = room;
-
-    modal.classList.add('active');
-  }
-
-  function closeEditClassModal(event) {
-    if (event) event.preventDefault();
-    var modal = document.getElementById('editClassModal');
-    modal.classList.remove('active');
-  }
-
-  function openAddStudentModal(element) {
-    var modal = document.getElementById('addStudentModal');
-    document.getElementById('addStudentClassId').value = element.dataset.classId || '';
-    document.getElementById('addStudentClassName').value = element.dataset.className || '';
-    var enrolledIds = element.dataset.enrolledIds ? JSON.parse(element.dataset.enrolledIds) : [];
-    
-    var allOptions = document.querySelectorAll('#addStudentDropdownOptions .custom-option');
-    allOptions.forEach(function(option) {
-      if (enrolledIds.includes(parseInt(option.dataset.id))) {
-        option.style.display = 'none';
-      } else {
-        option.style.display = 'block';
+    const modalActions = {
+      'add-student': function (data) {
+        return `
+          <h2>Add Students to ${data.className || 'Class'}</h2>
+          <div class="modal-meta">
+            <div><strong>Class Code:</strong> ${data.classCode || 'N/A'}</div>
+            <div><strong>Room:</strong> ${data.classRoom || 'TBA'}</div>
+            <div><strong>Schedule:</strong> ${data.classDays || 'N/A'} ${data.classStartTime || ''} ${data.classEndTime || ''}</div>
+          </div>
+          <div class="modal-body">
+            <div class="modal-field">
+              <label>Search existing students</label>
+              <input type="search" id="studentSearchInput" placeholder="Search by name or email" autocomplete="off" />
+            </div>
+            <div class="student-search-results" id="studentSearchResults"></div>
+            <div class="modal-field">
+              <label>Selected students</label>
+              <input type="text" id="selectedStudentDisplay" value="" readonly placeholder="Pick students from the list" />
+            </div>
+            <div class="modal-note">Click students to toggle them on or off. Add all selected students at once.</div>
+            <div class="modal-actions">
+              <button type="button" id="studentAddSubmit" class="btn btn-add" disabled>Add Students</button>
+              <button type="button" class="btn" onclick="document.getElementById('modalBackdrop').style.display='none';document.body.style.overflow=''">Cancel</button>
+            </div>
+          </div>
+        `;
+      },
+      'edit-class': function (data) {
+        // days: data.classDays expected as comma-separated string
+        const days = (data.classDays || '').split(',').map(d => d.trim()).filter(Boolean);
+        const startValue = (data.classStartTime || '').split(':').slice(0, 2).join(':');
+        const endValue = (data.classEndTime || '').split(':').slice(0, 2).join(':');
+        return `
+          <h2>Edit ${data.className || 'Class'}</h2>
+          <div class="modal-meta">
+            <div><strong>Class Code:</strong> ${data.classCode || 'N/A'}</div>
+            <div><strong>Schedule ID:</strong> ${data.classScheduleId || 'N/A'}</div>
+          </div>
+          <div class="modal-body">
+            <div class="modal-field">
+              <label>Class Name</label>
+              <input type="text" id="editNameInput" value="${data.className || ''}" />
+            </div>
+            <div class="modal-field">
+              <label>Class Code</label>
+              <input type="text" id="editCodeInput" value="${data.classCode || ''}" />
+            </div>
+            <div class="modal-field">
+              <label>Room</label>
+              <input type="text" id="editRoomInput" value="${data.classRoom || ''}" />
+            </div>
+            <div class="modal-field">
+              <label>Days</label>
+              <div id="editDaysGroup" style="display:flex;gap:8px;flex-wrap:wrap;">
+                ${['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(d => `<label style=\"display:inline-flex;align-items:center;gap:6px;\"><input type=\"checkbox\" class=\"edit-day-checkbox\" value=\"${d}\" ${days.includes(d) ? 'checked' : ''}/> ${d}</label>`).join('')}
+              </div>
+            </div>
+            <div class="modal-field">
+              <label>Start Time</label>
+              <input type="time" id="editStartTime" value="${startValue}" />
+            </div>
+            <div class="modal-field">
+              <label>End Time</label>
+              <input type="time" id="editEndTime" value="${endValue}" />
+            </div>
+            <div class="modal-note">Edit schedule days and times for this class.</div>
+            <div id="editClassErrors" class="modal-errors" style="color:#ffdddd;margin-bottom:8px;"></div>
+            <div id="editClassSuccess" class="modal-success" style="color:#b9ffb7;margin-bottom:8px;"></div>
+            <div class="modal-actions">
+              <button type="button" id="editClassSave" class="btn btn-edit">Save Changes</button>
+              <button type="button" class="btn" onclick="document.getElementById('modalBackdrop').style.display='none';document.body.style.overflow=''">Cancel</button>
+            </div>
+          </div>
+        `;
+      },
+      'scan-qr': function (data) {
+        const selectedClassId = data.classId || '';
+        return `
+          <h2>Scan QR for ${data.className || 'Class'}</h2>
+          <div class="scanner-layout">
+            <div class="scanner-box glass" style="flex:1">
+              <div class="section-head" style="margin-bottom:12px">
+                <h3>QR Scanner</h3>
+                <div class="scan-status" id="scanStatus">Ready to scan</div>
+              </div>
+              <div class="scanner-tabs">
+                <button type="button" class="scanner-tab active" data-mode="camera">Camera</button>
+                <button type="button" class="scanner-tab" data-mode="hardware">Hardware</button>
+              </div>
+              <div class="cam-viewport">
+                <div class="cam-inner"></div>
+              </div>
+            </div>
+            <div>
+              <form id="scanAttendanceForm" method="POST" action="/professor/attendance" class="att-recording">
+                <input type="hidden" name="_token" value="${csrfToken}" />
+                <input type="hidden" id="scanClassInput" name="class_id" value="${selectedClassId}" />
+                <input type="hidden" id="scanStudentInput" name="student_id" value="" />
+                <div class="section-head" style="margin-bottom:12px"><h3>Attendance Recording</h3></div>
+                <div class="att-field">
+                  <label>Class</label>
+                  <div class="att-display" id="scanClassDisplay">${data.className || 'Selected Class'}</div>
+                </div>
+                <div class="att-field">
+                  <label>Student Scanned</label>
+                  <div class="att-display" id="scanStudentDisplay">Waiting for scan...</div>
+                </div>
+                <input type="hidden" id="scanQrInput" name="qr_code" />
+                <div class="att-note" style="margin-top:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.08);font-size:14px;color:var(--text2);">
+                  Attendance will be recorded automatically for this class when a valid student QR is scanned.
+                </div>
+              </form>
+              <div class="recent-scans-box">
+                <div class="section-head" style="margin-bottom:12px"><h3>Recent Scans</h3></div>
+                <div class="no-scans">No scans yet</div>
+              </div>
+            </div>
+          </div>
+        `;
       }
-    });
-    
-    resetAddStudentDropdown();
-    modal.classList.add('active');
-  }
+    };
 
-  function toggleAddStudentDropdown(event) {
-    event.stopPropagation();
-    var dropdown = document.getElementById('addStudentDropdown');
-    dropdown.classList.toggle('open');
-  }
+    const availableStudents = @json($studentPayload);
+    const scanClasses = @json($scanClassesPayload);
+    const csrfToken = '{{ csrf_token() }}';
 
-  function selectAddStudentOption(event, option) {
-    event.stopPropagation();
-    var trigger = document.getElementById('addStudentDropdownTrigger');
-    var studentIdField = document.getElementById('addStudentStudentId');
-    var dropdown = document.getElementById('addStudentDropdown');
-    trigger.textContent = option.textContent;
-    studentIdField.value = option.dataset.id || '';
-    dropdown.classList.remove('open');
-  }
-
-  function resetAddStudentDropdown() {
-    var dropdown = document.getElementById('addStudentDropdown');
-    var trigger = document.getElementById('addStudentDropdownTrigger');
-    var studentIdField = document.getElementById('addStudentStudentId');
-    trigger.textContent = 'Select a student';
-    studentIdField.value = '';
-    dropdown.classList.remove('open');
-  }
-
-  function toggleDaysDropdown(event) {
-    event.stopPropagation();
-    var dropdown = document.getElementById('editClassDaysDropdown');
-    dropdown.classList.toggle('open');
-  }
-
-  function toggleDayOption(event, option) {
-    event.stopPropagation();
-    option.classList.toggle('active');
-    updateDaysSelection();
-  }
-
-  function updateDaysSelection() {
-    var options = document.querySelectorAll('#editClassDaysOptions .custom-option');
-    var selected = [];
-    options.forEach(function(option) {
-      if (option.classList.contains('active')) {
-        selected.push(option.dataset.value);
-      }
-    });
-
-    var trigger = document.getElementById('editClassDaysTrigger');
-    var container = document.getElementById('editClassDaysHiddenInputs');
-    container.innerHTML = '';
-
-    if (selected.length === 0) {
-      trigger.textContent = 'Select days';
-    } else {
-      trigger.textContent = selected.join(', ');
-      selected.forEach(function(day) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'days[]';
-        input.value = day;
-        container.appendChild(input);
-      });
-    }
-  }
-
-  function populateDaysSelection(daysString) {
-    var values = (daysString || '').split(',').map(function(day) { return day.trim(); }).filter(Boolean);
-    var options = document.querySelectorAll('#editClassDaysOptions .custom-option');
-    options.forEach(function(option) {
-      if (values.includes(option.dataset.value)) {
-        option.classList.add('active');
-      } else {
-        option.classList.remove('active');
-      }
-    });
-    updateDaysSelection();
-  }
-
-  function resetDaysSelection() {
-    var options = document.querySelectorAll('#editClassDaysOptions .custom-option');
-    options.forEach(function(option) {
-      option.classList.remove('active');
-    });
-    updateDaysSelection();
-  }
-
-  function closeAddStudentModal(event) {
-    if (event) event.preventDefault();
-    var modal = document.getElementById('addStudentModal');
-    modal.classList.remove('active');
-  }
-
-  var scanQRStream = null;
-  var scanQRFrame = null;
-  var lastQRCodeData = '';
-
-  async function startScanCamera() {
-    var video = document.getElementById('scanQRVideo');
-    var fallback = document.getElementById('scanQRCameraFallback');
-    var status = document.getElementById('scanQRStatus');
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      fallback.textContent = 'Camera access is not supported by this browser.';
-      fallback.style.display = 'flex';
-      if (status) status.textContent = 'No camera support detected.';
-      return;
+    function renderStudentOption(student) {
+      return `
+        <button type="button" class="student-option" data-student-id="${student.id}" data-student-name="${student.name}" data-student-email="${student.email}">
+          <span>${student.name}</span>
+          <small>${student.email}</small>
+        </button>
+      `;
     }
 
-    try {
-      if (status) status.textContent = 'Requesting camera access...';
-      scanQRStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
-        audio: false
-      });
-      video.srcObject = scanQRStream;
-      video.muted = true;
-      await video.play();
-      fallback.style.display = 'none';
-      if (status) status.textContent = 'Camera active. Scanning for QR code...';
-      initQRDetection(video);
-    } catch (error) {
-      fallback.textContent = 'Unable to access the camera. Please allow camera access or try a different device.';
-      fallback.style.display = 'flex';
-      if (status) status.textContent = 'Camera access failed.';
-      console.warn('Scan QR camera failed', error);
-    }
-  }
-
-  function stopScanCamera() {
-    var video = document.getElementById('scanQRVideo');
-    var fallback = document.getElementById('scanQRCameraFallback');
-
-    if (scanQRStream) {
-      scanQRStream.getTracks().forEach(function(track) {
-        track.stop();
-      });
-      scanQRStream = null;
-    }
-
-    if (scanQRFrame) {
-      cancelAnimationFrame(scanQRFrame);
-      scanQRFrame = null;
-    }
-
-    if (video) {
-      video.srcObject = null;
-    }
-
-    if (fallback) {
-      fallback.textContent = 'Point your device camera at a QR code to preview it here.';
-      fallback.style.display = 'flex';
-    }
-  }
-
-  function initQRDetection(video) {
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-    var fallback = document.getElementById('scanQRCameraFallback');
-    var status = document.getElementById('scanQRStatus');
-
-    function detect() {
-      if (!scanQRStream) {
-        if (status) status.textContent = 'Camera stopped.';
+    function attachStudentSearchHandlers(currentStudentIds, classId) {
+      currentStudentIds = (currentStudentIds || []).map(String);
+      const searchInput = modalContent.querySelector('#studentSearchInput');
+      const resultsContainer = modalContent.querySelector('#studentSearchResults');
+      const selectedDisplay = modalContent.querySelector('#selectedStudentDisplay');
+      const addButton = modalContent.querySelector('#studentAddSubmit');
+      if (!searchInput || !resultsContainer || !selectedDisplay || !addButton) {
         return;
       }
 
-      if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0 && video.videoHeight > 0) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const selectedStudents = new Map();
 
-        if (typeof jsQR !== 'undefined') {
-          try {
-            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            var code = jsQR(imageData.data, canvas.width, canvas.height);
-            if (code && code.data && code.data !== lastQRCodeData) {
-              lastQRCodeData = code.data;
-              if (status) status.textContent = 'QR code detected. Decoding...';
-              onQRCodeDetected(code.data);
-            }
-          } catch (err) {
-            console.warn('QR detection error', err);
-            if (status) status.textContent = 'QR detection error. See console for details.';
-          }
+      function updateSelectedDisplay() {
+        if (selectedStudents.size === 0) {
+          selectedDisplay.value = '';
+          addButton.disabled = true;
         } else {
-          fallback.textContent = 'QR decoder is unavailable. Please reload the page.';
-          fallback.style.display = 'flex';
-          if (status) status.textContent = 'Decoder missing.';
+          const names = Array.from(selectedStudents.values()).map((student) => student.name);
+          selectedDisplay.value = `${names.join(', ')}`;
+          addButton.disabled = false;
         }
       }
 
-      scanQRFrame = requestAnimationFrame(detect);
+      function renderResults(query) {
+        const normalized = query.trim().toLowerCase();
+        const filtered = availableStudents.filter(function (student) {
+          const isEnrolled = currentStudentIds.includes(String(student.id));
+          return !isEnrolled && (student.name.toLowerCase().includes(normalized) || student.email.toLowerCase().includes(normalized));
+        });
+
+        resultsContainer.innerHTML = filtered.map(renderStudentOption).join('') || '<div style="color:rgba(255,255,255,.65);font-size:13px;padding:10px;">No students matched.</div>';
+
+        resultsContainer.querySelectorAll('.student-option').forEach(function (button) {
+          const studentId = button.dataset.studentId;
+          if (selectedStudents.has(studentId)) {
+            button.classList.add('selected');
+          }
+
+          button.addEventListener('click', function () {
+            const student = {
+              id: this.dataset.studentId,
+              name: this.dataset.studentName,
+              email: this.dataset.studentEmail,
+            };
+            if (selectedStudents.has(student.id)) {
+              selectedStudents.delete(student.id);
+              this.classList.remove('selected');
+            } else {
+              selectedStudents.set(student.id, student);
+              this.classList.add('selected');
+            }
+            updateSelectedDisplay();
+          });
+        });
+      }
+
+      searchInput.addEventListener('input', function () {
+        renderResults(this.value);
+      });
+
+      addButton.addEventListener('click', function () {
+        if (selectedStudents.size === 0) {
+          alert('Please choose at least one student from the list.');
+          return;
+        }
+
+        const selected = Array.from(selectedStudents.values());
+        const payload = {
+          class_id: classId,
+          student_ids: selected.map(s => s.id)
+        };
+
+        addButton.disabled = true;
+        addButton.textContent = 'Adding...';
+
+        fetch('/professor/add-student', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+          },
+          body: JSON.stringify(payload)
+        }).then(async (res) => {
+          const text = await res.text();
+          if (res.ok) {
+            // reload to reflect changes
+            window.location.reload();
+          } else {
+            alert('Failed to add students.');
+            addButton.disabled = false;
+            addButton.textContent = 'Add Students';
+          }
+        }).catch((err) => {
+          console.error(err);
+          alert('An error occurred while adding students.');
+          addButton.disabled = false;
+          addButton.textContent = 'Add Students';
+        });
+      });
+
+      updateSelectedDisplay();
+      renderResults('');
     }
 
-    detect();
-  }
+    let scanStream = null;
+    let scanFrameId = null;
 
-  function openScanQRModal(element) {
-    var classId = element.dataset.classId || '';
-    var className = element.dataset.className || '';
-    var scheduleDays = element.dataset.scheduleDays || '';
-    var scheduleStart = element.dataset.scheduleStart || '';
-    var scheduleEnd = element.dataset.scheduleEnd || '';
-    var modal = document.getElementById('scanQRModal');
-    var classField = document.getElementById('scanQRClassName');
-    var classIdField = document.getElementById('scanQRClassId');
-    var studentNameField = document.getElementById('scanQRStudentName');
-    var studentIdField = document.getElementById('scanQRStudentId');
-    var qrInput = document.getElementById('scanQRCode');
-    var fallback = document.getElementById('scanQRCameraFallback');
+    function attachScanQrHandlers(classData) {
+      const classInput = modalContent.querySelector('#scanClassInput');
+      const classDisplay = modalContent.querySelector('#scanClassDisplay');
+      const studentInput = modalContent.querySelector('#scanStudentInput');
+      const studentDisplay = modalContent.querySelector('#scanStudentDisplay');
+      const qrInput = modalContent.querySelector('#scanQrInput');
+      const scannerTabs = modalContent.querySelectorAll('.scanner-tab');
+      const camViewport = modalContent.querySelector('.cam-inner');
+      const scanStatus = modalContent.querySelector('#scanStatus');
+      if (!classInput || !classDisplay || !studentInput || !studentDisplay || !qrInput || !camViewport || !scanStatus) {
+        return;
+      }
 
-    modal.dataset.scheduleDays = scheduleDays;
-    modal.dataset.scheduleStart = scheduleStart;
-    modal.dataset.scheduleEnd = scheduleEnd;
+      const attendanceForm = modalContent.querySelector('#scanAttendanceForm');
+      const recentScansBox = modalContent.querySelector('.recent-scans-box');
+      const noScansNotice = modalContent.querySelector('.no-scans');
+      let pendingSubmit = false;
+      let inputTimer = null;
 
-    classField.value = className;
-    classIdField.value = classId;
-    studentNameField.value = '';
-    studentNameField.placeholder = 'Scan a student QR code to record attendance';
-    studentIdField.value = '';
-    qrInput.value = '';
-    fallback.textContent = 'Point your device camera at a QR code to preview it here.';
-    fallback.style.display = 'flex';
+      const selectedClassId = String(classData.classId || '');
+      classInput.value = selectedClassId;
+      classDisplay.textContent = classData.className || 'Selected Class';
+      studentDisplay.textContent = 'Waiting for scan...';
+      studentInput.value = '';
 
-    modal.classList.add('active');
-    startScanCamera();
-  }
+      function setScanStatus(text) {
+        scanStatus.textContent = text;
+      }
 
-  function closeScanQRModal(event) {
-    if (event) event.preventDefault();
-    var modal = document.getElementById('scanQRModal');
-    var rawDataField = document.getElementById('scanQRRawData');
-    var status = document.getElementById('scanQRStatus');
-    var fallback = document.getElementById('scanQRCameraFallback');
+      function addRecentScanEntry(message, type = 'success') {
+        if (!recentScansBox) return;
+        if (noScansNotice) {
+          noScansNotice.style.display = 'none';
+        }
+        const entry = document.createElement('div');
+        entry.className = 'recent-scan-entry';
+        entry.style.padding = '10px 12px';
+        entry.style.margin = '8px 0';
+        entry.style.borderRadius = '12px';
+        entry.style.background = type === 'success' ? 'rgba(88, 214, 141, 0.12)' : 'rgba(255, 133, 133, 0.12)';
+        entry.style.color = type === 'success' ? 'var(--green)' : 'var(--red)';
+        entry.textContent = `${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })} — ${message}`;
+        recentScansBox.appendChild(entry);
+      }
 
-    modal.classList.remove('active');
-    stopScanCamera();
-    lastQRCodeData = '';
-    if (rawDataField) rawDataField.value = 'No QR data detected yet.';
-    if (status) status.textContent = 'Scanner is ready.';
-    if (fallback) {
-      fallback.textContent = 'Point your device camera at a QR code to preview it here.';
-      fallback.style.display = 'flex';
+      function lookupStudentName(studentId, decodedName) {
+        const classe = scanClasses.find(cls => String(cls.id) === selectedClassId);
+        const student = classe?.students?.find(st => String(st.id) === String(studentId));
+        return student?.name || decodedName || `Student #${studentId}`;
+      }
+
+      function parseQrPayload(qrCode) {
+        let studentId = '';
+        let studentName = '';
+        try {
+          const decoded = JSON.parse(qrCode);
+          if (decoded && decoded.type === 'student_attendance' && decoded.student_id) {
+            studentId = String(decoded.student_id);
+            studentName = lookupStudentName(decoded.student_id, decoded.student_name || '');
+          }
+        } catch (e) {
+          // ignore invalid JSON
+        }
+        return { studentId, studentName };
+      }
+
+      function submitAttendance() {
+        const classId = classInput.value;
+        const studentId = studentInput.value;
+        const qrCode = qrInput.value.trim();
+
+        if (!qrCode) {
+          return;
+        }
+        if (pendingSubmit) {
+          return;
+        }
+        if (!studentId) {
+          setScanStatus('Waiting for a valid student QR scan...');
+          return;
+        }
+        if (!classId) {
+          setScanStatus('Unable to determine the selected class.');
+          return;
+        }
+
+        pendingSubmit = true;
+        setScanStatus('Recording attendance...');
+
+        fetch('/professor/attendance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            class_id: classId,
+            student_id: studentId,
+            qr_code: qrCode
+          })
+        }).then(async (res) => {
+          const data = await res.json().catch(() => ({}));
+          pendingSubmit = false;
+          if (res.ok) {
+            setScanStatus('Attendance recorded successfully.');
+            addRecentScanEntry(data.message || `Recorded ${studentDisplay.textContent} for ${classDisplay.textContent}`);
+            return;
+          }
+          const errorMessage = data.error || data.message || 'Failed to record attendance.';
+          setScanStatus(errorMessage);
+          addRecentScanEntry(errorMessage, 'error');
+        }).catch((err) => {
+          console.error(err);
+          pendingSubmit = false;
+          const errorMessage = 'Network error while recording attendance.';
+          setScanStatus(errorMessage);
+          addRecentScanEntry(errorMessage, 'error');
+        });
+      }
+
+      function handleQrInput(value) {
+        const { studentId, studentName } = parseQrPayload(value);
+        if (studentId) {
+          studentInput.value = studentId;
+          studentDisplay.textContent = studentName || `Student #${studentId}`;
+        } else {
+          studentInput.value = '';
+          studentDisplay.textContent = 'Scanning student QR...';
+        }
+      }
+
+      if (attendanceForm) {
+        attendanceForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          submitAttendance();
+        });
+      }
+
+      qrInput.addEventListener('input', function () {
+        clearTimeout(inputTimer);
+        handleQrInput(this.value.trim());
+        inputTimer = setTimeout(() => submitAttendance(), 250);
+      });
+
+      function stopCamera() {
+        if (scanStream) {
+          scanStream.getTracks().forEach(track => track.stop());
+          scanStream = null;
+        }
+        if (scanFrameId) {
+          cancelAnimationFrame(scanFrameId);
+          scanFrameId = null;
+        }
+        camViewport.innerHTML = '';
+        setScanStatus('Ready to scan');
+      }
+
+      function loadJsQr() {
+        return new Promise((resolve, reject) => {
+          if (window.jsQR) {
+            return resolve(window.jsQR);
+          }
+          const existing = document.querySelector('script[data-jsqr]');
+          if (existing) {
+            existing.addEventListener('load', () => resolve(window.jsQR));
+            existing.addEventListener('error', reject);
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js';
+          script.dataset.jsqr = 'true';
+          script.onload = () => resolve(window.jsQR);
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      function parseScheduleDays(days) {
+        if (!days) return [];
+        return days.split(/[,;\/\s]+/).map(d => d.trim()).filter(Boolean).map(d => {
+          const normalized = d.toLowerCase();
+          return {
+            mon: 'Monday', monday: 'Monday', tue: 'Tuesday', tues: 'Tuesday', tuesday: 'Tuesday',
+            wed: 'Wednesday', wednesday: 'Wednesday', thu: 'Thursday', thur: 'Thursday', thurs: 'Thursday', thursday: 'Thursday',
+            fri: 'Friday', friday: 'Friday', sat: 'Saturday', saturday: 'Saturday', sun: 'Sunday', sunday: 'Sunday'
+          }[normalized];
+        }).filter(Boolean);
+      }
+
+      function scheduleMatchesDay(schedule, day) {
+        return parseScheduleDays(schedule.days).some(d => d.toLowerCase() === day.toLowerCase());
+      }
+
+      function scheduleMatchesNow(schedule) {
+        if (!schedule.start_time || !schedule.end_time) {
+          return false;
+        }
+        const now = new Date();
+        const today = now.toISOString().slice(0, 10);
+        const start = new Date(`${today}T${schedule.start_time}`);
+        const end = new Date(`${today}T${schedule.end_time}`);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+          return false;
+        }
+        return now >= start && now <= end;
+      }
+
+      function findBestClassForStudent(studentId) {
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        const candidates = scanClasses.filter(cls => cls.students.some(student => String(student.id) === String(studentId)));
+        if (!candidates.length) return null;
+        const currentMatches = candidates.filter(cls => cls.schedules.some(schedule => scheduleMatchesDay(schedule, today) && scheduleMatchesNow(schedule)));
+        if (currentMatches.length === 1) return currentMatches[0].id;
+        if (currentMatches.length > 1) return currentMatches[0].id;
+        const todayMatches = candidates.filter(cls => cls.schedules.some(schedule => scheduleMatchesDay(schedule, today)));
+        if (todayMatches.length === 1) return todayMatches[0].id;
+        return candidates[0].id;
+      }
+
+      function initQrDetection(video) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        let lastDetectedValue = null;
+
+        function detect() {
+          if (!scanStream) return;
+          if (video.videoWidth === 0 || video.videoHeight === 0) {
+            scanFrameId = requestAnimationFrame(detect);
+            return;
+          }
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          try {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = window.jsQR(imageData.data, canvas.width, canvas.height);
+            if (code && code.data && code.data !== lastDetectedValue) {
+              lastDetectedValue = code.data;
+              qrInput.value = code.data;
+              setScanStatus('QR code detected');
+              handleQrInput(code.data);
+              setTimeout(submitAttendance, 150);
+            }
+          } catch (e) {
+            console.error('QR detection error', e);
+          }
+          scanFrameId = requestAnimationFrame(detect);
+        }
+
+        detect();
+      }
+
+      function startCamera() {
+        loadJsQr().then(() => navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }))
+          .then(stream => {
+            scanStream = stream;
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.autoplay = true;
+            video.playsInline = true;
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.borderRadius = '14px';
+            camViewport.innerHTML = '';
+            camViewport.appendChild(video);
+            setScanStatus('Scanning...');
+            initQrDetection(video);
+          })
+          .catch(err => {
+            setScanStatus('Camera access denied');
+            console.error(err);
+          });
+      }
+
+      scannerTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          scannerTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          if (tab.dataset.mode === 'hardware') {
+            stopCamera();
+            qrInput.focus();
+            setScanStatus('Hardware scanner mode');
+          } else {
+            qrInput.placeholder = 'Scan or paste student QR code...';
+            setScanStatus('Ready to scan');
+          }
+        });
+      });
+
+      // Start camera automatically when scan modal opens
+      startCamera();
     }
-  }
 
-  function getManilaNow() {
-    var parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Manila',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    }).formatToParts(new Date());
+    function attachEditClassHandlers(classData) {
+      const saveBtn = modalContent.querySelector('#editClassSave');
+      const errorContainer = modalContent.querySelector('#editClassErrors');
+      if (!saveBtn) return;
 
-    var values = {};
-    parts.forEach(function(part) {
-      if (part.type && part.value) {
-        values[part.type] = part.value;
+      function clearErrors() {
+        if (errorContainer) errorContainer.innerHTML = '';
+        modalContent.querySelectorAll('.input-error').forEach(n => n.remove());
+        const successContainer = modalContent.querySelector('#editClassSuccess');
+        if (successContainer) successContainer.textContent = '';
+      }
+
+      function showErrors(errors) {
+        if (!errors) return;
+        if (errorContainer) {
+          const list = Object.values(errors).flat().map(m => `<div>${m}</div>`).join('');
+          errorContainer.innerHTML = list;
+        }
+        Object.keys(errors).forEach(key => {
+          const input = modalContent.querySelector('#edit' + key.charAt(0).toUpperCase() + key.slice(1) + 'Input') || modalContent.querySelector(`#edit${key.charAt(0).toUpperCase() + key.slice(1)}Input`);
+          if (input) {
+            const el = document.createElement('div');
+            el.className = 'input-error';
+            el.style.color = '#ffdddd';
+            el.style.fontSize = '12px';
+            el.textContent = errors[key][0];
+            input.parentNode.insertBefore(el, input.nextSibling);
+          }
+        });
+      }
+
+      function setSuccess(message) {
+        const successContainer = modalContent.querySelector('#editClassSuccess');
+        if (successContainer) {
+          successContainer.textContent = message;
+        }
+      }
+
+      saveBtn.addEventListener('click', function () {
+        clearErrors();
+        setSuccess('');
+        const name = modalContent.querySelector('#editNameInput')?.value?.trim();
+        const code = modalContent.querySelector('#editCodeInput')?.value?.trim();
+        const room = modalContent.querySelector('#editRoomInput')?.value?.trim();
+        const startTime = modalContent.querySelector('#editStartTime')?.value;
+        const endTime = modalContent.querySelector('#editEndTime')?.value;
+        const days = Array.from(modalContent.querySelectorAll('.edit-day-checkbox:checked')).map(n => n.value);
+
+        if (!name || !code) {
+          showErrors({ name: ['Please provide class name.'], code: ['Please provide class code.'] });
+          return;
+        }
+
+        const classId = classData.classId || classData.class_id;
+        if (!classId) {
+          showErrors({ general: ['Invalid class identifier. Please refresh the page and try again.'] });
+          return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        const payload = {
+          name: name,
+          code: code,
+          room: room,
+          description: '',
+          start_time: startTime,
+          end_time: endTime,
+          days: days,
+          _method: 'PUT'
+        };
+
+        fetch(`/professor/classes/${classId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-HTTP-Method-Override': 'PUT'
+          },
+          body: JSON.stringify(payload)
+        }).then(async (res) => {
+          if (res.ok) {
+            setSuccess('Saved successfully. Refreshing...');
+            setTimeout(() => window.location.reload(), 900);
+            return;
+          }
+
+          if (res.status === 422) {
+            const data = await res.json();
+            showErrors(data.errors || data);
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+            return;
+          }
+
+          const txt = await res.text();
+          showErrors({ general: [txt] });
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Changes';
+        }).catch((err) => {
+          console.error(err);
+          showErrors({ general: ['Error saving class.'] });
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Changes';
+        });
+      }, { once: true });
+    }
+
+    function openModal(html) {
+      modalContent.innerHTML = html;
+      modalBackdrop.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      stopScanStream();
+      modalBackdrop.style.display = 'none';
+      modalContent.innerHTML = '';
+      document.body.style.overflow = '';
+    }
+
+    function stopScanStream() {
+      if (scanStream) {
+        scanStream.getTracks().forEach(track => track.stop());
+        scanStream = null;
+      }
+      if (scanFrameId) {
+        cancelAnimationFrame(scanFrameId);
+        scanFrameId = null;
+      }
+      const camInner = modalContent.querySelector('.cam-inner');
+      if (camInner) camInner.innerHTML = '';
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', function (event) {
+      if (event.target === modalBackdrop) {
+        closeModal();
       }
     });
 
-    return new Date(values.year + '-' + values.month + '-' + values.day + 'T' + values.hour + ':' + values.minute + ':' + values.second);
-  }
-
-  function verifyScheduleMatch(days, startTime, endTime) {
-    if (!days || !startTime || !endTime) {
-      return false;
-    }
-
-    var now = getManilaNow();
-    var dayMap = {
-      sunday: 'Sunday',
-      monday: 'Monday',
-      tuesday: 'Tuesday',
-      wednesday: 'Wednesday',
-      thursday: 'Thursday',
-      friday: 'Friday',
-      saturday: 'Saturday'
-    };
-
-    var today = dayMap[now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()];
-    var scheduleDays = days.split(/[,;\s]+/).map(function(day) { return day.trim(); }).filter(Boolean);
-    if (!scheduleDays.some(function(day) { return day.toLowerCase() === today.toLowerCase(); })) {
-      return false;
-    }
-
-    function parseTime(value) {
-      var timeString = (value || '').trim();
-      if (!timeString) {
-        return null;
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && modalBackdrop.style.display === 'flex') {
+        closeModal();
       }
+    });
 
-      var ampmMatch = timeString.match(/\s*(am|pm)$/i);
-      var isPM = false;
-      var isAM = false;
-
-      if (ampmMatch) {
-        isPM = ampmMatch[1].toLowerCase() === 'pm';
-        isAM = ampmMatch[1].toLowerCase() === 'am';
-        timeString = timeString.replace(/\s*(am|pm)$/i, '').trim();
-      }
-
-      var parts = timeString.split(':').map(function(part) { return parseInt(part, 10); });
-      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) {
-        return null;
-      }
-
-      var hour = parts[0];
-      var minute = parts[1];
-
-      if (isAM || isPM) {
-        if (hour === 12) {
-          hour = isAM ? 0 : 12;
-        } else if (isPM) {
-          hour += 12;
+    document.querySelectorAll('button[data-action]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        const action = this.dataset.action;
+        const data = {
+          className: this.dataset.className,
+          classCode: this.dataset.classCode,
+          classRoom: this.dataset.classRoom,
+          classDays: this.dataset.classDays,
+          classStartTime: this.dataset.classStartTime,
+          classEndTime: this.dataset.classEndTime,
+          classScheduleId: this.dataset.classScheduleId,
+          currentStudentIds: this.dataset.currentStudents ? JSON.parse(this.dataset.currentStudents) : [],
+          classId: this.dataset.classId
+        };
+        const renderer = modalActions[action];
+        if (renderer) {
+          openModal(renderer(data));
+          if (action === 'add-student') {
+            attachStudentSearchHandlers(data.currentStudentIds, data.classId);
+          }
+          if (action === 'edit-class') {
+            attachEditClassHandlers(data);
+          }
+          if (action === 'scan-qr') {
+            attachScanQrHandlers(data);
+          }
         }
-      }
-
-      var date = new Date(now);
-      date.setHours(hour, minute, 0, 0);
-      return date;
-    }
-
-    var start = parseTime(startTime);
-    var end = parseTime(endTime);
-    if (!start || !end) {
-      return false;
-    }
-
-    return now >= start && now <= end;
-  }
-
-  function attemptAutoSubmitScanQR() {
-    var qrInput = document.getElementById('scanQRCode');
-    var studentIdField = document.getElementById('scanQRStudentId');
-    var form = document.getElementById('scanQRForm');
-
-    if (!qrInput || !studentIdField || !form) {
-      return;
-    }
-
-    if (qrInput.value.trim() !== '' && studentIdField.value) {
-      stopScanCamera();
-      form.submit();
-    }
-  }
-
-  function onQRCodeDetected(data) {
-    var qrInput = document.getElementById('scanQRCode');
-    var studentNameField = document.getElementById('scanQRStudentName');
-    var studentIdField = document.getElementById('scanQRStudentId');
-    var fallback = document.getElementById('scanQRCameraFallback');
-    var status = document.getElementById('scanQRStatus');
-    var rawDataField = document.getElementById('scanQRRawData');
-    var form = document.getElementById('scanQRForm');
-    var modal = document.getElementById('scanQRModal');
-
-    if (!qrInput || !studentNameField || !studentIdField || !form || !modal || !data) {
-      return;
-    }
-
-    var decoded;
-    try {
-      decoded = JSON.parse(data);
-    } catch (err) {
-      fallback.textContent = 'Scanned QR is not recognized. Please scan a student attendance QR code.';
-      fallback.style.display = 'flex';
-      return;
-    }
-
-    if (!decoded || decoded.type !== 'student_attendance' || !decoded.student_id) {
-      fallback.textContent = 'Scanned QR is not a valid student attendance code.';
-      fallback.style.display = 'flex';
-      if (status) status.textContent = 'Invalid QR format.';
-      return;
-    }
-
-    var scheduleDays = modal.dataset.scheduleDays || '';
-    var scheduleStart = modal.dataset.scheduleStart || '';
-    var scheduleEnd = modal.dataset.scheduleEnd || '';
-
-    if (!verifyScheduleMatch(scheduleDays, scheduleStart, scheduleEnd)) {
-      fallback.textContent = 'This class is not scheduled for the current day/time.';
-      fallback.style.display = 'flex';
-      if (status) status.textContent = 'Schedule mismatch. Scan again when the class is live.';
-      return;
-    }
-
-    qrInput.value = data;
-    if (rawDataField) rawDataField.value = data;
-    studentNameField.value = decoded.student_name || 'Student #' + decoded.student_id;
-    studentIdField.value = decoded.student_id;
-    fallback.textContent = 'Detected ' + studentNameField.value + '. Recording attendance now...';
-    fallback.style.display = 'flex';
-    if (status) status.textContent = 'QR decoded successfully. Recording attendance...';
-
-    stopScanCamera();
-    setTimeout(function() {
-      form.submit();
-    }, 300);
-  }
-
-  document.addEventListener('click', function(event) {
-    var studentDropdown = document.getElementById('addStudentDropdown');
-    if (studentDropdown && !studentDropdown.contains(event.target)) {
-      studentDropdown.classList.remove('open');
-    }
-
-    var daysDropdown = document.getElementById('editClassDaysDropdown');
-    if (daysDropdown && !daysDropdown.contains(event.target)) {
-      daysDropdown.classList.remove('open');
-    }
+      });
+    });
   });
 </script>
 @endsection

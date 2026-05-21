@@ -11,7 +11,7 @@
   }
   
   .settings-container {
-    max-width: 520px;
+    max-width: 1040px;
     margin: 0 auto;
     background: rgba(255,255,255,.055);
     border: 1px solid rgba(255,255,255,.10);
@@ -44,9 +44,9 @@
     width: 100%;
     padding: 11px 14px;
     border-radius: 13px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--text);
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #0f172a;
     font-size: 13px;
     font-family: var(--font);
     outline: none;
@@ -55,13 +55,17 @@
   }
   
   .settings-input:focus {
-    border-color: rgba(139,92,255,.5);
-    box-shadow: 0 0 0 3px rgba(139,92,255,.12);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
   }
   
   .settings-input:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+  
+  .settings-input::placeholder {
+    color: #6b7280;
   }
   
   .form-group {
@@ -91,6 +95,61 @@
     margin-top: 4px;
   }
   
+  .theme-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+  
+  .theme-option {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    color:inherit;
+    cursor:pointer;
+    transition:transform .2s ease,border-color .2s ease,background .2s ease;
+    width:100%;
+    text-align:left;
+  }
+  
+  .theme-option:hover {
+    transform:translateY(-1px);
+    border-color:rgba(255,255,255,.22);
+  }
+  
+  .theme-option.selected {
+    border-color:#6b73ff;
+    box-shadow:0 0 0 2px rgba(107,115,255,.12);
+    background:rgba(107,115,255,.12);
+  }
+  .theme-option.selected .theme-swatch {
+    border-color:rgba(255,255,255,.95);
+    box-shadow:0 0 0 1px rgba(255,255,255,.5);
+  }
+  
+  .theme-swatch {
+    width:34px;
+    height:34px;
+    border-radius:14px;
+    flex-shrink:0;
+    border:1px solid rgba(148,163,184,.45);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  
+  .theme-label {
+    font-size:13px;
+    font-weight:700;
+  }
+  
+  .theme-light { background:#ffffff; }
+  .theme-ash { background:#9ca3af; }
+  .theme-dark { background:#1f2937; }
+  .theme-onyx { background:#0f172a; }
+
   .button-group {
     display: flex;
     gap: 10px;
@@ -171,6 +230,108 @@
   }
 </style>
 
+<style>
+  /* Light theme solid overrides */
+  body.theme-light .settings-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+  }
+
+  body.theme-light .settings-input {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    color: #000000;
+  }
+
+  body.theme-light .settings-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+  }
+
+  body.theme-light .settings-divider { background: #e5e7eb; }
+
+  body.theme-light .settings-btn {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    color: #000000;
+  }
+
+  body.theme-light .settings-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+
+  body.theme-light .settings-btn.primary { background: linear-gradient(135deg,#3b82f6,#8b5cff); border-color:#3b82f6; color:#fff; }
+
+  body.theme-light .info-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+  }
+
+  body.theme-light .info-label { color: #6b7280; }
+
+  body.theme-light .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+</style>
+
+<style>
+  /* Ash theme overrides (similar to light but slightly muted) */
+  body.theme-ash .settings-container {
+    background: #f3f4f6;
+    border: 1px solid #e6e9ee;
+  }
+
+  body.theme-ash .settings-input {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #0b1220;
+  }
+
+  body.theme-ash .settings-input:focus {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107,115,255,.06);
+  }
+
+  body.theme-ash .settings-divider { background: #e6e9ee; }
+
+  body.theme-ash .settings-btn { background: #ffffff; border: 1px solid #d1d5db; color: #0b1220; }
+  body.theme-ash .settings-btn:hover { background: #f3f4f6; border-color: #c7ccd3; }
+  body.theme-ash .settings-btn.primary { background: linear-gradient(135deg,#7b6eff,#6aa0ff); border-color:#6b73ff; color:#fff; }
+
+  body.theme-ash .info-item { background: #ffffff; border: 1px solid #e6e9ee; }
+  body.theme-ash .info-label { color: #6b7280; }
+  body.theme-ash .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+
+  /* In Ash theme, hide swatch inner borders on unselected options; only show on selected */
+  /* Make Ash theme behave like Light: only the selected option is highlighted.
+     Unselected options should look neutral (white background, subtle border). */
+  body.theme-ash .theme-option {
+    background: #ffffff !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+    box-shadow: none !important;
+    color: #0b1220 !important;
+  }
+
+  body.theme-ash .theme-option:hover {
+    border-color: rgba(15,23,42,.12) !important;
+  }
+
+  /* Keep the selected styling (highlighted) intact for Ash */
+  body.theme-ash .theme-option.selected {
+    border-color: #6b73ff !important;
+    box-shadow: 0 0 0 2px rgba(107,115,255,.12) !important;
+    background: rgba(107,115,255,.12) !important;
+    color: #0b1220 !important;
+  }
+
+  /* Show swatch border for unselected options in Ash to match Light appearance */
+  body.theme-ash .theme-swatch {
+    border: 1px solid rgba(148,163,184,.45) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05) !important;
+  }
+
+  body.theme-ash .theme-option.selected .theme-swatch {
+    border-color: rgba(255,255,255,.95) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.5) !important;
+  }
+</style>
+
 <div class="settings-container">
   <!-- Profile Settings -->
   <div class="settings-section">
@@ -204,6 +365,38 @@
         <input type="text" value="{{ $user->username ?? 'N/A' }}" disabled class="settings-input" style="opacity:0.6;cursor:not-allowed;margin-bottom:0">
         <div class="form-note">Cannot be changed</div>
       </div>
+
+      @php $theme = old('theme', $user->theme ?? 'light'); @endphp
+      <div>
+        <label class="label">Theme</label>
+        <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
+        <div class="theme-grid">
+          <button type="button" class="theme-option {{ $theme === 'light' ? 'selected' : '' }}" data-theme="light">
+            <span class="theme-swatch theme-light"></span>
+            <span class="theme-label">Light</span>
+          </button>
+          <button type="button" class="theme-option {{ $theme === 'ash' ? 'selected' : '' }}" data-theme="ash">
+            <span class="theme-swatch theme-ash"></span>
+            <span class="theme-label">Ash</span>
+          </button>
+          <button type="button" class="theme-option {{ $theme === 'dark' ? 'selected' : '' }}" data-theme="dark">
+            <span class="theme-swatch theme-dark"></span>
+            <span class="theme-label">Dark</span>
+          </button>
+          <button type="button" class="theme-option {{ $theme === 'onyx' ? 'selected' : '' }}" data-theme="onyx">
+            <span class="theme-swatch theme-onyx"></span>
+            <span class="theme-label">Onyx</span>
+          </button>
+        </div>
+        <div class="form-note">Choose between Light, Ash, Dark and Onyx.</div>
+      </div>
+    </form>
+
+    <form id="theme-save-form" action="{{ route('professor.settings.update') }}" method="POST" style="display:none;margin-top:12px">
+      @csrf
+      @method('PUT')
+      <input type="hidden" name="theme" id="theme-only-input" value="{{ $theme }}">
+      <button type="submit" id="theme-save-btn" class="settings-btn primary">Save Theme</button>
     </form>
   </div>
 
@@ -266,5 +459,43 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeKey = 'qr_attendance_theme';
+    const themeInput = document.getElementById('theme-input');
+    const themeOnlyInput = document.getElementById('theme-only-input');
+    const themeButtons = document.querySelectorAll('.theme-option');
+    const themeSaveForm = document.getElementById('theme-save-form');
+    if (!themeInput || !themeButtons.length) return;
+
+    const applyTheme = function (theme) {
+      const validThemes = ['light','ash','dark','onyx'];
+      const activeTheme = validThemes.includes(theme) ? theme : 'dark';
+      document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
+      document.body.classList.add('theme-' + activeTheme);
+      themeInput.value = activeTheme;
+      if (themeOnlyInput) themeOnlyInput.value = activeTheme;
+      themeButtons.forEach(function (option) {
+        option.classList.toggle('selected', option.dataset.theme === activeTheme);
+      });
+      return activeTheme;
+    };
+
+    const savedTheme = localStorage.getItem(themeKey);
+    const currentTheme = applyTheme(savedTheme);
+    localStorage.setItem(themeKey, currentTheme);
+
+    themeButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        const theme = button.dataset.theme;
+        const selectedTheme = applyTheme(theme);
+        localStorage.setItem(themeKey, selectedTheme);
+        // show save button/form
+        if (themeSaveForm) themeSaveForm.style.display = '';
+      });
+    });
+  });
+</script>
 
 @endsection

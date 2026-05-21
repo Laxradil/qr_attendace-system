@@ -8,6 +8,7 @@ use App\Models\AttendanceRecord;
 use App\Models\DropRequest;
 use App\Models\SystemLog;
 use App\Models\QRCode;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -88,6 +89,29 @@ class AdminController extends Controller
         });
     }
 
+    private function getAdminUsersCacheKeys(): array
+    {
+        return Cache::get('admin_users_cache_keys', []);
+    }
+
+    private function addAdminUsersCacheKey(string $cacheKey): void
+    {
+        $keys = $this->getAdminUsersCacheKeys();
+        if (!in_array($cacheKey, $keys, true)) {
+            $keys[] = $cacheKey;
+            Cache::forever('admin_users_cache_keys', $keys);
+        }
+    }
+
+    private function clearAdminUsersCache(): void
+    {
+        $keys = $this->getAdminUsersCacheKeys();
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
+        Cache::forget('admin_users_cache_keys');
+    }
+
     // Users Management
 
     public function users(): View
@@ -111,6 +135,7 @@ class AdminController extends Controller
         $users = Cache::remember($cacheKey, 60, function () use ($query) {
             return $query->paginate(20);
         });
+        $this->addAdminUsersCacheKey($cacheKey);
 
         $stats = $this->getUserStats();
 
@@ -148,6 +173,7 @@ class AdminController extends Controller
             'password' => 'required|min:8|confirmed',
             'role' => 'required|in:admin,professor,student',
             'student_id' => 'nullable|string|unique:users|max:255',
+            'section' => 'nullable|string|max:255|required_if:role,student',
         ]);
 
         $user = User::create([
@@ -157,6 +183,7 @@ class AdminController extends Controller
             'password' => bcrypt($validated['password']),
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
+            'section' => $validated['role'] === 'student' ? ($validated['section'] ?? null) : null,
         ]);
 
         // Create QR code for students
@@ -177,6 +204,7 @@ class AdminController extends Controller
 
         Cache::forget('admin_user_stats');
         Cache::forget('admin_stats');
+        $this->clearAdminUsersCache();
 
         return redirect()->route('admin.users')->with('success', 'User created successfully');
     }
@@ -194,9 +222,12 @@ class AdminController extends Controller
             'username' => 'required|string|unique:users,username,' . $user->id,
             'role' => 'required|in:admin,professor,student',
             'student_id' => 'nullable|string|unique:users,student_id,' . $user->id,
+            'section' => 'nullable|string|max:255|required_if:role,student',
             'password' => 'nullable|min:8|confirmed',
             'is_active' => 'boolean',
         ]);
+
+        $oldRole = $user->role;
 
         $user->update([
             'name' => $validated['name'],
@@ -204,6 +235,7 @@ class AdminController extends Controller
             'username' => $validated['username'],
             'role' => $validated['role'],
             'student_id' => $validated['student_id'] ?? null,
+            'section' => $validated['role'] === 'student' ? ($validated['section'] ?? null) : null,
             'is_active' => $validated['is_active'] ?? false,
             'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
         ]);
@@ -216,8 +248,18 @@ class AdminController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        // If role changed from student -> non-student, detach enrolled classes
+        if ($oldRole === 'student' && ($validated['role'] ?? '') !== 'student') {
+            try {
+                $user->enrolledClasses()->detach();
+            } catch (\Exception $e) {
+                // don't block the update flow on detach errors
+            }
+        }
+
         Cache::forget('admin_user_stats');
         Cache::forget('admin_stats');
+        $this->clearAdminUsersCache();
 
         return redirect()->route('admin.users')->with('success', 'User updated successfully');
     }
@@ -239,6 +281,7 @@ class AdminController extends Controller
 
         Cache::forget('admin_user_stats');
         Cache::forget('admin_stats');
+        $this->clearAdminUsersCache();
 
         if (request()->expectsJson()) {
             return response()->json(['success' => true]);
@@ -289,8 +332,13 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes|max:20',
+            'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'days' => 'required|array|min:1',
+            'days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'professors' => 'required|array|min:1',
             'professors.*' => 'required|exists:users,id',
         ]);
@@ -300,9 +348,27 @@ class AdminController extends Controller
 
         $classe = Classe::create([
             'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
             'name' => $validated['name'],
             'description' => $validated['description'],
             'professor_id' => $primaryProfessorId,
+        ]);
+
+        $primaryProfessor = User::findOrFail($primaryProfessorId);
+
+        $daysValue = implode(', ', $validated['days']);
+
+        Schedule::create([
+            'class_id' => $classe->id,
+            'subject_code' => $validated['code'],
+            'subject_name' => $validated['name'],
+            'professor_id' => $primaryProfessor->id,
+            'professor' => $primaryProfessor->name,
+            'days' => $daysValue,
+            'time' => \Carbon\Carbon::createFromFormat('H:i', $validated['start_time'])->format('g:i A') . ' - ' . \Carbon\Carbon::createFromFormat('H:i', $validated['end_time'])->format('g:i A'),
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'room' => $validated['room_code'],
         ]);
 
         $classe->professors()->attach($professors);
@@ -325,17 +391,26 @@ class AdminController extends Controller
 
     public function editClass(Classe $classe): View
     {
-        $classe->load('professors');
+        $classe->load('professors', 'schedules');
         $professors = User::where('role', 'professor')->get();
-        return view('admin.edit-class', ['classe' => $classe, 'professors' => $professors]);
+        return view('admin.edit-class', [
+            'classe' => $classe,
+            'professors' => $professors,
+            'schedule' => $classe->schedules->first(),
+        ]);
     }
 
     public function updateClass(Request $request, Classe $classe): RedirectResponse
     {
         $validated = $request->validate([
             'code' => 'required|string|unique:classes,code,' . $classe->id . '|max:20',
+            'room_code' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'days' => 'required|array|min:1',
+            'days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'professors' => 'required|array|min:1',
             'professors.*' => 'required|exists:users,id',
             'is_active' => 'boolean',
@@ -346,11 +421,29 @@ class AdminController extends Controller
 
         $classe->update([
             'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
             'name' => $validated['name'],
             'description' => $validated['description'],
             'professor_id' => $primaryProfessorId,
             'is_active' => $validated['is_active'] ?? false,
         ]);
+
+        $daysValue = implode(', ', $validated['days']);
+
+        Schedule::updateOrCreate(
+            ['class_id' => $classe->id],
+            [
+                'subject_code' => $validated['code'],
+                'subject_name' => $validated['name'],
+                'professor_id' => $primaryProfessorId,
+                'professor' => User::findOrFail($primaryProfessorId)->name,
+                'days' => $daysValue,
+                'time' => \Carbon\Carbon::createFromFormat('H:i', $validated['start_time'])->format('g:i A') . ' - ' . \Carbon\Carbon::createFromFormat('H:i', $validated['end_time'])->format('g:i A'),
+                'start_time' => $validated['start_time'],
+                'end_time' => $validated['end_time'],
+                'room' => $validated['room_code'],
+            ]
+        );
 
         $classe->professors()->sync($professors);
 
@@ -400,7 +493,17 @@ class AdminController extends Controller
             return back()->with('error', 'Please select valid students to enroll.');
         }
 
-        $classe->students()->syncWithoutDetaching($studentIds);
+        $alreadyEnrolledStudents = $classe->students()
+            ->whereIn('users.id', $studentIds)
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
+        if (!empty($alreadyEnrolledStudents)) {
+            return back()->with('error', 'The following student(s) are already enrolled in this class: ' . implode(', ', $alreadyEnrolledStudents));
+        }
+
+        $classe->students()->attach($studentIds);
 
         SystemLog::create([
             'user_id' => Auth::id(),
@@ -451,10 +554,53 @@ class AdminController extends Controller
         return view('admin.qr-codes-new', compact('students'));
     }
 
+    public function downloadAllQrCodesZip()
+    {
+        $students = User::where('role', 'student')
+            ->with(['enrolledClasses', 'studentQrCode'])
+            ->orderBy('name')
+            ->get();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'qr_codes_zip_');
+
+        if ($zipPath === false) {
+            abort(500, 'Unable to create temporary archive.');
+        }
+
+        $zipFile = $zipPath . '.zip';
+        @unlink($zipPath);
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Unable to create QR code archive.');
+        }
+
+        foreach ($students as $student) {
+            $fileName = preg_replace('/[^A-Za-z0-9_-]+/', '_', trim($student->name)) ?: 'student';
+            $qrPng = $this->buildStudentQrPng($student);
+            $zip->addFromString($fileName . '-qr.png', $qrPng);
+        }
+
+        $zip->close();
+
+        return response()->download($zipFile, 'student-qr-codes.zip')->deleteFileAfterSend(true);
+    }
+
     public function studentQrCode(User $student)
     {
         abort_if(!$student->isStudent(), 404);
 
+        $svg = $this->buildStudentQrSvg($student);
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
+    }
+
+    private function buildStudentQrSvg(User $student): string
+    {
         $qrCode = QRCode::where('student_id', $student->id)->first();
 
         $qrData = json_encode([
@@ -466,16 +612,11 @@ class AdminController extends Controller
             'generated_at' => now()->toIso8601String(),
         ]);
 
-        $svg = QrCodeFacade::format('svg')
+        return QrCodeFacade::format('svg')
             ->size(180)
             ->margin(1)
             ->encoding('UTF-8')
             ->generate($qrData);
-
-        return response($svg, 200, [
-            'Content-Type' => 'image/svg+xml',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-        ]);
     }
 
     // Attendance Management
@@ -483,8 +624,29 @@ class AdminController extends Controller
     {
         $records = AttendanceRecord::with('student', 'classe')
             ->paginate(20);
-        $attendanceRecords = $records;
-        return view('admin.attendance-records-new', ['attendanceRecords' => $attendanceRecords]);
+        
+        $attendanceStats = AttendanceRecord::selectRaw(
+            'COUNT(*) as total_records, 
+             SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as present_count,
+             SUM(CASE WHEN status = \'late\' THEN 1 ELSE 0 END) as late_count,
+             SUM(CASE WHEN status = \'absent\' THEN 1 ELSE 0 END) as absent_count,
+             SUM(CASE WHEN status = \'excused\' THEN 1 ELSE 0 END) as excused_count'
+        )->first();
+        
+        $totalRecords = (int) ($attendanceStats?->total_records ?? 0);
+        $presentCount = (int) ($attendanceStats?->present_count ?? 0);
+        $lateCount = (int) ($attendanceStats?->late_count ?? 0);
+        $absentCount = (int) ($attendanceStats?->absent_count ?? 0);
+        $excusedCount = (int) ($attendanceStats?->excused_count ?? 0);
+        
+        return view('admin.attendance-records-new', [
+            'attendanceRecords' => $records,
+            'totalRecords' => $totalRecords,
+            'presentCount' => $presentCount,
+            'lateCount' => $lateCount,
+            'absentCount' => $absentCount,
+            'excusedCount' => $excusedCount,
+        ]);
     }
 
     // Reports
@@ -612,5 +774,63 @@ class AdminController extends Controller
             return SystemLog::with('user')->latest()->paginate(20);
         });
         return view('admin.logs-new', ['logs' => $logs]);
+    }
+
+    // Settings
+    public function settings(): View
+    {
+        return view('admin.settings');
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
+        ]);
+
+        Auth::user()->update($validated);
+
+        // Log the activity
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'update',
+            'model_type' => 'User',
+            'model_id' => Auth::id(),
+            'description' => 'Updated profile settings',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => 'nullable|string|min:8|confirmed',
+            'password_confirmation' => 'nullable|string',
+        ]);
+
+        if (!empty($validated['password'])) {
+            Auth::user()->update([
+                'password' => bcrypt($validated['password']),
+            ]);
+
+            // Log the activity
+            SystemLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'update',
+                'model_type' => 'User',
+                'model_id' => Auth::id(),
+                'description' => 'Changed password',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Password updated successfully.');
+        }
+
+        return back()->with('info', 'No password change made.');
     }
 }

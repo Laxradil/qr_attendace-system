@@ -81,7 +81,7 @@
         <tbody>
           @forelse($records as $record)
             <tr>
-              <td>{{ $record->recorded_at->setTimezone('Asia/Manila')->format('M d, Y h:i A T') }}</td>
+              <td>{{ $record->created_at->format('M d, Y H:i A') }}</td>
               <td>
                 <div class="user-cell">
                   <div class="small-avatar">{{ strtoupper(substr($record->student->name ?? 'S', 0, 1)) }}</div>
@@ -218,6 +218,12 @@
     margin-bottom: 18px;
     align-items: flex-end;
   }
+
+  /* Ensure filter controls render above the table and sticky headers */
+  .filter-row {
+    position: relative;
+    z-index: 60;
+  }
   
   .filter-field {
     display: flex;
@@ -238,13 +244,30 @@
     padding: 9px 12px;
     border-radius: 12px;
     background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
     color: var(--text);
     font-size: 13px;
     font-family: var(--font);
     outline: none;
     transition: .2s ease;
     min-width: 160px;
+    position: relative;
+    z-index: 80;
+  }
+
+  /* Live search input styling (improves border visibility and text contrast) */
+  .live-search {
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.96);
+    border: 1px solid rgba(0,0,0,.08);
+    color: #0b1220;
+    font-size: 13px;
+    font-family: var(--font);
+    outline: none;
+    transition: .2s ease;
+    min-width: 160px;
+    margin-left: auto;
   }
   
   .filter-select:focus,
@@ -276,9 +299,14 @@
   }
   
   .filter-btn.reset {
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--muted);
+    background: rgba(255,61,114,.15);
+    border: 1px solid rgba(255,61,114,.35);
+    color: #ff8298;
+  }
+
+  .filter-btn.reset:hover {
+    background: rgba(255,61,114,.25);
+    border-color: rgba(255,61,114,.45);
   }
   
   .filter-btn:hover {
@@ -299,9 +327,9 @@
   }
   
   .pill.green, .pill.present {
-    color: #4dffa0;
-    background: rgba(24,240,139,.11);
-    border-color: rgba(24,240,139,.2);
+    color: #166534;
+    background: #dcfce7;
+    border-color: #bbf7d0;
   }
   
   .pill.red, .pill.absent {
@@ -320,6 +348,90 @@
     padding: 7px 10px;
     font-size: 12px;
     border-radius: 10px;
+  }
+</style>
+
+<style>
+  body.theme-light .glass {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .glass-table {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .stat-icon.cyan {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light .filter-select,
+  body.theme-light .filter-input {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light th {
+    background: #f9fafb !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light td {
+    color: #000000 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  body.theme-light tr:hover td {
+    background: #f3f4f6 !important;
+  }
+  
+  body.theme-light .small-avatar {
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .muted {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .filter-btn.reset {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #374151 !important;
+  }
+  
+  body.theme-light .pill {
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
+  }
+  
+  body.theme-light .pill.green {
+    background: #ecfdf5 !important;
+    border-color: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  
+  body.theme-light .pill.red {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #991b1b !important;
+  }
+  
+  body.theme-light .pill.yellow {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    color: #92400e !important;
+  }
+  
+  body.theme-light .live-search {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #000000 !important;
   }
 </style>
 
@@ -345,7 +457,7 @@
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.placeholder = 'Search students...';
-  searchInput.style.cssText = 'padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;min-width:160px;margin-left:auto';
+  searchInput.style.cssText = 'padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);color:#0b1220;font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;min-width:160px;margin-left:auto';
   searchInput.classList.add('live-search');
   
   const filterFieldsContainer = document.querySelector('.filter-row');
