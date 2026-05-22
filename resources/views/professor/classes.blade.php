@@ -43,6 +43,14 @@
   .search-bar {
     display: none !important;
   }
+
+  /* Overview/stat card color to match darker bluish-gray palette */
+  .stats .stat.glass {
+    background: linear-gradient(180deg,#2f3746,#262b36);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #e6eef8;
+    box-shadow: 0 8px 26px rgba(6,8,18,0.6);
+  }
 </style>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px;margin-top:6px">
@@ -171,12 +179,12 @@
   .class-card {
     border-radius: var(--radius-lg);
     padding: 20px;
-    transition: .25s ease;
-    border: 1px solid var(--stroke);
-    background: linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04) 40%,rgba(255,255,255,.08));
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), var(--shadow);
+    transition: .18s ease, transform .22s ease;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: linear-gradient(180deg,#2f3746,#262b36);
+    backdrop-filter: blur(6px) saturate(115%);
+    -webkit-backdrop-filter: blur(6px) saturate(115%);
+    box-shadow: 0 10px 28px rgba(12,16,24,0.64), inset 0 1px 0 rgba(255,255,255,0.03);
     position: relative;
     overflow: hidden;
   }
@@ -188,13 +196,14 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg,transparent,rgba(255,255,255,.55) 50%,transparent);
+    background: linear-gradient(90deg,transparent,rgba(255,255,255,.12) 50%,transparent);
     pointer-events: none;
   }
   
   .class-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255,255,255,.3);
+    transform: translateY(-6px);
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: 0 20px 56px rgba(10,14,26,0.72), inset 0 1px 0 rgba(255,255,255,0.04);
   }
   
   .class-head {
@@ -267,10 +276,12 @@
   .scanner-box,
   .att-recording,
   .recent-scans-box {
-    background: rgba(15, 23, 42, 0.95);
+    background: linear-gradient(180deg,#2f3746,#262b36);
     border-radius: 24px;
     padding: 24px;
-    border: 1px solid rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 10px 30px rgba(6,8,16,0.55) inset, 0 8px 28px rgba(8,12,18,0.5);
+    color: #e6eef8;
   }
 
   .scanner-tabs {
@@ -785,6 +796,7 @@
                 <input type="hidden" name="_token" value="${csrfToken}" />
                 <input type="hidden" id="scanClassInput" name="class_id" value="${selectedClassId}" />
                 <input type="hidden" id="scanStudentInput" name="student_id" value="" />
+                <input type="hidden" id="scanQrInput" name="qr_code" />
                 <div class="section-head" style="margin-bottom:12px"><h3>Attendance Recording</h3></div>
                 <div class="att-field">
                   <label>Class</label>
@@ -794,7 +806,10 @@
                   <label>Student Scanned</label>
                   <div class="att-display" id="scanStudentDisplay">Waiting for scan...</div>
                 </div>
-                <input type="hidden" id="scanQrInput" name="qr_code" />
+                <div class="hardware-input-group" style="margin-top:16px; display:none;">
+                  <label for="scanQrTextInput" style="display:none;">Student QR code input</label>
+                  <input type="text" id="scanQrTextInput" autocomplete="off" spellcheck="false" placeholder="Scan or paste student QR code..." style="width:100%;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;" />
+                </div>
                 <div class="att-note" style="margin-top:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.08);font-size:14px;color:var(--text2);">
                   Attendance will be recorded automatically for this class when a valid student QR is scanned.
                 </div>
@@ -935,10 +950,12 @@
       const studentInput = modalContent.querySelector('#scanStudentInput');
       const studentDisplay = modalContent.querySelector('#scanStudentDisplay');
       const qrInput = modalContent.querySelector('#scanQrInput');
+      const qrTextInput = modalContent.querySelector('#scanQrTextInput');
+      const hardwareInputGroup = modalContent.querySelector('.hardware-input-group');
       const scannerTabs = modalContent.querySelectorAll('.scanner-tab');
       const camViewport = modalContent.querySelector('.cam-inner');
       const scanStatus = modalContent.querySelector('#scanStatus');
-      if (!classInput || !classDisplay || !studentInput || !studentDisplay || !qrInput || !camViewport || !scanStatus) {
+      if (!classInput || !classDisplay || !studentInput || !studentDisplay || !qrInput || !qrTextInput || !camViewport || !scanStatus) {
         return;
       }
 
@@ -1068,10 +1085,21 @@
         });
       }
 
-      qrInput.addEventListener('input', function () {
+      qrTextInput.addEventListener('input', function () {
         clearTimeout(inputTimer);
-        handleQrInput(this.value.trim());
+        const value = this.value.trim();
+        qrInput.value = value;
+        handleQrInput(value);
         inputTimer = setTimeout(() => submitAttendance(), 250);
+      });
+
+      qrTextInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          qrInput.value = this.value.trim();
+          handleQrInput(qrInput.value);
+          submitAttendance();
+        }
       });
 
       function stopCamera() {
@@ -1211,11 +1239,22 @@
           tab.classList.add('active');
           if (tab.dataset.mode === 'hardware') {
             stopCamera();
-            qrInput.focus();
+            if (hardwareInputGroup) {
+              hardwareInputGroup.style.display = 'block';
+            }
+            qrTextInput.value = '';
+            qrInput.value = '';
+            qrTextInput.focus();
             setScanStatus('Hardware scanner mode');
           } else {
+            if (hardwareInputGroup) {
+              hardwareInputGroup.style.display = 'none';
+            }
+            qrTextInput.value = '';
+            qrInput.value = '';
             qrInput.placeholder = 'Scan or paste student QR code...';
             setScanStatus('Ready to scan');
+            startCamera();
           }
         });
       });
