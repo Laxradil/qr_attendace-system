@@ -55,8 +55,8 @@
     body.theme-light .brand{border-bottom-color:#f3f4f6}
     body.theme-light .nav a, body.theme-light .nav form button{color:#475569}
     body.theme-light .nav a .nav-icon, body.theme-light .nav form button .nav-icon{background:#f3f4f6;border-color:#e5e7eb}
-    body.theme-light .nav a:hover, body.theme-light .nav form button:hover{background:#f0f1f3;color:#0f172a}
-    body.theme-light .nav a:hover .nav-icon, body.theme-light .nav form button:hover .nav-icon{background:#e5e7eb}
+    body.theme-light .nav a:not(.active):hover, body.theme-light .nav form button:not(.active):hover{background:#f0f1f3;color:#0f172a}
+    body.theme-light .nav a:not(.active):hover .nav-icon, body.theme-light .nav form button:not(.active):hover .nav-icon{background:#e5e7eb}
     body.theme-light .nav a.active{background:linear-gradient(135deg,#7c3aed,.8,#2563eb);color:#fff}
     body.theme-light .nav a.active:hover, body.theme-light .nav form button.active:hover{background:linear-gradient(135deg,#7c3aed,.8,#2563eb);color:#fff;transform:none}
     /* Prevent generic hover rules from turning active tab white */
@@ -232,8 +232,8 @@
     body.theme-ash .brand{border-bottom-color:rgba(15,23,42,.1)}
     body.theme-ash .nav a, body.theme-ash .nav form button{color:#475569}
     body.theme-ash .nav a .nav-icon, body.theme-ash .nav form button .nav-icon{background:rgba(15,23,42,.08);border-color:rgba(15,23,42,.1)}
-    body.theme-ash .nav a:hover, body.theme-ash .nav form button:hover{background:rgba(15,23,42,.1);color:#0f172a}
-    body.theme-ash .nav a:hover .nav-icon, body.theme-ash .nav form button:hover .nav-icon{background:rgba(15,23,42,.14)}
+    body.theme-ash .nav a:not(.active):hover, body.theme-ash .nav form button:not(.active):hover{background:rgba(15,23,42,.1);color:#0f172a}
+    body.theme-ash .nav a:not(.active):hover .nav-icon, body.theme-ash .nav form button:not(.active):hover .nav-icon{background:rgba(15,23,42,.14)}
     body.theme-ash .nav a.active{background:linear-gradient(135deg,#6d28d9,.8,#2563eb);color:#fff}
     body.theme-ash .logout-wrap{border-top-color:rgba(15,23,42,.1)}
     body.theme-ash .profile-card{background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2)}
@@ -431,8 +431,8 @@
     body.theme-dark .brand{border-bottom-color:rgba(255,255,255,.09)}
     body.theme-dark .nav a, body.theme-dark .nav form button{color:rgba(234,240,255,.75)}
     body.theme-dark .nav a .nav-icon, body.theme-dark .nav form button .nav-icon{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.09)}
-    body.theme-dark .nav a:hover, body.theme-dark .nav form button:hover{background:rgba(255,255,255,.08);color:var(--text)}
-    body.theme-dark .nav a:hover .nav-icon, body.theme-dark .nav form button:hover .nav-icon{background:rgba(255,255,255,.12)}
+    body.theme-dark .nav a:not(.active):hover, body.theme-dark .nav form button:not(.active):hover{background:rgba(255,255,255,.08);color:var(--text)}
+    body.theme-dark .nav a:not(.active):hover .nav-icon, body.theme-dark .nav form button:not(.active):hover .nav-icon{background:rgba(255,255,255,.12)}
     body.theme-dark .nav a.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff}
     body.theme-dark .logout-wrap{border-top-color:rgba(255,255,255,.08)}
     body.theme-dark .profile-card{background:rgba(139,92,255,.12);border-color:rgba(139,92,255,.25)}
@@ -461,8 +461,8 @@
     body.theme-onyx .brand{border-bottom-color:rgba(255,255,255,.08)}
     body.theme-onyx .nav a, body.theme-onyx .nav form button{color:rgba(244,247,255,.8)}
     body.theme-onyx .nav a .nav-icon, body.theme-onyx .nav form button .nav-icon{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
-    body.theme-onyx .nav a:hover, body.theme-onyx .nav form button:hover{background:rgba(255,255,255,.08);color:var(--text)}
-    body.theme-onyx .nav a:hover .nav-icon, body.theme-onyx .nav form button:hover .nav-icon{background:rgba(255,255,255,.1)}
+    body.theme-onyx .nav a:not(.active):hover, body.theme-onyx .nav form button:not(.active):hover{background:rgba(255,255,255,.08);color:var(--text)}
+    body.theme-onyx .nav a:not(.active):hover .nav-icon, body.theme-onyx .nav form button:not(.active):hover .nav-icon{background:rgba(255,255,255,.1)}
     body.theme-onyx .nav a.active{background:linear-gradient(135deg,rgba(124,58,237,.8),rgba(96,165,250,.5));color:#fff}
     body.theme-onyx .logout-wrap{border-top-color:rgba(255,255,255,.08)}
     body.theme-onyx .profile-card{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)}
@@ -668,12 +668,12 @@
       flex-shrink:0;
       transition:.2s ease;
     }
-    .nav a:hover, .nav form button:hover{
+    .nav a:not(.active):hover, .nav form button:not(.active):hover{
       background:rgba(255,255,255,.08);
       color:var(--text);
       transform:translateX(3px);
     }
-    .nav a:hover .nav-icon, .nav form button:hover .nav-icon{
+    .nav a:not(.active):hover .nav-icon, .nav form button:not(.active):hover .nav-icon{
       background:rgba(255,255,255,.12);
     }
     .nav a.active{
