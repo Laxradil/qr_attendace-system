@@ -877,6 +877,14 @@ class ProfessorController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Attendance updated successfully',
+                'status' => $attendanceRecord->status,
+                'minutes_late' => $attendanceRecord->minutes_late,
+            ]);
+        }
+
         return redirect()->route('professor.attendance-records', ['class_id' => $attendanceRecord->class_id])
             ->with('success', 'Attendance updated successfully');
     }
@@ -900,12 +908,14 @@ class ProfessorController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
+            'theme' => 'nullable|in:light,ash,dark,onyx',
         ]);
 
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => isset($validated['password']) && $validated['password'] ? bcrypt($validated['password']) : $user->password,
+            'theme' => $validated['theme'] ?? $user->theme,
         ]);
 
         return back()->with('success', 'Settings updated successfully');

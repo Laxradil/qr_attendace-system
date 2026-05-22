@@ -313,6 +313,9 @@
     body.theme-ash .nav a:not(.active):hover, body.theme-ash .nav button:not(.active):hover{background:rgba(255,255,255,.03);color:var(--text)}
     body.theme-ash .nav a.active, body.theme-ash .nav button.active{background:linear-gradient(135deg,#d1d5db,.8,#e5e7eb);color:#0f1724}
     body.theme-ash .logout-wrap{border-top-color:rgba(255,255,255,.04)}
+    body.theme-ash .logout{background:transparent !important;color:#ff8298 !important;border-color:transparent !important}
+    body.theme-ash .logout:hover{background:rgba(255,61,114,.12) !important}
+    body.theme-ash .logout-icon{color:#ff8298 !important}
     body.theme-ash .profile-card{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.03)}
     body.theme-ash .avatar{background:linear-gradient(145deg,#9ca3af,#6b7280)}
     /* Override bright white inline styles for ash theme */
@@ -703,16 +706,19 @@
     @keyframes orb-float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-40px) scale(1.06)}66%{transform:translate(-20px,25px) scale(.96)}}
 
     .glass{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.18);
-      backdrop-filter:var(--blur);
-      -webkit-backdrop-filter:var(--blur);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.18),var(--shadow);
+      border:1px solid rgba(255,255,255,0.06);
+      /* Force a fully opaque bluish-gray card background to remove transparency */
+      background: #2f3746 !important;
+      background-image: none !important;
+      /* disable backdrop blur to prevent background bleed-through */
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: 0 22px 60px rgba(6,10,18,0.85), inset 0 1px 0 rgba(255,255,255,0.04) !important;
       position:relative;overflow:hidden;
     }
     .glass::after{
       content:"";position:absolute;top:0;left:0;right:0;height:1px;
-      background:linear-gradient(90deg,transparent,rgba(255,255,255,.55) 50%,transparent);
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.06) 50%,transparent);
       pointer-events:none;
     }
 
@@ -804,9 +810,15 @@
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:12px;flex-shrink:0}
     .logout{
-      border:1px solid transparent;background:transparent;color:#ff8298;
+      border:1px solid transparent;background:transparent;color:#ff8298 !important;
       padding:11px 12px;border-radius:15px;display:flex;align-items:center;gap:11px;
       font-weight:700;cursor:pointer;transition:.2s ease;font-size:14px;font-family:var(--font);width:100%;
+    }
+    body.theme-light .logout,
+    body.theme-ash .logout,
+    body.theme-dark .logout,
+    body.theme-onyx .logout {
+      color:#ff8298 !important;
     }
     .logout:hover{background:rgba(255,61,114,.12);border-color:rgba(255,61,114,.2);transform:scale(1.02)}
     .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:transparent}
@@ -847,10 +859,10 @@
     }
     
     body.theme-ash .page-title h2 {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .page-title p {
-      color: #475569 !important;
+      color: var(--text) !important;
     }
     
     body.theme-dark .page-title h2 {

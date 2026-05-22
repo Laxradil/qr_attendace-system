@@ -51,12 +51,40 @@
             body.theme-ash .badge {
                 background: var(--glass-strong) !important;
                 border-color: var(--stroke) !important;
-                color: #0f172a !important;
+                color: #ffffff !important;
                 box-shadow: 0 18px 40px rgba(15,23,42,.08) !important;
             }
             body.theme-ash .report-chart,
             body.theme-ash .distribution-row {
                 background: var(--glass) !important;
+            }
+            body.theme-ash .table-wrap table tr,
+            body.theme-ash .table-wrap table tbody tr,
+            body.theme-ash .att-table-wrap table tr,
+            body.theme-ash .att-table-wrap table tbody tr {
+                background: rgba(15,23,42,.65) !important;
+                color: #ffffff !important;
+            }
+            body.theme-ash .table-wrap table tbody tr:nth-child(2n),
+            body.theme-ash .att-table-wrap table tbody tr:nth-child(2n) {
+                background: rgba(15,23,42,.55) !important;
+            }
+            body.theme-ash .table-wrap table tbody tr:hover,
+            body.theme-ash .att-table-wrap table tbody tr:hover {
+                background: rgba(255,255,255,.08) !important;
+            }
+            body.theme-ash .table-wrap table td,
+            body.theme-ash .table-wrap table th,
+            body.theme-ash .table-wrap td,
+            body.theme-ash .table-wrap th {
+                color: #ffffff !important;
+            }
+            body.theme-ash .table-wrap table th,
+            body.theme-ash .att-table-wrap table th,
+            body.theme-ash .table-wrap th,
+            body.theme-ash .att-table-wrap th {
+                background: rgba(255,255,255,.08) !important;
+                color: #ffffff !important;
             }
             body.theme-ash .chart-line {
                 stroke: #4338ca !important;
@@ -88,7 +116,7 @@
             body.theme-ash .table-wrap td strong {
                 background: var(--glass) !important;
                 border-color: var(--stroke-soft) !important;
-                color: #0f172a !important;
+                color: #ffffff !important;
             }
             body.theme-ash .report-filter-field .filter-select,
             body.theme-ash .report-filter-field .filter-input,
@@ -317,11 +345,15 @@
         <style>
           body.theme-ash .table-wrap td .muted,
           body.theme-ash .table-wrap td,
-          body.theme-ash .table-wrap th,
           body.theme-ash .table-wrap td a,
           body.theme-ash .table-wrap td span,
           body.theme-ash .table-wrap td strong {
-            color: #0f172a !important;
+            color: #ffffff !important;
+          }
+
+          body.theme-ash .table-wrap table th,
+          body.theme-ash .att-table-wrap table th {
+            color: #334155 !important;
           }
 
           body.theme-ash .attendance-ring-inner {
@@ -340,13 +372,13 @@
           }
 
           body.theme-ash .distribution-row div:last-child {
-            color: #1f2937 !important;
+            color: #ffffff !important;
           }
 
           body.theme-ash .distribution-row .distribution-count,
           body.theme-ash .distribution-row strong,
           body.theme-ash .distribution-row small {
-            color: #1f2937 !important;
+            color: #ffffff !important;
           }
         </style>
 

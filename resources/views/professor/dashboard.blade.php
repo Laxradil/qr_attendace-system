@@ -24,6 +24,31 @@
   .ghost-stat .stat-body {
     opacity: 0.85 !important;
   }
+  .recent-activity-list {
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .recent-activity-list .activity {
+    display:grid;grid-template-columns:42px 1fr auto;gap:14px;padding:16px 18px;border-radius:18px;
+    border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);text-decoration:none;color:inherit;
+    transition:transform .25s ease,background .25s ease,border-color .25s ease,box-shadow .25s ease;
+  }
+  .recent-activity-list .activity:hover {
+    background:rgba(139,92,255,0.16);border-color:rgba(139,92,255,0.35);
+    transform:translateY(-2px);
+    box-shadow:0 18px 40px rgba(9,10,29,0.18);
+  }
+  .recent-activity-list .activity .act-icon {
+    width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:18px;
+  }
+  .recent-activity-list .activity .activity-title {
+    font-weight:700;font-size:14px;color:#ffffff;
+  }
+  .recent-activity-list .activity .activity-desc {
+    margin-top:6px;font-size:12px;color:rgba(255,255,255,0.72);line-height:1.5;
+  }
+  .recent-activity-list .activity time {
+    font-size:12px;color:rgba(255,255,255,0.7);white-space:nowrap;font-family:var(--mono);align-self:start;
+  }
 </style>
 
 <div class="stats">
@@ -63,7 +88,7 @@
 
 <div class="dashboard">
   <div class="dash-left">
-    <div class="card glass">
+    <div class="card glass" style="background: rgba(15,23,42,0.62) !important;">
       <div class="section-head">
         <h3 style="font-size:16px">📊 Attendance Overview</h3>
       </div>
@@ -97,25 +122,32 @@
       <button class="report-btn" onclick="window.location.href='{{ route('professor.attendance-records') }}'">View Full Attendance Report →</button>
     </div>
 
-    <div class="section-head">
-      <h3 style="font-size:16px; margin-top: 12px;">⚡ Recent Activities</h3>
-      <a href="{{ route('professor.logs') }}" style="color: #8b5cff">View all →</a>
-    </div>
-    @forelse($recentLogs as $log)
-      <div class="activity">
-        <div class="act-icon @if($log->action == 'create') create @elseif($log->action == 'update') edit @elseif($log->action == 'delete') drop @elseif($log->action == 'scan_qr') scan @else add @endif">
-          @if($log->action == 'create') ✨ @elseif($log->action == 'update') ✏️ @elseif($log->action == 'delete') 🗑 @elseif($log->action == 'scan_qr') 📷 @else ➕ @endif
-        </div>
-        <div><b style="font-size:14px;color:#ffffff">{{ $log->user->name }} {{ ucwords(str_replace('_', ' ', $log->action)) }}</b><p style="font-size:12px;color:#ffffff">{{ $log->description }}</p></div>
-        <time style="font-size:12px">{{ $log->created_at->format('h:i A') }}</time>
+    <div class="card glass" style="padding:18px 14px;margin-top:12px;background:rgba(15,23,42,0.62) !important;">
+      <div class="section-head" style="justify-content:space-between;align-items:center;display:flex;gap:12px;margin-bottom:14px;">
+        <h3 style="font-size:16px; margin:0;">⚡ Recent Activities</h3>
+        <a href="{{ route('professor.logs') }}" style="color: #8b5cff">View all →</a>
       </div>
-    @empty
-      <p style="color:#ffffff;padding:20px;text-align:center;font-size:13px">No recent activities</p>
-    @endforelse
+      <div class="recent-activity-list">
+        @forelse($recentLogs as $log)
+          <a href="{{ route('professor.logs') }}" class="activity">
+            <div class="act-icon @if($log->action == 'create') create @elseif($log->action == 'update') edit @elseif($log->action == 'delete') drop @elseif($log->action == 'scan_qr') scan @else add @endif">
+              @if($log->action == 'create') ✨ @elseif($log->action == 'update') ✏️ @elseif($log->action == 'delete') 🗑 @elseif($log->action == 'scan_qr') 📷 @else ➕ @endif
+            </div>
+            <div>
+              <div class="activity-title">{{ $log->user->name }} {{ ucwords(str_replace('_', ' ', $log->action)) }}</div>
+              <div class="activity-desc">{{ $log->description }}</div>
+            </div>
+            <time>{{ $log->created_at->format('h:i A') }}</time>
+          </a>
+        @empty
+          <div style="padding:20px;text-align:center;color:#ffffff;font-size:13px;">No recent activities</div>
+        @endforelse
+      </div>
+    </div>
   </div>
 
   <div class="dash-right" style="display:flex;flex-direction:column;gap:12px">
-    <div class="card glass">
+    <div class="card glass" style="background: rgba(15,23,42,0.62) !important;">
       <div class="section-head"><h3 style="font-size:16px">📅 Today's Schedule</h3></div>
       @forelse($todaySchedules as $schedule)
         <div class="row-item" style="color: var(--text);">
