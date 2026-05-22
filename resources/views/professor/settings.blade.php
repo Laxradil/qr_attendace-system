@@ -318,6 +318,22 @@
     pointer-events: auto;
   }
 
+  .unsaved-notice.success,
+  body.theme-light .unsaved-notice.success,
+  body.theme-ash .unsaved-notice.success {
+    background: rgba(24, 240, 139, 0.1) !important;
+    border: 1px solid rgba(77, 255, 160, 0.3) !important;
+  }
+
+  .unsaved-notice.success .message {
+    color: #4dffa0 !important;
+  }
+
+  .unsaved-notice.success .icon {
+    background: rgba(77, 255, 160, 0.15) !important;
+    color: #4dffa0 !important;
+  }
+
   .unsaved-notice .notice-copy,
   body.theme-light .unsaved-notice .notice-copy,
   body.theme-ash .unsaved-notice .notice-copy {
@@ -419,6 +435,10 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
+  }
+
+  .unsaved-notice.success .actions {
+    display: none;
   }
 
   .unsaved-notice button::after,
@@ -709,6 +729,19 @@
     const currentTheme = applyTheme(savedTheme);
     localStorage.setItem(themeKey, currentTheme);
 
+    // Check if we just saved settings
+    if (localStorage.getItem('settings_saved') === 'true') {
+      localStorage.removeItem('settings_saved');
+      const warningBox = document.getElementById('settings-warning');
+      if (warningBox) {
+        warningBox.classList.add('success', 'show');
+        warningBox.querySelector('.message').textContent = 'Changes saved successfully! ✓';
+        setTimeout(function () {
+          warningBox.classList.remove('show', 'success');
+        }, 2500);
+      }
+    }
+
     themeButtons.forEach(function (button) {
       button.addEventListener('click', function () {
         const theme = button.dataset.theme;
@@ -746,6 +779,17 @@
           saveButton.replaceWith(saveButton.cloneNode(true));
           const freshSave = document.getElementById('unsaved-save-action');
           freshSave.addEventListener('click', function () {
+            // Show saving notification
+            warningBox.classList.remove('show');
+            warningBox.classList.add('success');
+            warningBox.querySelector('.message').textContent = 'Saving changes...';
+            warningBox.classList.add('show');
+            unsavedSettings = false;
+            
+            // Set flag for post-reload success message
+            localStorage.setItem('settings_saved', 'true');
+            
+            // Submit the form
             if (themeSaveForm && themeSaveForm.style.display !== 'none') {
               themeSaveForm.submit();
             } else if (profileSettingsForm) {

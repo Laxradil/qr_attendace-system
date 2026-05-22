@@ -7,7 +7,7 @@
 @php
   $attendanceRate = $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0;
 @endphp
-<section class="page" id="dashboard" style="display: flex; flex-direction: column; height: calc(100vh - 100px); overflow: hidden; padding-bottom: 24px;" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
+<section class="page" id="dashboard" style="display: flex; flex-direction: column; min-height: 100%; padding-bottom: 24px;" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
 
   <div class="stats" style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; flex-shrink: 0;">
     <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">

@@ -38,14 +38,18 @@ class StudentController extends Controller
                 return back()->with('success', 'Theme updated successfully.');
             }
 
-            // Otherwise update profile fields
+            // Otherwise update profile and optionally theme fields
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+                'theme' => 'nullable|in:light,ash,dark,onyx',
             ]);
 
             $user->name = $request->input('name');
             $user->email = $request->input('email');
+            if ($request->filled('theme')) {
+                $user->theme = $request->input('theme');
+            }
             $user->save();
 
             return back()->with('success', 'Profile updated successfully.');

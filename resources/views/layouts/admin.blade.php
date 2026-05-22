@@ -275,13 +275,13 @@
 
     html, body{
       height:100%;
-      overflow:hidden;
+      overflow-x:hidden;
     }
     body{
-      height:100vh;
+      min-height:100vh;
       font-family:var(--font);
       color:var(--text);
-      overflow:hidden;
+      overflow-x:hidden;
       background:
         radial-gradient(ellipse at 14% 12%, rgba(108,92,231,.16) 0%, transparent 38%),
         radial-gradient(ellipse at 85% 8%, rgba(9,132,227,.12) 0%, transparent 32%),
