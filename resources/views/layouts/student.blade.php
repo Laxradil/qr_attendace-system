@@ -743,12 +743,12 @@
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;overflow:hidden}
+    html,body{height:100%;overflow-x:hidden;}
     body{
-      height:100vh;
+      min-height:100vh;
       font-family:var(--font);
       color:var(--text);
-      overflow:hidden;
+      overflow-x:hidden;
       background:
         radial-gradient(ellipse at 14% 12%, rgba(102,75,255,.26) 0%, transparent 38%),
         radial-gradient(ellipse at 85% 8%, rgba(39,103,214,.18) 0%, transparent 32%),

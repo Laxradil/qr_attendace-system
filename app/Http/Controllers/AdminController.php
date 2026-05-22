@@ -784,12 +784,30 @@ class AdminController extends Controller
 
     public function updateSettings(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+
+        // If only theme is being updated, validate and save theme
+        if ($request->has('theme') && !$request->has('name') && !$request->has('email')) {
+            $request->validate([
+                'theme' => 'required|in:light,ash,dark,onyx',
+            ]);
+            $user->theme = $request->input('theme');
+            $user->save();
+            return back()->with('success', 'Theme updated successfully.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . Auth::id(),
+            'theme' => 'nullable|in:light,ash,dark,onyx',
         ]);
 
-        Auth::user()->update($validated);
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        if (!empty($validated['theme'])) {
+            $user->theme = $validated['theme'];
+        }
+        $user->save();
 
         // Log the activity
         SystemLog::create([
