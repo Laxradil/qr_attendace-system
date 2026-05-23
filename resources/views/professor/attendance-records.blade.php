@@ -106,7 +106,11 @@
               </td>
               <td>{{ $record->minutes_late ?? '—' }}</td>
               <td>
-                <a href="{{ route('professor.attendance-records.edit', $record) }}" class="btn slim">Edit</a>
+                <select class="fi status-select" data-id="{{ $record->id }}" data-recorded_at="{{ optional($record->recorded_at)->tz('UTC')->setTimezone('Asia/Manila')->format('Y-m-d\TH:i') }}" data-token="{{ csrf_token() }}">
+                  <option value="present" {{ (strtolower($record->status) ?? '') === 'present' ? 'selected' : '' }}>Present</option>
+                  <option value="absent" {{ (strtolower($record->status) ?? '') === 'absent' ? 'selected' : '' }}>Absent</option>
+                  <option value="excused" {{ (strtolower($record->status) ?? '') === 'excused' ? 'selected' : '' }}>Excused</option>
+                </select>
               </td>
             </tr>
           @empty
@@ -448,6 +452,61 @@
     border-color: #ddd6fe !important;
     color: #6d28d9 !important;
   }
+
+<script>
+  (function(){
+    function setStatusPill(row, status){
+      const pill = row.querySelector('.pill');
+      if(!pill) return;
+      pill.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      pill.classList.remove('green','red','yellow','excused','present','late','blue');
+      const map = { present: 'green', absent: 'red', late: 'yellow', excused: 'excused' };
+      const cls = map[status] || 'blue';
+      pill.classList.add(cls);
+    }
+
+    async function updateStatus(select){
+      const id = select.dataset.id;
+      const status = select.value;
+      const recorded_at = select.dataset.recorded_at || new Date().toISOString();
+      const token = select.dataset.token;
+      const url = `/professor/attendance-records/${id}`;
+
+      select.disabled = true;
+      try{
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ status, recorded_at })
+        });
+        if(!res.ok){
+          const txt = await res.text();
+          throw new Error(txt || 'Update failed');
+        }
+        // update UI
+        const row = select.closest('tr');
+        setStatusPill(row, status);
+        const minutesCell = row.children[4];
+        if(minutesCell) minutesCell.textContent = '—';
+      }catch(err){
+        console.error('Failed to update status', err);
+        alert('Failed to update attendance: ' + (err.message||err));
+      }finally{
+        select.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('.status-select').forEach(function(sel){
+        sel.addEventListener('change', function(){ updateStatus(sel); });
+      });
+    });
+  })();
+</script>
   
   body.theme-light .live-search {
     background: #ffffff !important;
