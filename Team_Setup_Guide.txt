@@ -1,0 +1,70 @@
+========================================================
+QR ATTENDANCE SYSTEM - LOCAL DATABASE SETUP GUIDE
+========================================================
+
+Welcome to the team! This guide explains how to get the local Supabase database running on your machine. 
+
+Because the database structure and test data are already version-controlled in this repository, running these steps will give you an exact, working copy of the database instantly—running at lightning speed on your own hardware!
+
+--------------------------------------------------------
+PREREQUISITES
+--------------------------------------------------------
+Before you begin, ensure you have the following installed:
+1. Docker Desktop: Download from https://www.docker.com/products/docker-desktop
+   * WINDOWS USERS: Ensure "Use WSL 2 instead of Hyper-V" is checked during installation.
+2. Node.js & NPM: Download from https://nodejs.org/
+3. PHP & Composer: Standard Laravel requirements.
+
+--------------------------------------------------------
+STEP 1: PULL THE CODE
+--------------------------------------------------------
+1. Clone the project repository to your machine.
+2. Open your terminal inside the project folder (`qr_attendance-system`).
+3. Run this command to install the Supabase CLI and other dependencies:
+   npm install
+
+--------------------------------------------------------
+STEP 2: START THE LOCAL DATABASE
+--------------------------------------------------------
+1. Open the Docker Desktop app and ensure it is running in the background.
+2. In your project terminal, run the following command:
+   npx supabase start
+
+*Note: The very first time you run this, it will take a few minutes to download the Docker images. It will automatically read the `supabase` folder in the code to build our tables and inject the test data!
+
+--------------------------------------------------------
+STEP 3: CONNECT LARAVEL TO THE LOCAL DB
+--------------------------------------------------------
+1. Duplicate the `.env.example` file and rename the copy to `.env`.
+2. Open `.env` and update the database configuration to match this EXACTLY:
+
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=54322
+   DB_DATABASE=postgres
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   DB_SSLMODE=prefer
+
+3. Update the Supabase API keys (if our code uses the JS/PHP client):
+   SUPABASE_URL=http://127.0.0.1:54321
+   SUPABASE_KEY=sb_publishable_ACJWlzQHlZJBrEguHvfOxg_3BJgxAaH
+
+--------------------------------------------------------
+STEP 4: CLEAR CACHE & RUN
+--------------------------------------------------------
+To ensure Laravel doesn't hold onto any old configurations:
+1. Run: php artisan optimize:clear
+2. Run: php artisan migrate (Just to ensure Laravel's base tables are set)
+3. Start the server: php artisan serve
+4. Go to http://127.0.0.1:8000/login and log in with the existing test accounts!
+
+--------------------------------------------------------
+DAILY WORKFLOW (CHEAT SHEET)
+--------------------------------------------------------
+* Start working: 
+  Open Docker Desktop -> Run `npx supabase start` in VS Code.
+* Stop working (Free up RAM): 
+  Run `npx supabase stop` in VS Code.
+* View Local Database UI: 
+  Open http://127.0.0.1:54323 in your browser.

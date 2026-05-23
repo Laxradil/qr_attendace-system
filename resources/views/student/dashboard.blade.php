@@ -1,0 +1,233 @@
+@extends('layouts.student')
+
+@section('title', 'Dashboard')
+@section('subtitle', 'Welcome back, ' . auth()->user()->name . '. Here is your attendance overview.')
+
+@section('content')
+@php
+  $attendanceRate = $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0;
+@endphp
+<section class="page" id="dashboard" style="display: flex; flex-direction: column; min-height: 100%; padding-bottom: 24px;" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
+
+  <div class="stats" style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; flex-shrink: 0;">
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
+      <div class="stat-icon blue">▤</div>
+      <div class="stat-body">
+        <strong>{{ $classes->count() }}</strong>
+        <span class="stat-label">Enrolled Classes</span>
+      </div>
+    </div>
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
+      <div class="stat-icon green">✓</div>
+      <div class="stat-body">
+        <strong>{{ $totalPresent }}</strong>
+        <span class="stat-label">Present</span>
+      </div>
+    </div>
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
+      <div class="stat-icon yellow">◷</div>
+      <div class="stat-body">
+        <strong>{{ $totalLate }}</strong>
+        <span class="stat-label">Late</span>
+      </div>
+    </div>
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
+      <div class="stat-icon red">✕</div>
+      <div class="stat-body">
+        <strong>{{ $totalAbsent }}</strong>
+        <span class="stat-label">Absent</span>
+      </div>
+    </div>
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
+      <div class="stat-icon purple">✉</div>
+      <div class="stat-body">
+        <strong>{{ $totalExcused ?? 0 }}</strong>
+        <span class="stat-label">Excused</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-grid" style="grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; min-height: 0;">
+
+    <div class="dash-col" style="display: flex; flex-direction: column;">
+      <div class="card glass qr-container stretch" style="padding: 30px; display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%; color: var(--text);">
+        <div class="qr-label" style="font-size: 18px; font-weight: 700; margin-bottom: 24px;">Your QR Code</div>
+        
+        <div class="qr-frame" style="padding: 15px; margin-bottom: 20px; background: white; border-radius: 12px; width: 100%; max-width: 280px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+          <canvas id="qrDashboard" style="width: 100%; height: auto;"></canvas>
+        </div>
+        
+        <div class="qr-student-name" style="font-size: 22px; font-weight: 800; margin-bottom: 6px;">{{ Auth::user()->name }}</div>
+        <div class="qr-student-id" style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Student ID: {{ Auth::user()->id }}</div>
+        
+        <div class="qr-hint" style="font-size: 14.5px; font-weight: 600; color: var(--text);">
+          Show to professor for attendance
+        </div>
+        
+        <div style="flex-grow: 1;"></div>
+        
+        <div class="qr-actions" style="display: flex; gap: 12px; width: 100%; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+          <button class="btn btn-pill primary" onclick="openQRModal()" style="flex: 1; padding: 10px 20px; font-size: 14px; color: #ffffff;">Show QR</button>
+          <button class="btn btn-pill" onclick="downloadQR()" style="flex: 1; padding: 10px 20px; font-size: 14px; color: var(--text); background: rgba(255, 255, 255, 0.15);">Download</button>
+        </div>
+        
+        <div class="qr-status" style="font-size: 13px; color: var(--muted); font-weight: 600;">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(24,240,139,.8);display:inline-block;margin-right:6px;"></span>
+          System Online
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-col" style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <div class="card glass" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+        <div class="section-head" style="margin-bottom: 16px;">
+          <h3 style="font-size: 16px; margin: 0;">📋 Recent Attendance</h3>
+          <a href="{{ route('student.attendance') }}" style="font-size: 13px; color: #ffffff; font-weight: 600; text-decoration: none;">View all</a>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:12px;color:var(--muted);font-weight:600">Attendance Rate</span>
+          <span style="font-size:14px;font-weight:800;color:#4dffa0">{{ $attendanceRate }}%</span>
+        </div>
+        <div class="prog-bar" style="height: 6px; margin-bottom: 16px;"><div class="prog-fill" id="attendanceRateFill" data-rate="{{ $attendanceRate }}" style="width:0%"></div></div>
+
+        <div style="flex-grow: 1; overflow-y: auto; padding-right: 12px;">
+          @forelse($recentAttendance->take(3) as $record)
+          <div class="att-row" style="padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; background: rgba(255,255,255,0.04); border-radius: 10px;">
+            <div style="flex-grow: 1;">
+              <div class="att-class" style="font-size: 14px; font-weight: 600; margin-bottom: 2px;">{{ $record->classe->code }} — {{ $record->classe->name }}</div>
+              <div class="att-date" style="font-size: 12px; color: var(--muted);">{{ $record->recorded_at->format('M d, Y') }}</div>
+            </div>
+            
+            <span class="att-time" style="font-size: 13px; font-weight: 700; color: #ffffff; margin-right: 16px;">{{ $record->recorded_at->format('h:i A') }}</span>
+            <span class="pill {{ $record->status === 'present' ? 'green' : ($record->status === 'late' ? 'yellow' : ($record->status === 'absent' ? 'red' : 'purple')) }}" style="font-size: 11px; padding: 4px 10px;">
+              {{ ucfirst($record->status) }}
+            </span>
+          </div>
+          @empty
+          <div class="empty-state" style="padding:15px 0;font-size:13px">No records yet.</div>
+          @endforelse
+        </div>
+
+        <a href="{{ route('student.attendance') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;display:flex;padding: 8px;font-size:13px; color: #ffffff; background: rgba(255, 255, 255, 0.1);">View All Records →</a>
+      </div>
+
+      <div class="card glass" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+        <div class="section-head" style="margin-bottom: 16px;">
+          <h3 style="font-size: 16px; margin: 0;">📚 Your Classes</h3>
+          <a href="{{ route('student.classes') }}" style="font-size: 13px; color: #ffffff; font-weight: 600; text-decoration: none;">View all</a>
+        </div>
+        
+        <div style="flex-grow: 1; overflow: hidden; padding-right: 4px;">
+          @php $classList = collect($classes); @endphp
+          @forelse($classList->take(3) as $class)
+          <div class="class-row" style="padding: 10px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border-radius: 8px;">
+            <div class="class-row-left" style="flex-grow: 1; padding-right: 12px;">
+              <div class="class-row-name" style="font-size: 13.5px; font-weight: 600; margin-bottom: 2px;">{{ $class->code }} — {{ $class->name }}</div>
+              <div class="class-row-code" style="font-size: 11px; color: var(--muted);">{{ $class->code }}</div>
+              @if($class->schedules->first())
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35;">{{ $class->schedules->first()->days }} · {{ $class->schedules->first()->time }} · Room {{ $class->schedules->first()->room }}</div>
+              @endif
+            </div>
+            <div class="class-row-prof" style="font-size: 11px; text-align: right; min-width: 100px;">
+              @if($class->professors->first())
+              <strong style="display: block; color: #ffffff; margin-bottom: 2px;">{{ $class->professors->first()->name }}</strong>
+              <span style="color: var(--muted);">Professor</span>
+              @endif
+            </div>
+          </div>
+          @empty
+          <div class="empty-state" style="padding:10px 0;font-size:12px">No classes enrolled</div>
+          @endforelse
+        </div>
+        
+        <a href="{{ route('student.classes') }}" class="btn btn-pill" style="width:100%;margin-top:auto;justify-content:center;text-decoration:none;padding: 8px;font-size:13px; color: #ffffff; background: rgba(255, 255, 255, 0.1); display:flex;">View All Classes</a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<div class="qr-modal" id="qrModal">
+  <div class="qr-modal-overlay"></div>
+  <div class="qr-modal-content glass">
+    <button class="qr-modal-close" onclick="closeQRModal()">✕</button>
+    <div class="qr-modal-body">
+      <div style="text-align:center">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)">Your QR Code</div>
+        <div class="qr-modal-frame">
+          <canvas id="qrModalCanvas"></canvas>
+        </div>
+        <div style="margin-top:16px">
+          <div style="font-size:16px;font-weight:800;color:var(--text)">{{ Auth::user()->name }}</div>
+          <div style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-top:4px">Student ID: {{ Auth::user()->id }}</div>
+          <div style="font-size:12px;color:var(--faint);margin-top:8px">Show to professor for attendance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    function downloadQR() {
+      const canvas = document.getElementById('qrDashboard');
+      if (!canvas) return;
+      const link = document.createElement('a');
+      link.download = 'student-qr.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  // Generate QR code for dashboard
+  function initStudentQR() {
+    const dashboard = document.getElementById('dashboard');
+    if (!dashboard) return;
+
+    const qrPayload = {
+      type: 'student_attendance',
+      student_id: Number(dashboard.dataset.studentId),
+      student_name: dashboard.dataset.studentName || '',
+      email: dashboard.dataset.studentEmail || ''
+    };
+    const qrData = JSON.stringify(qrPayload);
+
+    const rateFill = document.getElementById('attendanceRateFill');
+    if (rateFill) {
+      const rate = Number(rateFill.dataset.rate || 0);
+      rateFill.style.width = `${rate}%`;
+    }
+
+    const attemptGenerate = function() {
+      if (typeof generateQR === 'function') {
+        generateQR('qrDashboard', qrData);
+        generateQR('qrModalCanvas', qrData);
+      } else {
+        setTimeout(attemptGenerate, 100);
+      }
+    };
+
+    attemptGenerate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStudentQR);
+  } else {
+    initStudentQR();
+  }
+
+  function openQRModal() {
+    document.getElementById('qrModal').classList.add('active');
+  }
+
+  function closeQRModal() {
+    document.getElementById('qrModal').classList.remove('active');
+  }
+
+  // Close modal on escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('qrModal').classList.contains('active')) {
+      closeQRModal();
+    }
+  });
+</script>
+@endsection

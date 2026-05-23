@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Attendance System - Flowcharts</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d0c1d;
+            color: #e8e6ff;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .flowchart-section {
+            background: #13122a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        .flowchart-section.active { display: block; }
+        h1 { 
+            font-size: 28px; 
+            margin-bottom: 10px;
+            color: #a29bfe;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #9b97cc;
+            margin-bottom: 20px;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            background: #090818;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 16px;
+            border: 1px solid #6c5ce7;
+            background: #6c5ce7;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        button:hover { background: #5a4fcf; }
+        button.inactive {
+            background: transparent;
+            color: #9b97cc;
+            border-color: #5a5880;
+        }
+        button.inactive:hover {
+            background: rgba(108, 92, 231, 0.1);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 style="text-align: center; margin-bottom: 30px;">QR Attendance System - Flowcharts</h1>
+    
+    <div class="controls" style="justify-content: center;">
+        <button onclick="showChart(1)">1. Website Flow</button>
+        <button onclick="showChart(2)" class="inactive">2. Scanning Process</button>
+        <button onclick="showChart(3)" class="inactive">3. System Architecture</button>
+    </div>
+
+    <!-- Chart 1: Website Flow -->
+    <div class="flowchart-section active" id="chart-1">
+        <h1>1. Website Flow & User Journey</h1>
+        <p class="subtitle">Shows how users authenticate and navigate between admin and professor roles</p>
+        <div class="mermaid">
+graph TD
+    A["👤 User Visits Website"] --> B{"Authenticated?"};
+    B -->|No| C["🔐 Login Page"];
+    C --> D{"Valid Credentials?"};
+    D -->|No| E["❌ Login Failed"];
+    E --> C;
+    D -->|Yes| F{"Select Role"};
+    F -->|Admin| G["👨‍💼 Admin Dashboard"];
+    F -->|Professor| H["👨‍🏫 Professor Dashboard"];
+    
+    B -->|Yes| F;
+    
+    G --> G1["📊 Admin Features"];
+    G1 --> G2["👥 Manage Users<br/>📚 Manage Classes<br/>🎓 Manage Professors/Students<br/>🔐 Generate QR Codes<br/>📈 View Reports<br/>📋 System Logs"];
+    
+    H --> H1["📊 Professor Features"];
+    H1 --> H2["📱 Scan QR Code<br/>📸 Camera Mode<br/>🔧 Hardware Scanner<br/>📝 Record Attendance<br/>✏️ Edit Attendance<br/>📈 View Reports<br/>🎓 My Classes<br/>👥 View Students"];
+    
+    G2 --> G3["🎯 Key Actions"];
+    G3 --> G3A["Create/Edit Users<br/>Create/Edit Classes<br/>Generate QR Codes<br/>View Attendance Data<br/>Export Reports"];
+    
+    H2 --> H3["🎯 Key Actions"];
+    H3 --> H3A["Start Camera/Scanner<br/>Select Class & Student<br/>Submit Attendance<br/>View Class Performance<br/>Edit Student Records"];
+    
+    G3A --> G4["💾 Save to Database"];
+    H3A --> H4["💾 Save to Database"];
+    
+    G4 --> G5["✅ Changes Applied<br/>📋 System Log Entry"];
+    H4 --> H5["✅ Changes Applied<br/>📋 System Log Entry"];
+    
+    G5 --> G6["🚪 Logout"];
+    H5 --> H6["🚪 Logout"];
+    
+    G6 --> A;
+    H6 --> A;
+        </div>
+    </div>
+
+    <!-- Chart 2: Attendance Scanning -->
+    <div class="flowchart-section" id="chart-2">
+        <h1>2. Attendance Scanning Process</h1>
+        <p class="subtitle">Detailed workflow for recording student attendance using camera or hardware scanner</p>
+        <div class="mermaid">
+graph TD
+    A["🎓 Professor Opens Scan QR Page"] --> B{"Choose Mode"};
+    
+    B -->|Camera Mode| C["Camera Mode Active"];
+    C --> C1["Select Class"];
+    C1 --> C2["Start Camera"];
+    C2 --> C3{"Camera Ready?"};
+    C3 -->|No| C4["Camera Error"];
+    C4 --> C2;
+    C3 -->|Yes| C5["Video Feed Displayed"];
+    
+    B -->|Hardware Mode| D["Hardware Scanner Mode Active"];
+    D --> D1["Select Class"];
+    D1 --> D2["Focus on Input Field"];
+    D2 --> D3["Point Scanner at QR Code"];
+    
+    C5 --> C6{"Scan QR Code"};
+    D3 --> D4{"Scanner Detects QR"};
+    
+    C6 -->|Manual or Auto| C7["Enter QR Code"];
+    C7 --> C8["QR Code Captured"];
+    
+    D4 -->|Success| D5["Auto-Types QR Code"];
+    D4 -->|Fail| D6["Rescan Required"];
+    D6 --> D3;
+    D5 --> D7["QR Code Captured"];
+    
+    C8 --> E["QR Code Shows in Field"];
+    D7 --> E;
+    E --> F["Added to Recent Scans"];
+    F --> G["Select Student"];
+    G --> G1{"Student Selected?"};
+    G1 -->|No| G2["Choose a Student"];
+    G2 --> G;
+    G1 -->|Yes| H["Student Details Populated"];
+    
+    H --> I["Review Attendance Record"];
+    I --> I1{"Record Correct?"};
+    I1 -->|No| I2["Edit Fields"];
+    I2 --> I3["Change Status/Time"];
+    I3 --> H;
+    I1 -->|Yes| J["Submit Attendance"];
+    
+    J --> K["Save to Database"];
+    K --> K1{"Save Success?"};
+    K1 -->|No| K2["Error Occurred"];
+    K2 --> K3["Retry"];
+    K3 --> K;
+    K1 -->|Yes| L["System Log Entry Created"];
+    L --> M["Attendance Recorded"];
+    M --> M1["Recent Scans Updated"];
+    M1 --> N{"Continue Scanning?"};
+    N -->|Yes| N1["Clear Fields"];
+    N1 --> E;
+    N -->|No| O["Exit Scan Page"];
+    O --> P["Dashboard"];
+        </div>
+    </div>
+
+    <!-- Chart 3: System Architecture -->
+    <div class="flowchart-section" id="chart-3">
+        <h1>3. System Architecture & Data Flow</h1>
+        <p class="subtitle">Complete technical architecture showing frontend, backend, database, and features</p>
+        <div class="mermaid">
+graph LR
+    subgraph Frontend["Frontend Layer"]
+        L1["Login Page"]
+        L2["Admin Dashboard"]
+        L3["Professor Dashboard"]
+        L4["QR Scanner"]
+        L5["Reports Page"]
+    end
+    
+    subgraph Backend["Backend - Laravel"]
+        R1["Routes"]
+        C1["Controllers"]
+        M1["Models"]
+    end
+    
+    subgraph Database["Database - PostgreSQL"]
+        DB1["Users Table"]
+        DB2["Classes Table"]
+        DB3["QR Codes Table"]
+        DB4["Attendance Table"]
+        DB5["Schedules Table"]
+        DB6["System Logs Table"]
+    end
+    
+    L1 --> R1;
+    L2 --> R1;
+    L3 --> R1;
+    L4 --> R1;
+    L5 --> R1;
+    
+    R1 --> C1;
+    C1 --> M1;
+    
+    M1 --> DB1;
+    M1 --> DB2;
+    M1 --> DB3;
+    M1 --> DB4;
+    M1 --> DB5;
+    M1 --> DB6;
+    
+    style Frontend fill:#e1f5ff
+    style Backend fill:#fff3e0
+    style Database fill:#f3e5f5
+        </div>
+    </div>
+</div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    
+    function showChart(num) {
+        // Hide all charts
+        document.querySelectorAll('.flowchart-section').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.querySelectorAll('button').forEach(btn => {
+            btn.classList.add('inactive');
+        });
+        
+        // Show selected chart
+        document.getElementById('chart-' + num).classList.add('active');
+        event.target.classList.remove('inactive');
+    }
+</script>
+</body>
+</html>
