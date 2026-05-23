@@ -153,6 +153,25 @@
     color: #166534;
     background: #dcfce7;
     border-color: #bbf7d0;
+    outline: 1px solid rgba(139, 92, 255, 0.5);
+    outline-offset: 1px;
+  }
+  
+  details > summary {
+    outline: 1px solid rgba(139, 92, 255, 0.3);
+    outline-offset: 2px;
+    border-radius: 8px;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+  }
+  
+  details > summary:hover {
+    outline: 1px solid rgba(139, 92, 255, 0.6);
+    background: rgba(139, 92, 255, 0.08);
+  }
+  
+  details > summary:focus-visible {
+    outline: 2px solid rgba(139, 92, 255, 0.8);
   }
   
   .table-wrap {
@@ -266,6 +285,24 @@
     background: #ecfdf5 !important;
     border-color: #d1fae5 !important;
     color: #065f46 !important;
+    outline: 1px solid #10b981 !important;
+    outline-offset: 1px;
+  }
+  
+  body.theme-light details > summary {
+    outline: 1px solid #3b82f6 !important;
+    outline-offset: 2px;
+    border-radius: 8px;
+    padding: 4px 8px;
+  }
+  
+  body.theme-light details > summary:hover {
+    outline: 1px solid #1d4ed8 !important;
+    background: #eff6ff !important;
+  }
+  
+  body.theme-light details > summary:focus-visible {
+    outline: 2px solid #1d4ed8 !important;
   }
   
   body.theme-light th {

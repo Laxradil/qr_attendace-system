@@ -230,12 +230,22 @@
   }
 
   body.theme-light .scan-status {
-    background: rgba(16,185,129,.12) !important;
-    border-color: rgba(16,185,129,.4) !important;
-    color: #059669 !important;
-    box-shadow: 0 4px 12px rgba(16,185,129,.08) !important;
+    background: rgba(16,185,129,.18) !important;
+    border-color: rgba(16,185,129,.55) !important;
+    color: #064e3b !important;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(16,185,129,.12) !important;
   }
-  
+
+  body.theme-light .scan-status .dot {
+    background: #10b981 !important;
+    border-color: rgba(16,185,129,.55) !important;
+  }
+
+  body.theme-light .section-head h3 {
+    color: #111827 !important;
+  }
+
   .cam-btns {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -292,13 +302,14 @@
   }
 
   body.theme-light .cam-btn.stop {
-    background: rgba(255,61,114,.12) !important;
-    border: 1px solid rgba(255,61,114,.25) !important;
-    color: #ff8298 !important;
+    background: rgba(239,68,68,.16) !important;
+    border: 1px solid rgba(239,68,68,.35) !important;
+    color: #7f1d1d !important;
+    font-weight: 700 !important;
   }
 
   body.theme-light .cam-btn.stop:hover:not(:disabled) {
-    background: rgba(255,61,114,.22) !important;
+    background: rgba(239,68,68,.28) !important;
   }
 
   body.theme-light .report-btn {

@@ -121,6 +121,14 @@
             transform: translateX(6px);
         }
 
+        body.theme-ash .sidebar-item:hover,
+        body.theme-ash .sidebar-item.active {
+            background-color: #363838 !important;
+            color: #ffffff !important;
+            border-left-color: #363838 !important;
+            transform: translateX(6px) !important;
+        }
+
         .sidebar-item svg {
             width: 20px;
             height: 20px;

@@ -27,7 +27,6 @@
     transition: transform .3s ease, box-shadow .3s ease;
   }
   body.theme-ash .glass.schedule-card,
-  body.theme-light .glass.schedule-card,
   body.theme-dark .glass.schedule-card,
   body.theme-onyx .glass.schedule-card {
     background: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
@@ -37,6 +36,32 @@
     box-shadow: 0 24px 60px rgba(0,0,0,.24) !important;
     backdrop-filter: blur(18px) !important;
     -webkit-backdrop-filter: blur(18px) !important;
+  }
+  body.theme-light .glass.schedule-card,
+  body.theme-light .schedule-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 16px 40px rgba(15,23,42,.08) !important;
+    color: #111827 !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+  }
+  body.theme-light .schedule-card:hover {
+    border-color: #94a3b8 !important;
+  }
+  body.theme-light .schedule-card h3 {
+    color: #111827 !important;
+  }
+  body.theme-light .schedule-card .room-code,
+  body.theme-light .schedule-card .schedule-meta-item,
+  body.theme-light .schedule-card .schedule-meta-item span,
+  body.theme-light .schedule-card .schedule-meta-item strong {
+    color: #4b5563 !important;
+  }
+  body.theme-light .schedule-card .schedule-meta-item .icon {
+    background: #f8fafc !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
   }
   .schedule-card:hover {
     transform: translateY(-4px);

@@ -279,7 +279,12 @@
         <div class="form-note">Cannot be changed</div>
       </div>
 
-      @php $theme = old('theme', $user->theme ?? 'light'); @endphp
+      @php
+        $theme = old('theme', $user->theme ?? 'light');
+        if (!in_array($theme, ['light','onyx'])) {
+          $theme = 'light';
+        }
+      @endphp
       <div>
         <label class="label">Theme</label>
         <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
@@ -288,20 +293,12 @@
             <span class="theme-swatch theme-light"></span>
             <span class="theme-label">Light</span>
           </button>
-          <button type="button" class="theme-option {{ $theme === 'ash' ? 'selected' : '' }}" data-theme="ash">
-            <span class="theme-swatch theme-ash"></span>
-            <span class="theme-label">Ash</span>
-          </button>
-          <button type="button" class="theme-option {{ $theme === 'dark' ? 'selected' : '' }}" data-theme="dark">
-            <span class="theme-swatch theme-dark"></span>
-            <span class="theme-label">Dark</span>
-          </button>
           <button type="button" class="theme-option {{ $theme === 'onyx' ? 'selected' : '' }}" data-theme="onyx">
             <span class="theme-swatch theme-onyx"></span>
             <span class="theme-label">Onyx</span>
           </button>
         </div>
-        <div class="form-note">Choose between Light, Ash, Dark and Onyx.</div>
+        <div class="form-note">Choose between Light and Onyx.</div>
       </div>
     </form>
 
@@ -331,8 +328,8 @@
       if (!themeInput || !themeButtons.length) return;
 
       const applyTheme = function (theme) {
-        const validThemes = ['light','ash','dark','onyx'];
-        const activeTheme = validThemes.includes(theme) ? theme : 'dark';
+        const validThemes = ['light','onyx'];
+        const activeTheme = validThemes.includes(theme) ? theme : 'light';
         document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
         document.body.classList.add('theme-' + activeTheme);
         themeInput.value = activeTheme;
@@ -649,8 +646,8 @@
     if (!themeInput || !themeButtons.length) return;
 
     const applyTheme = function (theme) {
-      const validThemes = ['light','ash','dark','onyx'];
-      const activeTheme = validThemes.includes(theme) ? theme : 'dark';
+      const validThemes = ['light','onyx'];
+      const activeTheme = validThemes.includes(theme) ? theme : 'onyx';
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + activeTheme);
       themeInput.value = activeTheme;

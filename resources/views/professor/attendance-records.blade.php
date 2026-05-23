@@ -441,8 +441,15 @@
   }
   
   body.theme-light .glass-table {
+    background: #f8fafc !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: 0 16px 40px rgba(15,23,42,.08) !important;
+  }
+  
+  body.theme-light .table-wrap {
     background: #ffffff !important;
     border: 1px solid #e5e7eb !important;
+    border-radius: 20px !important;
   }
   
   body.theme-light .stat-icon.cyan {
@@ -454,22 +461,22 @@
   body.theme-light .filter-input {
     background: #ffffff !important;
     border: 1px solid #e5e7eb !important;
-    color: #000000 !important;
+    color: #0f172a !important;
   }
   
   body.theme-light th {
-    background: #f9fafb !important;
-    color: #374151 !important;
-    border-bottom: 1px solid #e5e7eb !important;
+    background: #eef2ff !important;
+    color: #1f2937 !important;
+    border-bottom: 1px solid #d1d5db !important;
   }
   
   body.theme-light td {
-    color: #000000 !important;
+    color: #111827 !important;
     border-bottom: 1px solid #e5e7eb !important;
   }
   
   body.theme-light tr:hover td {
-    background: #f3f4f6 !important;
+    background: #eff6ff !important;
   }
   
   body.theme-light .small-avatar {

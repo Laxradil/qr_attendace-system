@@ -35,6 +35,9 @@ class StudentController extends Controller
                 ]);
                 $user->theme = $request->input('theme');
                 $user->save();
+                if ($request->wantsJson()) {
+                    return response()->json(['success' => true, 'message' => 'Theme updated successfully.']);
+                }
                 return back()->with('success', 'Theme updated successfully.');
             }
 

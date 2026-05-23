@@ -200,7 +200,11 @@
     body.theme-light .glass th,
     body.theme-light .glass li,
     body.theme-light .glass small,
-    body.theme-light .stat-body span
+    body.theme-light .stat-body,
+    body.theme-light .stat-body strong,
+    body.theme-light .stat-body span,
+    body.theme-light .stat-body .trend,
+    body.theme-light .activity-title
     {
       color: #1f2937 !important;
     }
@@ -1392,14 +1396,14 @@
 
     (function() {
       const themeKey = 'qr_attendance_theme';
-      const themeNames = ['light','ash','dark','onyx'];
+      const themeNames = ['light','onyx'];
       const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
       const stored = localStorage.getItem(themeKey);
       const current = themeNames.includes(serverTheme)
         ? serverTheme
         : themeNames.includes(stored)
           ? stored
-          : 'light';
+          : 'onyx';
       if (serverTheme && themeNames.includes(serverTheme)) {
         try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
       }
