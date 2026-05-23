@@ -854,18 +854,13 @@ class ProfessorController extends Controller
         abort_unless($user->assignedClasses()->whereKey($attendanceRecord->class_id)->exists(), 403);
 
         $validated = $request->validate([
-            'status' => 'required|in:present,late,absent,excused',
+            'status' => 'required|in:present,absent,excused',
             'recorded_at' => 'required|date',
-            'minutes_late' => 'nullable|integer|min:0',
         ]);
-
-        $minutesLate = $validated['status'] === 'late'
-            ? (int) ($validated['minutes_late'] ?? 0)
-            : 0;
 
         $attendanceRecord->update([
             'status' => $validated['status'],
-            'minutes_late' => $minutesLate,
+            'minutes_late' => 0,
             'recorded_at' => Carbon::parse($validated['recorded_at']),
         ]);
 

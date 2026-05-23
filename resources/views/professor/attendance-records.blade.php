@@ -93,11 +93,20 @@
               </td>
               <td>{{ $record->classe->code ?? 'N/A' }} — {{ $record->classe->name ?? 'N/A' }}</td>
               <td>
-                <span class="pill {{ strtolower($record->status ?? 'present') }}">{{ ucfirst($record->status ?? 'Present') }}</span>
+                @php
+                  $statusClass = match (strtolower($record->status ?? 'present')) {
+                    'present' => 'green',
+                    'late' => 'yellow',
+                    'absent' => 'red',
+                    'excused' => 'excused',
+                    default => 'blue',
+                  };
+                @endphp
+                <span class="pill {{ $statusClass }}">{{ ucfirst($record->status ?? 'Present') }}</span>
               </td>
               <td>{{ $record->minutes_late ?? '—' }}</td>
               <td>
-                <a href="#" class="btn slim" onclick="alert('Edit attendance feature coming soon')">Edit</a>
+                <a href="{{ route('professor.attendance-records.edit', $record) }}" class="btn slim">Edit</a>
               </td>
             </tr>
           @empty
@@ -343,6 +352,12 @@
     background: rgba(255,199,90,.12);
     border-color: rgba(255,199,90,.22);
   }
+
+  .pill.excused {
+    color: #d8cdff;
+    background: rgba(139,92,255,.15);
+    border-color: rgba(139,92,255,.25);
+  }
   
   .btn.slim {
     padding: 7px 10px;
@@ -426,6 +441,12 @@
     background: #fffbeb !important;
     border-color: #fde68a !important;
     color: #92400e !important;
+  }
+
+  body.theme-light .pill.excused {
+    background: #f5f3ff !important;
+    border-color: #ddd6fe !important;
+    color: #6d28d9 !important;
   }
   
   body.theme-light .live-search {
