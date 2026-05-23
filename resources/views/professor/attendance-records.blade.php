@@ -21,23 +21,23 @@
 <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px">
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon blue" style="width:34px;height:34px;font-size:15px">▤</div>
-    <div class="stat-body"><strong style="font-size:22px">{{ $totalRecords }}</strong><span>Total Records</span></div>
+    <div class="stat-body"><strong id="totalRecords" style="font-size:22px">{{ $totalRecords }}</strong><span>Total Records</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon green" style="width:34px;height:34px;font-size:15px">✓</div>
-    <div class="stat-body"><strong style="font-size:22px">{{ $presentCount }}</strong><span>Present</span></div>
+    <div class="stat-body"><strong id="presentCount" style="font-size:22px">{{ $presentCount }}</strong><span>Present</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon yellow" style="width:34px;height:34px;font-size:15px">◷</div>
-    <div class="stat-body"><strong style="font-size:22px">{{ $lateCount }}</strong><span>Late</span></div>
+    <div class="stat-body"><strong id="lateCount" style="font-size:22px">{{ $lateCount }}</strong><span>Late</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon red" style="width:34px;height:34px;font-size:15px">✕</div>
-    <div class="stat-body"><strong style="font-size:22px">{{ $absentCount }}</strong><span>Absent</span></div>
+    <div class="stat-body"><strong id="absentCount" style="font-size:22px">{{ $absentCount }}</strong><span>Absent</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon cyan" style="width:34px;height:34px;font-size:15px;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.2)">◈</div>
-    <div class="stat-body"><strong style="font-size:22px">{{ $excusedCount ?? 0 }}</strong><span>Excused</span></div>
+    <div class="stat-body"><strong id="excusedCount" style="font-size:22px">{{ $excusedCount ?? 0 }}</strong><span>Excused</span></div>
   </div>
 </div>
 
@@ -80,7 +80,7 @@
         </thead>
         <tbody>
           @forelse($records as $record)
-            <tr>
+            <tr data-status="{{ strtolower($record->status ?? '') }}">
               <td>{{ $record->created_at->format('M d, Y H:i A') }}</td>
               <td>
                 <div class="user-cell">
@@ -106,7 +106,7 @@
               </td>
               <td>{{ $record->minutes_late ?? '—' }}</td>
               <td>
-                <select class="fi status-select" data-id="{{ $record->id }}" data-recorded_at="{{ optional($record->recorded_at)->tz('UTC')->setTimezone('Asia/Manila')->format('Y-m-d\TH:i') }}" data-token="{{ csrf_token() }}">
+                <select class="fi status-select" data-id="{{ $record->id }}" data-prev="{{ strtolower($record->status ?? '') }}" data-recorded_at="{{ optional($record->recorded_at)->tz('UTC')->setTimezone('Asia/Manila')->format('Y-m-d\TH:i') }}" data-token="{{ csrf_token() }}">
                   <option value="present" {{ (strtolower($record->status) ?? '') === 'present' ? 'selected' : '' }}>Present</option>
                   <option value="absent" {{ (strtolower($record->status) ?? '') === 'absent' ? 'selected' : '' }}>Absent</option>
                   <option value="excused" {{ (strtolower($record->status) ?? '') === 'excused' ? 'selected' : '' }}>Excused</option>
@@ -362,6 +362,17 @@
     background: rgba(139,92,255,.15);
     border-color: rgba(139,92,255,.25);
   }
+
+  .status-select {
+    min-width:120px;
+    padding:6px 10px;
+    border-radius:10px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    color: var(--text);
+    font-weight:700;
+    font-family:var(--font);
+  }
   
   .btn.slim {
     padding: 7px 10px;
@@ -472,10 +483,12 @@
       const token = select.dataset.token;
       const url = `/professor/attendance-records/${id}`;
 
+      const prev = select.dataset.prev || select.closest('tr')?.dataset?.status || '';
       select.disabled = true;
       try{
         const res = await fetch(url, {
           method: 'PUT',
+          credentials: 'same-origin',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': token,
@@ -484,7 +497,8 @@
           body: JSON.stringify({ status, recorded_at })
         });
         if(!res.ok){
-          const txt = await res.text();
+          const json = await res.json().catch(()=>null);
+          const txt = json?.message || (await res.text());
           throw new Error(txt || 'Update failed');
         }
         // update UI
@@ -492,6 +506,27 @@
         setStatusPill(row, status);
         const minutesCell = row.children[4];
         if(minutesCell) minutesCell.textContent = '—';
+        // update counters
+        try{
+          const toInt = el => parseInt(el?.textContent||'0')||0;
+          const presentEl = document.getElementById('presentCount');
+          const absentEl = document.getElementById('absentCount');
+          const excusedEl = document.getElementById('excusedCount');
+          const totalEl = document.getElementById('totalRecords');
+          const prevLower = (prev||'').toLowerCase();
+          if(prevLower !== status){
+            if(status === 'present') presentEl.textContent = toInt(presentEl)+1;
+            if(status === 'absent') absentEl.textContent = toInt(absentEl)+1;
+            if(status === 'excused') excusedEl.textContent = toInt(excusedEl)+1;
+
+            if(prevLower === 'present') presentEl.textContent = Math.max(0,toInt(presentEl)-1);
+            if(prevLower === 'absent') absentEl.textContent = Math.max(0,toInt(absentEl)-1);
+            if(prevLower === 'excused') excusedEl.textContent = Math.max(0,toInt(excusedEl)-1);
+          }
+          // ensure row dataset updated
+          if(row) row.dataset.status = status;
+          select.dataset.prev = status;
+        }catch(e){console.warn('counter update failed', e)}
       }catch(err){
         console.error('Failed to update status', err);
         alert('Failed to update attendance: ' + (err.message||err));
