@@ -854,13 +854,18 @@ class ProfessorController extends Controller
         abort_unless($user->assignedClasses()->whereKey($attendanceRecord->class_id)->exists(), 403);
 
         $validated = $request->validate([
-            'status' => 'required|in:present,absent,excused',
+            'status' => 'required|in:present,late,absent,excused',
             'recorded_at' => 'required|date',
+            'minutes_late' => 'nullable|integer|min:0',
         ]);
+
+        $minutesLate = $validated['status'] === 'late'
+            ? (int) ($validated['minutes_late'] ?? 0)
+            : 0;
 
         $attendanceRecord->update([
             'status' => $validated['status'],
-            'minutes_late' => 0,
+            'minutes_late' => $minutesLate,
             'recorded_at' => Carbon::parse($validated['recorded_at']),
         ]);
 
@@ -871,6 +876,14 @@ class ProfessorController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Attendance updated successfully',
+                'status' => $attendanceRecord->status,
+                'minutes_late' => $attendanceRecord->minutes_late,
+            ]);
+        }
 
         return redirect()->route('professor.attendance-records', ['class_id' => $attendanceRecord->class_id])
             ->with('success', 'Attendance updated successfully');
@@ -895,12 +908,14 @@ class ProfessorController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
+            'theme' => 'nullable|in:light,ash,dark,onyx',
         ]);
 
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => isset($validated['password']) && $validated['password'] ? bcrypt($validated['password']) : $user->password,
+            'theme' => $validated['theme'] ?? $user->theme,
         ]);
 
         return back()->with('success', 'Settings updated successfully');

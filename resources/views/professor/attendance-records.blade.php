@@ -21,23 +21,23 @@
 <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px">
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon blue" style="width:34px;height:34px;font-size:15px">▤</div>
-    <div class="stat-body"><strong id="totalRecords" style="font-size:22px">{{ $totalRecords }}</strong><span>Total Records</span></div>
+    <div class="stat-body"><strong style="font-size:22px">{{ $totalRecords }}</strong><span>Total Records</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon green" style="width:34px;height:34px;font-size:15px">✓</div>
-    <div class="stat-body"><strong id="presentCount" style="font-size:22px">{{ $presentCount }}</strong><span>Present</span></div>
+    <div class="stat-body"><strong style="font-size:22px">{{ $presentCount }}</strong><span>Present</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon yellow" style="width:34px;height:34px;font-size:15px">◷</div>
-    <div class="stat-body"><strong id="lateCount" style="font-size:22px">{{ $lateCount }}</strong><span>Late</span></div>
+    <div class="stat-body"><strong style="font-size:22px">{{ $lateCount }}</strong><span>Late</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon red" style="width:34px;height:34px;font-size:15px">✕</div>
-    <div class="stat-body"><strong id="absentCount" style="font-size:22px">{{ $absentCount }}</strong><span>Absent</span></div>
+    <div class="stat-body"><strong style="font-size:22px">{{ $absentCount }}</strong><span>Absent</span></div>
   </div>
   <div class="stat glass" style="padding:12px">
     <div class="stat-icon cyan" style="width:34px;height:34px;font-size:15px;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.2)">◈</div>
-    <div class="stat-body"><strong id="excusedCount" style="font-size:22px">{{ $excusedCount ?? 0 }}</strong><span>Excused</span></div>
+    <div class="stat-body"><strong style="font-size:22px">{{ $excusedCount ?? 0 }}</strong><span>Excused</span></div>
   </div>
 </div>
 
@@ -80,7 +80,7 @@
         </thead>
         <tbody>
           @forelse($records as $record)
-            <tr data-status="{{ strtolower($record->status ?? '') }}">
+            <tr>
               <td>{{ $record->created_at->format('M d, Y H:i A') }}</td>
               <td>
                 <div class="user-cell">
@@ -93,23 +93,15 @@
               </td>
               <td>{{ $record->classe->code ?? 'N/A' }} — {{ $record->classe->name ?? 'N/A' }}</td>
               <td>
-                @php
-                  $statusClass = match (strtolower($record->status ?? 'present')) {
-                    'present' => 'green',
-                    'late' => 'yellow',
-                    'absent' => 'red',
-                    'excused' => 'excused',
-                    default => 'blue',
-                  };
-                @endphp
-                <span class="pill {{ $statusClass }}">{{ ucfirst($record->status ?? 'Present') }}</span>
+                <span class="pill {{ strtolower($record->status ?? 'present') }}">{{ ucfirst($record->status ?? 'Present') }}</span>
               </td>
               <td>{{ $record->minutes_late ?? '—' }}</td>
               <td>
-                <select class="fi status-select" data-id="{{ $record->id }}" data-prev="{{ strtolower($record->status ?? '') }}" data-recorded_at="{{ optional($record->recorded_at)->tz('UTC')->setTimezone('Asia/Manila')->format('Y-m-d\TH:i') }}" data-token="{{ csrf_token() }}">
-                  <option value="present" {{ (strtolower($record->status) ?? '') === 'present' ? 'selected' : '' }}>Present</option>
-                  <option value="absent" {{ (strtolower($record->status) ?? '') === 'absent' ? 'selected' : '' }}>Absent</option>
-                  <option value="excused" {{ (strtolower($record->status) ?? '') === 'excused' ? 'selected' : '' }}>Excused</option>
+                <select class="status-select" data-original-status="{{ $record->status ?? 'present' }}" data-update-url="{{ route('professor.attendance-records.update', $record) }}" data-recorded-at="{{ $record->recorded_at->format('Y-m-d H:i:s') }}" data-minutes-late="{{ $record->minutes_late ?? 0 }}" aria-label="Update attendance status for {{ $record->student->name ?? 'student' }}">
+                  <option value="present" {{ ($record->status ?? 'present') === 'present' ? 'selected' : '' }}>Present</option>
+                  <option value="late" {{ $record->status === 'late' ? 'selected' : '' }}>Late</option>
+                  <option value="absent" {{ $record->status === 'absent' ? 'selected' : '' }}>Absent</option>
+                  <option value="excused" {{ $record->status === 'excused' ? 'selected' : '' }}>Excused</option>
                 </select>
               </td>
             </tr>
@@ -131,6 +123,68 @@
     </div>
   @endif
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = '{{ csrf_token() }}';
+    document.querySelectorAll('.status-select').forEach(function (select) {
+      const statusCell = select.closest('tr')?.querySelector('td:nth-child(4) .pill');
+      const minutesCell = select.closest('tr')?.querySelector('td:nth-child(5)');
+      select.addEventListener('change', function () {
+        const selectedStatus = this.value;
+        const url = this.dataset.updateUrl;
+        const recordedAt = this.dataset.recordedAt;
+        const minutesLate = Number(this.dataset.minutesLate || 0);
+        const originalStatus = this.dataset.originalStatus || 'present';
+
+        if (!url) {
+          return;
+        }
+
+        this.disabled = true;
+        this.style.opacity = '0.7';
+
+        fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            status: selectedStatus,
+            recorded_at: recordedAt,
+            minutes_late: selectedStatus === 'late' ? minutesLate : 0
+          })
+        })
+          .then(async function (response) {
+            const data = await response.json().catch(function () { return {}; });
+            if (response.ok) {
+              if (statusCell) {
+                statusCell.textContent = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+                statusCell.className = 'pill ' + selectedStatus;
+              }
+              if (minutesCell) {
+                minutesCell.textContent = selectedStatus === 'late' ? (minutesLate + ' min') : '—';
+              }
+              select.dataset.originalStatus = selectedStatus;
+              return;
+            }
+            alert(data.error || data.message || 'Unable to update attendance status.');
+            select.value = originalStatus;
+          })
+          .catch(function () {
+            alert('Unable to update attendance status due to network error.');
+            select.value = originalStatus;
+          })
+          .finally(function () {
+            select.disabled = false;
+            select.style.opacity = '';
+          });
+      });
+    });
+  });
+</script>
 
 <style>
   .glass-table {
@@ -163,6 +217,22 @@
     text-align: left;
     border-bottom: 1px solid rgba(255,255,255,.07);
     vertical-align: middle;
+  }
+  .status-select {
+    min-width: 140px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: #fff;
+    font-size: 13px;
+    width: 100%;
+    max-width: 180px;
+  }
+  .status-select:focus {
+    outline: none;
+    border-color: rgba(73, 184, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(73, 184, 255, 0.15);
   }
   
   th {
@@ -356,23 +426,6 @@
     background: rgba(255,199,90,.12);
     border-color: rgba(255,199,90,.22);
   }
-
-  .pill.excused {
-    color: #d8cdff;
-    background: rgba(139,92,255,.15);
-    border-color: rgba(139,92,255,.25);
-  }
-
-  .status-select {
-    min-width:120px;
-    padding:6px 10px;
-    border-radius:10px;
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.08);
-    color: var(--text);
-    font-weight:700;
-    font-family:var(--font);
-  }
   
   .btn.slim {
     padding: 7px 10px;
@@ -457,91 +510,6 @@
     border-color: #fde68a !important;
     color: #92400e !important;
   }
-
-  body.theme-light .pill.excused {
-    background: #f5f3ff !important;
-    border-color: #ddd6fe !important;
-    color: #6d28d9 !important;
-  }
-
-<script>
-  (function(){
-    function setStatusPill(row, status){
-      const pill = row.querySelector('.pill');
-      if(!pill) return;
-      pill.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-      pill.classList.remove('green','red','yellow','excused','present','late','blue');
-      const map = { present: 'green', absent: 'red', late: 'yellow', excused: 'excused' };
-      const cls = map[status] || 'blue';
-      pill.classList.add(cls);
-    }
-
-    async function updateStatus(select){
-      const id = select.dataset.id;
-      const status = select.value;
-      const recorded_at = select.dataset.recorded_at || new Date().toISOString();
-      const token = select.dataset.token;
-      const url = `/professor/attendance-records/${id}`;
-
-      const prev = select.dataset.prev || select.closest('tr')?.dataset?.status || '';
-      select.disabled = true;
-      try{
-        const res = await fetch(url, {
-          method: 'PUT',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': token,
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ status, recorded_at })
-        });
-        if(!res.ok){
-          const json = await res.json().catch(()=>null);
-          const txt = json?.message || (await res.text());
-          throw new Error(txt || 'Update failed');
-        }
-        // update UI
-        const row = select.closest('tr');
-        setStatusPill(row, status);
-        const minutesCell = row.children[4];
-        if(minutesCell) minutesCell.textContent = '—';
-        // update counters
-        try{
-          const toInt = el => parseInt(el?.textContent||'0')||0;
-          const presentEl = document.getElementById('presentCount');
-          const absentEl = document.getElementById('absentCount');
-          const excusedEl = document.getElementById('excusedCount');
-          const totalEl = document.getElementById('totalRecords');
-          const prevLower = (prev||'').toLowerCase();
-          if(prevLower !== status){
-            if(status === 'present') presentEl.textContent = toInt(presentEl)+1;
-            if(status === 'absent') absentEl.textContent = toInt(absentEl)+1;
-            if(status === 'excused') excusedEl.textContent = toInt(excusedEl)+1;
-
-            if(prevLower === 'present') presentEl.textContent = Math.max(0,toInt(presentEl)-1);
-            if(prevLower === 'absent') absentEl.textContent = Math.max(0,toInt(absentEl)-1);
-            if(prevLower === 'excused') excusedEl.textContent = Math.max(0,toInt(excusedEl)-1);
-          }
-          // ensure row dataset updated
-          if(row) row.dataset.status = status;
-          select.dataset.prev = status;
-        }catch(e){console.warn('counter update failed', e)}
-      }catch(err){
-        console.error('Failed to update status', err);
-        alert('Failed to update attendance: ' + (err.message||err));
-      }finally{
-        select.disabled = false;
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', function(){
-      document.querySelectorAll('.status-select').forEach(function(sel){
-        sel.addEventListener('change', function(){ updateStatus(sel); });
-      });
-    });
-  })();
-</script>
   
   body.theme-light .live-search {
     background: #ffffff !important;

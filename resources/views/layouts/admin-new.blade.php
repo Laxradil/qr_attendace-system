@@ -1288,10 +1288,6 @@
           <span class="nav-icon">👥</span>
           <span>Users</span>
         </a>
-        <a href="{{ route('admin.professors') }}" class="@if(Route::currentRouteName() === 'admin.professors') active @endif">
-          <span class="nav-icon">🎓</span>
-          <span>Professors</span>
-        </a>
         <a href="{{ route('admin.students') }}" class="@if(Route::currentRouteName() === 'admin.students') active @endif">
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>
