@@ -1255,7 +1255,7 @@
     }
   </style>
 </head>
-<body @if((auth()->user()->theme ?? 'light') === 'light') class="theme-light" @elseif((auth()->user()->theme ?? '') === 'ash') class="theme-ash" @elseif((auth()->user()->theme ?? '') === 'dark') class="theme-dark" @elseif((auth()->user()->theme ?? '') === 'onyx') class="theme-onyx" @endif>
+<body @if((auth()->user()->theme ?? 'light') === 'light') class="theme-light" @elseif((auth()->user()->theme ?? '') === 'ash') class="theme-ash" @elseif((auth()->user()->theme ?? '') === 'dark') class="theme-dark" @elseif((auth()->user()->theme ?? '') === 'onyx') class="theme-onyx" @endif data-show-welcome-back="{{ session('show_welcome_back') ? '1' : '0' }}" data-server-theme="{{ Auth::check() ? Auth::user()->theme : '' }}">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
@@ -1506,13 +1506,16 @@
       document.head.appendChild(script);
     }
 
-    setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
+    const showWelcomeBack = document.body.dataset.showWelcomeBack === '1';
+    if (showWelcomeBack) {
+      setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
+    }
 
     // Theme switching via localStorage (matches admin/professor behavior)
     (function() {
       const themeKey = 'qr_attendance_theme';
       const themeNames = ['light','ash','dark','onyx'];
-      const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
+      const serverTheme = document.body.dataset.serverTheme || null;
       const stored = localStorage.getItem(themeKey);
       const current = themeNames.includes(serverTheme)
         ? serverTheme

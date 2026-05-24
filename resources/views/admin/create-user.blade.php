@@ -115,9 +115,9 @@
         <label for="student_id">Student ID</label>
         <input type="text" id="student_id" name="student_id" value="{{ old('student_id') }}" placeholder="Optional - for students only">
       </div>
-      <div class="form-group">
-        <label for="section">Section</label>
-        <input type="text" id="section" name="section" value="{{ old('section') }}" placeholder="Required for students">
+      <div class="form-group" id="section-group">
+        <label for="section">Section <span id="section-label-note">(optional)</span></label>
+        <input type="text" id="section" name="section" value="{{ old('section') }}" placeholder="Optional for professor/admin accounts">
       </div>
     </div>
 
@@ -138,6 +138,28 @@
     </div>
   </form>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const roleSelect = document.getElementById('role');
+    const sectionInput = document.getElementById('section');
+    const sectionNote = document.getElementById('section-label-note');
+
+    function syncSectionField() {
+      const isStudent = roleSelect && roleSelect.value === 'student';
+      sectionInput.required = isStudent;
+      sectionInput.placeholder = isStudent
+        ? 'Required for students'
+        : 'Optional for professor/admin accounts';
+      sectionNote.textContent = isStudent ? '(required)' : '(optional)';
+    }
+
+    if (roleSelect && sectionInput && sectionNote) {
+      roleSelect.addEventListener('change', syncSectionField);
+      syncSectionField();
+    }
+  });
+</script>
 
 <style>
   /* Light theme solid overrides */

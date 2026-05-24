@@ -42,12 +42,37 @@
   .theme-option:hover { transform:translateY(-1px); border-color:rgba(255,255,255,.22); }
   .theme-option.selected { border-color:#6b73ff; box-shadow:0 0 0 2px rgba(107,115,255,.12); background:rgba(107,115,255,.12); }
   .theme-option.selected .theme-swatch { border-color:rgba(255,255,255,.95); box-shadow:0 0 0 1px rgba(255,255,255,.5); }
+  .theme-option.disabled { opacity:.45; cursor:not-allowed; position:relative; }
+  .theme-option.disabled:hover { transform:none; border-color:rgba(255,255,255,.12); }
+  .theme-option.disabled::after {
+    content:'Coming soon';
+    position:absolute;
+    right:12px;
+    top:12px;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#9ca3af;
+  }
   .theme-swatch { width:34px; height:34px; border-radius:14px; flex-shrink:0; border:1px solid rgba(148,163,184,.45); box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); }
   .theme-label { font-size:13px; font-weight:700; }
   .theme-light { background:#ffffff; }
   .theme-ash { background:#9ca3af; }
   .theme-dark { background:#1f2937; }
   .theme-onyx { background:#0f172a; }
+  .theme-side-note {
+    margin-top:12px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    color:var(--muted);
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .theme-side-note strong { color:var(--text); }
   .button-group { display: flex; gap: 10px; margin-top: 16px; }
   .settings-btn { padding: 11px 20px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 600; outline: none; cursor: pointer; transition: .2s ease; flex: 1; }
   .settings-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.24); }
@@ -280,6 +305,7 @@
       </div>
 
       @php $theme = old('theme', $user->theme ?? 'light'); @endphp
+      @php $theme = $theme === 'ash' ? 'light' : $theme; @endphp
       <div>
         <label class="label">Theme</label>
         <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
@@ -288,7 +314,7 @@
             <span class="theme-swatch theme-light"></span>
             <span class="theme-label">Light</span>
           </button>
-          <button type="button" class="theme-option {{ $theme === 'ash' ? 'selected' : '' }}" data-theme="ash">
+          <button type="button" class="theme-option disabled" data-theme="ash" disabled aria-disabled="true" title="Theme coming soon - bayad muna">
             <span class="theme-swatch theme-ash"></span>
             <span class="theme-label">Ash</span>
           </button>
@@ -301,7 +327,11 @@
             <span class="theme-label">Onyx</span>
           </button>
         </div>
-        <div class="form-note">Choose between Light, Ash, Dark and Onyx.</div>
+        <div class="theme-side-note">
+          <span>ℹ️</span>
+          <div><strong>Theme coming soon</strong> - bayad muna</div>
+        </div>
+        <div class="form-note">Choose between Light, Dark and Onyx. Ash is not available yet.</div>
       </div>
     </form>
 
@@ -331,7 +361,7 @@
       if (!themeInput || !themeButtons.length) return;
 
       const applyTheme = function (theme) {
-        const validThemes = ['light','ash','dark','onyx'];
+        const validThemes = ['light','dark','onyx'];
         const activeTheme = validThemes.includes(theme) ? theme : 'dark';
         document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
         document.body.classList.add('theme-' + activeTheme);
@@ -430,6 +460,9 @@
       };
 
       themeButtons.forEach(function (button) {
+        if (button.disabled) {
+          return;
+        }
         button.addEventListener('click', function () {
           const theme = button.dataset.theme;
           const selectedTheme = applyTheme(theme);

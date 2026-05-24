@@ -207,12 +207,12 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function scanQR(): View
+    public function scanQR(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
         $classes = $user->assignedClasses()->with(['students', 'schedules'])->get();
-        $selectedClassId = request()->query('class_id');
+        $selectedClassId = $request->query('class_id');
 
         return view('professor.scan-qr', [
             'classes' => $classes,
@@ -322,11 +322,30 @@ class ProfessorController extends Controller
                 $sessionStart = Carbon::parse($schedule->start_time, 'Asia/Manila')
                     ->setDate($recordedAtManila->year, $recordedAtManila->month, $recordedAtManila->day);
                 $lateThreshold = $sessionStart->copy()->addMinutes(15);
-                $absentThreshold = $sessionStart->copy()->addMinutes(20);
 
-                if ($recordedAtManila->greaterThanOrEqualTo($absentThreshold)) {
+                // Determine session end for absent logic. If schedule end_time is set use it, otherwise fall back
+                $sessionEnd = $sessionStart->copy();
+                if (!empty($schedule->end_time)) {
+                    try {
+                        $formatEnd = strlen($schedule->end_time) > 5 ? 'H:i:s' : 'H:i';
+                        $sessionEnd = Carbon::createFromFormat($formatEnd, $schedule->end_time, 'Asia/Manila')
+                            ->setDate($sessionStart->year, $sessionStart->month, $sessionStart->day);
+                    } catch (\Exception $e) {
+                        // keep original sessionEnd as sessionStart if parsing fails
+                        $sessionEnd = $sessionStart->copy()->addMinutes(60);
+                    }
+                } else {
+                    // fallback: assume 60-minute class if no end_time provided
+                    $sessionEnd = $sessionStart->copy()->addMinutes(60);
+                }
+
+                // Attendance rules:
+                // - Present: recorded_at <= sessionStart + 15 minutes (inclusive)
+                // - Late: recorded_at > sessionStart + 15 minutes AND recorded_at <= sessionEnd
+                // - Absent: recorded_at > sessionEnd
+                if ($recordedAtManila->greaterThan($sessionEnd)) {
                     $attendanceStatus = 'absent';
-                } elseif ($recordedAtManila->greaterThanOrEqualTo($lateThreshold)) {
+                } elseif ($recordedAtManila->greaterThan($lateThreshold)) {
                     $attendanceStatus = 'late';
                     $minutesLate = (int) $recordedAtManila->diffInMinutes($sessionStart);
                 }
@@ -369,6 +388,7 @@ class ProfessorController extends Controller
 
     private function inferClassForStudentAttendance(int $studentId): ?int
     {
+        /** @var User $user */
         $user = Auth::user();
         $classes = $user->assignedClasses()
             ->with(['students', 'schedules'])
@@ -486,13 +506,27 @@ class ProfessorController extends Controller
             }
 
             $scheduleStart = $startTime->setDate($now->year, $now->month, $now->day);
-            $absentThreshold = $scheduleStart->copy()->addMinutes(20);
-            if ($absentThreshold->greaterThan($now)) {
-                continue;
-            }
+                // Determine session end to decide when to mark absences. Prefer schedule end_time when available.
+                $sessionEnd = $scheduleStart->copy();
+                if (!empty($schedule->end_time)) {
+                    try {
+                        $formatEnd = strlen($schedule->end_time) > 5 ? 'H:i:s' : 'H:i';
+                        $sessionEnd = Carbon::createFromFormat($formatEnd, $schedule->end_time, 'Asia/Manila')
+                            ->setDate($now->year, $now->month, $now->day);
+                    } catch (\Exception $e) {
+                        $sessionEnd = $scheduleStart->copy()->addMinutes(60);
+                    }
+                } else {
+                    $sessionEnd = $scheduleStart->copy()->addMinutes(60);
+                }
 
-            if (!isset($classAbsentTimes[$schedule->class_id]) || $absentThreshold->greaterThan($classAbsentTimes[$schedule->class_id])) {
-                $classAbsentTimes[$schedule->class_id] = $absentThreshold;
+                // Only mark absent after the session end has passed
+                if ($sessionEnd->greaterThan($now)) {
+                    continue;
+                }
+
+            if (!isset($classAbsentTimes[$schedule->class_id]) || $sessionEnd->greaterThan($classAbsentTimes[$schedule->class_id])) {
+                $classAbsentTimes[$schedule->class_id] = $sessionEnd;
             }
         }
 
@@ -623,13 +657,13 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function reports(): View
+    public function reports(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
         $classes = $user->assignedClasses()->with('students')->get();
         $this->markMissingAttendanceAbsent($classes);
-        $classId = request()->query('class_id');
+        $classId = $request->query('class_id');
 
         if ($classId) {
             $classe = $classes->find($classId);
@@ -641,13 +675,13 @@ class ProfessorController extends Controller
             $attendanceSource = AttendanceRecord::whereIn('class_id', $classes->pluck('id'));
         }
 
-        $date = request('date');
+        $date = (string) $request->input('date', '');
         if ($date) {
             [$startUtc, $endUtc] = $this->getManilaDateRange($date);
             $attendanceSource->whereBetween('recorded_at', [$startUtc, $endUtc]);
         }
 
-        $search = trim(strtolower(request('search', '')));
+        $search = trim(strtolower((string) $request->input('search', '')));
         if ($search !== '') {
             $students = $students->filter(function ($student) use ($search) {
                 return str_contains(strtolower($student->name ?? ''), $search)
@@ -656,7 +690,7 @@ class ProfessorController extends Controller
             })->values();
         }
 
-        $date = request('date');
+        $date = (string) $request->input('date', '');
         if ($date) {
             $attendanceSource->whereDate('recorded_at', $date);
         }
@@ -688,7 +722,7 @@ class ProfessorController extends Controller
             ];
         });
 
-        $rangeEnd = request('date') ? Carbon::parse(request('date'), 'Asia/Manila')->endOfDay() : Carbon::now('Asia/Manila')->endOfDay();
+        $rangeEnd = $date !== '' ? Carbon::parse($date, 'Asia/Manila')->endOfDay() : Carbon::now('Asia/Manila')->endOfDay();
         $rangeStart = $rangeEnd->copy()->subDays(6)->startOfDay();
 
         $trendRecords = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
@@ -847,7 +881,7 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function updateAttendanceRecord(Request $request, AttendanceRecord $attendanceRecord): RedirectResponse
+    public function updateAttendanceRecord(Request $request, AttendanceRecord $attendanceRecord): Response|RedirectResponse|JsonResponse
     {
         /** @var User $user */
         $user = Auth::user();

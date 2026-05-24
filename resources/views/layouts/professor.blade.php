@@ -706,14 +706,12 @@
     @keyframes orb-float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-40px) scale(1.06)}66%{transform:translate(-20px,25px) scale(.96)}}
 
     .glass{
-      border:1px solid rgba(255,255,255,0.06);
-      /* Force a fully opaque bluish-gray card background to remove transparency */
-      background: #2f3746 !important;
-      background-image: none !important;
-      /* disable backdrop blur to prevent background bleed-through */
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      box-shadow: 0 22px 60px rgba(6,10,18,0.85), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+      border:1px solid var(--stroke);
+      background: var(--glass);
+      background-image: none;
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
       position:relative;overflow:hidden;
     }
     .glass::after{

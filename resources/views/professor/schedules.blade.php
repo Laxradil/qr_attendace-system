@@ -27,7 +27,6 @@
     transition: transform .3s ease, box-shadow .3s ease;
   }
   body.theme-ash .glass.schedule-card,
-  body.theme-light .glass.schedule-card,
   body.theme-dark .glass.schedule-card,
   body.theme-onyx .glass.schedule-card {
     background: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
@@ -89,6 +88,15 @@
     border-color: rgba(148,163,184,.2);
     box-shadow: 0 16px 40px rgba(15,23,42,.08);
   }
+  /* Ensure text inside schedule cards is readable in light theme */
+  body.theme-light .schedule-card h3,
+  body.theme-light .schedule-card .room-code,
+  body.theme-light .schedule-card .schedule-meta-item,
+  body.theme-light .schedule-card .schedule-meta-item span,
+  body.theme-light .schedule-card .schedule-meta-item strong {
+    color: #0f172a !important;
+  }
+  body.theme-light .schedule-card .schedule-meta-item .icon { background: rgba(15,23,42,.06) !important; color: #0f172a !important }
 </style>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px;margin-top:6px">

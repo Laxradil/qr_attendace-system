@@ -137,14 +137,14 @@
             .chart-mark{display:none;}
             .chart-line{fill:none;stroke:#7c4dff;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;}
             .chart-point{display:none;}
-            .chart-labels{display:grid;grid-template-columns:repeat({{ $labelCols }},1fr);gap:8px;margin-top:14px;font-size:11px;color:rgba(255,255,255,.65);}
+            .chart-labels{display:grid;gap:8px;margin-top:14px;font-size:11px;color:rgba(255,255,255,.65);} 
             .chart-labels span{text-align:center;opacity:.85;}
             .distribution-card{display:grid;grid-template-rows:auto 1fr;gap:18px;}
             .distribution-header{display:flex;align-items:center;justify-content:flex-start;}
             .distribution-header h3{margin:0;font-size:14px;font-weight:700;color:#f8fbff;}
             .distribution-body{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:center;}
             .distribution-pie{position:relative;width:180px;height:180px;display:grid;place-items:center;margin:auto 0;}
-            .attendance-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#18f08b 0% {{ $presentEnd }}%, #ffc75a {{ $presentEnd }}% {{ $lateEnd }}%, #ff3d72 {{ $lateEnd }}% {{ $absentEnd }}%, rgba(255,255,255,.08) {{ $absentEnd }}% 100%);}
+            .attendance-ring{position:absolute;inset:0;border-radius:50%;} 
             .attendance-ring-inner{position:absolute;inset:18px;border-radius:50%;background:rgba(6,11,29,.98);display:grid;place-items:center;border:1px solid rgba(255,255,255,.05);}
             .attendance-ring-inner strong{font-size:34px;font-weight:800;line-height:1;color:#fff;}
             .attendance-ring-inner span{font-size:14px;color:rgba(255,255,255,.65);}
@@ -422,7 +422,7 @@
                     <div class="distribution-header"><h3>Attendance Distribution</h3></div>
                     <div class="distribution-body">
                         <div class="distribution-pie">
-                            <div class="attendance-ring"></div>
+                            <div class="attendance-ring" data-present-end="{{ $presentEnd }}" data-late-end="{{ $lateEnd }}" data-absent-end="{{ $absentEnd }}"></div>
                             <div class="attendance-ring-inner">
                                 <div style="text-align:center;">
                                     <strong>{{ $attendanceRate }}<span style="font-size:16px;color:var(--muted);">%</span></strong>
@@ -510,4 +510,13 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.attendance-ring').forEach(function (ring) {
+        const presentEnd = ring.dataset.presentEnd || '0';
+        const lateEnd = ring.dataset.lateEnd || presentEnd;
+        const absentEnd = ring.dataset.absentEnd || lateEnd;
+        ring.style.background = 'conic-gradient(#18f08b 0% ' + presentEnd + '%, #ffc75a ' + presentEnd + '% ' + lateEnd + '%, #ff3d72 ' + lateEnd + '% ' + absentEnd + '%, rgba(255,255,255,.08) ' + absentEnd + '% 100%)';
+    });
+</script>
 @endsection

@@ -119,7 +119,7 @@
           <div style="color:#3b82f6;margin-top:8px;font-weight:700;font-size:12px">Total</div>
         </div>
       </div>
-      <button class="report-btn" onclick="window.location.href='{{ route('professor.attendance-records') }}'">View Full Attendance Report →</button>
+      <a class="report-btn" href="{{ route('professor.attendance-records') }}">View Full Attendance Report →</a>
     </div>
 
     <div class="card glass" style="padding:18px 14px;margin-top:12px;background:rgba(15,23,42,0.62) !important;">
