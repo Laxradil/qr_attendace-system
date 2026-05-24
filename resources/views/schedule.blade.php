@@ -32,6 +32,40 @@
       --font:'DM Sans',system-ui,sans-serif;
       --mono:'Space Mono',monospace;
     }
+    /* Light theme overrides */
+    body.theme-light{
+      --bg:#ffffff;
+      --glass:rgba(11,18,32,0.04);
+      --glass-strong:rgba(11,18,32,0.06);
+      --stroke:rgba(11,18,32,0.06);
+      --stroke-soft:rgba(11,18,32,0.035);
+      --text:#0b1220;
+      --muted:#6b7280;
+      background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+      color:var(--text);
+    }
+
+    body.theme-light .glass{
+      background:var(--glass) !important;
+      border:1px solid var(--stroke) !important;
+      box-shadow:none !important;
+      color:var(--text) !important;
+    }
+
+    body.theme-light .sidebar{
+      background:#ffffff !important;
+      border-right:1px solid var(--stroke) !important;
+      color:var(--text) !important;
+    }
+
+    body.theme-light .logo{ box-shadow:none !important; background:linear-gradient(145deg,#f3e8ff,#e6f7ff) !important; color:var(--text) !important }
+
+    body.theme-light .stat{ background:var(--glass) !important; border:1px solid var(--stroke) !important }
+    body.theme-light .glass-table{ background:var(--glass) !important }
+    body.theme-light th{ background:rgba(11,18,32,0.03) !important; color:var(--muted) !important }
+    body.theme-light td{ color:var(--text) !important }
+    body.theme-light .btn{ color:var(--text) !important; background:rgba(11,18,32,0.04) !important; border:1px solid rgba(11,18,32,0.06) !important }
+    body.theme-light .btn.primary{ background:linear-gradient(135deg,#8b5cff,#43a6ff) !important; color:#fff !important }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow:hidden}
     body{

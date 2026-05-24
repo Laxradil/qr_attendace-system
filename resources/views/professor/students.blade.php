@@ -32,6 +32,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
               <input type="text" class="student-search" placeholder="Search students..." style="padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);color:#0b1220;font-size:13px;font-family:var(--font);outline:none;transition:.2s ease;flex:1;min-width:160px" oninput="filterStudents(this)">
               <button type="button" class="btn primary slim" onclick="alert('Add student feature coming soon')">+ Add Student</button>
+              <button type="button" class="btn slim refresh-btn" data-class-id="{{ $classe->id }}">Refresh</button>
             </div>
 
             @if($classe->students && $classe->students->count())
@@ -60,10 +61,15 @@
                         </td>
                         <td>{{ $student->email ?? 'N/A' }}</td>
                         <td>
-                          <span class="pill green">Active</span>
+                          @php $dropKey = $classe->id . '_' . $student->id; @endphp
+                          @if(isset($pendingRequests[$dropKey]))
+                            <span class="pill yellow">Pending</span>
+                          @else
+                            <span class="pill green">Active</span>
+                          @endif
                         </td>
                         <td>
-                          <button class="btn slim drop" onclick="dropStudent({{ $student->id }}, '{{ $student->name }}', {{ $classe->id }})">Drop</button>
+                          <button class="btn slim drop drop-btn" data-student-id="{{ $student->id }}" data-student-name="{{ addslashes($student->name) }}" data-class-id="{{ $classe->id }}">Drop</button>
                         </td>
                       </tr>
                     @endforeach
@@ -308,23 +314,179 @@
   }
   
   function dropStudent(studentId, studentName, classId) {
-    if (!confirm(`Are you sure you want to drop ${studentName} from this class?`)) {
-      return;
+    const modal = document.getElementById('dropModalBackdrop');
+    const messageEl = modal.querySelector('.modal-message');
+    const confirmBtn = modal.querySelector('.modal-confirm');
+    // set message and dataset values for later use
+    messageEl.textContent = `Are you sure you want to drop ${studentName} from this class?`;
+    confirmBtn.dataset.studentId = studentId;
+    confirmBtn.dataset.classId = classId;
+    // show modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Modal handlers
+  document.addEventListener('DOMContentLoaded', function () {
+    // wire up drop buttons (use delegation)
+    document.querySelectorAll('.drop-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const sid = this.dataset.studentId;
+        const sname = this.dataset.studentName;
+        const cid = this.dataset.classId;
+        dropStudent(sid, sname, cid);
+      });
+    });
+    const modal = document.getElementById('dropModalBackdrop');
+    if (!modal) return;
+    const cancel = modal.querySelector('.modal-cancel');
+    const confirm = modal.querySelector('.modal-confirm');
+
+    function hideModal() {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      confirm.removeAttribute('data-student-id');
+      confirm.removeAttribute('data-class-id');
     }
-    
-    // Submit drop request to backend
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/professor/students/drop';
-    form.innerHTML = `
-      @csrf
-      <input type="hidden" name="student_id" value="${studentId}">
-      <input type="hidden" name="class_id" value="${classId}">
-    `;
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+
+    cancel.addEventListener('click', hideModal);
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) hideModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.style.display === 'flex') hideModal();
+    });
+
+    confirm.addEventListener('click', function () {
+      const studentId = this.dataset.studentId;
+      const classId = this.dataset.classId;
+      const reasonSelect = modal.querySelector('.modal-reason');
+      const reason = reasonSelect ? reasonSelect.value : 'Personal reasons';
+      if (!studentId || !classId) {
+        hideModal();
+        return;
+      }
+      // submit POST form to professor.drop-request route with reason
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `{{ route('professor.drop-request') }}`;
+      form.innerHTML = `
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="student_id" value="${studentId}">
+        <input type="hidden" name="class_id" value="${classId}">
+        <input type="hidden" name="reason" value="${reason}">
+      `;
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    });
+
+    // wire up refresh buttons
+    document.querySelectorAll('.refresh-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        refreshClassStudents(this.dataset.classId, this);
+      });
+    });
+  });
+
+  // Drop confirmation modal markup and styles
+</script>
+
+<script>
+  // Refresh students for a class via AJAX and update the table
+  async function refreshClassStudents(classId, btn) {
+    const url = `/professor/class/${classId}/students`;
+    try {
+      btn.disabled = true;
+      btn.textContent = 'Refreshing...';
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      const students = data.students || [];
+      // find the table within the nearest details block
+      const details = btn.closest('details');
+      if (!details) return;
+      const tbody = details.querySelector('table tbody');
+      if (!tbody) return;
+      // rebuild tbody
+      tbody.innerHTML = '';
+      if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:18px;color:var(--muted)">No students enrolled in this class.</td></tr>`;
+      } else {
+        for (const s of students) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><span style="font-family:var(--mono);font-size:12px">${s.student_id ?? 'N/A'}</span></td>
+            <td><div class="user-cell"><div class="small-avatar">${(s.name||'S').charAt(0).toUpperCase()}</div><strong>${s.name}</strong></div></td>
+            <td>${s.email ?? 'N/A'}</td>
+            <td><span class="pill green">Active</span></td>
+            <td><button class="btn slim drop-btn" data-student-id="${s.id}" data-student-name="${(s.name||'').replace(/'/g,"\\'")}" data-class-id="${classId}">Drop</button></td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+      // re-wire drop buttons for the updated rows
+      details.querySelectorAll('.drop-btn').forEach(function (b) {
+        b.addEventListener('click', function () {
+          const sid = this.dataset.studentId;
+          const sname = this.dataset.studentName;
+          const cid = this.dataset.classId;
+          dropStudent(sid, sname, cid);
+        });
+      });
+    } catch (e) {
+      console.error(e);
+      alert('Could not refresh students.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Refresh';
+    }
   }
 </script>
 
 @endsection
+
+<!-- Drop confirmation modal -->
+<div id="dropModalBackdrop" class="modal-backdrop" style="display:none;">
+  <div class="modal-card small">
+    <div class="modal-body">
+      <div class="modal-icon">⚠️</div>
+      <div>
+        <div class="modal-title">Confirm Removal</div>
+        <div class="modal-message" style="margin-top:8px;color:var(--muted);">Are you sure?</div>
+        <div style="margin-top:12px">
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Reason for drop</label>
+          <select class="modal-reason" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);min-width:220px">
+            <option>Schedule conflict</option>
+            <option>Transfer to another section</option>
+            <option>Medical reason</option>
+            <option>Academic performance</option>
+            <option selected>Personal reasons</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn modal-cancel">Cancel</button>
+      <button type="button" class="btn modal-confirm" style="margin-left:8px;background:linear-gradient(135deg,rgba(139,92,255,.9),rgba(67,166,255,.55));color:#fff;border:0">OK</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Simple modal styles reusing theme variables */
+  #dropModalBackdrop.modal-backdrop {
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1100;background:rgba(2,6,23,0.6);backdrop-filter:blur(6px);
+  }
+  .modal-card.small{min-width:360px;max-width:90%;border-radius:14px;padding:18px;background:var(--glass);border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 40px rgba(0,0,0,.6);}
+  .modal-body{display:flex;gap:12px;align-items:center}
+  .modal-icon{font-size:28px}
+  .modal-title{font-weight:800;font-size:15px}
+  .modal-actions{display:flex;justify-content:flex-end;margin-top:12px}
+  /* Theme-specific adjustments */
+  body.theme-light #dropModalBackdrop{background:rgba(255,255,255,0.45)}
+  body.theme-light .modal-card.small{background:#ffffff;border:1px solid #e5e7eb;color:#0b1220}
+  body.theme-ash #dropModalBackdrop{background:rgba(3,6,12,0.6)}
+  body.theme-dark #dropModalBackdrop{background:rgba(2,6,23,0.7)}
+  body.theme-onyx #dropModalBackdrop{background:rgba(0,0,0,0.75)}
+</style>

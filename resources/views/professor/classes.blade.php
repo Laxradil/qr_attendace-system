@@ -692,11 +692,15 @@
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
+  <script type="application/json" id="available-students-data">@json($studentPayload)</script>
+  <script type="application/json" id="scan-classes-data">@json($scanClassesPayload)</script>
+  <script>
     const modalBackdrop = document.getElementById('modalBackdrop');
     const modalContent = document.getElementById('modalContent');
-    const modalClose = modalBackdrop.querySelector('.modal-close');
+    const modalClose = modalBackdrop ? modalBackdrop.querySelector('.modal-close') : null;
+    const availableStudents = JSON.parse(document.getElementById('available-students-data')?.textContent || '[]');
+    const scanClasses = JSON.parse(document.getElementById('scan-classes-data')?.textContent || '[]');
+    const csrfToken = '{{ csrf_token() }}';
 
     const modalActions = {
       'add-student': function (data) {
@@ -726,7 +730,6 @@
         `;
       },
       'edit-class': function (data) {
-        // days: data.classDays expected as comma-separated string
         const days = (data.classDays || '').split(',').map(d => d.trim()).filter(Boolean);
         const startValue = (data.classStartTime || '').split(':').slice(0, 2).join(':');
         const endValue = (data.classEndTime || '').split(':').slice(0, 2).join(':');
@@ -823,10 +826,6 @@
         `;
       }
     };
-
-    const availableStudents = @json($studentPayload);
-    const scanClasses = @json($scanClassesPayload);
-    const csrfToken = '{{ csrf_token() }}';
 
     function renderStudentOption(student) {
       return `
@@ -1441,6 +1440,5 @@
         }
       });
     });
-  });
 </script>
 @endsection

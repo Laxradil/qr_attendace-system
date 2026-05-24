@@ -31,7 +31,7 @@ class StudentController extends Controller
             // If only theme is being updated, validate and save theme
             if ($request->has('theme') && !$request->has('name') && !$request->has('email')) {
                 $request->validate([
-                    'theme' => 'required|in:light,ash,dark,onyx',
+                    'theme' => 'required|in:light,dark,onyx',
                 ]);
                 $user->theme = $request->input('theme');
                 $user->save();
@@ -42,7 +42,7 @@ class StudentController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-                'theme' => 'nullable|in:light,ash,dark,onyx',
+                'theme' => 'nullable|in:light,dark,onyx',
             ]);
 
             $user->name = $request->input('name');

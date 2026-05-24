@@ -218,16 +218,25 @@
     border-bottom: 1px solid rgba(255,255,255,.07);
     vertical-align: middle;
   }
+  /* Theme-aware select styling: default to theme text, override for light theme */
   .status-select {
     min-width: 140px;
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.05);
-    color: #fff;
+    color: var(--text); /* use theme text color by default */
     font-size: 13px;
     width: 100%;
     max-width: 180px;
+  }
+  body.theme-light .status-select {
+    color: #0b1220; /* dark text for light theme */
+  }
+  /* Ensure option text is readable when native dropdown opens (most browsers use light backgrounds) */
+  .status-select option {
+    color: #0b1220 !important;
+    background: #ffffff;
   }
   .status-select:focus {
     outline: none;
