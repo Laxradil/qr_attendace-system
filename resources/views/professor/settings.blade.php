@@ -673,7 +673,7 @@
   <div class="settings-section">
     <h3>Change Password</h3>
     
-    <form action="{{ route('professor.settings.password') ?? '#' }}" method="POST" class="form-group">
+    <form id="password-settings-form" action="{{ route('professor.settings.password') ?? '#' }}" method="POST" class="form-group">
       @csrf
       @method('PUT')
 
@@ -731,7 +731,55 @@
     const themeOnlyInput = document.getElementById('theme-only-input');
     const themeButtons = document.querySelectorAll('.theme-option');
     const themeSaveForm = document.getElementById('theme-save-form');
+    const profileSettingsForm = document.getElementById('profile-settings-form');
+    const passwordSettingsForm = document.getElementById('password-settings-form');
     if (!themeInput || !themeButtons.length) return;
+
+    const themeSwitchCheckbox = document.getElementById('theme-switch-checkbox');
+    const themeSwitchWrapper = themeSwitchCheckbox ? themeSwitchCheckbox.closest('.theme-switch') : null;
+    const syncThemeSwitch = function (theme) {
+      if (!themeSwitchCheckbox) return;
+      themeSwitchCheckbox.checked = (theme === 'onyx');
+      if (!themeSwitchWrapper) return;
+      themeSwitchWrapper.classList.toggle('light-mode', theme === 'light');
+      themeSwitchWrapper.classList.toggle('onyx-mode', theme === 'onyx');
+    };
+    let activeForm = null;
+    let themeChanged = false;
+
+    const passwordField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password"]') : null;
+    const passwordConfirmField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password_confirmation"]') : null;
+    const clearPasswordMismatchError = function () {
+      if (!passwordConfirmField) return;
+      passwordConfirmField.setCustomValidity('');
+      const existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
+      if (existing) existing.remove();
+    };
+    const showPasswordMismatchError = function (message) {
+      if (!passwordConfirmField) return;
+      passwordConfirmField.setCustomValidity(message);
+      let existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
+      if (!existing) {
+        existing = document.createElement('div');
+        existing.className = 'error-text password-mismatch-error';
+        passwordConfirmField.parentNode.appendChild(existing);
+      }
+      existing.textContent = message;
+    };
+    const validatePasswordMatch = function () {
+      if (!passwordSettingsForm || !passwordField || !passwordConfirmField) return true;
+      const passwordValue = passwordField.value;
+      const confirmValue = passwordConfirmField.value;
+      clearPasswordMismatchError();
+      if (!passwordValue && !confirmValue) {
+        return true;
+      }
+      if (passwordValue !== confirmValue) {
+        showPasswordMismatchError('Passwords do not match.');
+        return false;
+      }
+      return true;
+    };
 
     const applyTheme = function (theme) {
       const validThemes = ['light','onyx'];
@@ -743,6 +791,7 @@
       themeButtons.forEach(function (option) {
         option.classList.toggle('selected', option.dataset.theme === activeTheme);
       });
+      syncThemeSwitch(activeTheme);
       return activeTheme;
     };
 
@@ -786,11 +835,26 @@
         localStorage.setItem(themeKey, selectedTheme);
         // show save button/form
         if (themeSaveForm) themeSaveForm.style.display = '';
-        markUnsaved();
+        markUnsaved(themeSaveForm, true);
       });
     });
 
-    const profileSettingsForm = document.getElementById('profile-settings-form');
+    if (passwordSettingsForm) {
+      passwordSettingsForm.addEventListener('submit', function (event) {
+        if (!validatePasswordMatch()) {
+          event.preventDefault();
+          event.stopPropagation();
+          const passwordConfirmField = passwordSettingsForm.querySelector('input[name="password_confirmation"]');
+          if (passwordConfirmField) {
+            passwordConfirmField.focus();
+          }
+        }
+      });
+      [passwordSettingsForm.querySelector('input[name="password"]'), passwordSettingsForm.querySelector('input[name="password_confirmation"]')].filter(Boolean).forEach(function (input) {
+        input.addEventListener('input', validatePasswordMatch);
+      });
+    }
+
     let unsavedSettings = false;
     let warningTimeout = null;
 
@@ -829,11 +893,25 @@
             // Set flag for post-reload success message
             localStorage.setItem('settings_saved', 'true');
             
-            // Submit the form
+            // Submit the active form with validation where possible
             if (themeSaveForm && themeSaveForm.style.display !== 'none') {
-              themeSaveForm.submit();
+              if (themeSaveForm.requestSubmit) {
+                themeSaveForm.requestSubmit();
+              } else {
+                themeSaveForm.submit();
+              }
+            } else if (activeForm) {
+              if (activeForm.requestSubmit) {
+                activeForm.requestSubmit();
+              } else {
+                activeForm.submit();
+              }
             } else if (profileSettingsForm) {
-              profileSettingsForm.submit();
+              if (profileSettingsForm.requestSubmit) {
+                profileSettingsForm.requestSubmit();
+              } else {
+                profileSettingsForm.submit();
+              }
             }
           });
         }
@@ -843,14 +921,21 @@
           resetButton.replaceWith(resetButton.cloneNode(true));
           const freshReset = document.getElementById('unsaved-reset-action');
           freshReset.addEventListener('click', function () {
-            if (profileSettingsForm) {
+            if (activeForm && activeForm !== themeSaveForm) {
+              try { activeForm.reset(); } catch (e) { if (profileSettingsForm) profileSettingsForm.reset(); }
+            } else if (profileSettingsForm) {
               profileSettingsForm.reset();
             }
             if (themeSaveForm) {
               themeSaveForm.style.display = 'none';
+            }
+            if (themeChanged) {
               applyTheme(savedTheme);
+              localStorage.setItem(themeKey, savedTheme);
             }
             unsavedSettings = false;
+            activeForm = null;
+            themeChanged = false;
             hideUnsavedWarning();
           });
         }
@@ -861,15 +946,19 @@
       warningBox.classList.remove('show');
     };
 
-    const markUnsaved = function () {
+    const markUnsaved = function (form, themeOnly = false) {
       unsavedSettings = true;
-      if (themeSaveForm) themeSaveForm.style.display = '';
+      activeForm = form;
+      themeChanged = themeOnly;
+      if (themeSaveForm) {
+        themeSaveForm.style.display = themeOnly ? '' : 'none';
+      }
       showUnsavedWarning('Careful — you have unsaved changes!');
     };
 
     document.querySelectorAll('.settings-container form').forEach(function (form) {
-      form.addEventListener('input', markUnsaved);
-      form.addEventListener('change', markUnsaved);
+      form.addEventListener('input', function () { markUnsaved(form); });
+      form.addEventListener('change', function () { markUnsaved(form); });
       form.addEventListener('submit', function () {
         unsavedSettings = false;
         hideUnsavedWarning();

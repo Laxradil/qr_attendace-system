@@ -49,6 +49,46 @@
   .theme-dark { background:#1f2937; }
   .theme-onyx { background:#0f172a; }
   .button-group { display: flex; gap: 10px; margin-top: 16px; }
+
+  body.theme-light .settings-container,
+  body.theme-light .settings-wrapper {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    color: #0f172a;
+  }
+
+  body.theme-light .settings-input {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #d1d5db;
+  }
+
+  body.theme-light .settings-input:focus {
+    background: #ffffff;
+    border-color: #3b82f6;
+  }
+
+  body.theme-light .settings-divider { background: #e5e7eb; }
+
+  body.theme-light .settings-btn { background: #f9fafb; border: 1px solid #d1d5db; color: #000000; }
+  body.theme-light .settings-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+  body.theme-light .settings-btn.primary { background: linear-gradient(135deg,#3b82f6,#8b5cff); border-color:#3b82f6; color:#fff; }
+
+  body.theme-light .info-item { background: #f9fafb; border: 1px solid #e5e7eb; }
+  body.theme-light .info-label { color: #6b7280; }
+  body.theme-light .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+
+  body.theme-light .settings-section h3,
+  body.theme-light .label,
+  body.theme-light .form-note,
+  body.theme-light .error-text,
+  body.theme-light .theme-label,
+  body.theme-light .info-value,
+  body.theme-light .theme-option {
+    color: #0f172a !important;
+  }
+
+  body.theme-light .theme-option:hover { color: #0f172a !important; }
   .settings-btn { padding: 11px 20px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 600; outline: none; cursor: pointer; transition: .2s ease; flex: 1; }
   .settings-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.24); }
   .settings-btn.primary { background: linear-gradient(135deg,rgba(67,166,255,.88),rgba(139,92,255,.5)); border-color: rgba(67,166,255,.5); color: #fff; }
@@ -240,12 +280,18 @@
 </style>
 
 <div class="unsaved-notice" id="settings-warning" role="alert" aria-live="assertive" hidden>
+  <span class="icon" aria-hidden="true">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 2L2 20h20L12 2z" fill="rgba(255,255,255,0.95)"/>
+      <path d="M11 10h2v5h-2zM11 16h2v2h-2z" fill="#0f172a"/>
+    </svg>
+  </span>
   <div class="notice-copy">
     <span class="message">Careful — you have unsaved changes!</span>
   </div>
   <div class="actions">
-    <button type="button" id="unsaved-save-action">Save changes</button>
-    <button type="button" id="unsaved-reset-action" class="btn-reset">Discard</button>
+    <button type="button" id="unsaved-reset-action" class="btn-reset">Reset</button>
+    <button type="button" id="unsaved-save-action" class="btn-save">Save changes</button>
   </div>
 </div>
 
@@ -301,13 +347,6 @@
         <div class="form-note">Choose between Light and Onyx.</div>
       </div>
     </form>
-
-    <form id="theme-save-form" action="{{ route('student.settings.update') }}" method="POST" style="display:none;margin-top:12px">
-      @csrf
-      @method('PUT')
-      <input type="hidden" name="theme" id="theme-only-input" value="{{ $theme }}">
-      <button type="submit" id="theme-save-btn" class="settings-btn primary">Save Theme</button>
-    </form>
   </div>
 
   <script>
@@ -316,16 +355,60 @@
       const themeInput = document.getElementById('theme-input');
       const themeOnlyInput = document.getElementById('theme-only-input');
       const themeButtons = document.querySelectorAll('.theme-option');
-      const themeSaveForm = document.getElementById('theme-save-form');
       const profileSettingsForm = document.getElementById('profile-settings-form');
       const passwordSettingsForm = document.getElementById('password-settings-form');
       const warningBox = document.getElementById('settings-warning');
       let unsavedSettings = false;
       let warningTimeout = null;
       let activeForm = null;
-      let themeChanged = false;
+      let profileFormModified = false;
+      let passwordFormModified = false;
 
       if (!themeInput || !themeButtons.length) return;
+
+      const themeSwitchCheckbox = document.getElementById('theme-switch-checkbox');
+      const themeSwitchWrapper = themeSwitchCheckbox ? themeSwitchCheckbox.closest('.theme-switch') : null;
+      const syncThemeSwitch = function (theme) {
+        if (!themeSwitchCheckbox) return;
+        themeSwitchCheckbox.checked = (theme === 'onyx');
+        if (!themeSwitchWrapper) return;
+        themeSwitchWrapper.classList.toggle('light-mode', theme === 'light');
+        themeSwitchWrapper.classList.toggle('onyx-mode', theme === 'onyx');
+      };
+
+      const passwordField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password"]') : null;
+      const passwordConfirmField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password_confirmation"]') : null;
+      const clearPasswordMismatchError = function () {
+        if (!passwordConfirmField) return;
+        passwordConfirmField.setCustomValidity('');
+        const existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
+        if (existing) existing.remove();
+      };
+      const showPasswordMismatchError = function (message) {
+        if (!passwordConfirmField) return;
+        passwordConfirmField.setCustomValidity(message);
+        let existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
+        if (!existing) {
+          existing = document.createElement('div');
+          existing.className = 'error-text password-mismatch-error';
+          passwordConfirmField.parentNode.appendChild(existing);
+        }
+        existing.textContent = message;
+      };
+      const validatePasswordMatch = function () {
+        if (!passwordSettingsForm || !passwordField || !passwordConfirmField) return true;
+        const passwordValue = passwordField.value;
+        const confirmValue = passwordConfirmField.value;
+        clearPasswordMismatchError();
+        if (!passwordValue && !confirmValue) {
+          return true;
+        }
+        if (passwordValue !== confirmValue) {
+          showPasswordMismatchError('Passwords do not match.');
+          return false;
+        }
+        return true;
+      };
 
       const applyTheme = function (theme) {
         const validThemes = ['light','onyx'];
@@ -337,6 +420,7 @@
         themeButtons.forEach(function (option) {
           option.classList.toggle('selected', option.dataset.theme === activeTheme);
         });
+        syncThemeSwitch(activeTheme);
         return activeTheme;
       };
 
@@ -375,11 +459,78 @@
             warningBox.classList.add('show');
             unsavedSettings = false;
             localStorage.setItem('settings_saved', 'true');
-            if (activeForm) {
-              activeForm.submit();
-            } else if (profileSettingsForm) {
-              profileSettingsForm.submit();
+            
+            // Create promises for both form submissions
+            let promises = [];
+            
+            // Submit profile form if modified
+            if (profileFormModified && profileSettingsForm) {
+              const profilePromise = new Promise(function (resolve, reject) {
+                const formData = new FormData(profileSettingsForm);
+                fetch(profileSettingsForm.action, {
+                  method: 'PUT',
+                  headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                  },
+                  body: formData
+                })
+                .then(response => response.json())
+                .then(data => resolve(data))
+                .catch(error => reject(error));
+              });
+              promises.push(profilePromise);
             }
+            
+            // Submit password form if modified
+            if (passwordFormModified && passwordSettingsForm) {
+              const passwordPromise = new Promise(function (resolve, reject) {
+                const formData = new FormData(passwordSettingsForm);
+                fetch(passwordSettingsForm.action, {
+                  method: 'PUT',
+                  headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                  },
+                  body: formData
+                })
+                .then(response => response.json())
+                .then(data => resolve(data))
+                .catch(error => reject(error));
+              });
+              promises.push(passwordPromise);
+            }
+            
+            // If only one form was modified, submit that one
+            if (!profileFormModified && !passwordFormModified && activeForm) {
+              const singlePromise = new Promise(function (resolve, reject) {
+                const formData = new FormData(activeForm);
+                fetch(activeForm.action, {
+                  method: 'PUT',
+                  headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                  },
+                  body: formData
+                })
+                .then(response => response.json())
+                .then(data => resolve(data))
+                .catch(error => reject(error));
+              });
+              promises.push(singlePromise);
+            }
+            
+            // Wait for all promises to complete
+            Promise.all(promises).then(function (results) {
+              // After both submissions complete, reload the page
+              setTimeout(function () {
+                location.reload();
+              }, 500);
+            }).catch(function (error) {
+              console.error('Error saving changes:', error);
+              warningBox.classList.remove('success');
+              warningBox.querySelector('.message').textContent = 'Error saving changes. Please try again.';
+            });
           });
         }
 
@@ -387,41 +538,53 @@
         if (resetButton && !resetButton.dataset.bound) {
           resetButton.dataset.bound = 'true';
           resetButton.addEventListener('click', function () {
-            if (activeForm && activeForm !== themeSaveForm) {
-              activeForm.reset();
-            }
-            if (themeSaveForm) {
-              themeSaveForm.style.display = 'none';
-            }
-            if (themeChanged) {
+            if (profileFormModified && profileSettingsForm) {
+              profileSettingsForm.reset();
+              // Reset theme to saved value
               applyTheme(savedTheme);
               localStorage.setItem(themeKey, savedTheme);
             }
+            if (passwordFormModified && passwordSettingsForm) {
+              passwordSettingsForm.reset();
+            }
             unsavedSettings = false;
             activeForm = null;
-            themeChanged = false;
+            profileFormModified = false;
+            passwordFormModified = false;
             hideUnsavedWarning();
           });
         }
       };
 
       if (localStorage.getItem('settings_saved') === 'true') {
+        console.log('[Settings] Found settings_saved flag on page load, showing success state');
         localStorage.removeItem('settings_saved');
         if (warningBox) {
+          // Show success message and hide actions
+          const actionsDiv = warningBox.querySelector('.actions');
+          if (actionsDiv) {
+            actionsDiv.style.display = 'none';
+          }
           warningBox.classList.add('success', 'show');
           warningBox.querySelector('.message').textContent = 'Changes saved successfully! ✓';
+          console.log('[Settings] Added success class to warning box');
           setTimeout(function () {
-            warningBox.classList.remove('show', 'success');
-          }, 2500);
+            warningBox.classList.remove('show');
+          }, 3000);
+        } else {
+          console.log('[Settings] Warning box not found!');
         }
+      } else {
+        console.log('[Settings] settings_saved flag not found on page load');
       }
 
       const markUnsaved = function (form, themeOnly = false) {
         unsavedSettings = true;
         activeForm = form;
-        themeChanged = themeOnly;
-        if (themeSaveForm) {
-          themeSaveForm.style.display = themeOnly ? '' : 'none';
+        if (form === profileSettingsForm) {
+          profileFormModified = true;
+        } else if (form === passwordSettingsForm) {
+          passwordFormModified = true;
         }
         showUnsavedWarning('Careful — you have unsaved changes!');
       };
@@ -431,12 +594,28 @@
           const theme = button.dataset.theme;
           const selectedTheme = applyTheme(theme);
           localStorage.setItem(themeKey, selectedTheme);
-          if (themeSaveForm) {
-            themeSaveForm.style.display = '';
-          }
-          markUnsaved(themeSaveForm, true);
+          markUnsaved(profileSettingsForm, false);
         });
       });
+
+      if (passwordSettingsForm) {
+        passwordSettingsForm.addEventListener('submit', function (event) {
+          if (!validatePasswordMatch()) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (passwordConfirmField) {
+              passwordConfirmField.focus();
+            }
+          }
+        });
+        [passwordField, passwordConfirmField].filter(Boolean).forEach(function (input) {
+          input.addEventListener('input', function () {
+            if (passwordConfirmField && passwordConfirmField.value.length > 0) {
+              validatePasswordMatch();
+            }
+          });
+        });
+      }
 
       [profileSettingsForm, passwordSettingsForm].filter(Boolean).forEach(function (form) {
         form.addEventListener('input', function () {
@@ -448,11 +627,12 @@
         form.addEventListener('submit', function () {
           unsavedSettings = false;
           hideUnsavedWarning();
-          if (themeSaveForm) {
-            themeSaveForm.style.display = 'none';
+          if (form === profileSettingsForm) {
+            profileFormModified = false;
+          } else if (form === passwordSettingsForm) {
+            passwordFormModified = false;
           }
           activeForm = null;
-          themeChanged = false;
         });
       });
     });
@@ -480,10 +660,6 @@
         @error('password_confirmation')
           <div class="error-text">{{ $message }}</div>
         @enderror
-      </div>
-      <div class="button-group">
-        <button type="submit" class="settings-btn primary">Update Password</button>
-        <button type="reset" class="settings-btn">Clear</button>
       </div>
     </form>
   </div>

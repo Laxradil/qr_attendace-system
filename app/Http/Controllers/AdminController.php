@@ -815,7 +815,7 @@ class AdminController extends Controller
         // Log the activity
         SystemLog::create([
             'user_id' => Auth::id(),
-            'action' => 'update',
+            'action' => 'update_user',
             'model_type' => 'User',
             'model_id' => Auth::id(),
             'description' => 'Updated profile settings',
@@ -841,7 +841,7 @@ class AdminController extends Controller
             // Log the activity
             SystemLog::create([
                 'user_id' => Auth::id(),
-                'action' => 'update',
+                'action' => 'update_user',
                 'model_type' => 'User',
                 'model_id' => Auth::id(),
                 'description' => 'Changed password',

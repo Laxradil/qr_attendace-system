@@ -687,6 +687,50 @@
 
     if (!themeInput || !themeButtons.length) return;
 
+    const themeSwitchCheckbox = document.getElementById('theme-switch-checkbox');
+    const themeSwitchWrapper = themeSwitchCheckbox ? themeSwitchCheckbox.closest('.theme-switch') : null;
+    const syncThemeSwitch = function (theme) {
+      if (!themeSwitchCheckbox) return;
+      themeSwitchCheckbox.checked = (theme === 'onyx');
+      if (!themeSwitchWrapper) return;
+      themeSwitchWrapper.classList.toggle('light-mode', theme === 'light');
+      themeSwitchWrapper.classList.toggle('onyx-mode', theme === 'onyx');
+    };
+
+    const passwordField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password"]') : null;
+    const passwordConfirmField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password_confirmation"]') : null;
+    const clearPasswordMismatchError = function () {
+      if (!passwordConfirmField) return;
+      passwordConfirmField.setCustomValidity('');
+      const existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
+      if (existing) existing.remove();
+    };
+    const showPasswordMismatchError = function (message) {
+      if (!passwordConfirmField) return;
+      passwordConfirmField.setCustomValidity(message);
+      let existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
+      if (!existing) {
+        existing = document.createElement('div');
+        existing.className = 'error-text password-mismatch-error';
+        passwordConfirmField.parentNode.appendChild(existing);
+      }
+      existing.textContent = message;
+    };
+    const validatePasswordMatch = function () {
+      if (!passwordSettingsForm || !passwordField || !passwordConfirmField) return true;
+      const passwordValue = passwordField.value;
+      const confirmValue = passwordConfirmField.value;
+      clearPasswordMismatchError();
+      if (!passwordValue && !confirmValue) {
+        return true;
+      }
+      if (passwordValue !== confirmValue) {
+        showPasswordMismatchError('Passwords do not match.');
+        return false;
+      }
+      return true;
+    };
+
     const applyTheme = function (theme) {
       const validThemes = ['light','onyx'];
       const activeTheme = validThemes.includes(theme) ? theme : 'onyx';
@@ -698,6 +742,7 @@
       themeButtons.forEach(function (option) {
         option.classList.toggle('selected', option.dataset.theme === activeTheme);
       });
+      syncThemeSwitch(activeTheme);
       return activeTheme;
     };
 
@@ -737,9 +782,17 @@
           unsavedSettings = false;
           localStorage.setItem('settings_saved', 'true');
           if (activeForm) {
-            activeForm.submit();
+            if (activeForm.requestSubmit) {
+              activeForm.requestSubmit();
+            } else {
+              activeForm.submit();
+            }
           } else if (profileSettingsForm) {
-            profileSettingsForm.submit();
+            if (profileSettingsForm.requestSubmit) {
+              profileSettingsForm.requestSubmit();
+            } else {
+              profileSettingsForm.submit();
+            }
           }
         });
       }
@@ -798,6 +851,25 @@
         markUnsaved(themeSaveForm, true);
       });
     });
+
+    if (passwordSettingsForm) {
+      passwordSettingsForm.addEventListener('submit', function (event) {
+        if (!validatePasswordMatch()) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (passwordConfirmField) {
+            passwordConfirmField.focus();
+          }
+        }
+      });
+      [passwordField, passwordConfirmField].filter(Boolean).forEach(function (input) {
+        input.addEventListener('input', function () {
+          if (passwordConfirmField && passwordConfirmField.value.length > 0) {
+            validatePasswordMatch();
+          }
+        });
+      });
+    }
 
     [profileSettingsForm, passwordSettingsForm].filter(Boolean).forEach(function (form) {
       form.addEventListener('input', function () {

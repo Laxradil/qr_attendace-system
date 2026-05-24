@@ -156,6 +156,7 @@
       --yellow: #ca8a04;
       --cyan: #0891b2;
       --shadow: 0 4px 12px rgba(0,0,0,.08);
+      background: linear-gradient(180deg,#ffffff 0%,#f8fafb 100%);
     }
     
     body.theme-light .btn:hover,
@@ -928,8 +929,7 @@
     .theme-switch .track{position:absolute;inset:0;border-radius:999px;background:rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08);transition:all .18s ease;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:0 6px;}
     .theme-switch .thumb{position:absolute;top:50%;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 4px 10px rgba(2,6,23,.08);transition:all .18s ease;transform:translateY(-50%);z-index:2}
     .theme-switch input:checked + .track{background:linear-gradient(135deg,#111827,#0b1220);border-color:rgba(255,255,255,.06)}
-    .theme-switch input:checked + .track .thumb{transform:translateX(calc(var(--w) - var(--h) - 4px)) translateY(-50%);}
-    .theme-switch input:checked + .track .thumb{transform:translateX(20px)}
+    .theme-switch input:checked + .track .thumb{transform:translateX(20px) translateY(-50%)}
     .clock-pill{
       display:flex;align-items:center;gap:8px;padding:0 14px;height:44px;
       border-radius:999px;border:1px solid rgba(255,255,255,.13);
@@ -1547,7 +1547,7 @@
     // Theme switching via localStorage (matches admin/professor behavior)
     (function() {
       const themeKey = 'qr_attendance_theme';
-      const themeNames = ['light','onyx'];
+      const themeNames = ['light','ash','dark','onyx'];
       const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
       const stored = localStorage.getItem(themeKey);
       const current = themeNames.includes(serverTheme)
@@ -1565,10 +1565,19 @@
       const key = 'qr_attendance_theme';
       const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
       const checkbox = document.getElementById('theme-switch-checkbox');
+      const switchWrapper = checkbox ? checkbox.closest('.theme-switch') : null;
       const csrfToken = '{{ csrf_token() }}';
       if (!checkbox) return;
-      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-onyx') ? 'onyx' : 'onyx');
-      checkbox.checked = (current === 'onyx');
+      const setSwitchMode = function(theme) {
+        if (!switchWrapper) return;
+        const isLight = theme === 'light';
+        const isNight = theme !== 'light';
+        switchWrapper.classList.toggle('light-mode', isLight);
+        switchWrapper.classList.toggle('onyx-mode', isNight);
+      };
+      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-light') ? 'light' : 'onyx');
+      checkbox.checked = (current !== 'light');
+      setSwitchMode(current);
       const saveThemeToServer = function(theme){
         const path = window.location.pathname;
         let endpoint = null;

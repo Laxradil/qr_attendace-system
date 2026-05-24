@@ -184,7 +184,7 @@
     background: rgba(20,28,40,0.95);
     backdrop-filter: blur(6px) saturate(115%);
     -webkit-backdrop-filter: blur(6px) saturate(115%);
-    box-shadow: 0 16px 36px rgba(10,14,26,0.65), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 16px 36px rgba(10,14,26,0.65), inset 0 1px 0 rgba(255,255,255,0.05);
     position: relative;
     overflow: hidden;
   }
@@ -294,12 +294,12 @@
   .scanner-box,
   .att-recording,
   .recent-scans-box {
-    background: linear-gradient(180deg,#2f3746,#262b36);
+    background: linear-gradient(180deg,#f8fafc,#e2e8f0);
     border-radius: 24px;
     padding: 24px;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 10px 30px rgba(6,8,16,0.55) inset, 0 8px 28px rgba(8,12,18,0.5);
-    color: #e6eef8;
+    border: 1px solid rgba(148,163,184,.6);
+    box-shadow: 0 8px 28px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.8);
+    color: #0f172a;
   }
 
   .scanner-tabs {
@@ -310,9 +310,9 @@
   }
 
   .scanner-tab {
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    color: rgba(234,240,255,.85);
+    border: 1px solid rgba(148,163,184,.7);
+    background: rgba(255,255,255,.92);
+    color: #0f172a;
     border-radius: 14px;
     padding: 11px 12px;
     font-weight: 700;
@@ -322,7 +322,7 @@
   }
 
   .scanner-tab.active {
-    background: linear-gradient(135deg,rgba(139,92,255,.9),rgba(67,166,255,.55));
+    background: linear-gradient(135deg,rgba(139,92,255,.95),rgba(67,166,255,.85));
     color: #fff;
     border-color: transparent;
   }
@@ -330,8 +330,8 @@
   .cam-viewport {
     width: 100%;
     border-radius: 22px;
-    background: rgba(0,0,0,.28);
-    border: 1px dashed rgba(139,92,255,.35);
+    background: #e2e8f0;
+    border: 1px dashed rgba(148,163,184,.65);
     display: grid;
     place-items: center;
     position: relative;
@@ -370,9 +370,9 @@
     border-radius: 999px;
     font-size: 13px;
     font-weight: 700;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.12);
-    color: #dbeafe;
+    background: rgba(15,23,42,.08);
+    border: 1px solid rgba(148,163,184,.6);
+    color: #0f172a;
     margin-bottom: 12px;
   }
 
@@ -387,7 +387,7 @@
     text-transform: uppercase;
     letter-spacing: .08em;
     margin-bottom: 8px;
-    color: var(--muted);
+    color: #475569;
   }
 
   .att-select,
@@ -396,9 +396,9 @@
     min-height: 48px;
     padding: 12px 14px;
     border-radius: 16px;
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--text);
+    background: #ffffff;
+    border: 1px solid rgba(148,163,184,.65);
+    color: #0f172a;
     font-size: 14px;
     outline: none;
     transition: .2s ease;
@@ -410,9 +410,9 @@
     align-items: center;
     padding: 14px 16px;
     border-radius: 16px;
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.14);
-    color: var(--text);
+    background: #ffffff;
+    border: 1px solid rgba(148,163,184,.65);
+    color: #0f172a;
     font-size: 14px;
   }
 
@@ -433,7 +433,7 @@
   .no-scans {
     text-align: center;
     padding: 30px 0;
-    color: var(--muted);
+    color: #64748b;
     font-size: 13px;
   }
 
@@ -462,12 +462,13 @@
     width: min(960px, 96vw);
     max-height: min(92vh, 1080px);
     overflow-y: auto;
-    background: rgba(10, 14, 28, 0.98);
+    background: rgba(243, 244, 246, 0.98);
     border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
     padding: 32px;
     position: relative;
+    color: #0f172a;
   }
 
   .modal-close {
@@ -475,8 +476,8 @@
     top: 14px;
     right: 14px;
     border: none;
-    background: rgba(255, 255, 255, 0.08);
-    color: #f8fafc;
+    background: rgba(15, 23, 42, 0.08);
+    color: #0f172a;
     width: 34px;
     height: 34px;
     border-radius: 14px;
@@ -489,12 +490,17 @@
     margin: 0 0 14px;
     font-size: 22px;
     letter-spacing: -0.03em;
+    color: #0f172a;
+  }
+
+  .modal-card .section-head h3 {
+    color: #0f172a;
   }
 
   .modal-card p,
   .modal-card label,
   .modal-card small {
-    color: rgba(255, 255, 255, 0.82);
+    color: #475569;
   }
 
   .modal-card .modal-meta {
@@ -532,10 +538,10 @@
   .modal-card .modal-field textarea,
   .modal-card .modal-field select {
     width: 100%;
-    border: 1px solid rgba(255,255,255,.12);
+    border: 1px solid rgba(148,163,184,.6);
     border-radius: 12px;
-    background: rgba(255,255,255,.04);
-    color: #f8fafc;
+    background: #ffffff;
+    color: #0f172a;
     padding: 11px 12px;
     font-size: 14px;
   }
@@ -546,13 +552,13 @@
   }
 
   .modal-card .modal-note {
-    color: rgba(139,92,255,.9);
+    color: #475569;
     font-size: 13px;
   }
 
   .modal-card .modal-panel {
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.08);
+    background: #f8fafc;
+    border: 1px solid rgba(148,163,184,.6);
     border-radius: 16px;
     padding: 16px;
   }
@@ -560,11 +566,11 @@
   .modal-card .modal-panel strong {
     display: block;
     margin-bottom: 6px;
-    color: #fff;
+    color: #0f172a;
   }
 
   .modal-card .modal-panel span {
-    color: rgba(255,255,255,.75);
+    color: #475569;
     font-size: 13px;
   }
 
@@ -574,19 +580,19 @@
     max-height: 240px;
     overflow-y: auto;
     padding: 8px;
-    border: 1px solid rgba(255,255,255,.12);
+    border: 1px solid rgba(148,163,184,.5);
     border-radius: 12px;
-    background: rgba(255,255,255,.03);
+    background: #f8fafc;
   }
 
   .modal-card .student-option {
     width: 100%;
     text-align: left;
-    border: 1px solid rgba(255,255,255,.1);
+    border: 1px solid rgba(148,163,184,.6);
     border-radius: 14px;
     padding: 12px 14px;
-    background: rgba(255,255,255,.04);
-    color: #f8fafc;
+    background: #ffffff;
+    color: #0f172a;
     cursor: pointer;
     transition: background .2s, border-color .2s;
     display: grid;
@@ -595,12 +601,12 @@
 
   .modal-card .student-option:hover,
   .modal-card .student-option.selected {
-    background: rgba(139,92,255,.16);
-    border-color: rgba(139,92,255,.35);
+    background: rgba(59,130,246,.14);
+    border-color: rgba(59,130,246,.35);
   }
 
   .modal-card .student-option small {
-    color: rgba(255,255,255,.65);
+    color: #475569;
     font-size: 12px;
   }
 
@@ -694,9 +700,12 @@
   
   body.theme-light .class-room,
   body.theme-light .class-meta-row,
-  body.theme-light .class-meta-row strong,
+  body.theme-light .class-meta-row strong {
+    color: var(--text) !important;
+  }
+
   body.theme-light .class-head h3 {
-    color: #ffffff !important;
+    color: var(--text) !important;
   }
   
   body.theme-light .meta-icon {

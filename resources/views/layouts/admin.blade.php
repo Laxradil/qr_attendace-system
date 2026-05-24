@@ -76,7 +76,7 @@
       --yellow:#ca8a04;
       --cyan:#0891b2;
       --shadow:0 4px 12px rgba(0,0,0,.08);
-      background:#f9fafb;
+      background: linear-gradient(180deg,#ffffff 0%,#f9fafb 100%);
     }
 
     body.theme-light .glass,
@@ -972,7 +972,7 @@
     document.head.appendChild(style);
     (function() {
       const themeKey = 'qr_attendance_theme';
-      const themeNames = ['light','onyx'];
+      const themeNames = ['light','ash','dark','onyx'];
       const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
       const stored = localStorage.getItem(themeKey);
       const current = themeNames.includes(serverTheme)
@@ -995,11 +995,13 @@
       const switchWrapper = checkbox.closest('.theme-switch');
       const setSwitchMode = function(theme) {
         if (!switchWrapper) return;
-        switchWrapper.classList.toggle('light-mode', theme === 'light');
-        switchWrapper.classList.toggle('onyx-mode', theme === 'onyx');
+        const isLight = theme === 'light';
+        const isNight = theme !== 'light';
+        switchWrapper.classList.toggle('light-mode', isLight);
+        switchWrapper.classList.toggle('onyx-mode', isNight);
       };
-      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-onyx') ? 'onyx' : 'onyx');
-      checkbox.checked = (current === 'onyx');
+      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-light') ? 'light' : 'onyx');
+      checkbox.checked = (current !== 'light');
       setSwitchMode(current);
       const saveThemeToServer = function(theme){
         const path = window.location.pathname;

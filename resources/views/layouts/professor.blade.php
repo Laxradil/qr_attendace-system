@@ -46,7 +46,7 @@
       --red:#dc2626;
       --yellow:#ca8a04;
       --cyan:#0891b2;
-      background:#eef2ff;
+      background: linear-gradient(180deg,#ffffff 0%,#eef2ff 100%);
     }
     body.theme-light .sidebar{background:#ffffff;border:1px solid #e5e7eb;box-shadow:0 18px 40px rgba(15,23,42,.06)}
     body.theme-light .brand{border-bottom-color:#f3f4f6}
@@ -1043,9 +1043,12 @@
     .dash-right{display:flex;flex-direction:column;gap:12px}
     .card{border-radius:var(--radius-lg);padding:22px}
     .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-shrink:0}
-    .section-head h3{font-size:18px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;color:#ffffff}
-    .section-head a{color:#ffffff;text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.02em;cursor:pointer}
-    .section-head a:hover{color:#b9c4ff}
+    body.theme-onyx .section-head h3, body.theme-dark .section-head h3, body.theme-ash .section-head h3 {font-size:18px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;color:#ffffff}
+    body.theme-light .section-head h3 {font-size:18px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;color:var(--text)}
+    body.theme-onyx .section-head a, body.theme-dark .section-head a, body.theme-ash .section-head a {color:#ffffff;text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.02em;cursor:pointer}
+    body.theme-light .section-head a {color:rgba(139,92,255,.9);text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.02em;cursor:pointer}
+    body.theme-onyx .section-head a:hover, body.theme-dark .section-head a:hover, body.theme-ash .section-head a:hover{color:#b9c4ff}
+    body.theme-light .section-head a:hover{color:#6b73ff}
 
     .mini-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px;max-width:400px}
     .mini{
@@ -1338,7 +1341,7 @@
 
     (function() {
       const themeKey = 'qr_attendance_theme';
-      const themeNames = ['light','onyx'];
+      const themeNames = ['light','ash','dark','onyx'];
       const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
       const stored = localStorage.getItem(themeKey);
       const current = themeNames.includes(serverTheme)
@@ -1362,11 +1365,13 @@
       const switchWrapper = checkbox.closest('.theme-switch');
       const setSwitchMode = function(theme) {
         if (!switchWrapper) return;
-        switchWrapper.classList.toggle('light-mode', theme === 'light');
-        switchWrapper.classList.toggle('onyx-mode', theme === 'onyx');
+        const isLight = theme === 'light';
+        const isNight = theme !== 'light';
+        switchWrapper.classList.toggle('light-mode', isLight);
+        switchWrapper.classList.toggle('onyx-mode', isNight);
       };
-      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-onyx') ? 'onyx' : 'onyx');
-      checkbox.checked = (current === 'onyx');
+      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-light') ? 'light' : 'onyx');
+      checkbox.checked = (current !== 'light');
       setSwitchMode(current);
       const saveThemeToServer = function(theme){
         // determine endpoint by URL prefix

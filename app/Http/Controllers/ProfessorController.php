@@ -997,7 +997,7 @@ class ProfessorController extends Controller
 
         SystemLog::create([
             'user_id' => $user->id,
-            'action' => 'update_password',
+            'action' => 'update_user',
             'description' => 'Updated password',
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

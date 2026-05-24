@@ -23,7 +23,7 @@ class StudentController extends Controller
         /**
          * Update student profile settings.
          */
-        public function updateSettings(\Illuminate\Http\Request $request): \Illuminate\Http\RedirectResponse
+        public function updateSettings(\Illuminate\Http\Request $request)
         {
             /** @var \App\Models\User $user */
             $user = Auth::user();
@@ -55,13 +55,16 @@ class StudentController extends Controller
             }
             $user->save();
 
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Profile updated successfully.']);
+            }
             return back()->with('success', 'Profile updated successfully.');
         }
 
         /**
          * Update student password.
          */
-        public function updatePassword(): \Illuminate\Http\RedirectResponse
+        public function updatePassword()
         {
             $user = Auth::user();
             request()->validate([
@@ -70,7 +73,13 @@ class StudentController extends Controller
             if (request('password')) {
                 $user->password = bcrypt(request('password'));
                 $user->save();
+                if (request()->wantsJson()) {
+                    return response()->json(['success' => true, 'message' => 'Password updated successfully.']);
+                }
                 return back()->with('success', 'Password updated successfully.');
+            }
+            if (request()->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'No password change.']);
             }
             return back()->with('info', 'No password change.');
         }

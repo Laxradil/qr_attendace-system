@@ -46,7 +46,7 @@
       --red:#dc2626;
       --yellow:#ca8a04;
       --cyan:#0891b2;
-      background:#f9fafb;
+      background: linear-gradient(180deg,#ffffff 0%,#f9fafb 100%);
     }
     body.theme-light .sidebar{
       background:#ffffff;
@@ -1396,7 +1396,7 @@
 
     (function() {
       const themeKey = 'qr_attendance_theme';
-      const themeNames = ['light','onyx'];
+      const themeNames = ['light','ash','dark','onyx'];
       const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
       const stored = localStorage.getItem(themeKey);
       const current = themeNames.includes(serverTheme)
