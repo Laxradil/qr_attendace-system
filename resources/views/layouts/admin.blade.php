@@ -817,10 +817,6 @@
           <span class="nav-icon">👥</span>
           <span>Users</span>
         </a>
-        <a href="{{ route('admin.professors') }}" class="nav-link {{ request()->routeIs('admin.professors') ? 'active' : '' }}">
-          <span class="nav-icon">🎓</span>
-          <span>Professors</span>
-        </a>
         <a href="{{ route('admin.students') }}" class="nav-link {{ request()->routeIs('admin.students') ? 'active' : '' }}">
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>

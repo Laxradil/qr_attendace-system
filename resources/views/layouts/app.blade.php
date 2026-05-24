@@ -313,12 +313,6 @@
                         </svg>
                         <span>Users</span>
                     </a>
-                    <a href="{{ route('admin.professors') }}" class="sidebar-item {{ request()->routeIs('admin.professors') ? 'active' : '' }}">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.14 3.14a6 6 0 00-8.488 8.488l-3.14 3.14M9 9a6 6 0 018.488 8.488l3.14 3.14M9 9l3 3m-3-3l-3 3"></path>
-                        </svg>
-                        <span>Professors</span>
-                    </a>
                     <a href="{{ route('admin.students') }}" class="sidebar-item {{ request()->routeIs('admin.students') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM12.93 12H0v7a6 6 0 0015.806-1M16 16a2 2 0 100-4 2 2 0 000 4z"></path>

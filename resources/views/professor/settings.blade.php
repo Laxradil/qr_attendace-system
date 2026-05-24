@@ -28,8 +28,8 @@
   .settings-container {
     max-width: 1040px;
     margin: 0 auto;
-    background: #4a4a4a;
-    border: 1px solid rgba(255,255,255,.45);
+    background: rgba(15,23,42,0.62) !important;
+    border: 1px solid rgba(255,255,255,.45) !important;
     border-radius: 28px;
     padding: 32px;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 0 0 1px rgba(0,0,0,.12);
@@ -184,6 +184,10 @@
   }
   body.theme-ash .theme-swatch.theme-ash { background: #d1d5db !important; }
 
+  body.theme-ash,
+  body.theme-ash * {
+    color: #ffffff !important;
+  }
   body.theme-ash .settings-container,
   body.theme-ash .settings-container * {
     color: #ffffff !important;
@@ -486,8 +490,18 @@
 <style>
   /* Light theme solid overrides */
   body.theme-light .settings-container {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: rgba(15,23,42,0.62) !important;
+    border: 1px solid rgba(255,255,255,.45) !important;
+  }
+
+  /* Force readable dark text inside the settings card in light theme */
+  body.theme-light .settings-container .label,
+  body.theme-light .settings-container .theme-label,
+  body.theme-light .settings-container .info-label,
+  body.theme-light .settings-container .info-value,
+  body.theme-light .settings-container .settings-btn,
+  body.theme-light .settings-container .theme-option .theme-label {
+    color: #0f172a !important;
   }
 
   body.theme-light .settings-input {
@@ -526,8 +540,8 @@
 <style>
   /* Ash theme overrides (similar to light but slightly muted) */
   body.theme-ash .settings-container {
-    background: #4a4a4a;
-    border: 1px solid rgba(255,255,255,.45);
+    background: rgba(15,23,42,0.62) !important;
+    border: 1px solid rgba(255,255,255,.45) !important;
   }
 
   body.theme-ash .settings-input {
@@ -583,9 +597,19 @@
     box-shadow: 0 0 0 1px rgba(255,255,255,.06) !important;
     background: rgba(255,255,255,.12) !important;
   }
+
+  /* Preserve distinct swatch colors even in Ash theme */
+  body.theme-ash .theme-swatch.theme-light { background: #ffffff !important; }
+  body.theme-ash .theme-swatch.theme-ash   { background: #d1d5db !important; }
+  body.theme-ash .theme-swatch.theme-dark  { background: #1f2937 !important; }
+  body.theme-ash .theme-swatch.theme-onyx { background: #0f172a !important; }
+
+  /* Ensure theme option labels and settings buttons remain readable in Ash */
+  body.theme-ash .theme-option .theme-label { color: #ffffff !important; }
+  body.theme-ash .settings-btn { color: #ffffff !important; }
 </style>
 
-<div class="settings-container">
+<div class="settings-container" style="background: rgba(15,23,42,0.62) !important; border: 1px solid rgba(255,255,255,.45) !important;">
   <!-- Profile Settings -->
   <div class="settings-section">
     <h3>Profile Settings</h3>
@@ -725,17 +749,33 @@
       return activeTheme;
     };
 
+    // Prefer the server-provided theme if available, otherwise fall back to stored theme
+    const serverTheme = themeInput.value || null;
     const savedTheme = localStorage.getItem(themeKey);
-    const currentTheme = applyTheme(savedTheme);
+    const initialTheme = serverTheme ? serverTheme : (savedTheme ? savedTheme : null);
+    const currentTheme = applyTheme(initialTheme);
     localStorage.setItem(themeKey, currentTheme);
+
+    const warningBox = document.getElementById('settings-warning');
+    const warningActions = warningBox ? warningBox.querySelector('.actions') : null;
+    const hideWarningActions = function () {
+      if (warningActions) {
+        warningActions.style.display = 'none';
+      }
+    };
+    const showWarningActions = function () {
+      if (warningActions) {
+        warningActions.style.display = 'inline-flex';
+      }
+    };
 
     // Check if we just saved settings
     if (localStorage.getItem('settings_saved') === 'true') {
       localStorage.removeItem('settings_saved');
-      const warningBox = document.getElementById('settings-warning');
       if (warningBox) {
         warningBox.classList.add('success', 'show');
         warningBox.querySelector('.message').textContent = 'Changes saved successfully! ✓';
+        hideWarningActions();
         setTimeout(function () {
           warningBox.classList.remove('show', 'success');
         }, 2500);
@@ -753,7 +793,6 @@
       });
     });
 
-    const warningBox = document.getElementById('settings-warning');
     const profileSettingsForm = document.getElementById('profile-settings-form');
     let unsavedSettings = false;
     let warningTimeout = null;
@@ -767,6 +806,9 @@
         const actions = warningBox.querySelector('.actions');
         if (actions && !document.getElementById('unsaved-save-action')) {
           actions.innerHTML = '<button type="button" id="unsaved-save-action">Save changes</button>';
+        }
+        if (warningActions) {
+          showWarningActions();
         }
         clearTimeout(warningTimeout);
         warningTimeout = setTimeout(function () {
@@ -783,6 +825,7 @@
             warningBox.classList.remove('show');
             warningBox.classList.add('success');
             warningBox.querySelector('.message').textContent = 'Saving changes...';
+            hideWarningActions();
             warningBox.classList.add('show');
             unsavedSettings = false;
             
