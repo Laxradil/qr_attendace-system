@@ -110,12 +110,8 @@
             @endforelse
           </td>
           <td>
-            <div class="qr @if($student->studentQrCode) @else empty @endif">
-              @if($student->studentQrCode)
-                <img src="{{ route('admin.students.qr-code', $student) }}" alt="QR code for {{ $student->name }}">
-              @else
-                ▦
-              @endif
+            <div class="qr">
+              <img src="{{ route('admin.students.qr-code', $student) }}" alt="QR code for {{ $student->name }}" onerror="this.style.display='none';this.parentNode.innerText='▦'">
             </div>
           </td>
           <td>

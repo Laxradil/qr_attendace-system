@@ -946,10 +946,11 @@
     .mini-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:10px;flex-shrink:0}
 
     .report-btn{
-      width:100%;height:40px;border:0;border-radius:13px;color:white;font-weight:800;cursor:pointer;
-      font-size:13px;letter-spacing:.02em;font-family:var(--font);
+      display:inline-flex;align-items:center;justify-content:center;
+      min-width:180px;height:44px;border:0;border-radius:13px;color:white;font-weight:800;cursor:pointer;
+      font-size:13px;letter-spacing:.02em;font-family:var(--font);text-decoration:none;
       background:linear-gradient(135deg,rgba(139,92,255,.85),rgba(67,166,255,.45));
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(80,94,255,.2);transition:.2s ease;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(80,94,255,.2);transition:.2s ease;padding:0 18px;
     }
     .report-btn:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 14px 32px rgba(80,94,255,.35)}
 
@@ -1094,14 +1095,15 @@
           <span class="nav-icon">▦</span>
           <span>Scan QR</span>
         </a>
+        <a href="{{ route('professor.qr-codes') }}" class="{{ request()->routeIs('professor.qr-codes*') ? 'active' : '' }}">
+          <span class="nav-icon">🔲</span>
+          <span>QR Codes</span>
+        </a>
         <a href="{{ route('professor.attendance-records') }}" class="{{ request()->routeIs('professor.attendance-records*') ? 'active' : '' }}">
           <span class="nav-icon">📋</span>
           <span>Attendance Records</span>
         </a>
-        <a href="{{ route('professor.schedules') }}" class="{{ request()->routeIs('professor.schedules') ? 'active' : '' }}">
-          <span class="nav-icon">📅</span>
-          <span>Schedules</span>
-        </a>
+        {{-- Schedules removed from professor sidebar (not used) --}}
         <a href="{{ route('professor.students') }}" class="{{ request()->routeIs('professor.students') ? 'active' : '' }}">
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>

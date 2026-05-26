@@ -114,6 +114,7 @@
         <button type="button" class="btn slim btn-scan" data-action="scan-qr" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}">Scan QR</button>
       </div>
     </div>
+
   @empty
     <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">
       <div style="font-size:48px;margin-bottom:12px">📚</div>
@@ -1440,5 +1441,26 @@
         }
       });
     });
+</script>
+
+<script>
+  // Make clicking a class-card navigate to Students tab and open that class
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.class-card').forEach(function(card){
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function (e) {
+        // ignore clicks on buttons/links inside the card
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        const id = card.querySelector('[data-action]')?.dataset.classId || card.querySelector('.btn')?.dataset.classId;
+        if (!id) {
+          // try data attribute on parent (if any)
+          const dataId = card.getAttribute('data-class-id');
+          if (dataId) window.location.href = `{{ route('professor.students') }}?class_id=${dataId}`;
+          return;
+        }
+        window.location.href = `{{ route('professor.students') }}?class_id=${id}`;
+      });
+    });
+  });
 </script>
 @endsection

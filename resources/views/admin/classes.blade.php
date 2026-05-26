@@ -46,7 +46,9 @@
                         <span class="pill {{ $classe->is_active ? 'green' : 'red' }}">{{ $classe->is_active ? 'Active' : 'Inactive' }}</span>
                     </td>
                     <td style="display:flex;gap:6px;align-items:center;white-space:nowrap;">
+                        @if (Route::has('admin.classes.enroll'))
                         <a href="{{ route('admin.classes.enroll', $classe) }}" class="btn">Enroll</a>
+                        @endif
                         <a href="{{ route('admin.classes.edit', $classe) }}" class="btn">Edit</a>
                         <form action="{{ route('admin.classes.delete', $classe) }}" method="POST" onsubmit="return confirm('Delete?')" style="margin:0;">
                             @csrf

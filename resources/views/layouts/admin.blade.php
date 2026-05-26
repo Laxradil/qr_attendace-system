@@ -833,11 +833,7 @@
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
         </a>
-        <a href="{{ route('admin.drop-requests') }}" class="nav-link {{ request()->routeIs('admin.drop-requests*') ? 'active' : '' }}">
-          <span class="nav-icon">⇩</span>
-          <span>Drop Requests</span>
-          <span class="nav-badge">{{ App\Models\DropRequest::where('status', 'pending')->count() }}</span>
-        </a>
+        <!-- Drop Requests removed: professors handle drops directly -->
         <a href="{{ route('admin.logs') }}" class="nav-link {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
           <span class="nav-icon">☷</span>
           <span>System Logs</span>

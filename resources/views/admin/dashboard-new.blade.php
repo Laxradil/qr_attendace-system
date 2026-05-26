@@ -305,10 +305,7 @@
         <span>Total Classes</span>
         <b>{{ App\Models\Classe::count() }}</b>
       </div>
-      <div class="row-item">
-        <span>Pending Drops</span>
-        <b style="color:#ffd584">{{ App\Models\DropRequest::where('status', 'pending')->count() }}</b>
-      </div>
+      <!-- Pending Drops removed: professors handle drops directly -->
       <div class="row-item">
         <span>System Status</span>
         <span class="pill green"><span class="status-dot" style="color:var(--green);background:var(--green)"></span> Operational</span>
@@ -338,24 +335,12 @@
       </div>
     </div>
 
-    <!-- Drop requests alert -->
-    @php
-      $pendingDropCount = App\Models\DropRequest::where('status', 'pending')->count();
-      $firstPendingDrop = App\Models\DropRequest::where('status', 'pending')->with('student', 'classe')->first();
-    @endphp
-    <div class="card" style="border-radius:var(--radius-lg);padding:18px;background:rgba(255,61,114,.08);border:1px solid rgba(255,61,114,.22)">
+    <div class="card" style="border-radius:var(--radius-lg);padding:18px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <span style="font-size:20px">⚠️</span>
-        <b style="font-size:14px">{{ $pendingDropCount }} Pending Drop Request(s)</b>
+        <span style="font-size:20px">ℹ️</span>
+        <b style="font-size:14px">Drop Requests</b>
       </div>
-      @if($pendingDropCount > 0)
-        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">{{ $firstPendingDrop?->student?->name ?? 'N/A' }} · {{ $firstPendingDrop?->classe?->code ?? 'N/A' }} · {{ now()->format('M d') }}</p>
-      @else
-        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">No pending drop requests at this time</p>
-      @endif
-      <div style="display:flex;gap:8px">
-        <a href="{{ route('admin.drop-requests') }}" class="btn primary slim" style="flex:1">Review →</a>
-      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:13px">Drop approvals have been removed. Professors can now remove students from their classes directly.</p>
     </div>
   </div>
 </div>
