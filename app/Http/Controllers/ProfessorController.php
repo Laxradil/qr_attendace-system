@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Classe;
 use App\Models\AttendanceRecord;
-use App\Models\DropRequest;
 use App\Models\Schedule;
 use App\Models\SystemLog;
 use App\Models\User;
@@ -765,7 +764,7 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function students(): View
+    public function students(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
@@ -773,20 +772,169 @@ class ProfessorController extends Controller
             ->with('students')
             ->get();
 
-        $pendingRequests = [];
-        try {
-            $pendingRequests = DropRequest::whereIn('class_id', $classes->pluck('id'))
-                ->where('status', 'pending')
-                ->get()
-                ->mapWithKeys(fn (DropRequest $request) => ["{$request->class_id}_{$request->student_id}" => $request]);
-        } catch (\Exception) {
-            // Table doesn't exist yet - migration hasn't been run
-        }
+        // Provide available students list for modal "Add Student" UI
+        $availableStudents = User::where('role', 'student')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
+        // Optional class to open/scroll to when landing on the students page
+        $openClassId = $request->query('class_id');
+
+        // Drop approval flow removed: professors now perform drops directly.
         return view('professor.students', [
             'classes' => $classes,
-            'pendingRequests' => $pendingRequests,
+            'availableStudents' => $availableStudents,
+            'openClassId' => $openClassId,
         ]);
+    }
+
+    // Show create-student form for professors
+    public function createStudent(): View
+    {
+        return view('professor.create-student');
+    }
+
+    // Store a new student created by a professor. Role is enforced to 'student'.
+    public function storeStudent(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'username' => 'required|string|unique:users,username|max:255',
+            'password' => 'required|min:8|confirmed',
+            'student_id' => 'nullable|string|max:100',
+            'section' => 'required|string|max:255',
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'username' => $validated['username'],
+            'password' => bcrypt($validated['password']),
+            'role' => 'student',
+            'student_id' => $validated['student_id'] ?? null,
+            'section' => $validated['section'],
+        ]);
+
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'add_student',
+            'description' => 'Professor created student account: ' . $user->name,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return redirect()->route('professor.students')->with('success', 'Student account created successfully.');
+    }
+
+    // QR Code Management for Professors (moved from admin)
+    public function qrCodes(): View
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $classIds = $user->assignedClasses()->pluck('classes.id');
+
+        $students = User::where('role', 'student')
+            ->whereHas('enrolledClasses', function ($query) use ($classIds) {
+                $query->whereIn('classes.id', $classIds);
+            })
+            ->with(['enrolledClasses', 'studentQrCode'])
+            ->orderBy('name')
+            ->paginate(20, ['*'], 'students_page');
+
+        return view('professor.qr-codes-new', compact('students'));
+    }
+
+    public function downloadAllQrCodesZip()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $classIds = $user->assignedClasses()->pluck('classes.id');
+
+        $students = User::where('role', 'student')
+            ->whereHas('enrolledClasses', function ($query) use ($classIds) {
+                $query->whereIn('classes.id', $classIds);
+            })
+            ->with(['enrolledClasses', 'studentQrCode'])
+            ->orderBy('name')
+            ->get();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'qr_codes_zip_');
+
+        if ($zipPath === false) {
+            abort(500, 'Unable to create temporary archive.');
+        }
+
+        $zipFile = $zipPath . '.zip';
+        @unlink($zipPath);
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Unable to create QR code archive.');
+        }
+
+        foreach ($students as $student) {
+            $fileName = preg_replace('/[^A-Za-z0-9_-]+/', '_', trim($student->name)) ?: 'student';
+            $qrPng = $this->buildStudentQrPng($student);
+            $zip->addFromString($fileName . '-qr.png', $qrPng);
+        }
+
+        $zip->close();
+
+        return response()->download($zipFile, 'student-qr-codes.zip')->deleteFileAfterSend(true);
+    }
+
+    public function studentQrCode(User $student)
+    {
+        abort_if(!$student->isStudent(), 404);
+
+        $svg = $this->buildStudentQrSvg($student);
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
+    }
+
+    private function buildStudentQrSvg(User $student): string
+    {
+        $qrCode = \App\Models\QRCode::where('student_id', $student->id)->first();
+
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'student_email' => $student->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
+
+        return \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+            ->size(180)
+            ->margin(1)
+            ->encoding('UTF-8')
+            ->generate($qrData);
+    }
+
+    private function buildStudentQrPng(User $student): string
+    {
+        $qrCode = \App\Models\QRCode::where('student_id', $student->id)->first();
+
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'student_email' => $student->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
+
+        return \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(300)
+            ->margin(1)
+            ->encoding('UTF-8')
+            ->generate($qrData);
     }
 
     public function submitDropRequest(Request $request): RedirectResponse
@@ -798,7 +946,7 @@ class ProfessorController extends Controller
             'class_id' => 'required|exists:classes,id',
             'student_id' => 'required|exists:users,id',
             'reason' => [
-                'required',
+                'nullable',
                 'string',
                 'max:500',
                 Rule::in([
@@ -820,40 +968,31 @@ class ProfessorController extends Controller
             return back()->with('error', 'This student is not enrolled in the selected class.');
         }
 
-        $existingRequest = DropRequest::where('class_id', $classe->id)
-            ->where('student_id', $student->id)
-            ->where('professor_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
-            ->first();
+        // Perform the drop immediately — no admin approval required.
+        DB::transaction(function () use ($classe, $student, $user, $request, $validated) {
+            $classe->students()->detach($student->id);
 
-        if ($existingRequest) {
-            return back()->with('error', 'A pending or approved drop request already exists for this student in the selected class.');
-        }
+            SystemLog::create([
+                'user_id' => $user->id,
+                'action' => 'remove_student',
+                'description' => 'Dropped ' . $student->name . ' from ' . $classe->code . ' - ' . $classe->name . ' by professor',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        });
 
-        DropRequest::create([
-            'professor_id' => $user->id,
-            'student_id' => $student->id,
-            'class_id' => $classe->id,
-            'reason' => $validated['reason'] ?? null,
-            'status' => 'pending',
-        ]);
-
-        SystemLog::create([
-            'user_id' => $user->id,
-            'action' => 'other',
-            'description' => 'Requested to drop ' . $student->name . ' from ' . $classe->code . ' - ' . $classe->name,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        return back()->with('success', 'Drop request submitted and is pending admin approval.');
+        return back()->with('success', 'Student removed from the class successfully.');
     }
 
     public function logs(): View
     {
         /** @var User $user */
         $user = Auth::user();
-        $logs = $user->logs()
+        $logs = SystemLog::with('user')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhere('action', 'add_student');
+            })
             ->latest()
             ->paginate(20);
 
