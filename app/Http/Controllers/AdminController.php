@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Classe;
 use App\Models\AttendanceRecord;
-use App\Models\DropRequest;
 use App\Models\SystemLog;
 use App\Models\QRCode;
 use App\Models\Schedule;
@@ -69,10 +68,7 @@ class AdminController extends Controller
             return SystemLog::with('user')->latest()->limit(10)->get();
         });
 
-        // Get pending drop requests count
-        $dropRequests = DropRequest::where('status', 'pending')->count();
-
-        return view('admin.dashboard-new', array_merge($stats, ['recentLogs' => $recentLogs, 'dropRequests' => $dropRequests]));
+        return view('admin.dashboard-new', array_merge($stats, ['recentLogs' => $recentLogs]));
     }
 
     private function getUserStats(): array
@@ -171,9 +167,7 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users',
             'username' => 'required|string|unique:users|max:255',
             'password' => 'required|min:8|confirmed',
-            'role' => 'required|in:admin,professor,student',
-            'student_id' => 'nullable|string|unique:users|max:255',
-            'section' => 'nullable|string|max:255|required_if:role,student',
+            'role' => 'required|in:admin,professor',
         ]);
 
         $user = User::create([
@@ -182,21 +176,13 @@ class AdminController extends Controller
             'username' => $validated['username'],
             'password' => bcrypt($validated['password']),
             'role' => $validated['role'],
-            'student_id' => $validated['student_id'] ?? null,
-            'section' => $validated['role'] === 'student' ? ($validated['section'] ?? null) : null,
+            'student_id' => null,
+            'section' => null,
         ]);
-
-        // Create QR code for students
-        if ($validated['role'] === 'student') {
-            QRCode::create([
-                'uuid' => \Illuminate\Support\Str::uuid(),
-                'student_id' => $user->id,
-            ]);
-        }
 
         SystemLog::create([
             'user_id' => Auth::id(),
-            'action' => 'other',
+            'action' => 'add_user',
             'description' => 'Created new user: ' . $validated['name'],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -221,10 +207,10 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'username' => 'required|string|unique:users,username,' . $user->id,
             'role' => 'required|in:admin,professor,student',
-            'student_id' => 'nullable|string|unique:users,student_id,' . $user->id,
-            'section' => 'nullable|string|max:255|required_if:role,student',
             'password' => 'nullable|min:8|confirmed',
             'is_active' => 'boolean',
+            'student_id' => 'nullable|string|max:255',
+            'section' => 'nullable|string|max:255',
         ]);
 
         $oldRole = $user->role;
@@ -683,88 +669,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function dropRequests(): View
-    {
-        $requests = DropRequest::with(['classe', 'student', 'professor', 'admin'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        $dropRequests = $requests;
-        return view('admin.drop-requests-new', [
-            'dropRequests' => $dropRequests,
-        ]);
-    }
-
-    public function approveDropRequest(Request $request, DropRequest $dropRequest): RedirectResponse
-    {
-        if ($dropRequest->status !== 'pending') {
-            return back()->with('error', 'Only pending requests can be approved.');
-        }
-
-        return DB::transaction(function () use ($request, $dropRequest) {
-            $duplicateApproved = DropRequest::where('professor_id', $dropRequest->professor_id)
-                ->where('student_id', $dropRequest->student_id)
-                ->where('class_id', $dropRequest->class_id)
-                ->where('status', 'approved')
-                ->where('id', '!=', $dropRequest->id)
-                ->exists();
-
-            if ($duplicateApproved) {
-                $dropRequest->delete();
-
-                SystemLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'other',
-                    'description' => 'Skipped duplicate drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
-
-                return back()->with('warning', 'That drop request was already approved. The duplicate request was removed.');
-            }
-
-            $dropRequest->update([
-                'status' => 'approved',
-                'admin_id' => Auth::id(),
-                'reviewed_at' => now(),
-            ]);
-
-            $dropRequest->classe->students()->detach($dropRequest->student_id);
-
-            SystemLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'other',
-                'description' => 'Approved drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            return back()->with('success', 'Drop request approved and student removed from the class.');
-        });
-    }
-
-    public function rejectDropRequest(Request $request, DropRequest $dropRequest): RedirectResponse
-    {
-        if ($dropRequest->status !== 'pending') {
-            return back()->with('error', 'Only pending requests can be rejected.');
-        }
-
-        $dropRequest->update([
-            'status' => 'rejected',
-            'admin_id' => Auth::id(),
-            'reviewed_at' => now(),
-        ]);
-
-        SystemLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'other',
-            'description' => 'Rejected drop request for ' . $dropRequest->student->name . ' from ' . $dropRequest->classe->code,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        return back()->with('success', 'Drop request rejected.');
-    }
+    // Drop approvals removed: professors handle drops directly now.
 
     // System Logs
     public function logs(): View
@@ -793,9 +698,6 @@ class AdminController extends Controller
             ]);
             $user->theme = $request->input('theme');
             $user->save();
-            if ($request->wantsJson()) {
-                return response()->json(['success' => true, 'message' => 'Theme updated successfully.']);
-            }
             return back()->with('success', 'Theme updated successfully.');
         }
 
@@ -815,7 +717,7 @@ class AdminController extends Controller
         // Log the activity
         SystemLog::create([
             'user_id' => Auth::id(),
-            'action' => 'update_user',
+            'action' => 'update',
             'model_type' => 'User',
             'model_id' => Auth::id(),
             'description' => 'Updated profile settings',
@@ -841,7 +743,7 @@ class AdminController extends Controller
             // Log the activity
             SystemLog::create([
                 'user_id' => Auth::id(),
-                'action' => 'update_user',
+                'action' => 'update',
                 'model_type' => 'User',
                 'model_id' => Auth::id(),
                 'description' => 'Changed password',

@@ -54,8 +54,11 @@ Route::middleware('auth')->group(function () {
 Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(function () {
     Route::get('/', [ProfessorController::class, 'dashboard'])->name('professor.dashboard');
     Route::get('/classes', [ProfessorController::class, 'myClasses'])->name('professor.classes');
+    Route::get('/classes/create', [ProfessorController::class, 'createClass'])->name('professor.classes.create');
+    Route::post('/classes', [ProfessorController::class, 'storeClass'])->name('professor.classes.store');
     Route::get('/classes/{classe}', [ProfessorController::class, 'showClass'])->name('professor.class-detail');
     Route::put('/classes/{classe}', [ProfessorController::class, 'updateClass'])->name('professor.classes.update');
+    Route::delete('/classes/{classe}', [ProfessorController::class, 'deleteClass'])->name('professor.classes.delete');
     Route::get('/scan-qr', [ProfessorController::class, 'scanQR'])->name('professor.scan-qr');
     Route::post('/attendance', [ProfessorController::class, 'recordAttendance'])->name('professor.attendance.store');
     Route::get('/attendance-records', [ProfessorController::class, 'attendanceRecords'])->name('professor.attendance-records');
@@ -70,6 +73,13 @@ Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(functi
     Route::put('/settings/password', [ProfessorController::class, 'updatePassword'])->name('professor.settings.password');
     Route::post('/add-student', [ProfessorController::class, 'addStudent'])->name('professor.add-student');
     Route::post('/drop-request', [ProfessorController::class, 'submitDropRequest'])->name('professor.drop-request');
+    // Professor: create student accounts (role locked to student)
+    Route::get('/users/create', [ProfessorController::class, 'createStudent'])->name('professor.users.create');
+    Route::post('/users', [ProfessorController::class, 'storeStudent'])->name('professor.users.store');
+    // Professor QR management (migrated from admin)
+    Route::get('/qr-codes', [ProfessorController::class, 'qrCodes'])->name('professor.qr-codes');
+    Route::get('/students/{student}/qr-code', [ProfessorController::class, 'studentQrCode'])->name('professor.students.qr-code');
+    Route::get('/qr-codes/download-all', [ProfessorController::class, 'downloadAllQrCodesZip'])->name('professor.qr-codes.downloadAll');
 });
 
 // Admin routes
@@ -96,8 +106,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/classes/create', [AdminController::class, 'createClass'])->name('admin.classes.create');
     Route::post('/classes', [AdminController::class, 'storeClass'])->name('admin.classes.store');
     Route::get('/classes/{classe}/edit', [AdminController::class, 'editClass'])->name('admin.classes.edit');
-    Route::get('/classes/{classe}/enroll', [AdminController::class, 'enrollClassForm'])->name('admin.classes.enroll');
-    Route::post('/classes/{classe}/enroll', [AdminController::class, 'storeClassEnrollment'])->name('admin.classes.enroll.store');
+    // Class enrollment by admin removed; professors manage their class rosters.
     Route::put('/classes/{classe}', [AdminController::class, 'updateClass'])->name('admin.classes.update');
     Route::delete('/classes/{classe}', [AdminController::class, 'deleteClass'])->name('admin.classes.delete');
     
@@ -110,10 +119,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Reports
     Route::get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
 
-    // Drop request approvals
-    Route::get('/drop-requests', [AdminController::class, 'dropRequests'])->name('admin.drop-requests');
-    Route::post('/drop-requests/{dropRequest}/approve', [AdminController::class, 'approveDropRequest'])->name('admin.drop-requests.approve');
-    Route::post('/drop-requests/{dropRequest}/reject', [AdminController::class, 'rejectDropRequest'])->name('admin.drop-requests.reject');
+    // Drop request approvals removed — professors handle drops directly now.
     
     // System logs
     Route::get('/logs', [AdminController::class, 'logs'])->name('admin.logs');

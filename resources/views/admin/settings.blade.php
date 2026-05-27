@@ -424,8 +424,8 @@
     <span class="message">Careful — you have unsaved changes!</span>
   </div>
   <div class="actions">
+    <button type="button" id="unsaved-reset-action" class="btn-reset">Reset</button>
     <button type="button" id="unsaved-save-action">Save changes</button>
-    <button type="button" id="unsaved-reset-action" class="btn-reset">Discard</button>
   </div>
 </div>
 
@@ -578,12 +578,7 @@
           <div class="form-note">Cannot be changed</div>
         </div>
 
-        @php
-          $theme = old('theme', auth()->user()->theme ?? 'light');
-          if (!in_array($theme, ['light','onyx'])) {
-            $theme = 'light';
-          }
-        @endphp
+        @php $theme = old('theme', auth()->user()->theme ?? 'light'); @endphp
         <div>
           <label class="label">Theme</label>
           <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
@@ -592,22 +587,24 @@
               <span class="theme-swatch theme-light"></span>
               <span class="theme-label">Light</span>
             </button>
+            <button type="button" class="theme-option {{ $theme === 'ash' ? 'selected' : '' }}" data-theme="ash">
+              <span class="theme-swatch theme-ash"></span>
+              <span class="theme-label">Ash</span>
+            </button>
+            <button type="button" class="theme-option {{ $theme === 'dark' ? 'selected' : '' }}" data-theme="dark">
+              <span class="theme-swatch theme-dark"></span>
+              <span class="theme-label">Dark</span>
+            </button>
             <button type="button" class="theme-option {{ $theme === 'onyx' ? 'selected' : '' }}" data-theme="onyx">
               <span class="theme-swatch theme-onyx"></span>
               <span class="theme-label">Onyx</span>
             </button>
           </div>
-          <div class="form-note">Choose between Light and Onyx.</div>
+          <div class="form-note">Choose between Light, Ash, Dark and Onyx.</div>
         </div>
 
       </form>
 
-      <form id="theme-save-form" action="{{ route('admin.settings.update') }}" method="POST" style="display:none;margin-top:12px">
-        @csrf
-        @method('PUT')
-        <input type="hidden" name="theme" id="theme-only-input" value="{{ $theme }}">
-        <button type="submit" id="theme-save-btn" class="settings-btn primary">Save Theme</button>
-      </form>
     </div>
     
     <div class="settings-divider"></div>
@@ -637,10 +634,6 @@
           @enderror
         </div>
         
-        <div class="button-group">
-          <button type="submit" class="settings-btn primary">Update Password</button>
-          <button type="reset" class="settings-btn">Clear</button>
-        </div>
       </form>
     </div>
     
@@ -676,10 +669,10 @@
     const themeKey = 'qr_attendance_theme';
     const themeInput = document.getElementById('theme-input');
     const themeButtons = document.querySelectorAll('.theme-option');
-    const themeSaveForm = document.getElementById('theme-save-form');
     const profileSettingsForm = document.getElementById('profile-settings-form');
     const passwordSettingsForm = document.getElementById('password-settings-form');
     const warningBox = document.getElementById('settings-warning');
+    const warningActions = warningBox ? warningBox.querySelector('.actions') : null;
     let unsavedSettings = false;
     let warningTimeout = null;
     let activeForm = null;
@@ -687,129 +680,92 @@
 
     if (!themeInput || !themeButtons.length) return;
 
-    const themeSwitchCheckbox = document.getElementById('theme-switch-checkbox');
-    const themeSwitchWrapper = themeSwitchCheckbox ? themeSwitchCheckbox.closest('.theme-switch') : null;
-    const syncThemeSwitch = function (theme) {
-      if (!themeSwitchCheckbox) return;
-      themeSwitchCheckbox.checked = (theme === 'onyx');
-      if (!themeSwitchWrapper) return;
-      themeSwitchWrapper.classList.toggle('light-mode', theme === 'light');
-      themeSwitchWrapper.classList.toggle('onyx-mode', theme === 'onyx');
-    };
-
-    const passwordField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password"]') : null;
-    const passwordConfirmField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password_confirmation"]') : null;
-    const clearPasswordMismatchError = function () {
-      if (!passwordConfirmField) return;
-      passwordConfirmField.setCustomValidity('');
-      const existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
-      if (existing) existing.remove();
-    };
-    const showPasswordMismatchError = function (message) {
-      if (!passwordConfirmField) return;
-      passwordConfirmField.setCustomValidity(message);
-      let existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
-      if (!existing) {
-        existing = document.createElement('div');
-        existing.className = 'error-text password-mismatch-error';
-        passwordConfirmField.parentNode.appendChild(existing);
-      }
-      existing.textContent = message;
-    };
-    const validatePasswordMatch = function () {
-      if (!passwordSettingsForm || !passwordField || !passwordConfirmField) return true;
-      const passwordValue = passwordField.value;
-      const confirmValue = passwordConfirmField.value;
-      clearPasswordMismatchError();
-      if (!passwordValue && !confirmValue) {
-        return true;
-      }
-      if (passwordValue !== confirmValue) {
-        showPasswordMismatchError('Passwords do not match.');
-        return false;
-      }
-      return true;
-    };
-
     const applyTheme = function (theme) {
-      const validThemes = ['light','onyx'];
-      const activeTheme = validThemes.includes(theme) ? theme : 'onyx';
+      const validThemes = ['light','ash','dark','onyx'];
+      const activeTheme = validThemes.includes(theme) ? theme : 'dark';
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + activeTheme);
       themeInput.value = activeTheme;
-      const themeOnlyInput = document.getElementById('theme-only-input');
-      if (themeOnlyInput) themeOnlyInput.value = activeTheme;
       themeButtons.forEach(function (option) {
         option.classList.toggle('selected', option.dataset.theme === activeTheme);
       });
-      syncThemeSwitch(activeTheme);
       return activeTheme;
     };
 
-    const savedTheme = localStorage.getItem(themeKey) || themeInput.value;
-    const currentTheme = applyTheme(savedTheme);
+    const serverTheme = themeInput.value || null;
+    const savedTheme = localStorage.getItem(themeKey);
+    const originalTheme = serverTheme || savedTheme || themeInput.value || 'dark';
+    const initialTheme = serverTheme || savedTheme || originalTheme;
+    const currentTheme = applyTheme(initialTheme);
+    themeInput.defaultValue = originalTheme;
+    themeInput.setAttribute('value', originalTheme);
     localStorage.setItem(themeKey, currentTheme);
+
+    const hideWarningActions = function () {
+      if (warningActions) {
+        warningActions.style.display = 'none';
+      }
+    };
+
+    const showWarningActions = function () {
+      if (warningActions) {
+        warningActions.style.display = 'inline-flex';
+      }
+    };
 
     const showUnsavedWarning = function (message) {
       if (!warningBox) return;
       warningBox.hidden = false;
       warningBox.classList.add('show');
       warningBox.querySelector('.message').textContent = message;
+      const actions = warningBox.querySelector('.actions');
+      if (actions && !document.getElementById('unsaved-save-action')) {
+        actions.innerHTML = '<button type="button" id="unsaved-save-action">Save changes</button>';
+      }
+      if (warningActions) {
+        showWarningActions();
+      }
       clearTimeout(warningTimeout);
       warningTimeout = setTimeout(function () {
         if (!unsavedSettings) {
           warningBox.classList.remove('show');
         }
       }, 4200);
-      bindWarningActions();
-    };
 
-    const hideUnsavedWarning = function () {
-      if (!warningBox) return;
-      warningBox.classList.remove('show');
-    };
-
-    const bindWarningActions = function () {
       const saveButton = document.getElementById('unsaved-save-action');
-      if (saveButton && !saveButton.dataset.bound) {
-        saveButton.dataset.bound = 'true';
-        saveButton.addEventListener('click', function () {
+      if (saveButton) {
+        saveButton.replaceWith(saveButton.cloneNode(true));
+        const freshSave = document.getElementById('unsaved-save-action');
+        freshSave.addEventListener('click', function () {
           if (!warningBox) return;
           warningBox.classList.remove('show');
           warningBox.classList.add('success');
           warningBox.querySelector('.message').textContent = 'Saving changes...';
+          hideWarningActions();
           warningBox.classList.add('show');
           unsavedSettings = false;
           localStorage.setItem('settings_saved', 'true');
           if (activeForm) {
-            if (activeForm.requestSubmit) {
-              activeForm.requestSubmit();
-            } else {
-              activeForm.submit();
-            }
+            activeForm.submit();
           } else if (profileSettingsForm) {
-            if (profileSettingsForm.requestSubmit) {
-              profileSettingsForm.requestSubmit();
-            } else {
-              profileSettingsForm.submit();
-            }
+            profileSettingsForm.submit();
           }
         });
       }
 
       const resetButton = document.getElementById('unsaved-reset-action');
-      if (resetButton && !resetButton.dataset.bound) {
-        resetButton.dataset.bound = 'true';
-        resetButton.addEventListener('click', function () {
-          if (activeForm && activeForm !== themeSaveForm) {
+      if (resetButton) {
+        resetButton.replaceWith(resetButton.cloneNode(true));
+        const freshReset = document.getElementById('unsaved-reset-action');
+        freshReset.addEventListener('click', function () {
+          if (activeForm) {
             activeForm.reset();
           }
-          if (themeSaveForm) {
-            themeSaveForm.style.display = 'none';
-          }
           if (themeChanged) {
-            const themeInputValue = localStorage.getItem(themeKey) || themeInput.value;
-            applyTheme(themeInputValue);
+            applyTheme(originalTheme);
+            themeInput.defaultValue = originalTheme;
+            themeInput.setAttribute('value', originalTheme);
+            localStorage.setItem(themeKey, originalTheme);
           }
           unsavedSettings = false;
           activeForm = null;
@@ -819,11 +775,17 @@
       }
     };
 
+    const hideUnsavedWarning = function () {
+      if (!warningBox) return;
+      warningBox.classList.remove('show');
+    };
+
     if (localStorage.getItem('settings_saved') === 'true') {
       localStorage.removeItem('settings_saved');
       if (warningBox) {
         warningBox.classList.add('success', 'show');
         warningBox.querySelector('.message').textContent = 'Changes saved successfully! ✓';
+        hideWarningActions();
         setTimeout(function () {
           warningBox.classList.remove('show', 'success');
         }, 2500);
@@ -832,11 +794,8 @@
 
     const markUnsaved = function (form, themeOnly = false) {
       unsavedSettings = true;
-      activeForm = form;
+      activeForm = form || profileSettingsForm;
       themeChanged = themeOnly;
-      if (themeSaveForm) {
-        themeSaveForm.style.display = themeOnly ? '' : 'none';
-      }
       showUnsavedWarning('Careful — you have unsaved changes!');
     };
 
@@ -845,33 +804,11 @@
         const theme = button.dataset.theme;
         const selectedTheme = applyTheme(theme);
         localStorage.setItem(themeKey, selectedTheme);
-        if (themeSaveForm) {
-          themeSaveForm.style.display = '';
-        }
-        markUnsaved(themeSaveForm, true);
+        markUnsaved(profileSettingsForm, true);
       });
     });
 
-    if (passwordSettingsForm) {
-      passwordSettingsForm.addEventListener('submit', function (event) {
-        if (!validatePasswordMatch()) {
-          event.preventDefault();
-          event.stopPropagation();
-          if (passwordConfirmField) {
-            passwordConfirmField.focus();
-          }
-        }
-      });
-      [passwordField, passwordConfirmField].filter(Boolean).forEach(function (input) {
-        input.addEventListener('input', function () {
-          if (passwordConfirmField && passwordConfirmField.value.length > 0) {
-            validatePasswordMatch();
-          }
-        });
-      });
-    }
-
-    [profileSettingsForm, passwordSettingsForm].filter(Boolean).forEach(function (form) {
+    document.querySelectorAll('.settings-wrapper form').forEach(function (form) {
       form.addEventListener('input', function () {
         markUnsaved(form);
       });
@@ -881,12 +818,15 @@
       form.addEventListener('submit', function () {
         unsavedSettings = false;
         hideUnsavedWarning();
-        if (themeSaveForm) {
-          themeSaveForm.style.display = 'none';
-        }
         activeForm = null;
         themeChanged = false;
       });
+    });
+
+    window.addEventListener('beforeunload', function (event) {
+      if (!unsavedSettings) return;
+      event.preventDefault();
+      event.returnValue = '';
     });
   });
 </script>

@@ -129,19 +129,7 @@
       </div>
     </div>
 
-    <!-- Alerts -->
-    @if($dropRequests > 0)
-      <div class="card glass" style="border-radius:var(--radius-lg);padding:18px;background:rgba(255,61,114,.08);border:1px solid rgba(255,61,114,.22)">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span style="font-size:20px">⚠️</span>
-          <b style="font-size:14px">{{ $dropRequests }} Pending Drop Request</b>
-        </div>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">Review and approve or reject drop requests</p>
-        <div style="display:flex;gap:8px">
-          <a href="{{ route('admin.drop-requests') }}" class="btn primary slim" style="flex:1;justify-content:center;">Review →</a>
-        </div>
-      </div>
-    @endif
+    <!-- Alerts: drop approvals removed -->
   </div>
 </div>
 @endsection

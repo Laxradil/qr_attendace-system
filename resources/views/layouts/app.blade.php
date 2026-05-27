@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'QR Attendance System')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+        <script src="{{ asset('js/app.js') }}" defer></script>
+    @endif
     <style>
         :root {
             --navy: #0d0c1d;
@@ -119,14 +124,6 @@
             color: #6c5ce7;
             border-left-color: #6c5ce7;
             transform: translateX(6px);
-        }
-
-        body.theme-ash .sidebar-item:hover,
-        body.theme-ash .sidebar-item.active {
-            background-color: #363838 !important;
-            color: #ffffff !important;
-            border-left-color: #363838 !important;
-            transform: translateX(6px) !important;
         }
 
         .sidebar-item svg {

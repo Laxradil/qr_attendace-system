@@ -76,7 +76,7 @@
       --yellow:#ca8a04;
       --cyan:#0891b2;
       --shadow:0 4px 12px rgba(0,0,0,.08);
-      background: linear-gradient(180deg,#ffffff 0%,#f9fafb 100%);
+      background:#f9fafb;
     }
 
     body.theme-light .glass,
@@ -568,28 +568,6 @@
       font-weight:500;
     }
     .top-right{display:flex;align-items:center;gap:12px}
-    /* Theme switch */
-    .theme-switch{display:flex;align-items:center;margin-right:6px}
-    .theme-switch .switch-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;color:var(--muted);font-size:13px;background:rgba(255,255,255,.08);transition:all .18s ease;}
-    .theme-switch.light-mode .switch-icon.light,
-    .theme-switch.onyx-mode .switch-icon.dark {
-      color: var(--text);
-      background: rgba(124, 58, 237, .16);
-    }
-    .theme-switch.light-mode .switch-icon.dark,
-    .theme-switch.onyx-mode .switch-icon.light {
-      opacity: .45;
-    }
-    .theme-switch .switch-label{font-size:13px;color:var(--muted);user-select:none}
-    .theme-switch .switch {
-      --w:58px; --h:32px; position:relative; width:var(--w); height:var(--h);
-    }
-    .theme-switch .switch input{appearance:none;width:100%;height:100%;margin:0;display:block;position:absolute;left:0;top:0;cursor:pointer;opacity:0;z-index:3}
-    .theme-switch .track{position:absolute;inset:0;border-radius:999px;background:rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08);transition:all .18s ease;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:0 6px;}
-    .theme-switch .thumb{position:absolute;top:50%;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 4px 10px rgba(2,6,23,.08);transition:all .18s ease;transform:translateY(-50%);z-index:2}
-    .theme-switch input:checked + .track{background:linear-gradient(135deg,#111827,#0b1220);border-color:rgba(255,255,255,.06)}
-    .theme-switch input:checked + .track .thumb{transform:translateX(calc(var(--w) - var(--h) - 4px)) translateY(-50%);}
-    .theme-switch input:checked + .track .thumb{transform:translateX(20px)}
 
     /* Search */
     .search-bar{
@@ -855,11 +833,7 @@
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
         </a>
-        <a href="{{ route('admin.drop-requests') }}" class="nav-link {{ request()->routeIs('admin.drop-requests*') ? 'active' : '' }}">
-          <span class="nav-icon">⇩</span>
-          <span>Drop Requests</span>
-          <span class="nav-badge">{{ App\Models\DropRequest::where('status', 'pending')->count() }}</span>
-        </a>
+        <!-- Drop Requests removed: professors handle drops directly -->
         <a href="{{ route('admin.logs') }}" class="nav-link {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
           <span class="nav-icon">☷</span>
           <span>System Logs</span>
@@ -885,16 +859,6 @@
           <p>@yield('subheader', "Welcome back! Here's what's happening in the system.")</p>
         </div>
         <div class="top-right">
-          <div class="theme-switch" title="Toggle theme">
-            <div class="switch" aria-hidden="true">
-              <input type="checkbox" id="theme-switch-checkbox" aria-label="Toggle theme">
-              <div class="track">
-                <span class="switch-icon light" aria-hidden="true">☀</span>
-                <span class="switch-icon dark" aria-hidden="true">🌙</span>
-                <div class="thumb"></div>
-              </div>
-            </div>
-          </div>
           <div class="search-bar">🔍 <span style="font-size:13.5px">@yield('searchPlaceholder', 'Search...')</span></div>
           <div class="clock-pill">
             📅 <span id="clockDate">May 7, 2026</span>
@@ -979,58 +943,12 @@
         ? serverTheme
         : themeNames.includes(stored)
           ? stored
-          : 'onyx';
+          : 'dark';
       if (serverTheme && themeNames.includes(serverTheme)) {
         try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
       }
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);
-    })();
-    (function(){
-      const key = 'qr_attendance_theme';
-      const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
-      const checkbox = document.getElementById('theme-switch-checkbox');
-      const csrfToken = '{{ csrf_token() }}';
-      if (!checkbox) return;
-      const switchWrapper = checkbox.closest('.theme-switch');
-      const setSwitchMode = function(theme) {
-        if (!switchWrapper) return;
-        const isLight = theme === 'light';
-        const isNight = theme !== 'light';
-        switchWrapper.classList.toggle('light-mode', isLight);
-        switchWrapper.classList.toggle('onyx-mode', isNight);
-      };
-      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-light') ? 'light' : 'onyx');
-      checkbox.checked = (current !== 'light');
-      setSwitchMode(current);
-      const saveThemeToServer = function(theme){
-        const path = window.location.pathname;
-        let endpoint = null;
-        if (path.startsWith('/professor')) endpoint = '/professor/settings';
-        else if (path.startsWith('/student')) endpoint = '/student/settings';
-        else if (path.startsWith('/admin')) endpoint = '/admin/settings';
-        if (!endpoint) return;
-        fetch(endpoint, {
-          method: 'PUT',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-          },
-          body: JSON.stringify({ theme: theme })
-        }).catch(()=>{});
-      };
-      checkbox.addEventListener('change', function(){
-        const newTheme = this.checked ? 'onyx' : 'light';
-        try { localStorage.setItem(key, newTheme); } catch(e) {}
-        document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
-        document.body.classList.add('theme-' + newTheme);
-        setSwitchMode(newTheme);
-        saveThemeToServer(newTheme);
-      });
-      if (!serverTheme && current === 'onyx') {
-        saveThemeToServer('onyx');
-      }
     })();
   </script>
   <style>

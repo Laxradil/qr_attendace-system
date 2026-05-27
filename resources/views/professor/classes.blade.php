@@ -52,6 +52,12 @@
     box-shadow: 0 8px 26px rgba(6,8,18,0.6);
   }
 </style>
+<!-- Top toolbar (Create Class button on the left) -->
+<div class="toolbar" style="margin-bottom:12px">
+  <div class="tools">
+    <a href="{{ route('professor.classes.create') }}" class="chip">+ Create Class</a>
+  </div>
+</div>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px;margin-top:6px">
   <div class="stat glass">
@@ -112,8 +118,10 @@
         <button type="button" class="btn slim btn-add" data-action="add-student" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}" data-class-room="{{ $schedule?->room }}" data-class-schedule-id="{{ $schedule?->id }}" data-class-days="{{ $schedule?->days }}" data-class-start-time="{{ $schedule?->start_time }}" data-class-end-time="{{ $schedule?->end_time }}" data-current-students='@json($class->students->pluck("id"))'>Add Student</button>
         <button type="button" class="btn slim btn-edit" data-action="edit-class" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}" data-class-room="{{ $schedule?->room }}" data-class-schedule-id="{{ $schedule?->id }}" data-class-days="{{ $schedule?->days }}" data-class-start-time="{{ $schedule?->start_time }}" data-class-end-time="{{ $schedule?->end_time }}">Edit Class</button>
         <button type="button" class="btn slim btn-scan" data-action="scan-qr" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}">Scan QR</button>
+        <button type="button" class="btn slim btn-delete" data-action="delete-class" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}">Delete</button>
       </div>
     </div>
+
   @empty
     <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">
       <div style="font-size:48px;margin-bottom:12px">📚</div>
@@ -179,12 +187,12 @@
   .class-card {
     border-radius: var(--radius-lg);
     padding: 20px;
-    transition: .18s ease, transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(20,28,40,0.95);
+    transition: .18s ease, transform .22s ease;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: linear-gradient(180deg,#2f3746,#262b36);
     backdrop-filter: blur(6px) saturate(115%);
     -webkit-backdrop-filter: blur(6px) saturate(115%);
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 16px 36px rgba(10,14,26,0.65), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 10px 28px rgba(12,16,24,0.64), inset 0 1px 0 rgba(255,255,255,0.03);
     position: relative;
     overflow: hidden;
   }
@@ -196,32 +204,14 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg,transparent,rgba(255,255,255,.18) 50%,transparent);
+    background: linear-gradient(90deg,transparent,rgba(255,255,255,.12) 50%,transparent);
     pointer-events: none;
   }
   
   .class-card:hover {
     transform: translateY(-6px);
-    border-color: rgba(139,92,255,0.35);
-    box-shadow: 0 20px 56px rgba(10,14,26,0.82), inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-  
-  .class-actions .btn {
-    border: 1px solid rgba(255,255,255,0.24);
-    background: rgba(255,255,255,0.08);
-    color: #f8fafc;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
-  }
-  
-  .class-actions .btn:hover {
-    border-color: rgba(139,92,255,0.35);
-    background: rgba(255,255,255,0.14);
-    box-shadow: 0 0 0 1px rgba(139,92,255,0.05), inset 0 1px 0 rgba(255,255,255,0.15);
-  }
-  
-  .class-actions .btn:focus-visible {
-    outline: 2px solid rgba(139,92,255,0.7);
-    outline-offset: 2px;
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: 0 20px 56px rgba(10,14,26,0.72), inset 0 1px 0 rgba(255,255,255,0.04);
   }
   
   .class-head {
@@ -294,12 +284,12 @@
   .scanner-box,
   .att-recording,
   .recent-scans-box {
-    background: linear-gradient(180deg,#f8fafc,#e2e8f0);
+    background: linear-gradient(180deg,#2f3746,#262b36);
     border-radius: 24px;
     padding: 24px;
-    border: 1px solid rgba(148,163,184,.6);
-    box-shadow: 0 8px 28px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.8);
-    color: #0f172a;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 10px 30px rgba(6,8,16,0.55) inset, 0 8px 28px rgba(8,12,18,0.5);
+    color: #e6eef8;
   }
 
   .scanner-tabs {
@@ -310,9 +300,9 @@
   }
 
   .scanner-tab {
-    border: 1px solid rgba(148,163,184,.7);
-    background: rgba(255,255,255,.92);
-    color: #0f172a;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(234,240,255,.85);
     border-radius: 14px;
     padding: 11px 12px;
     font-weight: 700;
@@ -322,7 +312,7 @@
   }
 
   .scanner-tab.active {
-    background: linear-gradient(135deg,rgba(139,92,255,.95),rgba(67,166,255,.85));
+    background: linear-gradient(135deg,rgba(139,92,255,.9),rgba(67,166,255,.55));
     color: #fff;
     border-color: transparent;
   }
@@ -330,8 +320,8 @@
   .cam-viewport {
     width: 100%;
     border-radius: 22px;
-    background: #e2e8f0;
-    border: 1px dashed rgba(148,163,184,.65);
+    background: rgba(0,0,0,.28);
+    border: 1px dashed rgba(139,92,255,.35);
     display: grid;
     place-items: center;
     position: relative;
@@ -370,9 +360,9 @@
     border-radius: 999px;
     font-size: 13px;
     font-weight: 700;
-    background: rgba(15,23,42,.08);
-    border: 1px solid rgba(148,163,184,.6);
-    color: #0f172a;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    color: #dbeafe;
     margin-bottom: 12px;
   }
 
@@ -387,7 +377,7 @@
     text-transform: uppercase;
     letter-spacing: .08em;
     margin-bottom: 8px;
-    color: #475569;
+    color: var(--muted);
   }
 
   .att-select,
@@ -396,9 +386,9 @@
     min-height: 48px;
     padding: 12px 14px;
     border-radius: 16px;
-    background: #ffffff;
-    border: 1px solid rgba(148,163,184,.65);
-    color: #0f172a;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--text);
     font-size: 14px;
     outline: none;
     transition: .2s ease;
@@ -410,9 +400,9 @@
     align-items: center;
     padding: 14px 16px;
     border-radius: 16px;
-    background: #ffffff;
-    border: 1px solid rgba(148,163,184,.65);
-    color: #0f172a;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--text);
     font-size: 14px;
   }
 
@@ -433,7 +423,7 @@
   .no-scans {
     text-align: center;
     padding: 30px 0;
-    color: #64748b;
+    color: var(--muted);
     font-size: 13px;
   }
 
@@ -462,13 +452,12 @@
     width: min(960px, 96vw);
     max-height: min(92vh, 1080px);
     overflow-y: auto;
-    background: rgba(243, 244, 246, 0.98);
+    background: rgba(10, 14, 28, 0.98);
     border-radius: 24px;
-    border: 1px solid rgba(148, 163, 184, 0.5);
-    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
     padding: 32px;
     position: relative;
-    color: #0f172a;
   }
 
   .modal-close {
@@ -476,8 +465,8 @@
     top: 14px;
     right: 14px;
     border: none;
-    background: rgba(15, 23, 42, 0.08);
-    color: #0f172a;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
     width: 34px;
     height: 34px;
     border-radius: 14px;
@@ -490,17 +479,12 @@
     margin: 0 0 14px;
     font-size: 22px;
     letter-spacing: -0.03em;
-    color: #0f172a;
-  }
-
-  .modal-card .section-head h3 {
-    color: #0f172a;
   }
 
   .modal-card p,
   .modal-card label,
   .modal-card small {
-    color: #475569;
+    color: rgba(255, 255, 255, 0.82);
   }
 
   .modal-card .modal-meta {
@@ -524,6 +508,67 @@
     min-width: 120px;
   }
 
+    .delete-warning {
+      display: grid;
+      gap: 14px;
+    }
+
+    .delete-banner {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255, 103, 103, 0.18), rgba(255, 103, 103, 0.08));
+      border: 1px solid rgba(255, 103, 103, 0.28);
+    }
+
+    .delete-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: rgba(255, 103, 103, 0.18);
+      border: 1px solid rgba(255, 103, 103, 0.28);
+      color: #ffd1d1;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .delete-banner h3 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    .delete-banner p {
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .delete-card-meta {
+      display: grid;
+      gap: 8px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .delete-card-meta div {
+      color: rgba(255,255,255,.84);
+      font-size: 13px;
+    }
+
+    .delete-card-meta strong {
+      color: #fff;
+    }
+
   .modal-card .modal-body {
     display: grid;
     gap: 14px;
@@ -538,10 +583,10 @@
   .modal-card .modal-field textarea,
   .modal-card .modal-field select {
     width: 100%;
-    border: 1px solid rgba(148,163,184,.6);
+    border: 1px solid rgba(255,255,255,.12);
     border-radius: 12px;
-    background: #ffffff;
-    color: #0f172a;
+    background: rgba(255,255,255,.04);
+    color: #f8fafc;
     padding: 11px 12px;
     font-size: 14px;
   }
@@ -552,13 +597,13 @@
   }
 
   .modal-card .modal-note {
-    color: #475569;
+    color: rgba(139,92,255,.9);
     font-size: 13px;
   }
 
   .modal-card .modal-panel {
-    background: #f8fafc;
-    border: 1px solid rgba(148,163,184,.6);
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
     border-radius: 16px;
     padding: 16px;
   }
@@ -566,11 +611,11 @@
   .modal-card .modal-panel strong {
     display: block;
     margin-bottom: 6px;
-    color: #0f172a;
+    color: #fff;
   }
 
   .modal-card .modal-panel span {
-    color: #475569;
+    color: rgba(255,255,255,.75);
     font-size: 13px;
   }
 
@@ -580,19 +625,19 @@
     max-height: 240px;
     overflow-y: auto;
     padding: 8px;
-    border: 1px solid rgba(148,163,184,.5);
+    border: 1px solid rgba(255,255,255,.12);
     border-radius: 12px;
-    background: #f8fafc;
+    background: rgba(255,255,255,.03);
   }
 
   .modal-card .student-option {
     width: 100%;
     text-align: left;
-    border: 1px solid rgba(148,163,184,.6);
+    border: 1px solid rgba(255,255,255,.1);
     border-radius: 14px;
     padding: 12px 14px;
-    background: #ffffff;
-    color: #0f172a;
+    background: rgba(255,255,255,.04);
+    color: #f8fafc;
     cursor: pointer;
     transition: background .2s, border-color .2s;
     display: grid;
@@ -601,14 +646,25 @@
 
   .modal-card .student-option:hover,
   .modal-card .student-option.selected {
-    background: rgba(59,130,246,.14);
-    border-color: rgba(59,130,246,.35);
+    background: rgba(139,92,255,.16);
+    border-color: rgba(139,92,255,.35);
   }
 
   .modal-card .student-option small {
-    color: #475569;
+    color: rgba(255,255,255,.65);
     font-size: 12px;
   }
+
+    .modal-card .btn-confirm-delete {
+      background: linear-gradient(135deg, rgba(255, 96, 96, 0.95), rgba(190, 53, 53, 0.95));
+      border: 1px solid rgba(255, 140, 140, 0.45);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(190, 53, 53, 0.28);
+    }
+
+    .modal-card .btn-confirm-delete:hover {
+      filter: brightness(1.05);
+    }
 
   @media (max-width: 640px) {
     .modal-card {
@@ -638,14 +694,18 @@
     font-size: 12px;
     border-radius: 10px;
     text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.24);
-    background: rgba(255,255,255,0.08);
-    color: #f8fafc;
   }
-  
-  .btn.slim:hover {
-    background: rgba(255,255,255,0.14);
-    border-color: rgba(139,92,255,0.35);
+
+  .btn-delete {
+    border: 1px solid rgba(255, 109, 109, 0.35);
+    background: linear-gradient(180deg, rgba(255, 103, 103, 0.16), rgba(255, 103, 103, 0.08));
+    color: #ffd1d1;
+  }
+
+  .btn-delete:hover {
+    border-color: rgba(255, 109, 109, 0.55);
+    background: linear-gradient(180deg, rgba(255, 103, 103, 0.24), rgba(255, 103, 103, 0.12));
+    color: #fff;
   }
   
   a.btn,
@@ -695,17 +755,19 @@
   }
   
   body.theme-light .class-code {
-    color: #d1d5ff !important;
+    color: #6b7280 !important;
   }
   
-  body.theme-light .class-room,
-  body.theme-light .class-meta-row,
-  body.theme-light .class-meta-row strong {
-    color: var(--text) !important;
+  body.theme-light .class-room {
+    color: #000000 !important;
   }
-
-  body.theme-light .class-head h3 {
-    color: var(--text) !important;
+  
+  body.theme-light .class-meta-row {
+    color: #6b7280 !important;
+  }
+  
+  body.theme-light .class-meta-row strong {
+    color: #000000 !important;
   }
   
   body.theme-light .meta-icon {
@@ -722,11 +784,15 @@
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
+  <script type="application/json" id="available-students-data">@json($studentPayload)</script>
+  <script type="application/json" id="scan-classes-data">@json($scanClassesPayload)</script>
+  <script>
     const modalBackdrop = document.getElementById('modalBackdrop');
     const modalContent = document.getElementById('modalContent');
-    const modalClose = modalBackdrop.querySelector('.modal-close');
+    const modalClose = modalBackdrop ? modalBackdrop.querySelector('.modal-close') : null;
+    const availableStudents = JSON.parse(document.getElementById('available-students-data')?.textContent || '[]');
+    const scanClasses = JSON.parse(document.getElementById('scan-classes-data')?.textContent || '[]');
+    const csrfToken = '{{ csrf_token() }}';
 
     const modalActions = {
       'add-student': function (data) {
@@ -756,7 +822,6 @@
         `;
       },
       'edit-class': function (data) {
-        // days: data.classDays expected as comma-separated string
         const days = (data.classDays || '').split(',').map(d => d.trim()).filter(Boolean);
         const startValue = (data.classStartTime || '').split(':').slice(0, 2).join(':');
         const endValue = (data.classEndTime || '').split(':').slice(0, 2).join(':');
@@ -851,12 +916,29 @@
             </div>
           </div>
         `;
+      },
+      'delete-class': function (data) {
+        return `
+          <div class="delete-warning">
+            <div class="delete-banner">
+              <div class="delete-badge">!</div>
+              <div>
+                <h3>Delete this class?</h3>
+                <p>This will permanently remove the class, its schedule, attendance records, and related links. This action cannot be undone.</p>
+              </div>
+            </div>
+            <div class="delete-card-meta">
+              <div><strong>Class:</strong> ${data.className || 'Class'}</div>
+              <div><strong>Code:</strong> ${data.classCode || 'N/A'}</div>
+            </div>
+            <div class="modal-actions">
+              <button type="button" id="confirmDeleteClass" class="btn btn-confirm-delete">Delete Class</button>
+              <button type="button" class="btn" onclick="document.getElementById('modalBackdrop').style.display='none';document.body.style.overflow=''">Cancel</button>
+            </div>
+          </div>
+        `;
       }
     };
-
-    const availableStudents = @json($studentPayload);
-    const scanClasses = @json($scanClassesPayload);
-    const csrfToken = '{{ csrf_token() }}';
 
     function renderStudentOption(student) {
       return `
@@ -1468,7 +1550,65 @@
           if (action === 'scan-qr') {
             attachScanQrHandlers(data);
           }
+          if (action === 'delete-class') {
+            const confirmBtn = modalContent.querySelector('#confirmDeleteClass');
+            if (confirmBtn) {
+              confirmBtn.addEventListener('click', function () {
+                const classId = data.classId || data.class_id;
+                if (!classId) {
+                  alert('Unable to determine the selected class.');
+                  return;
+                }
+
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = 'Deleting...';
+
+                fetch(`/professor/classes/${classId}`, {
+                  method: 'DELETE',
+                  headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                  }
+                }).then(async (res) => {
+                  if (res.ok) {
+                    window.location.reload();
+                    return;
+                  }
+
+                  const data = await res.json().catch(() => ({}));
+                  alert(data.message || 'Failed to delete class.');
+                  confirmBtn.disabled = false;
+                  confirmBtn.textContent = 'Delete Class';
+                }).catch((err) => {
+                  console.error(err);
+                  alert('Failed to delete class.');
+                  confirmBtn.disabled = false;
+                  confirmBtn.textContent = 'Delete Class';
+                });
+              }, { once: true });
+            }
+          }
         }
+      });
+    });
+</script>
+
+<script>
+  // Make clicking a class-card navigate to Students tab and open that class
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.class-card').forEach(function(card){
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function (e) {
+        // ignore clicks on buttons/links inside the card
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        const id = card.querySelector('[data-action]')?.dataset.classId || card.querySelector('.btn')?.dataset.classId;
+        if (!id) {
+          // try data attribute on parent (if any)
+          const dataId = card.getAttribute('data-class-id');
+          if (dataId) window.location.href = `{{ route('professor.students') }}?class_id=${dataId}`;
+          return;
+        }
+        window.location.href = `{{ route('professor.students') }}?class_id=${id}`;
       });
     });
   });

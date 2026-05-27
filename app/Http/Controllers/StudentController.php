@@ -23,7 +23,7 @@ class StudentController extends Controller
         /**
          * Update student profile settings.
          */
-        public function updateSettings(\Illuminate\Http\Request $request)
+        public function updateSettings(\Illuminate\Http\Request $request): \Illuminate\Http\RedirectResponse
         {
             /** @var \App\Models\User $user */
             $user = Auth::user();
@@ -31,13 +31,10 @@ class StudentController extends Controller
             // If only theme is being updated, validate and save theme
             if ($request->has('theme') && !$request->has('name') && !$request->has('email')) {
                 $request->validate([
-                    'theme' => 'required|in:light,ash,dark,onyx',
+                    'theme' => 'required|in:light,dark,onyx',
                 ]);
                 $user->theme = $request->input('theme');
                 $user->save();
-                if ($request->wantsJson()) {
-                    return response()->json(['success' => true, 'message' => 'Theme updated successfully.']);
-                }
                 return back()->with('success', 'Theme updated successfully.');
             }
 
@@ -45,7 +42,7 @@ class StudentController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-                'theme' => 'nullable|in:light,ash,dark,onyx',
+                'theme' => 'nullable|in:light,dark,onyx',
             ]);
 
             $user->name = $request->input('name');
@@ -55,16 +52,13 @@ class StudentController extends Controller
             }
             $user->save();
 
-            if ($request->wantsJson()) {
-                return response()->json(['success' => true, 'message' => 'Profile updated successfully.']);
-            }
             return back()->with('success', 'Profile updated successfully.');
         }
 
         /**
          * Update student password.
          */
-        public function updatePassword()
+        public function updatePassword(): \Illuminate\Http\RedirectResponse
         {
             $user = Auth::user();
             request()->validate([
@@ -73,13 +67,7 @@ class StudentController extends Controller
             if (request('password')) {
                 $user->password = bcrypt(request('password'));
                 $user->save();
-                if (request()->wantsJson()) {
-                    return response()->json(['success' => true, 'message' => 'Password updated successfully.']);
-                }
                 return back()->with('success', 'Password updated successfully.');
-            }
-            if (request()->wantsJson()) {
-                return response()->json(['success' => true, 'message' => 'No password change.']);
             }
             return back()->with('info', 'No password change.');
         }

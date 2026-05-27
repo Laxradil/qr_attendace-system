@@ -46,9 +46,9 @@
       --red:#dc2626;
       --yellow:#ca8a04;
       --cyan:#0891b2;
-      background: linear-gradient(180deg,#ffffff 0%,#eef2ff 100%);
+      background:#f9fafb;
     }
-    body.theme-light .sidebar{background:#ffffff;border:1px solid #e5e7eb;box-shadow:0 18px 40px rgba(15,23,42,.06)}
+    body.theme-light .sidebar{background:#ffffff;border-right-color:#e5e7eb}
     body.theme-light .brand{border-bottom-color:#f3f4f6}
     body.theme-light .nav a, body.theme-light .nav button{color:#475569}
     body.theme-light .nav a .nav-icon, body.theme-light .nav button .nav-icon{background:#f3f4f6;border-color:#e5e7eb}
@@ -109,44 +109,6 @@
     {
       background: #f1f5f9 !important;
     }
-
-    body.theme-light .dashboard .card.glass,
-    body.theme-light .dashboard .dash-left .card.glass,
-    body.theme-light .dashboard .dash-right .card.glass,
-    body.theme-light .recent-activity-list .activity,
-    body.theme-light .stats .ghost-stat
-    {
-      background: #ffffff !important;
-      border: 1px solid #d1d5db !important;
-      box-shadow: 0 16px 36px rgba(15,23,42,.08) !important;
-      color: #10b981 !important;
-    }
-
-    body.theme-light .dashboard .section-head h3,
-    body.theme-light .recent-activity-list .activity .activity-title,
-    body.theme-light .recent-activity-list .activity .activity-desc,
-    body.theme-light .recent-activity-list .activity time,
-    body.theme-light .stats .ghost-stat .stat-body strong,
-    body.theme-light .stats .ghost-stat .stat-body span,
-    body.theme-light .stats .ghost-stat .trend
-    {
-      color: #0f172a !important;
-    }
-
-    body.theme-light .dash-right .section-head h3 {
-      color: #0f172a !important;
-    }
-
-    body.theme-light .dash-right .row-item,
-    body.theme-light .dash-right .row-item span,
-    body.theme-light .dash-right .row-item div {
-      color: #0f172a !important;
-    }
-
-    body.theme-light .recent-activity-list .activity:hover {
-      background: #eef2ff !important;
-      border-color: #c4b5fd !important;
-    }
     body.theme-light [style*="background:rgba(8,12,30,.58)"] {
       background: #ffffff !important;
       color: #0f172a !important;
@@ -164,25 +126,6 @@
       background: #f8fafb !important;
       border-color: #e5e7eb !important;
     }
-
-    body.theme-light .dashboard .card.glass,
-    body.theme-light .dashboard .dash-left .card.glass,
-    body.theme-light .dashboard .dash-right .card.glass,
-    body.theme-light .dashboard .dash-left .recent-activity-list .activity,
-    body.theme-light .dashboard .dash-right .row-item,
-    body.theme-light .stats .ghost-stat
-    {
-      background: #ffffff !important;
-      border: 1px solid #d1d5db !important;
-      box-shadow: 0 16px 36px rgba(15,23,42,.08) !important;
-      color: #0f172a !important;
-    }
-
-    body.theme-light .dashboard .dash-left .recent-activity-list .activity:hover {
-      background: #eef2ff !important;
-      border-color: #c4b5fd !important;
-    }
-
     body.theme-light [style*="color:rgba(255,255,255,.5)"],
     body.theme-light [style*="color:rgba(255,255,255,.6)"],
     body.theme-light [style*="color:rgba(255,255,255,.7)"],
@@ -246,11 +189,7 @@
     body.theme-light .glass th,
     body.theme-light .glass li,
     body.theme-light .glass small,
-    body.theme-light .stat-body,
-    body.theme-light .stat-body strong,
-    body.theme-light .stat-body span,
-    body.theme-light .stat-body .trend,
-    body.theme-light .activity-title
+    body.theme-light .stat-body span
     {
       color: #1f2937 !important;
     }
@@ -367,14 +306,12 @@
       --cyan:#0c4a6e;
       background:#949494;
     }
-    body.theme-ash .sidebar{background:#4C4E4E;border-right-color:rgba(255,255,255,.04)}
+    body.theme-ash .sidebar{background:#0b1115;border-right-color:rgba(255,255,255,.04)}
     body.theme-ash .brand{border-bottom-color:rgba(255,255,255,.04)}
     body.theme-ash .nav a, body.theme-ash .nav button{color:rgba(248,250,252,.86) !important}
     body.theme-ash .nav a .nav-icon, body.theme-ash .nav button .nav-icon{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.04)}
     body.theme-ash .nav a:not(.active):hover, body.theme-ash .nav button:not(.active):hover{background:rgba(255,255,255,.03);color:var(--text)}
-    body.theme-ash .nav a.active, body.theme-ash .nav button.active{background:#363838 !important;color:#ffffff !important;box-shadow:0 12px 28px rgba(54,56,56,.35) !important,inset 0 1px 0 rgba(255,255,255,.08) !important}
-    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover{background:#363838 !important;color:#ffffff !important;box-shadow:0 12px 28px rgba(54,56,56,.35) !important,inset 0 1px 0 rgba(255,255,255,.08) !important}
-    body.theme-ash .nav a.active .nav-icon, body.theme-ash .nav button.active .nav-icon{background:rgba(255,255,255,.12) !important;border-color:rgba(255,255,255,.16) !important;color:#ffffff !important}
+    body.theme-ash .nav a.active, body.theme-ash .nav button.active{background:linear-gradient(135deg,#d1d5db,.8,#e5e7eb);color:#0f1724}
     body.theme-ash .logout-wrap{border-top-color:rgba(255,255,255,.04)}
     body.theme-ash .logout{background:transparent !important;color:#ff8298 !important;border-color:transparent !important}
     body.theme-ash .logout:hover{background:rgba(255,61,114,.12) !important}
@@ -621,7 +558,6 @@
     body.theme-ash .glass,
     body.theme-ash .card,
     body.theme-ash .page-card,
-    body.theme-ash .profile-card,
     body.theme-ash .settings-container,
     body.theme-ash .info-item,
     body.theme-ash .row-item,
@@ -629,8 +565,8 @@
     body.theme-ash .theme-option.selected,
     body.theme-ash .theme-option:hover
     {
-      background: #4C4E4E !important;
-      border: 1px solid rgba(255,255,255,.06) !important;
+      background: rgba(255,255,255,.02) !important;
+      border: 1px solid rgba(255,255,255,.04) !important;
       color: var(--text) !important;
       box-shadow: none !important;
       backdrop-filter: none !important;
@@ -770,14 +706,12 @@
     @keyframes orb-float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-40px) scale(1.06)}66%{transform:translate(-20px,25px) scale(.96)}}
 
     .glass{
-      border:1px solid rgba(255,255,255,0.06);
-      /* Force a fully opaque bluish-gray card background to remove transparency */
-      background: #2f3746 !important;
-      background-image: none !important;
-      /* disable backdrop blur to prevent background bleed-through */
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      box-shadow: 0 22px 60px rgba(6,10,18,0.85), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+      border:1px solid var(--stroke);
+      background: var(--glass);
+      background-image: none;
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
       position:relative;overflow:hidden;
     }
     .glass::after{
@@ -845,18 +779,6 @@
     .nav a.active, .nav button.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff;box-shadow:0 12px 28px rgba(80,94,255,.26),inset 0 1px 0 rgba(255,255,255,.28)}
     .nav a.active .nav-icon, .nav button.active .nav-icon{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.25);color:#0f172a}
 
-    body.theme-ash .nav a.active, body.theme-ash .nav button.active {
-      background: #363838 !important;
-      color: #fff !important;
-      box-shadow: 0 12px 28px rgba(54,56,56,.35) !important;
-    }
-
-    body.theme-ash .nav a.active .nav-icon, body.theme-ash .nav button.active .nav-icon {
-      background: rgba(255,255,255,.12) !important;
-      border-color: rgba(255,255,255,.16) !important;
-      color: #ffffff !important;
-    }
-
     /* Restore light-mode purple accents (force overrides) */
     body.theme-light .nav a.active, body.theme-light .nav button.active {
       background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
@@ -875,7 +797,7 @@
     }
 
     body.theme-light .section-head h3 {
-      color: #10b981 !important;
+      color: #7c3aed !important;
     }
 
     body.theme-light .chip.active {
@@ -955,41 +877,6 @@
       color: #a5aed4 !important;
     }
     .top-right{display:flex;align-items:center;gap:12px}
-    /* Theme switch */
-    .theme-switch{display:flex;align-items:center;margin-right:6px}
-    .theme-switch .switch-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;color:var(--muted);font-size:13px;background:rgba(255,255,255,.08);transition:all .18s ease;}
-    .theme-switch.light-mode .switch-icon.light,
-    .theme-switch.onyx-mode .switch-icon.dark {
-      color: var(--text);
-      background: rgba(124, 58, 237, .16);
-    }
-    .theme-switch.light-mode .switch-icon.dark,
-    .theme-switch.onyx-mode .switch-icon.light {
-      opacity: .45;
-    }
-    .theme-switch .switch-label{font-size:13px;color:var(--muted);user-select:none}
-    .theme-switch .switch {
-      --w:58px; --h:32px; position:relative; width:var(--w); height:var(--h);
-    }
-    .theme-switch .switch input{appearance:none;width:100%;height:100%;margin:0;display:block;position:absolute;left:0;top:0;cursor:pointer;opacity:0;z-index:3}
-    .theme-switch .track{position:absolute;inset:0;border-radius:999px;background:rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08);transition:all .18s ease;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:0 6px;}
-    .theme-switch .thumb{position:absolute;top:50%;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 4px 10px rgba(2,6,23,.08);transition:all .18s ease;transform:translateY(-50%);z-index:2}
-    .theme-switch input:checked + .track{background:linear-gradient(135deg,#111827,#0b1220);border-color:rgba(255,255,255,.06)}
-    .theme-switch input:checked + .track .thumb{transform:translateX(calc(var(--w) - var(--h) - 4px)) translateY(-50%);}
-    body.theme-light .theme-switch .track {
-      background: rgba(15,23,42,.16) !important;
-      border-color: rgba(15,23,42,.24) !important;
-    }
-    body.theme-light .theme-switch .thumb {
-      box-shadow: 0 4px 10px rgba(15,23,42,.18) !important;
-    }
-    body.theme-light .theme-switch .switch input:checked + .track {
-      background: linear-gradient(135deg,#7c3aed,#2563eb) !important;
-      border-color: rgba(124,58,237,.55) !important;
-    }
-    body.theme-light .theme-switch .switch input:checked + .track .thumb {
-      background: #ffffff !important;
-    }
     .search-bar{
       height:44px;width:300px;border-radius:999px;padding:0 16px;
       display:flex;align-items:center;gap:9px;color:var(--muted);
@@ -1043,12 +930,9 @@
     .dash-right{display:flex;flex-direction:column;gap:12px}
     .card{border-radius:var(--radius-lg);padding:22px}
     .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-shrink:0}
-    body.theme-onyx .section-head h3, body.theme-dark .section-head h3, body.theme-ash .section-head h3 {font-size:18px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;color:#ffffff}
-    body.theme-light .section-head h3 {font-size:18px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;color:var(--text)}
-    body.theme-onyx .section-head a, body.theme-dark .section-head a, body.theme-ash .section-head a {color:#ffffff;text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.02em;cursor:pointer}
-    body.theme-light .section-head a {color:rgba(139,92,255,.9);text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.02em;cursor:pointer}
-    body.theme-onyx .section-head a:hover, body.theme-dark .section-head a:hover, body.theme-ash .section-head a:hover{color:#b9c4ff}
-    body.theme-light .section-head a:hover{color:#6b73ff}
+    .section-head h3{font-size:18px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;color:#ffffff}
+    .section-head a{color:#ffffff;text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.02em;cursor:pointer}
+    .section-head a:hover{color:#b9c4ff}
 
     .mini-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px;max-width:400px}
     .mini{
@@ -1062,10 +946,11 @@
     .mini-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:10px;flex-shrink:0}
 
     .report-btn{
-      width:100%;height:40px;border:0;border-radius:13px;color:white;font-weight:800;cursor:pointer;
-      font-size:13px;letter-spacing:.02em;font-family:var(--font);
+      display:inline-flex;align-items:center;justify-content:center;
+      min-width:180px;height:44px;border:0;border-radius:13px;color:white;font-weight:800;cursor:pointer;
+      font-size:13px;letter-spacing:.02em;font-family:var(--font);text-decoration:none;
       background:linear-gradient(135deg,rgba(139,92,255,.85),rgba(67,166,255,.45));
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(80,94,255,.2);transition:.2s ease;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(80,94,255,.2);transition:.2s ease;padding:0 18px;
     }
     .report-btn:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 14px 32px rgba(80,94,255,.35)}
 
@@ -1100,19 +985,6 @@
     .row-item:hover{background:rgba(255,255,255,.09)}
     .row-item:last-child{margin-bottom:0}
     .row-item span{color:#ffffff;font-weight:500}
-
-    body.theme-light .row-item {
-      color: #0f172a !important;
-    }
-    body.theme-light .row-item span {
-      color: #0f172a !important;
-    }
-
-    body.theme-light .activity b,
-    body.theme-light .activity p,
-    body.theme-light .activity time {
-      color: #10b981 !important;
-    }
 
     .quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-width:280px}
     .quick{
@@ -1223,14 +1095,15 @@
           <span class="nav-icon">▦</span>
           <span>Scan QR</span>
         </a>
+        <a href="{{ route('professor.qr-codes') }}" class="{{ request()->routeIs('professor.qr-codes*') ? 'active' : '' }}">
+          <span class="nav-icon">🔲</span>
+          <span>QR Codes</span>
+        </a>
         <a href="{{ route('professor.attendance-records') }}" class="{{ request()->routeIs('professor.attendance-records*') ? 'active' : '' }}">
           <span class="nav-icon">📋</span>
           <span>Attendance Records</span>
         </a>
-        <a href="{{ route('professor.schedules') }}" class="{{ request()->routeIs('professor.schedules') ? 'active' : '' }}">
-          <span class="nav-icon">📅</span>
-          <span>Schedules</span>
-        </a>
+        {{-- Schedules removed from professor sidebar (not used) --}}
         <a href="{{ route('professor.students') }}" class="{{ request()->routeIs('professor.students') ? 'active' : '' }}">
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>
@@ -1267,16 +1140,6 @@
           <p id="pageSubtitle">@yield('subheader', '')</p>
         </div>
         <div class="top-right">
-          <div class="theme-switch" title="Toggle theme">
-            <div class="switch" aria-hidden>
-              <input type="checkbox" id="theme-switch-checkbox" aria-label="Toggle theme">
-              <div class="track">
-                <span class="switch-icon light" aria-hidden="true">☀</span>
-                <span class="switch-icon dark" aria-hidden="true">🌙</span>
-                <div class="thumb"></div>
-              </div>
-            </div>
-          </div>
           <div class="clock-pill">
             📅 <span class="clock-date" id="clock-date">May 7, 2026</span>
             &nbsp;·&nbsp;
@@ -1297,10 +1160,10 @@
           </div>
         @endif
         @if(session('success'))
-          <div class="flash-notice flash-success" style="margin-bottom:14px;padding:12px 14px;border-radius:12px;background:rgba(24,240,139,0.1);border:1px solid rgba(24,240,139,0.25);color:var(--text);">{{ session('success') }}</div>
+          <div style="margin-bottom:14px;padding:12px 14px;border-radius:12px;background:rgba(24,240,139,0.1);border:1px solid rgba(24,240,139,0.25);color:var(--text);">{{ session('success') }}</div>
         @endif
         @if(session('error'))
-          <div class="flash-notice flash-error" style="margin-bottom:14px;padding:12px 14px;border-radius:12px;background:rgba(255,61,114,0.1);border:1px solid rgba(255,61,114,0.25);color:var(--text);">{{ session('error') }}</div>
+          <div style="margin-bottom:14px;padding:12px 14px;border-radius:12px;background:rgba(255,61,114,0.1);border:1px solid rgba(255,61,114,0.25);color:var(--text);">{{ session('error') }}</div>
         @endif
         @yield('content')
       </div>
@@ -1320,25 +1183,6 @@
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Auto-hide success flash messages after page load
-    const autoHideFlashNotices = function () {
-      document.querySelectorAll('.flash-notice.flash-success').forEach(function (notice) {
-        setTimeout(function () {
-          notice.style.transition = 'opacity .28s ease, transform .28s ease';
-          notice.style.opacity = '0';
-          notice.style.transform = 'translateY(-12px)';
-          setTimeout(function () {
-            notice.remove();
-          }, 320);
-        }, 4200);
-      });
-    };
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', autoHideFlashNotices);
-    } else {
-      autoHideFlashNotices();
-    }
-
     (function() {
       const themeKey = 'qr_attendance_theme';
       const themeNames = ['light','ash','dark','onyx'];
@@ -1348,67 +1192,19 @@
         ? serverTheme
         : themeNames.includes(stored)
           ? stored
-          : 'onyx';
+          : 'light';
       if (serverTheme && themeNames.includes(serverTheme)) {
         try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
       }
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);
     })();
-    // Initialize theme switch element and wire up toggling (sync with server)
-    (function(){
-      const key = 'qr_attendance_theme';
-      const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
-      const checkbox = document.getElementById('theme-switch-checkbox');
-      const csrfToken = '{{ csrf_token() }}';
-      if (!checkbox) return;
-      const switchWrapper = checkbox.closest('.theme-switch');
-      const setSwitchMode = function(theme) {
-        if (!switchWrapper) return;
-        const isLight = theme === 'light';
-        const isNight = theme !== 'light';
-        switchWrapper.classList.toggle('light-mode', isLight);
-        switchWrapper.classList.toggle('onyx-mode', isNight);
-      };
-      const current = localStorage.getItem(key) || (document.body.classList.contains('theme-light') ? 'light' : 'onyx');
-      checkbox.checked = (current !== 'light');
-      setSwitchMode(current);
-      const saveThemeToServer = function(theme){
-        // determine endpoint by URL prefix
-        const path = window.location.pathname;
-        let endpoint = null;
-        if (path.startsWith('/professor')) endpoint = '/professor/settings';
-        else if (path.startsWith('/student')) endpoint = '/student/settings';
-        else if (path.startsWith('/admin')) endpoint = '/admin/settings';
-        if (!endpoint) return;
-        fetch(endpoint, {
-          method: 'PUT',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-          },
-          body: JSON.stringify({ theme: theme })
-        }).catch(()=>{});
-      };
-      checkbox.addEventListener('change', function(){
-        const newTheme = this.checked ? 'onyx' : 'light';
-        try { localStorage.setItem(key, newTheme); } catch(e) {}
-        document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
-        document.body.classList.add('theme-' + newTheme);
-        setSwitchMode(newTheme);
-        saveThemeToServer(newTheme);
-      });
-      // If user has no server-side theme yet, persist the default (onyx)
-      if (!serverTheme && current === 'onyx') {
-        saveThemeToServer('onyx');
-      }
-    })();
   </script>
   <style>
     /* Final override: keep active nav tab purple on hover */
     .nav a.active:hover, .nav button.active:hover,
     body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
     body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
     body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
       background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
@@ -1417,6 +1213,7 @@
     }
     .nav a.active:hover .nav-icon, .nav button.active:hover .nav-icon,
     body.theme-light .nav a.active:hover .nav-icon, body.theme-light .nav button.active:hover .nav-icon,
+    body.theme-ash .nav a.active:hover .nav-icon, body.theme-ash .nav button.active:hover .nav-icon,
     body.theme-dark .nav a.active:hover .nav-icon, body.theme-dark .nav button.active:hover .nav-icon,
     body.theme-onyx .nav a.active:hover .nav-icon, body.theme-onyx .nav button.active:hover .nav-icon {
       background: rgba(255,255,255,.2) !important;

@@ -42,53 +42,38 @@
   .theme-option:hover { transform:translateY(-1px); border-color:rgba(255,255,255,.22); }
   .theme-option.selected { border-color:#6b73ff; box-shadow:0 0 0 2px rgba(107,115,255,.12); background:rgba(107,115,255,.12); }
   .theme-option.selected .theme-swatch { border-color:rgba(255,255,255,.95); box-shadow:0 0 0 1px rgba(255,255,255,.5); }
+  .theme-option.disabled { opacity:.45; cursor:not-allowed; position:relative; }
+  .theme-option.disabled:hover { transform:none; border-color:rgba(255,255,255,.12); }
+  .theme-option.disabled::after {
+    content:'Coming soon';
+    position:absolute;
+    right:12px;
+    top:12px;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#9ca3af;
+  }
   .theme-swatch { width:34px; height:34px; border-radius:14px; flex-shrink:0; border:1px solid rgba(148,163,184,.45); box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); }
   .theme-label { font-size:13px; font-weight:700; }
   .theme-light { background:#ffffff; }
   .theme-ash { background:#9ca3af; }
   .theme-dark { background:#1f2937; }
   .theme-onyx { background:#0f172a; }
+  .theme-side-note {
+    margin-top:12px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    color:var(--muted);
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .theme-side-note strong { color:var(--text); }
   .button-group { display: flex; gap: 10px; margin-top: 16px; }
-
-  body.theme-light .settings-container,
-  body.theme-light .settings-wrapper {
-    background: #ffffff;
-    border-color: #e5e7eb;
-    color: #0f172a;
-  }
-
-  body.theme-light .settings-input {
-    background: #ffffff;
-    color: #0f172a;
-    border-color: #d1d5db;
-  }
-
-  body.theme-light .settings-input:focus {
-    background: #ffffff;
-    border-color: #3b82f6;
-  }
-
-  body.theme-light .settings-divider { background: #e5e7eb; }
-
-  body.theme-light .settings-btn { background: #f9fafb; border: 1px solid #d1d5db; color: #000000; }
-  body.theme-light .settings-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
-  body.theme-light .settings-btn.primary { background: linear-gradient(135deg,#3b82f6,#8b5cff); border-color:#3b82f6; color:#fff; }
-
-  body.theme-light .info-item { background: #f9fafb; border: 1px solid #e5e7eb; }
-  body.theme-light .info-label { color: #6b7280; }
-  body.theme-light .pill.green { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
-
-  body.theme-light .settings-section h3,
-  body.theme-light .label,
-  body.theme-light .form-note,
-  body.theme-light .error-text,
-  body.theme-light .theme-label,
-  body.theme-light .info-value,
-  body.theme-light .theme-option {
-    color: #0f172a !important;
-  }
-
-  body.theme-light .theme-option:hover { color: #0f172a !important; }
   .settings-btn { padding: 11px 20px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 600; outline: none; cursor: pointer; transition: .2s ease; flex: 1; }
   .settings-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.24); }
   .settings-btn.primary { background: linear-gradient(135deg,rgba(67,166,255,.88),rgba(139,92,255,.5)); border-color: rgba(67,166,255,.5); color: #fff; }
@@ -280,12 +265,6 @@
 </style>
 
 <div class="unsaved-notice" id="settings-warning" role="alert" aria-live="assertive" hidden>
-  <span class="icon" aria-hidden="true">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M12 2L2 20h20L12 2z" fill="rgba(255,255,255,0.95)"/>
-      <path d="M11 10h2v5h-2zM11 16h2v2h-2z" fill="#0f172a"/>
-    </svg>
-  </span>
   <div class="notice-copy">
     <span class="message">Careful — you have unsaved changes!</span>
   </div>
@@ -325,12 +304,8 @@
         <div class="form-note">Cannot be changed</div>
       </div>
 
-      @php
-        $theme = old('theme', $user->theme ?? 'light');
-        if (!in_array($theme, ['light','onyx'])) {
-          $theme = 'light';
-        }
-      @endphp
+      @php $theme = old('theme', $user->theme ?? 'light'); @endphp
+      @php $theme = $theme === 'ash' ? 'light' : $theme; @endphp
       <div>
         <label class="label">Theme</label>
         <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
@@ -339,107 +314,138 @@
             <span class="theme-swatch theme-light"></span>
             <span class="theme-label">Light</span>
           </button>
+          <button type="button" class="theme-option disabled" data-theme="ash" disabled aria-disabled="true" title="Theme coming soon - bayad muna">
+            <span class="theme-swatch theme-ash"></span>
+            <span class="theme-label">Ash</span>
+          </button>
+          <button type="button" class="theme-option {{ $theme === 'dark' ? 'selected' : '' }}" data-theme="dark">
+            <span class="theme-swatch theme-dark"></span>
+            <span class="theme-label">Dark</span>
+          </button>
           <button type="button" class="theme-option {{ $theme === 'onyx' ? 'selected' : '' }}" data-theme="onyx">
             <span class="theme-swatch theme-onyx"></span>
             <span class="theme-label">Onyx</span>
           </button>
         </div>
-        <div class="form-note">Choose between Light and Onyx.</div>
+        <div class="theme-side-note">
+          <span>ℹ️</span>
+          <div><strong>Theme coming soon</strong> - bayad muna</div>
+        </div>
+        <div class="form-note">Choose between Light, Dark and Onyx. Ash is not available yet.</div>
       </div>
     </form>
+
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const themeKey = 'qr_attendance_theme';
       const themeInput = document.getElementById('theme-input');
-      const themeOnlyInput = document.getElementById('theme-only-input');
       const themeButtons = document.querySelectorAll('.theme-option');
       const profileSettingsForm = document.getElementById('profile-settings-form');
       const passwordSettingsForm = document.getElementById('password-settings-form');
       const warningBox = document.getElementById('settings-warning');
+      const warningActions = warningBox ? warningBox.querySelector('.actions') : null;
       let unsavedSettings = false;
       let warningTimeout = null;
       let activeForm = null;
-      let profileFormModified = false;
-      let passwordFormModified = false;
+      let themeChanged = false;
 
       if (!themeInput || !themeButtons.length) return;
 
-      const themeSwitchCheckbox = document.getElementById('theme-switch-checkbox');
-      const themeSwitchWrapper = themeSwitchCheckbox ? themeSwitchCheckbox.closest('.theme-switch') : null;
-      const syncThemeSwitch = function (theme) {
-        if (!themeSwitchCheckbox) return;
-        themeSwitchCheckbox.checked = (theme === 'onyx');
-        if (!themeSwitchWrapper) return;
-        themeSwitchWrapper.classList.toggle('light-mode', theme === 'light');
-        themeSwitchWrapper.classList.toggle('onyx-mode', theme === 'onyx');
-      };
-
-      const passwordField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password"]') : null;
-      const passwordConfirmField = passwordSettingsForm ? passwordSettingsForm.querySelector('input[name="password_confirmation"]') : null;
-      const clearPasswordMismatchError = function () {
-        if (!passwordConfirmField) return;
-        passwordConfirmField.setCustomValidity('');
-        const existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
-        if (existing) existing.remove();
-      };
-      const showPasswordMismatchError = function (message) {
-        if (!passwordConfirmField) return;
-        passwordConfirmField.setCustomValidity(message);
-        let existing = passwordConfirmField.parentNode.querySelector('.password-mismatch-error');
-        if (!existing) {
-          existing = document.createElement('div');
-          existing.className = 'error-text password-mismatch-error';
-          passwordConfirmField.parentNode.appendChild(existing);
-        }
-        existing.textContent = message;
-      };
-      const validatePasswordMatch = function () {
-        if (!passwordSettingsForm || !passwordField || !passwordConfirmField) return true;
-        const passwordValue = passwordField.value;
-        const confirmValue = passwordConfirmField.value;
-        clearPasswordMismatchError();
-        if (!passwordValue && !confirmValue) {
-          return true;
-        }
-        if (passwordValue !== confirmValue) {
-          showPasswordMismatchError('Passwords do not match.');
-          return false;
-        }
-        return true;
-      };
-
       const applyTheme = function (theme) {
-        const validThemes = ['light','onyx'];
-        const activeTheme = validThemes.includes(theme) ? theme : 'light';
+        const validThemes = ['light','ash','dark','onyx'];
+        const activeTheme = validThemes.includes(theme) ? theme : 'dark';
         document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
         document.body.classList.add('theme-' + activeTheme);
         themeInput.value = activeTheme;
-        if (themeOnlyInput) themeOnlyInput.value = activeTheme;
         themeButtons.forEach(function (option) {
           option.classList.toggle('selected', option.dataset.theme === activeTheme);
         });
-        syncThemeSwitch(activeTheme);
         return activeTheme;
       };
 
-      const savedTheme = localStorage.getItem(themeKey) || themeInput.value;
-      const currentTheme = applyTheme(savedTheme);
+      const serverTheme = themeInput.value || null;
+      const savedTheme = localStorage.getItem(themeKey);
+      const originalTheme = serverTheme || savedTheme || themeInput.value || 'dark';
+      const initialTheme = serverTheme || savedTheme || originalTheme;
+      const currentTheme = applyTheme(initialTheme);
+      themeInput.defaultValue = originalTheme;
+      themeInput.setAttribute('value', originalTheme);
       localStorage.setItem(themeKey, currentTheme);
+
+      const hideWarningActions = function () {
+        if (warningActions) {
+          warningActions.style.display = 'none';
+        }
+      };
+
+      const showWarningActions = function () {
+        if (warningActions) {
+          warningActions.style.display = 'inline-flex';
+        }
+      };
 
       const showUnsavedWarning = function (message) {
         if (!warningBox) return;
         warningBox.hidden = false;
         warningBox.classList.add('show');
         warningBox.querySelector('.message').textContent = message;
+        const actions = warningBox.querySelector('.actions');
+        if (actions && !document.getElementById('unsaved-save-action')) {
+          actions.innerHTML = '<button type="button" id="unsaved-save-action">Save changes</button>';
+        }
+        if (warningActions) {
+          showWarningActions();
+        }
         clearTimeout(warningTimeout);
         warningTimeout = setTimeout(function () {
           if (!unsavedSettings) {
             warningBox.classList.remove('show');
           }
         }, 4200);
-        bindWarningActions();
+
+        const saveButton = document.getElementById('unsaved-save-action');
+        if (saveButton) {
+          saveButton.replaceWith(saveButton.cloneNode(true));
+          const freshSave = document.getElementById('unsaved-save-action');
+          freshSave.addEventListener('click', function () {
+            if (!warningBox) return;
+            warningBox.classList.remove('show');
+            warningBox.classList.add('success');
+            warningBox.querySelector('.message').textContent = 'Saving changes...';
+            hideWarningActions();
+            warningBox.classList.add('show');
+            unsavedSettings = false;
+            localStorage.setItem('settings_saved', 'true');
+            if (activeForm) {
+              activeForm.submit();
+            } else if (profileSettingsForm) {
+              profileSettingsForm.submit();
+            }
+          });
+        }
+
+        const resetButton = document.getElementById('unsaved-reset-action');
+        if (resetButton) {
+          resetButton.replaceWith(resetButton.cloneNode(true));
+          const freshReset = document.getElementById('unsaved-reset-action');
+          freshReset.addEventListener('click', function () {
+            if (activeForm) {
+              activeForm.reset();
+            }
+            if (themeChanged) {
+              applyTheme(originalTheme);
+              themeInput.defaultValue = originalTheme;
+              themeInput.setAttribute('value', originalTheme);
+              localStorage.setItem(themeKey, originalTheme);
+            }
+            unsavedSettings = false;
+            activeForm = null;
+            themeChanged = false;
+            hideUnsavedWarning();
+          });
+        }
       };
 
       const hideUnsavedWarning = function () {
@@ -447,177 +453,38 @@
         warningBox.classList.remove('show');
       };
 
-      const bindWarningActions = function () {
-        const saveButton = document.getElementById('unsaved-save-action');
-        if (saveButton && !saveButton.dataset.bound) {
-          saveButton.dataset.bound = 'true';
-          saveButton.addEventListener('click', function () {
-            if (!warningBox) return;
-            warningBox.classList.remove('show');
-            warningBox.classList.add('success');
-            warningBox.querySelector('.message').textContent = 'Saving changes...';
-            warningBox.classList.add('show');
-            unsavedSettings = false;
-            localStorage.setItem('settings_saved', 'true');
-            
-            // Create promises for both form submissions
-            let promises = [];
-            
-            // Submit profile form if modified
-            if (profileFormModified && profileSettingsForm) {
-              const profilePromise = new Promise(function (resolve, reject) {
-                const formData = new FormData(profileSettingsForm);
-                fetch(profileSettingsForm.action, {
-                  method: 'PUT',
-                  headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                  },
-                  body: formData
-                })
-                .then(response => response.json())
-                .then(data => resolve(data))
-                .catch(error => reject(error));
-              });
-              promises.push(profilePromise);
-            }
-            
-            // Submit password form if modified
-            if (passwordFormModified && passwordSettingsForm) {
-              const passwordPromise = new Promise(function (resolve, reject) {
-                const formData = new FormData(passwordSettingsForm);
-                fetch(passwordSettingsForm.action, {
-                  method: 'PUT',
-                  headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                  },
-                  body: formData
-                })
-                .then(response => response.json())
-                .then(data => resolve(data))
-                .catch(error => reject(error));
-              });
-              promises.push(passwordPromise);
-            }
-            
-            // If only one form was modified, submit that one
-            if (!profileFormModified && !passwordFormModified && activeForm) {
-              const singlePromise = new Promise(function (resolve, reject) {
-                const formData = new FormData(activeForm);
-                fetch(activeForm.action, {
-                  method: 'PUT',
-                  headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                  },
-                  body: formData
-                })
-                .then(response => response.json())
-                .then(data => resolve(data))
-                .catch(error => reject(error));
-              });
-              promises.push(singlePromise);
-            }
-            
-            // Wait for all promises to complete
-            Promise.all(promises).then(function (results) {
-              // After both submissions complete, reload the page
-              setTimeout(function () {
-                location.reload();
-              }, 500);
-            }).catch(function (error) {
-              console.error('Error saving changes:', error);
-              warningBox.classList.remove('success');
-              warningBox.querySelector('.message').textContent = 'Error saving changes. Please try again.';
-            });
-          });
-        }
-
-        const resetButton = document.getElementById('unsaved-reset-action');
-        if (resetButton && !resetButton.dataset.bound) {
-          resetButton.dataset.bound = 'true';
-          resetButton.addEventListener('click', function () {
-            if (profileFormModified && profileSettingsForm) {
-              profileSettingsForm.reset();
-              // Reset theme to saved value
-              applyTheme(savedTheme);
-              localStorage.setItem(themeKey, savedTheme);
-            }
-            if (passwordFormModified && passwordSettingsForm) {
-              passwordSettingsForm.reset();
-            }
-            unsavedSettings = false;
-            activeForm = null;
-            profileFormModified = false;
-            passwordFormModified = false;
-            hideUnsavedWarning();
-          });
-        }
-      };
-
       if (localStorage.getItem('settings_saved') === 'true') {
-        console.log('[Settings] Found settings_saved flag on page load, showing success state');
         localStorage.removeItem('settings_saved');
         if (warningBox) {
-          // Show success message and hide actions
-          const actionsDiv = warningBox.querySelector('.actions');
-          if (actionsDiv) {
-            actionsDiv.style.display = 'none';
-          }
           warningBox.classList.add('success', 'show');
           warningBox.querySelector('.message').textContent = 'Changes saved successfully! ✓';
-          console.log('[Settings] Added success class to warning box');
+          hideWarningActions();
           setTimeout(function () {
-            warningBox.classList.remove('show');
-          }, 3000);
-        } else {
-          console.log('[Settings] Warning box not found!');
+            warningBox.classList.remove('show', 'success');
+          }, 2500);
         }
-      } else {
-        console.log('[Settings] settings_saved flag not found on page load');
       }
 
       const markUnsaved = function (form, themeOnly = false) {
         unsavedSettings = true;
-        activeForm = form;
-        if (form === profileSettingsForm) {
-          profileFormModified = true;
-        } else if (form === passwordSettingsForm) {
-          passwordFormModified = true;
-        }
+        activeForm = form || profileSettingsForm;
+        themeChanged = themeOnly;
         showUnsavedWarning('Careful — you have unsaved changes!');
       };
 
       themeButtons.forEach(function (button) {
+        if (button.disabled) {
+          return;
+        }
         button.addEventListener('click', function () {
           const theme = button.dataset.theme;
           const selectedTheme = applyTheme(theme);
           localStorage.setItem(themeKey, selectedTheme);
-          markUnsaved(profileSettingsForm, false);
+          markUnsaved(profileSettingsForm, true);
         });
       });
 
-      if (passwordSettingsForm) {
-        passwordSettingsForm.addEventListener('submit', function (event) {
-          if (!validatePasswordMatch()) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (passwordConfirmField) {
-              passwordConfirmField.focus();
-            }
-          }
-        });
-        [passwordField, passwordConfirmField].filter(Boolean).forEach(function (input) {
-          input.addEventListener('input', function () {
-            if (passwordConfirmField && passwordConfirmField.value.length > 0) {
-              validatePasswordMatch();
-            }
-          });
-        });
-      }
-
-      [profileSettingsForm, passwordSettingsForm].filter(Boolean).forEach(function (form) {
+      document.querySelectorAll('.settings-container form').forEach(function (form) {
         form.addEventListener('input', function () {
           markUnsaved(form);
         });
@@ -627,13 +494,15 @@
         form.addEventListener('submit', function () {
           unsavedSettings = false;
           hideUnsavedWarning();
-          if (form === profileSettingsForm) {
-            profileFormModified = false;
-          } else if (form === passwordSettingsForm) {
-            passwordFormModified = false;
-          }
           activeForm = null;
+          themeChanged = false;
         });
+      });
+
+      window.addEventListener('beforeunload', function (event) {
+        if (!unsavedSettings) return;
+        event.preventDefault();
+        event.returnValue = '';
       });
     });
   </script>
@@ -811,43 +680,5 @@
     box-shadow: 0 0 0 1px rgba(255,255,255,.5) !important;
   }
 </style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const themeKey = 'qr_attendance_theme';
-    const themeInput = document.getElementById('theme-input');
-    const themeOnlyInput = document.getElementById('theme-only-input');
-    const themeButtons = document.querySelectorAll('.theme-option');
-    const themeSaveForm = document.getElementById('theme-save-form');
-    if (!themeInput || !themeButtons.length) return;
-
-    const applyTheme = function (theme) {
-      const validThemes = ['light','onyx'];
-      const activeTheme = validThemes.includes(theme) ? theme : 'onyx';
-      document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
-      document.body.classList.add('theme-' + activeTheme);
-      themeInput.value = activeTheme;
-      if (themeOnlyInput) themeOnlyInput.value = activeTheme;
-      themeButtons.forEach(function (option) {
-        option.classList.toggle('selected', option.dataset.theme === activeTheme);
-      });
-      return activeTheme;
-    };
-
-    const savedTheme = localStorage.getItem(themeKey) || themeInput.value;
-    const currentTheme = applyTheme(savedTheme);
-    localStorage.setItem(themeKey, currentTheme);
-
-    themeButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        const theme = button.dataset.theme;
-        const selectedTheme = applyTheme(theme);
-        localStorage.setItem(themeKey, selectedTheme);
-        // show save button/form
-        if (themeSaveForm) themeSaveForm.style.display = '';
-      });
-    });
-  });
-</script>
 
 @endsection

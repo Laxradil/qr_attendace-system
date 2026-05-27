@@ -37,32 +37,6 @@
     backdrop-filter: blur(18px) !important;
     -webkit-backdrop-filter: blur(18px) !important;
   }
-  body.theme-light .glass.schedule-card,
-  body.theme-light .schedule-card {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: 0 16px 40px rgba(15,23,42,.08) !important;
-    color: #111827 !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-  }
-  body.theme-light .schedule-card:hover {
-    border-color: #94a3b8 !important;
-  }
-  body.theme-light .schedule-card h3 {
-    color: #111827 !important;
-  }
-  body.theme-light .schedule-card .room-code,
-  body.theme-light .schedule-card .schedule-meta-item,
-  body.theme-light .schedule-card .schedule-meta-item span,
-  body.theme-light .schedule-card .schedule-meta-item strong {
-    color: #4b5563 !important;
-  }
-  body.theme-light .schedule-card .schedule-meta-item .icon {
-    background: #f8fafc !important;
-    color: #111827 !important;
-    border-color: #e5e7eb !important;
-  }
   .schedule-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 28px 72px rgba(15,23,42,.16);
@@ -114,6 +88,15 @@
     border-color: rgba(148,163,184,.2);
     box-shadow: 0 16px 40px rgba(15,23,42,.08);
   }
+  /* Ensure text inside schedule cards is readable in light theme */
+  body.theme-light .schedule-card h3,
+  body.theme-light .schedule-card .room-code,
+  body.theme-light .schedule-card .schedule-meta-item,
+  body.theme-light .schedule-card .schedule-meta-item span,
+  body.theme-light .schedule-card .schedule-meta-item strong {
+    color: #0f172a !important;
+  }
+  body.theme-light .schedule-card .schedule-meta-item .icon { background: rgba(15,23,42,.06) !important; color: #0f172a !important }
 </style>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px;margin-top:6px">

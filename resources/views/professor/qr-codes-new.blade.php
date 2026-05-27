@@ -1,8 +1,8 @@
-@extends('layouts.admin-new')
+@extends('layouts.professor')
 
-@section('title', 'QR Codes - QR Attendance Admin')
-@section('pageTitle', 'Student QR Codes')
-@section('pageSubtitle', 'View and manage student attendance QR codes.')
+@section('title', 'QR Codes - Professor')
+@section('header', 'Student QR Codes')
+@section('subheader', 'View and manage student attendance QR codes.')
 
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -70,6 +70,22 @@
     display: block;
     border-radius: 8px;
   }
+
+  .glass-table { border-radius: 16px; padding: 18px; }
+  .toolbar { margin-bottom: 12px; }
+  .table-wrap { overflow: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 820px; table-layout: fixed; }
+  th, td { padding: 18px 14px; text-align: left; vertical-align: middle; }
+  th { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.65); }
+  tbody tr { border-top: 1px solid rgba(255,255,255,0.04); }
+  .user-cell { display:flex; align-items:center; gap:12px; }
+  .small-avatar { width:40px; height:40px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; }
+  .qr img { width:120px; height:120px; object-fit:contain; background:#fff; padding:6px; border-radius:8px; display:block; }
+  .btn.slim { padding:8px 12px; font-size:13px; }
+  .footer-bar { display:flex; justify-content:space-between; align-items:center; margin-top:16px; color:rgba(255,255,255,.7); }
+  .pager { display:flex; gap:8px; align-items:center; }
+
+  .actions { text-align: right; }
 </style>
 
 <div class="glass-table glass">
@@ -89,7 +105,7 @@
           <th>Email</th>
           <th>Classes</th>
           <th>QR Code</th>
-          <th>Actions</th>
+          <th class="actions">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -111,19 +127,19 @@
           </td>
           <td>
             <div class="qr">
-              <img src="{{ route('admin.students.qr-code', $student) }}" alt="QR code for {{ $student->name }}" onerror="this.style.display='none';this.parentNode.innerText='▦'">
+              <img src="{{ route('professor.students.qr-code', $student) }}" alt="QR code for {{ $student->name }}" onerror="this.style.display='none';this.parentNode.innerText='▦'">
             </div>
           </td>
-          <td>
+          <td class="actions">
             <button
               type="button"
               class="btn slim"
-              data-url="{{ route('admin.students.qr-code', $student) }}"
+              data-url="{{ route('professor.students.qr-code', $student) }}"
               data-student-name="{{ $student->name }}"
               data-student-id="{{ $student->id }}"
               onclick="openQRCodeModal(this.dataset.url, this.dataset.studentName, this.dataset.studentId)"
             >Open</button>
-            <button class="btn primary slim" type="button" data-url="{{ route('admin.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
+            <button class="btn primary slim" type="button" data-url="{{ route('professor.students.qr-code', $student) }}" data-student-name="{{ $student->name }}" onclick="downloadQRCode(this.dataset.url, this.dataset.studentName)">↓ PNG</button>
           </td>
         </tr>
         @empty
@@ -136,11 +152,9 @@
   </div>
 
   <div class="footer-bar">
-    <span>Showing 1–{{ $students->count() }} of {{ App\Models\User::where('role', 'student')->count() }} students</span>
+    <span>Showing {{ $students->firstItem() ?? 0 }}–{{ $students->lastItem() ?? 0 }} of {{ $students->total() }} students</span>
     <div class="pager">
-      <button>‹</button>
-      <a class="current">1</a>
-      <button>›</button>
+      {!! $students->links() !!}
     </div>
   </div>
 </div>

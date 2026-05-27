@@ -230,22 +230,12 @@
   }
 
   body.theme-light .scan-status {
-    background: rgba(16,185,129,.18) !important;
-    border-color: rgba(16,185,129,.55) !important;
-    color: #064e3b !important;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(16,185,129,.12) !important;
+    background: rgba(16,185,129,.12) !important;
+    border-color: rgba(16,185,129,.4) !important;
+    color: #059669 !important;
+    box-shadow: 0 4px 12px rgba(16,185,129,.08) !important;
   }
-
-  body.theme-light .scan-status .dot {
-    background: #10b981 !important;
-    border-color: rgba(16,185,129,.55) !important;
-  }
-
-  body.theme-light .section-head h3 {
-    color: #111827 !important;
-  }
-
+  
   .cam-btns {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -302,14 +292,13 @@
   }
 
   body.theme-light .cam-btn.stop {
-    background: rgba(239,68,68,.16) !important;
-    border: 1px solid rgba(239,68,68,.35) !important;
-    color: #7f1d1d !important;
-    font-weight: 700 !important;
+    background: rgba(255,61,114,.12) !important;
+    border: 1px solid rgba(255,61,114,.25) !important;
+    color: #ff8298 !important;
   }
 
   body.theme-light .cam-btn.stop:hover:not(:disabled) {
-    background: rgba(239,68,68,.28) !important;
+    background: rgba(255,61,114,.22) !important;
   }
 
   body.theme-light .report-btn {
@@ -631,6 +620,53 @@
     
     detectQR();
   }
+
+  // Hardware scanner input handling: submit automatically on Enter or newline
+  qrInput.addEventListener('keydown', function (e) {
+    if (currentMode !== 'hardware') return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const value = qrInput.value.trim();
+      if (!value) return;
+
+      // If the QR contains a student attendance JSON payload, try to select student and class
+      try {
+        const decoded = JSON.parse(value);
+        if (decoded && decoded.type === 'student_attendance' && decoded.student_id) {
+          const studentId = decoded.student_id.toString();
+          if (studentSelect.querySelector(`option[value="${studentId}"]`)) {
+            studentSelect.value = studentId;
+          } else {
+            // remember pending value; will be set after class select change
+            studentSelect.dataset.pendingValue = studentId;
+          }
+
+          const inferred = findBestClassForStudent(studentId);
+          if (inferred) {
+            classSelect.value = inferred;
+            classSelect.dispatchEvent(new Event('change'));
+          }
+        }
+      } catch (err) {
+        // not JSON — proceed
+      }
+
+      const form = qrInput.closest('form');
+      if (form) form.submit();
+    }
+  });
+
+  // Some scanners paste the value with a trailing newline instead of sending Enter key events.
+  qrInput.addEventListener('input', function () {
+    if (currentMode !== 'hardware') return;
+    const v = qrInput.value;
+    if (!v) return;
+    if (v.endsWith('\n') || v.endsWith('\r')) {
+      qrInput.value = v.replace(/[\r\n]+$/g, '').trim();
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+      qrInput.dispatchEvent(enterEvent);
+    }
+  });
 </script>
 
 @endsection

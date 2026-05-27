@@ -15,72 +15,14 @@
     border-color: transparent !important;
   }
   .ghost-stat:hover {
-    background: #4C4E4E !important;
-    border-color: rgba(255,255,255,.18) !important;
-  }
-  body.theme-onyx .ghost-stat:hover {
-    background: rgba(139,92,255,.14) !important;
-    border-color: rgba(139,92,255,.35) !important;
+    background: rgba(139, 92, 255, 0.2) !important;
+    border-color: rgba(139, 92, 255, 0.4) !important;
   }
   .ghost-stat:hover .stat-body {
     opacity: 1 !important;
   }
-  .ghost-stat .stat-icon {
-    background: rgba(255,255,255,.06) !important;
-    border: 1px solid rgba(255,255,255,.1) !important;
-    color: #ffffff !important;
-  }
   .ghost-stat .stat-body {
     opacity: 0.85 !important;
-    color: #ffffff !important;
-  }
-  .ghost-stat .stat-body strong,
-  .ghost-stat .stat-body span,
-  .ghost-stat .stat-body .trend,
-  .ghost-stat:hover .stat-body .trend {
-    color: #ffffff !important;
-  }
-  body.theme-light .ghost-stat .stat-body {
-    color: #0f172a !important;
-  }
-  body.theme-light .ghost-stat .stat-body strong,
-  body.theme-light .ghost-stat .stat-body span,
-  body.theme-light .ghost-stat .stat-body .trend,
-  body.theme-light .ghost-stat:hover .stat-body .trend {
-    color: inherit !important;
-  }
-  body.theme-light .recent-activity-list .activity .activity-title {
-    color: #0f172a !important;
-  }
-  body.theme-light .recent-activity-list .activity .activity-desc,
-  body.theme-light .recent-activity-list .activity time {
-    color: #0f172a !important;
-  }
-  body.theme-light .recent-activity-list .activity {
-    background: #f8fafb !important;
-    border-color: #e5e7eb !important;
-  }
-  body.theme-light .recent-activity-list .activity:hover {
-    background: #ede9fe !important;
-    border-color: #c4b5fd !important;
-  }
-  body.theme-light .recent-activity-list .activity .act-icon {
-    background: rgba(139,92,255,.12) !important;
-    color: #7c3aed !important;
-  }
-  body.theme-light .dash-right .row-item {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    color: #0f172a !important;
-  }
-  body.theme-light .dash-right .row-item span,
-  body.theme-light .dash-right .row-item div {
-    color: #0f172a !important;
-  }
-  body.theme-light .dash-right table th,
-  body.theme-light .dash-right table td,
-  body.theme-light .dash-right table tbody tr {
-    color: #0f172a !important;
   }
   .recent-activity-list {
     display:flex;flex-direction:column;gap:12px;
@@ -146,15 +88,15 @@
 
 <div class="dashboard">
   <div class="dash-left">
-    <div class="card glass">
+    <div class="card glass" style="background: rgba(15,23,42,0.62) !important;">
       <div class="section-head">
         <h3 style="font-size:16px">📊 Attendance Overview</h3>
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;font-size:14px">
         <div style="padding:16px;background:rgba(4,120,87,.15);border-radius:12px;text-align:center;border:1px solid rgba(4,120,87,.3);border-bottom:3px solid #10b981;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
           <div style="width:40px;height:40px;border-radius:50%;background:rgba(16,185,129,.25);display:grid;place-items:center;margin-bottom:12px;font-size:28px">👤</div>
-          <div style="font-weight:800;font-size:28px;color:#0f172a">{{ $presentCount }}</div>
-          <div style="color:#0f172a;margin-top:8px;font-weight:700;font-size:12px">Present</div>
+          <div style="font-weight:800;font-size:28px;color:#10b981">{{ $presentCount }}</div>
+          <div style="color:#10b981;margin-top:8px;font-weight:700;font-size:12px">Present</div>
         </div>
         <div style="padding:16px;background:rgba(217,119,6,.15);border-radius:12px;text-align:center;border:1px solid rgba(217,119,6,.3);border-bottom:3px solid #f59e0b;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center">
           <div style="width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,.25);display:grid;place-items:center;margin-bottom:12px;font-size:28px">⏱️</div>
@@ -177,10 +119,10 @@
           <div style="color:#3b82f6;margin-top:8px;font-weight:700;font-size:12px">Total</div>
         </div>
       </div>
-      <button class="report-btn" onclick="window.location.href='{{ route('professor.attendance-records') }}'">View Full Attendance Report →</button>
+      <a class="report-btn" href="{{ route('professor.attendance-records') }}">View Full Attendance Report →</a>
     </div>
 
-    <div class="card glass" style="padding:18px 14px;margin-top:12px;">
+    <div class="card glass" style="padding:18px 14px;margin-top:12px;background:rgba(15,23,42,0.62) !important;">
       <div class="section-head" style="justify-content:space-between;align-items:center;display:flex;gap:12px;margin-bottom:14px;">
         <h3 style="font-size:16px; margin:0;">⚡ Recent Activities</h3>
         <a href="{{ route('professor.logs') }}" style="color: #8b5cff">View all →</a>
@@ -205,7 +147,7 @@
   </div>
 
   <div class="dash-right" style="display:flex;flex-direction:column;gap:12px">
-    <div class="card glass">
+    <div class="card glass" style="background: rgba(15,23,42,0.62) !important;">
       <div class="section-head"><h3 style="font-size:16px">📅 Today's Schedule</h3></div>
       @forelse($todaySchedules as $schedule)
         <div class="row-item" style="color: var(--text);">
@@ -258,14 +200,6 @@
     background: #f3e8ff !important;
     border-color: #8b5cff !important;
   }
-
-  body.theme-light .dashboard .dash-right .row-item,
-  body.theme-light .dashboard .dash-right .row-item span,
-  body.theme-light .dashboard .dash-right .row-item div,
-  body.theme-light .dashboard .dash-right .row-item * {
-    color: #0f172a !important;
-  }
-
   
   /* Overview cards */
   body.theme-light div[style*="background:rgba(255,255,255,.055)"] {
@@ -330,35 +264,5 @@
   
   body.theme-light [style*="color:#43a6ff"] {
     color: #2563eb !important;
-  }
-
-  body.theme-light .dashboard .card.glass,
-  body.theme-light .dashboard .dash-left .card.glass,
-  body.theme-light .dashboard .dash-right .card.glass {
-    background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    color: #0f172a !important;
-    box-shadow: 0 16px 36px rgba(15,23,42,.08) !important;
-  }
-
-  body.theme-light .dashboard .section-head h3 {
-    color: #4338ca !important;
-  }
-
-  body.theme-light .recent-activity-list .activity,
-  body.theme-light .dash-right .row-item {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    box-shadow: 0 14px 32px rgba(15,23,42,.06) !important;
-  }
-
-  body.theme-light .recent-activity-list .activity:hover {
-    background: #eef2ff !important;
-    border-color: #c4b5fd !important;
-  }
-
-  body.theme-light .stats .ghost-stat {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
   }
 </style>

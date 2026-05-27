@@ -34,7 +34,9 @@
           <td>{{ $class->students->count() }} students</td>
           <td><span class="pill green">Active</span></td>
           <td>
+            @if (Route::has('admin.classes.enroll'))
             <a href="{{ route('admin.classes.enroll', $class) }}" class="btn slim">Enroll</a>
+            @endif
             <a href="{{ route('admin.classes.edit', $class) }}" class="btn slim">Edit</a>
             <form method="POST" action="{{ route('admin.classes.delete', $class) }}" style="display:inline" onsubmit="return confirm('Delete this class?')">
               @csrf

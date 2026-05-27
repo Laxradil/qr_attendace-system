@@ -46,7 +46,7 @@
       --red:#dc2626;
       --yellow:#ca8a04;
       --cyan:#0891b2;
-      background: linear-gradient(180deg,#ffffff 0%,#f9fafb 100%);
+      background:#f9fafb;
     }
     body.theme-light .sidebar{
       background:#ffffff;
@@ -200,11 +200,7 @@
     body.theme-light .glass th,
     body.theme-light .glass li,
     body.theme-light .glass small,
-    body.theme-light .stat-body,
-    body.theme-light .stat-body strong,
-    body.theme-light .stat-body span,
-    body.theme-light .stat-body .trend,
-    body.theme-light .activity-title
+    body.theme-light .stat-body span
     {
       color: #1f2937 !important;
     }
@@ -1308,11 +1304,7 @@
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
         </a>
-        <a href="{{ route('admin.drop-requests') }}" class="@if(Route::currentRouteName() === 'admin.drop-requests') active @endif">
-          <span class="nav-icon">⇩</span>
-          <span>Drop Requests</span>
-          <span class="nav-badge">{{ App\Models\DropRequest::where('status', 'pending')->count() }}</span>
-        </a>
+        <!-- Drop Requests removed: professors handle drops directly -->
         <a href="{{ route('admin.logs') }}" class="@if(Route::currentRouteName() === 'admin.logs') active @endif">
           <span class="nav-icon">☷</span>
           <span>System Logs</span>
@@ -1403,7 +1395,7 @@
         ? serverTheme
         : themeNames.includes(stored)
           ? stored
-          : 'onyx';
+          : 'light';
       if (serverTheme && themeNames.includes(serverTheme)) {
         try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
       }

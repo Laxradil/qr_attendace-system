@@ -192,6 +192,99 @@
   .dashboard .card:nth-child(3){
     padding:16px;
   }
+  .attendance-graph-card {
+    border:1px solid var(--stroke);
+    background:rgba(255,255,255,.18);
+  }
+  .attendance-graph {
+    display:grid;
+    gap:18px;
+    margin-top:10px;
+  }
+  .attendance-graph .chart-grid {
+    display:grid;
+    grid-template-columns:32px minmax(0,1fr);
+    gap:18px;
+    align-items:start;
+  }
+  .attendance-graph .y-axis {
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    height:160px;
+    color:var(--muted);
+    font-size:12px;
+    text-align:right;
+    padding-right:10px;
+  }
+  .attendance-graph .y-axis span {
+    display:block;
+  }
+  .attendance-graph .bars-column {
+    display:grid;
+    gap:14px;
+  }
+  .attendance-graph .chart-bars {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(48px,1fr));
+    align-items:start;
+    gap:18px;
+    min-height:160px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .attendance-graph .chart-bar {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:10px;
+  }
+  .attendance-graph .bar-track {
+    width:100%;
+    height:160px;
+    display:flex;
+    align-items:flex-end;
+    background:rgba(255,255,255,.06);
+    border-radius:18px 18px 0 0;
+    overflow:hidden;
+    position:relative;
+  }
+  .attendance-graph .bar-track::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top, rgba(255,255,255,.05) 0%, transparent 16%);
+  }
+  .attendance-graph .bar-fill {
+    display:block;
+    width:100%;
+    border-radius:18px 18px 0 0;
+    transition:height .4s ease;
+    min-height:8px;
+  }
+  .attendance-graph .bar-fill.present { background:#18f08b; }
+  .attendance-graph .bar-fill.late { background:#ffc75a; }
+  .attendance-graph .bar-fill.absent { background:#ff3d72; }
+  .attendance-graph .bar-fill.total { background:#43a6ff; }
+  .attendance-graph .bar-label {
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    text-align:center;
+  }
+  .attendance-graph .bar-count {
+    font-size:14px;
+    font-weight:900;
+    color:#fff;
+  }
+  .attendance-graph-card .small-link {
+    color:rgba(255,255,255,.75);
+    text-decoration:none;
+  }
+  .attendance-graph-card .small-link:hover {
+    color:#fff;
+  }
 </style>
 
 <div class="stats dashboard-stats">
@@ -305,10 +398,7 @@
         <span>Total Classes</span>
         <b>{{ App\Models\Classe::count() }}</b>
       </div>
-      <div class="row-item">
-        <span>Pending Drops</span>
-        <b style="color:#ffd584">{{ App\Models\DropRequest::where('status', 'pending')->count() }}</b>
-      </div>
+      <!-- Pending Drops removed: professors handle drops directly -->
       <div class="row-item">
         <span>System Status</span>
         <span class="pill green"><span class="status-dot" style="color:var(--green);background:var(--green)"></span> Operational</span>
@@ -338,23 +428,57 @@
       </div>
     </div>
 
-    <!-- Drop requests alert -->
-    @php
-      $pendingDropCount = App\Models\DropRequest::where('status', 'pending')->count();
-      $firstPendingDrop = App\Models\DropRequest::where('status', 'pending')->with('student', 'classe')->first();
-    @endphp
-    <div class="card" style="border-radius:var(--radius-lg);padding:18px;background:rgba(255,61,114,.08);border:1px solid rgba(255,61,114,.22)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <span style="font-size:20px">⚠️</span>
-        <b style="font-size:14px">{{ $pendingDropCount }} Pending Drop Request(s)</b>
+    <div class="card glass attendance-graph-card">
+      <div class="section-head" style="justify-content:space-between;gap:12px">
+        <h3>📈 Attendance Graph</h3>
+        <a href="{{ route('admin.attendance-records') }}" class="small-link" style="font-size:13px;color:var(--text-muted);">View full report →</a>
       </div>
-      @if($pendingDropCount > 0)
-        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">{{ $firstPendingDrop?->student?->name ?? 'N/A' }} · {{ $firstPendingDrop?->classe?->code ?? 'N/A' }} · {{ now()->format('M d') }}</p>
-      @else
-        <p style="color:var(--muted);font-size:13px;margin-bottom:13px">No pending drop requests at this time</p>
-      @endif
-      <div style="display:flex;gap:8px">
-        <a href="{{ route('admin.drop-requests') }}" class="btn primary slim" style="flex:1">Review →</a>
+      @php
+        $presentCount = App\Models\AttendanceRecord::where('status', 'present')->count();
+        $lateCount = App\Models\AttendanceRecord::where('status', 'late')->count();
+        $absentCount = App\Models\AttendanceRecord::where('status', 'absent')->count();
+        $totalAttendance = App\Models\AttendanceRecord::count();
+        $maxCount = max($totalAttendance, 1);
+        $presentHeight = round($presentCount / $maxCount * 100);
+        $lateHeight = round($lateCount / $maxCount * 100);
+        $absentHeight = round($absentCount / $maxCount * 100);
+        $totalHeight = round($totalAttendance / $maxCount * 100);
+        $stepValue = ceil($maxCount / 4);
+      @endphp
+      <div class="attendance-graph">
+        <div class="chart-grid">
+          <div class="y-axis">
+            <span>{{ $stepValue * 4 }}</span>
+            <span>{{ $stepValue * 3 }}</span>
+            <span>{{ $stepValue * 2 }}</span>
+            <span>{{ $stepValue }}</span>
+            <span>0</span>
+          </div>
+          <div class="bars-column">
+            <div class="chart-bars">
+              <div class="chart-bar">
+                <div class="bar-track"><div class="bar-fill present" style="height:{{ $presentHeight }}%"></div></div>
+                <div class="bar-count">{{ $presentCount }}</div>
+                <div class="bar-label">Present</div>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-track"><div class="bar-fill late" style="height:{{ $lateHeight }}%"></div></div>
+                <div class="bar-count">{{ $lateCount }}</div>
+                <div class="bar-label">Late</div>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-track"><div class="bar-fill absent" style="height:{{ $absentHeight }}%"></div></div>
+                <div class="bar-count">{{ $absentCount }}</div>
+                <div class="bar-label">Absent</div>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-track"><div class="bar-fill total" style="height:{{ $totalHeight }}%"></div></div>
+                <div class="bar-count">{{ $totalAttendance }}</div>
+                <div class="bar-label">Total</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -363,8 +487,6 @@
 
 @section('scripts')
 <script>
-  document.querySelectorAll('.attendance-fill').forEach((bar) => {
-    bar.style.width = `${bar.dataset.progress || 0}%`;
-  });
+  // No JS needed; chart heights are set inline.
 </script>
 @endsection

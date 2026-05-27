@@ -218,16 +218,25 @@
     border-bottom: 1px solid rgba(255,255,255,.07);
     vertical-align: middle;
   }
+  /* Theme-aware select styling: default to theme text, override for light theme */
   .status-select {
     min-width: 140px;
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.05);
-    color: #fff;
+    color: var(--text); /* use theme text color by default */
     font-size: 13px;
     width: 100%;
     max-width: 180px;
+  }
+  body.theme-light .status-select {
+    color: #0b1220; /* dark text for light theme */
+  }
+  /* Ensure option text is readable when native dropdown opens (most browsers use light backgrounds) */
+  .status-select option {
+    color: #0b1220 !important;
+    background: #ffffff;
   }
   .status-select:focus {
     outline: none;
@@ -441,15 +450,8 @@
   }
   
   body.theme-light .glass-table {
-    background: #f8fafc !important;
-    border: 1px solid #d1d5db !important;
-    box-shadow: 0 16px 40px rgba(15,23,42,.08) !important;
-  }
-  
-  body.theme-light .table-wrap {
     background: #ffffff !important;
     border: 1px solid #e5e7eb !important;
-    border-radius: 20px !important;
   }
   
   body.theme-light .stat-icon.cyan {
@@ -461,22 +463,22 @@
   body.theme-light .filter-input {
     background: #ffffff !important;
     border: 1px solid #e5e7eb !important;
-    color: #0f172a !important;
+    color: #000000 !important;
   }
   
   body.theme-light th {
-    background: #eef2ff !important;
-    color: #1f2937 !important;
-    border-bottom: 1px solid #d1d5db !important;
+    background: #f9fafb !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
   }
   
   body.theme-light td {
-    color: #111827 !important;
+    color: #000000 !important;
     border-bottom: 1px solid #e5e7eb !important;
   }
   
   body.theme-light tr:hover td {
-    background: #eff6ff !important;
+    background: #f3f4f6 !important;
   }
   
   body.theme-light .small-avatar {
