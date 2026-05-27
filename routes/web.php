@@ -54,8 +54,11 @@ Route::middleware('auth')->group(function () {
 Route::prefix('professor')->middleware(['auth', 'role:professor'])->group(function () {
     Route::get('/', [ProfessorController::class, 'dashboard'])->name('professor.dashboard');
     Route::get('/classes', [ProfessorController::class, 'myClasses'])->name('professor.classes');
+    Route::get('/classes/create', [ProfessorController::class, 'createClass'])->name('professor.classes.create');
+    Route::post('/classes', [ProfessorController::class, 'storeClass'])->name('professor.classes.store');
     Route::get('/classes/{classe}', [ProfessorController::class, 'showClass'])->name('professor.class-detail');
     Route::put('/classes/{classe}', [ProfessorController::class, 'updateClass'])->name('professor.classes.update');
+    Route::delete('/classes/{classe}', [ProfessorController::class, 'deleteClass'])->name('professor.classes.delete');
     Route::get('/scan-qr', [ProfessorController::class, 'scanQR'])->name('professor.scan-qr');
     Route::post('/attendance', [ProfessorController::class, 'recordAttendance'])->name('professor.attendance.store');
     Route::get('/attendance-records', [ProfessorController::class, 'attendanceRecords'])->name('professor.attendance-records');
