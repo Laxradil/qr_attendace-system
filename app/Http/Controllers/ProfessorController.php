@@ -197,6 +197,33 @@ class ProfessorController extends Controller
         return redirect()->route('professor.classes')->with('success', 'Class updated successfully.');
     }
 
+    public function deleteClass(Classe $classe): RedirectResponse|JsonResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user->assignedClasses()->whereKey($classe->id)->exists()) {
+            abort(403);
+        }
+
+        $name = $classe->name;
+        $classe->delete();
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'delete_class',
+            'description' => 'Professor deleted class: ' . $name,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Class deleted successfully']);
+        }
+
+        return redirect()->route('professor.classes')->with('success', 'Class deleted successfully');
+    }
+
     public function showClass(Classe $classe): View
     {
         $this->authorize('view', $classe);
@@ -1094,6 +1121,79 @@ class ProfessorController extends Controller
         return back()->with('success', 'Settings updated successfully');
     }
 
+    // Classes Management for Professors: show create form
+    public function createClass(): View
+    {
+        $professors = User::where('role', 'professor')->get();
+        return view('professor.create-class', ['professors' => $professors]);
+    }
+
+    // Store class created by professor
+    public function storeClass(Request $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'code' => 'required|string|unique:classes|max:20',
+            'room_code' => 'required|string',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'days' => 'required|array|min:1',
+            'days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'professors' => 'nullable|array|min:1',
+            'professors.*' => 'required|exists:users,id',
+        ]);
+
+        $professors = $validated['professors'] ?? [];
+
+        // Ensure current professor is primary and included
+        if (!in_array($user->id, $professors, true)) {
+            array_unshift($professors, $user->id);
+        }
+
+        $primaryProfessorId = $professors[0];
+
+        $classe = Classe::create([
+            'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'professor_id' => $primaryProfessorId,
+        ]);
+
+        $primaryProfessor = User::findOrFail($primaryProfessorId);
+
+        $daysValue = implode(', ', $validated['days']);
+
+        Schedule::create([
+            'class_id' => $classe->id,
+            'subject_code' => $validated['code'],
+            'subject_name' => $validated['name'],
+            'professor_id' => $primaryProfessor->id,
+            'professor' => $primaryProfessor->name,
+            'days' => $daysValue,
+            'time' => \Carbon\Carbon::createFromFormat('H:i', $validated['start_time'])->format('g:i A') . ' - ' . \Carbon\Carbon::createFromFormat('H:i', $validated['end_time'])->format('g:i A'),
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'room' => $validated['room_code'],
+        ]);
+
+        // Attach professors (ensure unique)
+        $classe->professors()->attach(array_values(array_unique($professors)));
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'create_class',
+            'description' => 'Professor created class: ' . $validated['name'] . ' with ' . count($professors) . ' professor(s)',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('professor.classes')->with('success', 'Class created successfully');
+    }
     public function addStudent(Request $request): RedirectResponse
     {
         $validated = $request->validate([

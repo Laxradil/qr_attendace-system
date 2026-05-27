@@ -52,6 +52,12 @@
     box-shadow: 0 8px 26px rgba(6,8,18,0.6);
   }
 </style>
+<!-- Top toolbar (Create Class button on the left) -->
+<div class="toolbar" style="margin-bottom:12px">
+  <div class="tools">
+    <a href="{{ route('professor.classes.create') }}" class="chip">+ Create Class</a>
+  </div>
+</div>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px;margin-top:6px">
   <div class="stat glass">
@@ -112,6 +118,7 @@
         <button type="button" class="btn slim btn-add" data-action="add-student" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}" data-class-room="{{ $schedule?->room }}" data-class-schedule-id="{{ $schedule?->id }}" data-class-days="{{ $schedule?->days }}" data-class-start-time="{{ $schedule?->start_time }}" data-class-end-time="{{ $schedule?->end_time }}" data-current-students='@json($class->students->pluck("id"))'>Add Student</button>
         <button type="button" class="btn slim btn-edit" data-action="edit-class" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}" data-class-room="{{ $schedule?->room }}" data-class-schedule-id="{{ $schedule?->id }}" data-class-days="{{ $schedule?->days }}" data-class-start-time="{{ $schedule?->start_time }}" data-class-end-time="{{ $schedule?->end_time }}">Edit Class</button>
         <button type="button" class="btn slim btn-scan" data-action="scan-qr" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}">Scan QR</button>
+        <button type="button" class="btn slim btn-delete" data-action="delete-class" data-class-id="{{ $class->id }}" data-class-name="{{ $class->display_name }}" data-class-code="{{ $class->code }}">Delete</button>
       </div>
     </div>
 
@@ -501,6 +508,67 @@
     min-width: 120px;
   }
 
+    .delete-warning {
+      display: grid;
+      gap: 14px;
+    }
+
+    .delete-banner {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255, 103, 103, 0.18), rgba(255, 103, 103, 0.08));
+      border: 1px solid rgba(255, 103, 103, 0.28);
+    }
+
+    .delete-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: rgba(255, 103, 103, 0.18);
+      border: 1px solid rgba(255, 103, 103, 0.28);
+      color: #ffd1d1;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .delete-banner h3 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    .delete-banner p {
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .delete-card-meta {
+      display: grid;
+      gap: 8px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .delete-card-meta div {
+      color: rgba(255,255,255,.84);
+      font-size: 13px;
+    }
+
+    .delete-card-meta strong {
+      color: #fff;
+    }
+
   .modal-card .modal-body {
     display: grid;
     gap: 14px;
@@ -587,6 +655,17 @@
     font-size: 12px;
   }
 
+    .modal-card .btn-confirm-delete {
+      background: linear-gradient(135deg, rgba(255, 96, 96, 0.95), rgba(190, 53, 53, 0.95));
+      border: 1px solid rgba(255, 140, 140, 0.45);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(190, 53, 53, 0.28);
+    }
+
+    .modal-card .btn-confirm-delete:hover {
+      filter: brightness(1.05);
+    }
+
   @media (max-width: 640px) {
     .modal-card {
       padding: 20px;
@@ -615,6 +694,18 @@
     font-size: 12px;
     border-radius: 10px;
     text-decoration: none;
+  }
+
+  .btn-delete {
+    border: 1px solid rgba(255, 109, 109, 0.35);
+    background: linear-gradient(180deg, rgba(255, 103, 103, 0.16), rgba(255, 103, 103, 0.08));
+    color: #ffd1d1;
+  }
+
+  .btn-delete:hover {
+    border-color: rgba(255, 109, 109, 0.55);
+    background: linear-gradient(180deg, rgba(255, 103, 103, 0.24), rgba(255, 103, 103, 0.12));
+    color: #fff;
   }
   
   a.btn,
@@ -822,6 +913,27 @@
                 <div class="section-head" style="margin-bottom:12px"><h3>Recent Scans</h3></div>
                 <div class="no-scans">No scans yet</div>
               </div>
+            </div>
+          </div>
+        `;
+      },
+      'delete-class': function (data) {
+        return `
+          <div class="delete-warning">
+            <div class="delete-banner">
+              <div class="delete-badge">!</div>
+              <div>
+                <h3>Delete this class?</h3>
+                <p>This will permanently remove the class, its schedule, attendance records, and related links. This action cannot be undone.</p>
+              </div>
+            </div>
+            <div class="delete-card-meta">
+              <div><strong>Class:</strong> ${data.className || 'Class'}</div>
+              <div><strong>Code:</strong> ${data.classCode || 'N/A'}</div>
+            </div>
+            <div class="modal-actions">
+              <button type="button" id="confirmDeleteClass" class="btn btn-confirm-delete">Delete Class</button>
+              <button type="button" class="btn" onclick="document.getElementById('modalBackdrop').style.display='none';document.body.style.overflow=''">Cancel</button>
             </div>
           </div>
         `;
@@ -1437,6 +1549,44 @@
           }
           if (action === 'scan-qr') {
             attachScanQrHandlers(data);
+          }
+          if (action === 'delete-class') {
+            const confirmBtn = modalContent.querySelector('#confirmDeleteClass');
+            if (confirmBtn) {
+              confirmBtn.addEventListener('click', function () {
+                const classId = data.classId || data.class_id;
+                if (!classId) {
+                  alert('Unable to determine the selected class.');
+                  return;
+                }
+
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = 'Deleting...';
+
+                fetch(`/professor/classes/${classId}`, {
+                  method: 'DELETE',
+                  headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                  }
+                }).then(async (res) => {
+                  if (res.ok) {
+                    window.location.reload();
+                    return;
+                  }
+
+                  const data = await res.json().catch(() => ({}));
+                  alert(data.message || 'Failed to delete class.');
+                  confirmBtn.disabled = false;
+                  confirmBtn.textContent = 'Delete Class';
+                }).catch((err) => {
+                  console.error(err);
+                  alert('Failed to delete class.');
+                  confirmBtn.disabled = false;
+                  confirmBtn.textContent = 'Delete Class';
+                });
+              }, { once: true });
+            }
           }
         }
       });
