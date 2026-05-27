@@ -42,9 +42,9 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: #020205;
-            overflow: hidden;
+            background: #07080f;
             position: relative;
+            overflow: hidden;
         }
 
         body::before {
@@ -58,34 +58,74 @@
 
         .login-container {
             position: relative;
-            background: rgba(9, 8, 24, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(12, 14, 28, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--radius-lg);
             overflow: hidden;
             max-width: 520px;
             width: 100%;
             padding: 2.5rem;
-            backdrop-filter: blur(18px);
-            box-shadow: 0 35px 95px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(22px);
+            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.22);
         }
 
         .login-container::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(108, 92, 231, 0.16), transparent 34%),
-                        linear-gradient(225deg, rgba(0, 243, 255, 0.12), transparent 28%);
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.12), transparent 32%),
+                        linear-gradient(225deg, rgba(97, 139, 255, 0.07), transparent 28%);
             pointer-events: none;
             mix-blend-mode: screen;
         }
 
-        #particle-canvas {
+        #aurora-wrap {
             position: fixed;
             inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background: linear-gradient(180deg, #070816 0%, #0d1334 40%, #070816 100%);
+        }
+
+        #aurora-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
+            display: block;
+        }
+
+        #mountain-silhouette {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 36vh;
+            max-height: 420px;
+            display: block;
             z-index: 0;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        #mountain-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 36vh;
+            max-height: 420px;
+            background: linear-gradient(180deg, rgba(2,6,10,0) 0%, rgba(2,6,10,0.65) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .login-container {
+            z-index: 5;
+            position: relative;
         }
 
         .login-container > * {
@@ -255,26 +295,49 @@
 
         .btn-login {
             width: 100%;
-            padding: 0.875rem;
-            background: var(--purple);
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.96), rgba(168, 85, 247, 0.95));
             border: none;
-            border-radius: var(--radius);
+            border-radius: calc(var(--radius) * 1.2);
             color: white;
             font-size: 0.95rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
             font-family: 'Inter', sans-serif;
+            box-shadow: 0 14px 30px rgba(108, 92, 231, 0.18);
+            letter-spacing: 0.01em;
         }
 
         .btn-login:hover {
-            background: var(--purple2);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 1), rgba(108, 92, 231, 0.95));
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+            box-shadow: 0 18px 35px rgba(108, 92, 231, 0.22);
         }
 
         .btn-login:active {
             transform: translateY(0);
+        }
+
+        .register-box {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .register-box p {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.95rem;
+        }
+
+        .register-box a {
+            color: var(--purple);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .register-box a:hover {
+            color: var(--purple2);
         }
 
         .error-box {
@@ -306,7 +369,25 @@
     </style>
 </head>
 <body>
-    <canvas id="particle-canvas"></canvas>
+    <div id="aurora-wrap">
+        <canvas id="aurora-canvas" aria-hidden="true"></canvas>
+        <svg id="mountain-silhouette" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <defs>
+                <linearGradient id="mg1" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#121a36" />
+                    <stop offset="100%" stop-color="#050a18" />
+                </linearGradient>
+                <linearGradient id="mg2" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#1f2a5c" />
+                    <stop offset="100%" stop-color="#050a18" />
+                </linearGradient>
+            </defs>
+            <path d="M0,230 L120,190 L220,210 L320,180 L420,205 L540,160 L660,210 L780,170 L900,200 L1020,150 L1200,190 L1200,300 L0,300 Z" fill="url(#mg1)" opacity="0.95" />
+            <path d="M0,260 L80,200 L160,240 L260,180 L360,240 L460,170 L560,240 L680,160 L760,220 L860,170 L960,230 L1080,160 L1200,240 L1200,300 L0,300 Z" fill="url(#mg2)" opacity="0.98" />
+            <path d="M0,290 L140,230 L260,270 L380,220 L520,270 L660,210 L800,270 L960,220 L1100,280 L1200,260 L1200,300 L0,300 Z" fill="#02060a" opacity="1" />
+        </svg>
+        <div id="mountain-overlay" aria-hidden="true"></div>
+    </div>
     <div class="login-container">
         <div class="brand-logo">
             <i class="fas fa-clock"></i>
@@ -363,9 +444,13 @@
             </div>
             
             <button type="submit" class="btn-login">
-                Sign In
+                Sign In <i class="fas fa-arrow-right" style="margin-left: 0.65rem;"></i>
             </button>
         </form>
+
+        <div class="register-box">
+            <p>Don't have an account yet? <a href="{{ route('register') }}">Register now</a></p>
+        </div>
     </div>
     
     <script>
@@ -433,159 +518,168 @@
             input.addEventListener('input', clearErrors);
         });
 
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        const particles = [];
-        const particleCount = 320;
-        const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        const rotation = { x: 0, y: 0, targetX: 0, targetY: 0 };
+        // Aurora canvas animator + SVG mountain parallax
+        (function(){
+            const canvas = document.getElementById('aurora-canvas');
+            const mountain = document.getElementById('mountain-silhouette');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+            let t = 0;
 
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            center.x = window.innerWidth / 2;
-            center.y = window.innerHeight / 2;
-        };
+            function resize(){
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
 
-        class Particle {
-            constructor() {
-                this.reset();
+            const stars = [];
+            const STAR_COUNT = Math.min(240, Math.floor((w*h)/4600));
+            for (let i=0;i<STAR_COUNT;i++){
+                stars.push({
+                    x: Math.random()*w,
+                    y: Math.random()*h*0.60,
+                    size: Math.random()*1.8 + (Math.random()>0.92?1.9:0),
+                    phase: Math.random()*Math.PI*2,
+                    twinkleSpeed: 0.002 + Math.random()*0.007
+                });
             }
 
-            reset() {
-                this.x = (Math.random() - 0.5) * canvas.width * 0.9;
-                this.y = (Math.random() - 0.5) * canvas.height * 0.9;
-                this.z = (Math.random() - 0.5) * canvas.width * 0.6;
-                this.vx = (Math.random() - 0.5) * 0.05;
-                this.vy = (Math.random() - 0.5) * 0.05;
-                this.vz = (Math.random() - 0.5) * 0.02;
-                this.size = 1.3 + Math.random() * 3.5;
-                this.alpha = 0.12 + Math.random() * 0.28;
-                this.baseSize = this.size;
-                this.phase = Math.random() * Math.PI * 2;
-                this.projX = this.x + center.x;
-                this.projY = this.y + center.y;
-            }
-
-            update() {
-                const drift = 0.004 + Math.abs(this.z) / (canvas.width * 28);
-                this.vx += (Math.random() - 0.5) * 0.004 + this.x * 0.000004;
-                this.vy += (Math.random() - 0.5) * 0.004 + this.y * 0.000003;
-                this.vz += (Math.random() - 0.5) * 0.002 - this.z * 0.00001;
-                this.vx += Math.cos(this.phase * 0.8) * drift * 0.3;
-                this.vy += Math.sin(this.phase * 0.9) * drift * 0.3;
-                this.vz += Math.cos(this.phase * 1.2) * drift * 0.12;
-                this.vx *= 0.986;
-                this.vy *= 0.986;
-                this.vz *= 0.986;
-
-                this.x += this.vx;
-                this.y += this.vy;
-                this.z += this.vz;
-                this.phase += 0.014;
-
-                const boundX = canvas.width * 0.75;
-                const boundY = canvas.height * 0.75;
-                const boundZ = canvas.width * 0.55;
-
-                if (this.x < -boundX) this.x = boundX;
-                if (this.x > boundX) this.x = -boundX;
-                if (this.y < -boundY) this.y = boundY;
-                if (this.y > boundY) this.y = -boundY;
-                if (this.z < -boundZ) this.z = boundZ;
-                if (this.z > boundZ) this.z = -boundZ;
-
-                const perspective = 520;
-                const rotX = rotation.x;
-                const rotY = rotation.y;
-                const x3 = this.x;
-                const y3 = this.y;
-                const z3 = this.z;
-
-                const cosY = Math.cos(rotY);
-                const sinY = Math.sin(rotY);
-                const cosX = Math.cos(rotX);
-                const sinX = Math.sin(rotX);
-
-                const xRot = x3 * cosY - z3 * sinY;
-                const zRot = x3 * sinY + z3 * cosY;
-                const yRot = y3 * cosX - zRot * sinX;
-                const zFinal = y3 * sinX + zRot * cosX;
-
-                const scale = perspective / (perspective + zFinal);
-                this.projX = center.x + xRot * scale;
-                this.projY = center.y + yRot * scale;
-                this.drawSize = Math.max(0.8, this.baseSize * scale * 1.1 + Math.sin(this.phase) * 0.4);
-                const pulse = (Math.sin(this.phase) + 1) * 0.35;
-                this.opacity = Math.max(0.08, Math.min(0.45, this.alpha * Math.max(0.7, scale) + pulse * 0.12));
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.fillStyle = `rgba(108, 92, 231, ${this.opacity})`;
-                ctx.arc(this.projX, this.projY, this.drawSize, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        const initParticles = () => {
-            particles.length = 0;
-            for (let i = 0; i < particleCount; i++) {
-                particles.push(new Particle());
-            }
-        };
-
-        const drawConnections = () => {
-            ctx.strokeStyle = 'rgba(108, 92, 231, 0.06)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < particleCount; i++) {
-                for (let j = i + 1; j < particleCount; j++) {
-                    const p1 = particles[i];
-                    const p2 = particles[j];
-                    const dx = p1.projX - p2.projX;
-                    const dy = p1.projY - p2.projY;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 105) {
-                        ctx.globalAlpha = (1 - dist / 105) * 0.18;
-                        ctx.beginPath();
-                        ctx.moveTo(p1.projX, p1.projY);
-                        ctx.lineTo(p2.projX, p2.projY);
-                        ctx.stroke();
-                    }
+            function drawStars(){
+                ctx.save();
+                ctx.globalCompositeOperation = 'screen';
+                for (let i=0;i<stars.length;i++){
+                    const s = stars[i];
+                    const a = 0.25 + 0.75*Math.abs(Math.sin(t*s.twinkleSpeed + s.phase));
+                    ctx.fillStyle = `rgba(255,255,255,${Math.min(0.85, a)})`;
+                    ctx.fillRect(s.x, s.y, s.size, s.size);
+                    const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size*6);
+                    g.addColorStop(0, `rgba(255,255,255,${a*0.12})`);
+                    g.addColorStop(1, 'rgba(255,255,255,0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size*6, 0, Math.PI*2);
+                    ctx.fill();
                 }
+                ctx.restore();
             }
-            ctx.globalAlpha = 1;
-        };
 
-        const render = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            rotation.x += (rotation.targetX - rotation.x) * 0.08;
-            rotation.y += (rotation.targetY - rotation.y) * 0.08;
+            function fade(t){
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
 
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            drawConnections();
-            requestAnimationFrame(render);
-        };
+            function hash(x,y,z){
+                return Math.abs(Math.sin(x*127.1 + y*311.7 + z*74.7) * 43758.5453123) % 1;
+            }
 
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.clientX;
-            mouse.y = event.clientY;
-            rotation.targetX = (event.clientY - center.y) / center.y * 0.18;
-            rotation.targetY = (event.clientX - center.x) / center.x * 0.18;
-        });
+            function noise(x, y, z=0) {
+                const xi = Math.floor(x);
+                const yi = Math.floor(y);
+                const xf = x - xi;
+                const yf = y - yi;
 
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            initParticles();
-        });
+                const a = hash(xi, yi, z);
+                const b = hash(xi + 1, yi, z);
+                const c = hash(xi, yi + 1, z);
+                const d = hash(xi + 1, yi + 1, z);
 
-        resizeCanvas();
-        initParticles();
-        render();
+                const u = fade(xf);
+                const v = fade(yf);
+                const lerp = (a, b, t) => a + (b - a) * t;
+                return lerp(lerp(a,b,u), lerp(c,d,u), v) * 2 - 1;
+            }
+
+            function fractal(x, y, z, octaves=3){
+                let sum = 0;
+                let amp = 1;
+                let freq = 1;
+                let max = 0;
+                for (let i=0;i<octaves;i++){
+                    sum += noise(x*freq, y*freq, z*freq) * amp;
+                    max += amp;
+                    amp *= 0.5;
+                    freq *= 2;
+                }
+                return sum / max;
+            }
+
+            function drawRibbon(hue, baseY, height, speed, offset, alpha, wave){
+                const pts = 48;
+                const amp = height;
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                ctx.lineTo(0, baseY);
+                for (let i=0;i<=pts;i++){
+                    const x = (i/pts)*w;
+                    const px = x/w;
+                    const warp = fractal(px*2.4 + offset*0.7, baseY*0.008 + t*0.00085, offset) * amp * 0.18;
+                    const y = baseY
+                        + Math.sin(px * Math.PI * 2 * wave + t * speed * 0.78 + offset) * amp * 0.32
+                        + Math.cos(px * Math.PI * 4 + t * speed * 0.42 + offset * 1.4) * amp * 0.2
+                        + warp;
+                    ctx.lineTo(x, y);
+                }
+                ctx.lineTo(w, h);
+                ctx.closePath();
+
+                const grad = ctx.createLinearGradient(0, baseY - amp, 0, baseY + amp * 1.4);
+                grad.addColorStop(0, `hsla(${hue},92%,62%,0)`);
+                grad.addColorStop(0.15, `hsla(${hue+8},95%,56%,${alpha*0.22})`);
+                grad.addColorStop(0.45, `hsla(${hue+24},98%,48%,${alpha*0.92})`);
+                grad.addColorStop(0.75, `hsla(${hue+58},95%,44%,${alpha*0.24})`);
+                grad.addColorStop(1, `hsla(${hue+85},95%,38%,0)`);
+
+                ctx.fillStyle = grad;
+                ctx.filter = 'blur(16px)';
+                ctx.fill();
+                ctx.filter = 'none';
+                ctx.restore();
+            }
+
+            function drawGlow() {
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                const glow = ctx.createRadialGradient(w*0.22, h*0.22, 0, w*0.22, h*0.22, h*0.56);
+                glow.addColorStop(0, 'rgba(102, 159, 255, 0.28)');
+                glow.addColorStop(0.35, 'rgba(123, 78, 255, 0.15)');
+                glow.addColorStop(1, 'rgba(64, 35, 100, 0)');
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, w, h);
+                ctx.restore();
+            }
+
+            function render(){
+                ctx.clearRect(0, 0, w, h);
+                const sky = ctx.createLinearGradient(0, 0, 0, h);
+                sky.addColorStop(0, 'rgba(5, 14, 24, 0.08)');
+                sky.addColorStop(0.18, 'rgba(12, 20, 44, 0.25)');
+                sky.addColorStop(0.52, 'rgba(18, 36, 78, 0.32)');
+                sky.addColorStop(1, 'rgba(3, 8, 14, 0.97)');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, w, h);
+
+                drawGlow();
+                drawRibbon(268, h*0.20, Math.max(110, h*0.15), 0.00185, 0.0, 0.94, 1.08);
+                drawRibbon(286, h*0.40, Math.max(140, h*0.12), 0.0013, 1.9, 0.72, 0.89);
+                drawRibbon(235, h*0.55, Math.max(96, h*0.08), 0.00072, 4.1, 0.44, 0.96);
+                drawStars();
+
+                if (mountain) {
+                    const px = Math.sin(t*0.0019) * Math.min(18, w*0.008);
+                    const py = Math.cos(t*0.00095) * Math.min(10, h*0.005);
+                    mountain.style.transform = `translate3d(${px}px, ${py}px, 0)`;
+                }
+
+                t += 1;
+                requestAnimationFrame(render);
+            }
+
+            render();
+        })();
     </script>
 </body>
 </html>
