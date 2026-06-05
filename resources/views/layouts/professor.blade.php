@@ -52,7 +52,7 @@
     body.theme-light .brand{border-bottom-color:#f3f4f6}
     body.theme-light .nav a, body.theme-light .nav button{color:#475569}
     body.theme-light .nav a .nav-icon, body.theme-light .nav button .nav-icon{background:#f3f4f6;border-color:#e5e7eb}
-    body.theme-light .nav a:hover, body.theme-light .nav button:hover{background:#f0f1f3;color:#0f172a}
+    body.theme-light .nav a:not(.active):hover, body.theme-light .nav button:not(.active):hover{background:#f0f1f3;color:#0f172a}
     body.theme-light .nav a.active, body.theme-light .nav button.active{background:linear-gradient(135deg,#7c3aed,.8,#2563eb);color:#fff}
     body.theme-light .logout-wrap{border-top-color:#f3f4f6}
     body.theme-light .profile-card{background:#f3f0ff;border-color:#ede9fe}
@@ -290,31 +290,34 @@
     }
 
     body.theme-ash{
-      --bg:#e2e8f0;
-      --glass:rgba(220,225,235,.75);
-      --glass-strong:rgba(235,240,245,.85);
-      --stroke:rgba(15,23,42,.12);
-      --stroke-soft:rgba(15,23,42,.08);
-      --text:#0f172a;
-      --muted:#475569;
-      --faint:#64748b;
-      --purple:#6d28d9;
-      --blue:#2563eb;
+      --bg:#111827;
+      --glass:rgba(17,24,39,.6);
+      --glass-strong:rgba(17,24,39,.75);
+      --stroke:rgba(255,255,255,.06);
+      --stroke-soft:rgba(255,255,255,.03);
+      --text:#f8fafc;
+      --muted:#9ca3af;
+      --faint:#6b7280;
+      --purple:#9ca3af; /* neutralize purple to light gray for ash */
+      --blue:#9ca3af;
       --green:#16a34a;
       --red:#b91c1c;
       --yellow:#ca8a04;
       --cyan:#0c4a6e;
-      background:linear-gradient(135deg,#f8fafc 0%,#cbd5e1 100%);
+      background:#949494;
     }
-    body.theme-ash .sidebar{background:rgba(226,232,240,.80);border-right-color:rgba(15,23,42,.12)}
-    body.theme-ash .brand{border-bottom-color:rgba(15,23,42,.1)}
-    body.theme-ash .nav a, body.theme-ash .nav button{color:#475569}
-    body.theme-ash .nav a .nav-icon, body.theme-ash .nav button .nav-icon{background:rgba(15,23,42,.08);border-color:rgba(15,23,42,.1)}
-    body.theme-ash .nav a:hover, body.theme-ash .nav button:hover{background:rgba(15,23,42,.1);color:#0f172a}
-    body.theme-ash .nav a.active, body.theme-ash .nav button.active{background:linear-gradient(135deg,#6d28d9,.8,#2563eb);color:#fff}
-    body.theme-ash .logout-wrap{border-top-color:rgba(15,23,42,.1)}
-    body.theme-ash .profile-card{background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2)}
-    body.theme-ash .avatar{background:linear-gradient(145deg,#a78bfa,#6d28d9)}
+    body.theme-ash .sidebar{background:#0b1115;border-right-color:rgba(255,255,255,.04)}
+    body.theme-ash .brand{border-bottom-color:rgba(255,255,255,.04)}
+    body.theme-ash .nav a, body.theme-ash .nav button{color:rgba(248,250,252,.86) !important}
+    body.theme-ash .nav a .nav-icon, body.theme-ash .nav button .nav-icon{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.04)}
+    body.theme-ash .nav a:not(.active):hover, body.theme-ash .nav button:not(.active):hover{background:rgba(255,255,255,.03);color:var(--text)}
+    body.theme-ash .nav a.active, body.theme-ash .nav button.active{background:linear-gradient(135deg,#d1d5db,.8,#e5e7eb);color:#0f1724}
+    body.theme-ash .logout-wrap{border-top-color:rgba(255,255,255,.04)}
+    body.theme-ash .logout{background:transparent !important;color:#ff8298 !important;border-color:transparent !important}
+    body.theme-ash .logout:hover{background:rgba(255,61,114,.12) !important}
+    body.theme-ash .logout-icon{color:#ff8298 !important}
+    body.theme-ash .profile-card{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.03)}
+    body.theme-ash .avatar{background:linear-gradient(145deg,#9ca3af,#6b7280)}
     /* Override bright white inline styles for ash theme */
     body.theme-ash [style*="background:rgba(255,255,255,.92)"],
     body.theme-ash [style*="background:rgba(255,255,255,.98)"],
@@ -327,8 +330,8 @@
     body.theme-ash [style*="background:rgba(255,255,255,.04)"],
     body.theme-ash [style*="background:rgba(255,255,255,.08)"]
     {
-      background: rgba(220,225,235,.6) !important;
-      color: #0f172a !important;
+      background: rgba(17,24,39,.95) !important;
+      color: #f8fafc !important;
     }
     body.theme-ash [style*="color:rgba(255,255,255,.5)"],
     body.theme-ash [style*="color:rgba(255,255,255,.6)"],
@@ -336,7 +339,12 @@
     body.theme-ash [style*="color:rgba(255,255,255,.75)"],
     body.theme-ash [style*="color:rgba(255,255,255,.8)"]
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
+    }
+    body.theme-ash .topbar,
+    body.theme-ash .topbar .clock-pill,
+    body.theme-ash .topbar .clock-date {
+      color: var(--text) !important;
     }
     /* Ash theme text color fixes */
     body.theme-ash,
@@ -357,7 +365,7 @@
     body.theme-ash a,
     body.theme-ash button
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .glass h3,
     body.theme-ash .glass h2,
@@ -367,7 +375,7 @@
     body.theme-ash .card h1,
     body.theme-ash .section-head h3
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .glass span,
     body.theme-ash .glass p,
@@ -384,32 +392,32 @@
     body.theme-ash .card td,
     body.theme-ash .card th
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .stat-body span,
     body.theme-ash .stat-body strong,
     body.theme-ash .stat-body b
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .activity b,
     body.theme-ash .activity p,
     body.theme-ash .activity span,
     body.theme-ash .activity small
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .mini b,
     body.theme-ash .mini strong
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .row-item,
     body.theme-ash .row-item span,
     body.theme-ash .row-item b,
     body.theme-ash .row-item strong
     {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     /* Ash theme search bar styling */
     body.theme-ash .search-bar {
@@ -466,11 +474,11 @@
 
     body.theme-ash .table-wrap,
     body.theme-ash .att-table-wrap {
-      background: rgba(255,255,255,.08) !important;
-      border: 1px solid rgba(255,255,255,.18) !important;
+      background: rgba(255,255,255,.02) !important;
+      border: 1px solid rgba(255,255,255,.04) !important;
       border-radius: var(--radius-md);
       overflow: hidden;
-      backdrop-filter: blur(14px);
+      backdrop-filter: none;
     }
 
     body.theme-ash .table-wrap table,
@@ -515,36 +523,73 @@
       backdrop-filter: blur(12px) !important;
     }
 
-    /* Ash theme button styling */
+    /* Ash theme button styling: neutral light buttons, dark-gray primary */
     body.theme-ash .btn,
     body.theme-ash .btn.slim,
     body.theme-ash button,
     body.theme-ash a.btn {
-      background: linear-gradient(135deg, rgba(109,40,217,.35), rgba(37,99,235,.25)) !important;
-      border: 1.5px solid rgba(109,40,217,.5) !important;
+      background: #f3f4f6 !important;
+      border: 1.5px solid #d1d5db !important;
       color: #0f172a !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 4px 12px rgba(109,40,217,.15) !important;
+      box-shadow: none !important;
       font-weight: 700;
     }
     body.theme-ash .btn:hover,
     body.theme-ash .btn.slim:hover,
     body.theme-ash button:hover,
     body.theme-ash a.btn:hover {
-      background: linear-gradient(135deg, rgba(109,40,217,.5), rgba(37,99,235,.4)) !important;
-      border-color: rgba(109,40,217,.7) !important;
+      background: #e6e7e9 !important;
+      border-color: #c7c9cc !important;
       color: #0f172a !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 6px 16px rgba(109,40,217,.25) !important;
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
     body.theme-ash .btn.primary {
-      background: linear-gradient(135deg,#6d28d9,.8,#2563eb) !important;
+      background: linear-gradient(135deg,#374151,.8,#4b5563) !important;
       border-color: transparent !important;
       color: #fff !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 6px 18px rgba(80,94,255,.35) !important;
+      box-shadow: 0 6px 18px rgba(55,65,81,.12) !important;
     }
     body.theme-ash .btn.primary:hover {
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 10px 28px rgba(80,94,255,.45) !important;
+      box-shadow: 0 10px 28px rgba(55,65,81,.16) !important;
       transform: translateY(-2px);
+    }
+
+    /* Force card/glass/panel backgrounds to dark in ash mode */
+    body.theme-ash .glass,
+    body.theme-ash .card,
+    body.theme-ash .page-card,
+    body.theme-ash .settings-container,
+    body.theme-ash .info-item,
+    body.theme-ash .row-item,
+    body.theme-ash .theme-option,
+    body.theme-ash .theme-option.selected,
+    body.theme-ash .theme-option:hover
+    {
+      background: rgba(255,255,255,.02) !important;
+      border: 1px solid rgba(255,255,255,.04) !important;
+      color: var(--text) !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    /* Inputs and form controls in ash should be dark/neutral */
+    body.theme-ash input,
+    body.theme-ash textarea,
+    body.theme-ash select,
+    body.theme-ash .form-control,
+    body.theme-ash .settings-input,
+    body.theme-ash .search-bar,
+    body.theme-ash .filter-input
+    {
+      background: rgba(255,255,255,.03) !important;
+      border: 1px solid rgba(255,255,255,.04) !important;
+      color: var(--text) !important;
+    }
+
+    body.theme-ash input::placeholder,
+    body.theme-ash .search-bar::placeholder
+    {
+      color: var(--muted) !important;
     }
     body.theme-ash .btn.danger {
       background: linear-gradient(135deg, rgba(220,38,38,.3), rgba(239,68,68,.2)) !important;
@@ -581,7 +626,7 @@
     body.theme-dark .brand{border-bottom-color:rgba(255,255,255,.09)}
     body.theme-dark .nav a, body.theme-dark .nav button{color:rgba(234,240,255,.75)}
     body.theme-dark .nav a .nav-icon, body.theme-dark .nav button .nav-icon{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.09)}
-    body.theme-dark .nav a:hover, body.theme-dark .nav button:hover{background:rgba(255,255,255,.08);color:var(--text)}
+    body.theme-dark .nav a:not(.active):hover, body.theme-dark .nav button:not(.active):hover{background:rgba(255,255,255,.08);color:var(--text)}
     body.theme-dark .nav a.active, body.theme-dark .nav button.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff}
     body.theme-dark .logout-wrap{border-top-color:rgba(255,255,255,.08)}
     body.theme-dark .profile-card{background:rgba(139,92,255,.12);border-color:rgba(139,92,255,.25)}
@@ -607,7 +652,7 @@
     body.theme-onyx .brand{border-bottom-color:rgba(255,255,255,.08)}
     body.theme-onyx .nav a, body.theme-onyx .nav button{color:rgba(244,247,255,.8)}
     body.theme-onyx .nav a .nav-icon, body.theme-onyx .nav button .nav-icon{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
-    body.theme-onyx .nav a:hover, body.theme-onyx .nav button:hover{background:rgba(255,255,255,.08);color:var(--text)}
+    body.theme-onyx .nav a:not(.active):hover, body.theme-onyx .nav button:not(.active):hover{background:rgba(255,255,255,.08);color:var(--text)}
     body.theme-onyx .nav a.active, body.theme-onyx .nav button.active{background:linear-gradient(135deg,rgba(124,58,237,.8),rgba(96,165,250,.5));color:#fff}
     body.theme-onyx .logout-wrap{border-top-color:rgba(255,255,255,.08)}
     body.theme-onyx .profile-card{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)}
@@ -662,15 +707,16 @@
 
     .glass{
       border:1px solid var(--stroke);
-      background:rgba(255,255,255,.18);
-      backdrop-filter:var(--blur);
-      -webkit-backdrop-filter:var(--blur);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.18),var(--shadow);
+      background: var(--glass);
+      background-image: none;
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
       position:relative;overflow:hidden;
     }
     .glass::after{
       content:"";position:absolute;top:0;left:0;right:0;height:1px;
-      background:linear-gradient(90deg,transparent,rgba(255,255,255,.55) 50%,transparent);
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.06) 50%,transparent);
       pointer-events:none;
     }
 
@@ -728,16 +774,49 @@
       width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:16px;
       background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);flex-shrink:0;transition:.2s ease;
     }
-    .nav a:hover, .nav button:hover{background:rgba(255,255,255,.08);color:var(--text);transform:translateX(3px)}
-    .nav a:hover .nav-icon, .nav button:hover .nav-icon{background:rgba(255,255,255,.12)}
+    .nav a:not(.active):hover, .nav button:not(.active):hover{background:rgba(255,255,255,.08);color:var(--text);transform:translateX(3px)}
+    .nav a:not(.active):hover .nav-icon, .nav button:not(.active):hover .nav-icon{background:rgba(255,255,255,.12)}
     .nav a.active, .nav button.active{background:linear-gradient(135deg,rgba(139,92,255,.88),rgba(67,166,255,.5));color:#fff;box-shadow:0 12px 28px rgba(80,94,255,.26),inset 0 1px 0 rgba(255,255,255,.28)}
-    .nav a.active .nav-icon, .nav button.active .nav-icon{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.25)}
+    .nav a.active .nav-icon, .nav button.active .nav-icon{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.25);color:#0f172a}
+
+    /* Restore light-mode purple accents (force overrides) */
+    body.theme-light .nav a.active, body.theme-light .nav button.active {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      box-shadow: 0 12px 28px rgba(80,94,255,.26) !important;
+    }
+
+    body.theme-light .theme-option.selected {
+      border-color: #6b73ff !important;
+      border-width: 2px !important;
+      background: rgba(107,115,255,.12) !important;
+    }
+
+    body.theme-light .avatar {
+      background: linear-gradient(145deg,#a78bfa,#7c3aed) !important;
+    }
+
+    body.theme-light .section-head h3 {
+      color: #7c3aed !important;
+    }
+
+    body.theme-light .chip.active {
+      background: linear-gradient(135deg,#7c3aed,.85,#2563eb,.45) !important;
+      color: #fff !important;
+      box-shadow: 0 8px 24px rgba(80,94,255,.2) !important;
+    }
 
     .logout-wrap{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:12px;flex-shrink:0}
     .logout{
-      border:1px solid transparent;background:transparent;color:#ff8298;
+      border:1px solid transparent;background:transparent;color:#ff8298 !important;
       padding:11px 12px;border-radius:15px;display:flex;align-items:center;gap:11px;
       font-weight:700;cursor:pointer;transition:.2s ease;font-size:14px;font-family:var(--font);width:100%;
+    }
+    body.theme-light .logout,
+    body.theme-ash .logout,
+    body.theme-dark .logout,
+    body.theme-onyx .logout {
+      color:#ff8298 !important;
     }
     .logout:hover{background:rgba(255,61,114,.12);border-color:rgba(255,61,114,.2);transform:scale(1.02)}
     .logout-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:transparent}
@@ -778,10 +857,10 @@
     }
     
     body.theme-ash .page-title h2 {
-      color: #0f172a !important;
+      color: var(--text) !important;
     }
     body.theme-ash .page-title p {
-      color: #475569 !important;
+      color: var(--text) !important;
     }
     
     body.theme-dark .page-title h2 {
@@ -867,10 +946,11 @@
     .mini-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:10px;flex-shrink:0}
 
     .report-btn{
-      width:100%;height:40px;border:0;border-radius:13px;color:white;font-weight:800;cursor:pointer;
-      font-size:13px;letter-spacing:.02em;font-family:var(--font);
+      display:inline-flex;align-items:center;justify-content:center;
+      min-width:180px;height:44px;border:0;border-radius:13px;color:white;font-weight:800;cursor:pointer;
+      font-size:13px;letter-spacing:.02em;font-family:var(--font);text-decoration:none;
       background:linear-gradient(135deg,rgba(139,92,255,.85),rgba(67,166,255,.45));
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(80,94,255,.2);transition:.2s ease;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(80,94,255,.2);transition:.2s ease;padding:0 18px;
     }
     .report-btn:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 14px 32px rgba(80,94,255,.35)}
 
@@ -959,7 +1039,7 @@
     body.theme-ash .quick strong,
     body.theme-ash .quick span
     {
-      color: #0f172a !important;
+      color: #f8fafc !important;
     }
 
     @media(max-width:1200px){
@@ -1015,14 +1095,15 @@
           <span class="nav-icon">▦</span>
           <span>Scan QR</span>
         </a>
+        <a href="{{ route('professor.qr-codes') }}" class="{{ request()->routeIs('professor.qr-codes*') ? 'active' : '' }}">
+          <span class="nav-icon">🔲</span>
+          <span>QR Codes</span>
+        </a>
         <a href="{{ route('professor.attendance-records') }}" class="{{ request()->routeIs('professor.attendance-records*') ? 'active' : '' }}">
           <span class="nav-icon">📋</span>
           <span>Attendance Records</span>
         </a>
-        <a href="{{ route('professor.schedules') }}" class="{{ request()->routeIs('professor.schedules') ? 'active' : '' }}">
-          <span class="nav-icon">📅</span>
-          <span>Schedules</span>
-        </a>
+        {{-- Schedules removed from professor sidebar (not used) --}}
         <a href="{{ route('professor.students') }}" class="{{ request()->routeIs('professor.students') ? 'active' : '' }}">
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>
@@ -1105,11 +1186,40 @@
     (function() {
       const themeKey = 'qr_attendance_theme';
       const themeNames = ['light','ash','dark','onyx'];
-      const defaultTheme = 'light';
-      const current = themeNames.includes(localStorage.getItem(themeKey)) ? localStorage.getItem(themeKey) : defaultTheme;
+      const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
+      const stored = localStorage.getItem(themeKey);
+      const current = themeNames.includes(serverTheme)
+        ? serverTheme
+        : themeNames.includes(stored)
+          ? stored
+          : 'light';
+      if (serverTheme && themeNames.includes(serverTheme)) {
+        try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
+      }
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);
     })();
   </script>
+  <style>
+    /* Final override: keep active nav tab purple on hover */
+    .nav a.active:hover, .nav button.active:hover,
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+    body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+    body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
+    .nav a.active:hover .nav-icon, .nav button.active:hover .nav-icon,
+    body.theme-light .nav a.active:hover .nav-icon, body.theme-light .nav button.active:hover .nav-icon,
+    body.theme-ash .nav a.active:hover .nav-icon, body.theme-ash .nav button.active:hover .nav-icon,
+    body.theme-dark .nav a.active:hover .nav-icon, body.theme-dark .nav button.active:hover .nav-icon,
+    body.theme-onyx .nav a.active:hover .nav-icon, body.theme-onyx .nav button.active:hover .nav-icon {
+      background: rgba(255,255,255,.2) !important;
+      color: #fff !important;
+      border-color: rgba(255,255,255,.25) !important;
+    }
+  </style>
 </body>
 </html>

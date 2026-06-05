@@ -97,7 +97,12 @@
               </td>
               <td>{{ $record->minutes_late ?? '—' }}</td>
               <td>
-                <a href="#" class="btn slim" onclick="alert('Edit attendance feature coming soon')">Edit</a>
+                <select class="status-select" data-original-status="{{ $record->status ?? 'present' }}" data-update-url="{{ route('professor.attendance-records.update', $record) }}" data-recorded-at="{{ $record->recorded_at->format('Y-m-d H:i:s') }}" data-minutes-late="{{ $record->minutes_late ?? 0 }}" aria-label="Update attendance status for {{ $record->student->name ?? 'student' }}">
+                  <option value="present" {{ ($record->status ?? 'present') === 'present' ? 'selected' : '' }}>Present</option>
+                  <option value="late" {{ $record->status === 'late' ? 'selected' : '' }}>Late</option>
+                  <option value="absent" {{ $record->status === 'absent' ? 'selected' : '' }}>Absent</option>
+                  <option value="excused" {{ $record->status === 'excused' ? 'selected' : '' }}>Excused</option>
+                </select>
               </td>
             </tr>
           @empty
@@ -118,6 +123,68 @@
     </div>
   @endif
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = '{{ csrf_token() }}';
+    document.querySelectorAll('.status-select').forEach(function (select) {
+      const statusCell = select.closest('tr')?.querySelector('td:nth-child(4) .pill');
+      const minutesCell = select.closest('tr')?.querySelector('td:nth-child(5)');
+      select.addEventListener('change', function () {
+        const selectedStatus = this.value;
+        const url = this.dataset.updateUrl;
+        const recordedAt = this.dataset.recordedAt;
+        const minutesLate = Number(this.dataset.minutesLate || 0);
+        const originalStatus = this.dataset.originalStatus || 'present';
+
+        if (!url) {
+          return;
+        }
+
+        this.disabled = true;
+        this.style.opacity = '0.7';
+
+        fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            status: selectedStatus,
+            recorded_at: recordedAt,
+            minutes_late: selectedStatus === 'late' ? minutesLate : 0
+          })
+        })
+          .then(async function (response) {
+            const data = await response.json().catch(function () { return {}; });
+            if (response.ok) {
+              if (statusCell) {
+                statusCell.textContent = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+                statusCell.className = 'pill ' + selectedStatus;
+              }
+              if (minutesCell) {
+                minutesCell.textContent = selectedStatus === 'late' ? (minutesLate + ' min') : '—';
+              }
+              select.dataset.originalStatus = selectedStatus;
+              return;
+            }
+            alert(data.error || data.message || 'Unable to update attendance status.');
+            select.value = originalStatus;
+          })
+          .catch(function () {
+            alert('Unable to update attendance status due to network error.');
+            select.value = originalStatus;
+          })
+          .finally(function () {
+            select.disabled = false;
+            select.style.opacity = '';
+          });
+      });
+    });
+  });
+</script>
 
 <style>
   .glass-table {
@@ -150,6 +217,31 @@
     text-align: left;
     border-bottom: 1px solid rgba(255,255,255,.07);
     vertical-align: middle;
+  }
+  /* Theme-aware select styling: default to theme text, override for light theme */
+  .status-select {
+    min-width: 140px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: var(--text); /* use theme text color by default */
+    font-size: 13px;
+    width: 100%;
+    max-width: 180px;
+  }
+  body.theme-light .status-select {
+    color: #0b1220; /* dark text for light theme */
+  }
+  /* Ensure option text is readable when native dropdown opens (most browsers use light backgrounds) */
+  .status-select option {
+    color: #0b1220 !important;
+    background: #ffffff;
+  }
+  .status-select:focus {
+    outline: none;
+    border-color: rgba(73, 184, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(73, 184, 255, 0.15);
   }
   
   th {

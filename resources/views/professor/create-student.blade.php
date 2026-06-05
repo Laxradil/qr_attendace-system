@@ -1,0 +1,135 @@
+@extends('layouts.professor')
+
+@section('title', 'Create Student - QR Attendance')
+@section('header', 'Create Student')
+@section('subheader', 'Add a new student account (created by professor).')
+
+@section('content')
+<style>
+  .form-grid{
+    display:grid;
+    gap:16px;
+  }
+  .form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .form-group label{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.01em;
+    color:var(--text);
+    text-transform:uppercase;
+  }
+  .form-group input{
+    padding:12px 14px;
+    border-radius:var(--radius-md);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,12,30,.58);
+    color:var(--text);
+    font-size:13px;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .form-group input:focus{
+    outline:none;
+    border-color:rgba(143,91,255,.5);
+    box-shadow:inset 0 0 0 2px rgba(143,91,255,.1),0 0 16px rgba(143,91,255,.2);
+  }
+  .form-group input::placeholder{
+    color:rgba(255,255,255,.3);
+  }
+  .form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width: 760px){
+    .form-row{
+      grid-template-columns:1fr;
+    }
+  }
+  .form-actions{
+    display:flex;
+    gap:12px;
+    margin-top:24px;
+  }
+</style>
+
+<div class="glass-table glass" style="padding:32px;border-radius:16px;overflow:hidden;box-shadow:0 6px 30px rgba(2,6,23,0.45)">
+  <form action="{{ route('professor.users.store') }}" method="POST" class="form-grid">
+    @csrf
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Full Name *</label>
+        <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="Enter full name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="Enter email address" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="username">Username *</label>
+        <input type="text" id="username" name="username" value="{{ old('username') }}" placeholder="Enter username" required>
+      </div>
+      <div class="form-group">
+        <label for="student_id">Student ID</label>
+        <input type="text" id="student_id" name="student_id" value="{{ old('student_id') }}" placeholder="Optional - for students only">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group" id="section-group">
+        <label for="section">Section <span id="section-label-note">(required)</span></label>
+        <input type="text" id="section" name="section" value="{{ old('section') }}" placeholder="Enter section (e.g. A1)" required>
+      </div>
+      <div class="form-group">
+        <!-- placeholder for second column -->
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="password">Password *</label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
+      </div>
+      <div class="form-group">
+        <label for="password_confirmation">Confirm Password *</label>
+        <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Confirm password" required>
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top:32px">
+      <button type="submit" class="btn primary">✓ Create Student</button>
+      <a href="{{ route('professor.students') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  /* Light theme solid overrides */
+  body.theme-light .form-group label {
+    color: #000000;
+  }
+  
+  body.theme-light .form-group input {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #000000;
+  }
+  
+  body.theme-light .form-group input:focus {
+    border-color: #8b5cff;
+    box-shadow: inset 0 0 0 2px rgba(139, 92, 255, 0.1), 0 0 16px rgba(139, 92, 255, 0.1);
+  }
+  
+  body.theme-light .form-group input::placeholder {
+    color: #9ca3af;
+  }
+</style>
+
+@endsection

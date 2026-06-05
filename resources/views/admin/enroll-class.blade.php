@@ -185,6 +185,7 @@
             <span class="pill-soft">Enroll Mode</span>
         </div>
 
+        @if (Route::has('admin.classes.enroll.store'))
         <form action="{{ route('admin.classes.enroll.store', $classe) }}" method="POST" class="form-grid">
             @csrf
 
@@ -205,6 +206,14 @@
                 <a href="{{ route('admin.classes') }}" class="btn">Back to Classes</a>
             </div>
         </form>
+        @else
+        <div class="panel">
+            <p>Class enrollment via admin is disabled. Use the professor module to manage enrollments.</p>
+            <div class="actions" style="margin-top:12px">
+                <a href="{{ route('admin.classes') }}" class="btn">Back to Classes</a>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 @endsection
