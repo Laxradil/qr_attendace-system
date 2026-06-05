@@ -25,12 +25,12 @@ class LoginController extends Controller
                 
                 // Check user role and redirect accordingly
                 $user = Auth::user();
-                if ($user->isAdmin()) {
+                if ($user->role === 'admin') {
                     return redirect()->intended('/admin');
-                } elseif ($user->isProfessor()) {
+                } elseif ($user->role === 'professor') {
                     return redirect()->intended('/professor');
-                } elseif ($user->isStudent()) {
-                    return redirect()->intended('/student/dashboard');
+                } elseif ($user->role === 'student') {
+                    return redirect()->intended('/student/dashboard')->with('show_welcome_back', true);
                 }
                 return redirect()->intended('/dashboard');
             }
@@ -71,7 +71,7 @@ class LoginController extends Controller
             ]);
 
             Auth::login($user);
-            return redirect('/student/dashboard');
+            return redirect('/student/dashboard')->with('show_welcome_back', true);
         } catch (\Illuminate\Database\QueryException | \PDOException $exception) {
             return back()->withErrors([
                 'email' => 'Unable to register: database driver not installed or connection is misconfigured. Please verify DB_CONNECTION and your PHP database extensions.',

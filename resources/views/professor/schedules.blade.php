@@ -9,6 +9,94 @@
   .search-bar {
     display: none !important;
   }
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+    margin-top: 12px;
+  }
+  .schedule-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 32px;
+    padding: 28px;
+    box-shadow: 0 24px 60px rgba(15,23,42,.12);
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  body.theme-ash .glass.schedule-card,
+  body.theme-dark .glass.schedule-card,
+  body.theme-onyx .glass.schedule-card {
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
+    background-image: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
+    background-color: #111827 !important;
+    border-color: rgba(255,255,255,.08) !important;
+    box-shadow: 0 24px 60px rgba(0,0,0,.24) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+  }
+  .schedule-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 72px rgba(15,23,42,.16);
+  }
+  .schedule-card h3 {
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: #ffffff;
+  }
+  .schedule-card .room-code {
+    font-size: 14px;
+    font-weight: 900;
+    font-family: var(--mono);
+    color: rgba(255,255,255,.9);
+  }
+  .schedule-card .schedule-meta {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .schedule-card .schedule-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #ffffff;
+  }
+  .schedule-card .schedule-meta-item span,
+  .schedule-card .schedule-meta-item strong {
+    color: #ffffff;
+  }
+  .schedule-card .schedule-meta-item .icon {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(255,255,255,.08);
+    color: inherit;
+    font-size: 12px;
+  }
+  body.theme-ash .schedule-card {
+    background: linear-gradient(135deg, rgba(113,100,242,.95), rgba(59,130,246,.4));
+    border-color: rgba(255,255,255,.14);
+  }
+  body.theme-light .schedule-card {
+    background: linear-gradient(135deg, rgba(139,92,255,.12), rgba(67,166,255,.1));
+    border-color: rgba(148,163,184,.2);
+    box-shadow: 0 16px 40px rgba(15,23,42,.08);
+  }
+  /* Ensure text inside schedule cards is readable in light theme */
+  body.theme-light .schedule-card h3,
+  body.theme-light .schedule-card .room-code,
+  body.theme-light .schedule-card .schedule-meta-item,
+  body.theme-light .schedule-card .schedule-meta-item span,
+  body.theme-light .schedule-card .schedule-meta-item strong {
+    color: #0f172a !important;
+  }
+  body.theme-light .schedule-card .schedule-meta-item .icon { background: rgba(15,23,42,.06) !important; color: #0f172a !important }
 </style>
 <!-- Overview stats -->
 <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px;margin-top:6px">
@@ -43,40 +131,38 @@
 </div>
 
 <!-- Schedule cards grid -->
-<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+<div class="schedule-grid">
   @forelse($schedules ?? [] as $schedule)
-    <div class="glass schedule-card" data-class-id="{{ $schedule->class_id ?? '' }}" id="schedule-{{ $schedule->id }}" style="border-radius:var(--radius-lg);padding:20px;transition:.3s ease">
+    <div class="glass schedule-card" data-class-id="{{ $schedule->class_id ?? '' }}" id="schedule-{{ $schedule->id }}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
-          <h3 style="font-size:15px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px">
-            {{ $schedule->subject_name ?? 'Class' }}
-          </h3>
+          <h3>{{ $schedule->subject_name ?? 'Class' }}</h3>
+          <div style="font-size:13px;color:var(--muted);letter-spacing:.02em">{{ $schedule->subject_code ?? 'N/A' }}</div>
         </div>
-        <div style="font-size:26px;font-weight:900;font-family:var(--mono);color:rgba(139,92,255,.9);letter-spacing:-.03em">
-          {{ $schedule->room ?? 'F-107' }}
-        </div>
+        <div class="room-code">{{ $schedule->room ?? 'F-107' }}</div>
       </div>
       
-      <div style="display:grid;gap:8px;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-          <div style="width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;background:rgba(255,255,255,.08)">📅</div>
-          <span style="color:var(--muted)">Days:</span> <strong style="color:var(--text)">{{ $schedule->days ?? 'N/A' }}</strong>
+      <div class="schedule-meta">
+        <div class="schedule-meta-item">
+          <div class="icon">📅</div>
+          <span>Days:</span> <strong>{{ $schedule->days ?? 'N/A' }}</strong>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-          <div style="width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;background:rgba(255,255,255,.08)">🕓</div>
-          <span style="color:var(--muted)">Time:</span> <strong style="color:var(--text);font-family:var(--mono)">{{ $schedule->start_time ?? 'N/A' }} - {{ $schedule->end_time ?? 'N/A' }}</strong>
+        <div class="schedule-meta-item">
+          <div class="icon">🕓</div>
+          <span>Time:</span>
+          <strong style="font-family:var(--mono)">
+            {{ $schedule->start_time ? \Carbon\Carbon::parse($schedule->start_time)->format('g:i A') : 'N/A' }}
+            -
+            {{ $schedule->end_time ? \Carbon\Carbon::parse($schedule->end_time)->format('g:i A') : 'N/A' }}
+          </strong>
         </div>
         @if($schedule->professor)
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-            <div style="width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;background:rgba(255,255,255,.08)">👨‍🏫</div>
-            <span style="color:var(--muted)">Professor:</span> <strong style="color:var(--text)">{{ $schedule->professor }}</strong>
+          <div class="schedule-meta-item">
+            <div class="icon">👨‍🏫</div>
+            <span>Professor:</span> <strong>{{ $schedule->professor }}</strong>
           </div>
         @endif
       </div>
-
-      <a href="#" style="color:rgba(139,92,255,.9);font-size:12.5px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
-       
-      </a>
     </div>
   @empty
     <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">

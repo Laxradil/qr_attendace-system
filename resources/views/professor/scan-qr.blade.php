@@ -620,6 +620,53 @@
     
     detectQR();
   }
+
+  // Hardware scanner input handling: submit automatically on Enter or newline
+  qrInput.addEventListener('keydown', function (e) {
+    if (currentMode !== 'hardware') return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const value = qrInput.value.trim();
+      if (!value) return;
+
+      // If the QR contains a student attendance JSON payload, try to select student and class
+      try {
+        const decoded = JSON.parse(value);
+        if (decoded && decoded.type === 'student_attendance' && decoded.student_id) {
+          const studentId = decoded.student_id.toString();
+          if (studentSelect.querySelector(`option[value="${studentId}"]`)) {
+            studentSelect.value = studentId;
+          } else {
+            // remember pending value; will be set after class select change
+            studentSelect.dataset.pendingValue = studentId;
+          }
+
+          const inferred = findBestClassForStudent(studentId);
+          if (inferred) {
+            classSelect.value = inferred;
+            classSelect.dispatchEvent(new Event('change'));
+          }
+        }
+      } catch (err) {
+        // not JSON — proceed
+      }
+
+      const form = qrInput.closest('form');
+      if (form) form.submit();
+    }
+  });
+
+  // Some scanners paste the value with a trailing newline instead of sending Enter key events.
+  qrInput.addEventListener('input', function () {
+    if (currentMode !== 'hardware') return;
+    const v = qrInput.value;
+    if (!v) return;
+    if (v.endsWith('\n') || v.endsWith('\r')) {
+      qrInput.value = v.replace(/[\r\n]+$/g, '').trim();
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+      qrInput.dispatchEvent(enterEvent);
+    }
+  });
 </script>
 
 @endsection

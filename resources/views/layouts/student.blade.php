@@ -1,22 +1,3 @@
-    <style>
-    body.theme-light .sidebar {
-      background: #fff !important;
-      border-right: 1px solid #e5e7eb !important;
-      box-shadow: 0 14px 50px rgba(15,23,42,.06) !important;
-      background-image: none !important;
-      color: #23272f !important;
-    }
-    body.theme-light .sidebar .nav a,
-    body.theme-light .sidebar .nav button {
-      color: #23272f !important;
-    }
-    body.theme-light .sidebar .nav a .nav-icon,
-    body.theme-light .sidebar .nav button .nav-icon {
-      color: #7c3aed !important;
-      background: #ede9fe !important;
-      border-color: #c7d2fe !important;
-    }
-    </style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,7 +75,7 @@
       color: #222 !important;
     }
     body.theme-light .nav a .nav-icon, body.theme-light .nav button .nav-icon {
-      color: #5b21b6 !important;
+      color: #4f46e5 !important;
       background: #ede9fe !important;
       border-color: #c7d2fe !important;
     }
@@ -762,12 +743,12 @@
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;overflow:hidden}
+    html,body{height:100%;overflow-x:hidden;}
     body{
-      height:100vh;
+      min-height:100vh;
       font-family:var(--font);
       color:var(--text);
-      overflow:hidden;
+      overflow-x:hidden;
       background:
         radial-gradient(ellipse at 14% 12%, rgba(102,75,255,.26) 0%, transparent 38%),
         radial-gradient(ellipse at 85% 8%, rgba(39,103,214,.18) 0%, transparent 32%),
@@ -1274,7 +1255,7 @@
     }
   </style>
 </head>
-<body @if((auth()->user()->theme ?? 'light') === 'light') class="theme-light" @elseif((auth()->user()->theme ?? '') === 'ash') class="theme-ash" @elseif((auth()->user()->theme ?? '') === 'dark') class="theme-dark" @elseif((auth()->user()->theme ?? '') === 'onyx') class="theme-onyx" @endif>
+<body @if((auth()->user()->theme ?? 'light') === 'light') class="theme-light" @elseif((auth()->user()->theme ?? '') === 'ash') class="theme-ash" @elseif((auth()->user()->theme ?? '') === 'dark') class="theme-dark" @elseif((auth()->user()->theme ?? '') === 'onyx') class="theme-onyx" @endif data-show-welcome-back="{{ session('show_welcome_back') ? '1' : '0' }}" data-server-theme="{{ Auth::check() ? Auth::user()->theme : '' }}">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
@@ -1384,20 +1365,17 @@
       setTimeout(()=>t.remove(), 3200);
     }
 
-    // ─── QR Code Generation ───
+    // ─── QR Code Generation (robust: waits for library) ───
     function generateQR(canvasId, qrData) {
       const canvas = document.getElementById(canvasId);
       if (!canvas) {
         console.warn('Canvas not found:', canvasId);
         return;
       }
-      QRCode.toCanvas(canvas, qrData, {
-        width: 260,
-        margin: 1,
-        color: { dark: '#000000', light: '#ffffff' }
-      }, function(err){
-        if(err) {
-          console.error('QR generation error:', err);
+      console.log('generateQR called for', canvasId);
+
+      function drawPlaceholder() {
+        try {
           const ctx = canvas.getContext('2d');
           canvas.width = 260; canvas.height = 260;
           ctx.fillStyle = '#fff';
@@ -1406,21 +1384,171 @@
           ctx.font = 'bold 14px monospace';
           ctx.textAlign = 'center';
           ctx.fillText('QR CODE', 130, 130);
+        } catch (e) { /* ignore */ }
+        // Attempt server-generated SVG fallback when drawing placeholder
+        try { fetchServerSvgFallback(); } catch (e) { /* ignore */ }
+      }
+
+      function fetchServerSvgFallback() {
+        try {
+          // student endpoint is authenticated and does not require id param
+          const url = '/student/qr-code';
+          console.warn('Attempting server SVG fallback:', url);
+          fetch(url, { cache: 'no-store' }).then(res => {
+            if (!res.ok) throw new Error('Network response not ok');
+            return res.text();
+          }).then(svg => {
+            // Replace canvas with SVG container
+            const wrapper = document.createElement('div');
+            wrapper.className = 'qr-server-svg';
+            wrapper.style.width = canvas.style.width || '260px';
+            wrapper.style.height = canvas.style.height || '260px';
+            wrapper.innerHTML = svg;
+            canvas.parentNode.replaceChild(wrapper, canvas);
+            console.log('Server SVG inserted');
+          }).catch(err => {
+            console.error('Server SVG fallback failed:', err);
+          });
+        } catch (e) { console.error('Server SVG fallback exception:', e); }
+      }
+
+        function doGenerate() {
+          try {
+            if (typeof QRCode === 'undefined' || !QRCode.toCanvas) {
+              console.warn('QRCode library not available');
+              drawPlaceholder();
+              return;
+            }
+            // ensure pixel dimensions for consistent rendering
+            canvas.width = 260; canvas.height = 260;
+            const ctx = canvas.getContext('2d');
+            // Primary: draw directly to canvas
+            QRCode.toCanvas(canvas, qrData, {
+              width: canvas.width,
+              margin: 1,
+              color: { dark: '#000000', light: '#ffffff' }
+            }, function(err){
+              if(err) {
+                console.error('QR generation error (toCanvas):', err);
+                // fallback to data URL
+                tryDataURLFallback();
+                return;
+              }
+              // small delay then validate canvas not blank
+              setTimeout(()=>{
+                try {
+                  const imgData = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+                  let nonWhite = 0;
+                  for (let i=0;i<imgData.length;i+=4) {
+                    const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
+                    if (!(r===255 && g===255 && b===255)) { nonWhite++; if (nonWhite>10) break; }
+                  }
+                  if (nonWhite <= 10) {
+                      console.warn('Canvas appears blank, trying DataURL fallback');
+                        tryDataURLFallback();
+                        // also try server-side SVG fallback shortly after
+                        setTimeout(fetchServerSvgFallback, 150);
+                  }
+                } catch (e) {
+                  console.warn('Could not validate canvas pixels:', e);
+                }
+              }, 60);
+            });
+          } catch (e) {
+            console.error('QR generation exception:', e);
+            drawPlaceholder();
+          }
         }
-      });
+
+        function tryDataURLFallback() {
+          if (typeof QRCode === 'undefined' || !QRCode.toDataURL) { drawPlaceholder(); fetchServerSvgFallback(); return; }
+          QRCode.toDataURL(qrData, { width: 260, margin: 1, color: { dark: '#000000', light: '#ffffff' } }, function(err, url){
+            if (err || !url) { console.error('toDataURL fallback failed:', err); drawPlaceholder(); return; }
+            const img = new Image();
+            img.onload = function(){
+              try {
+                canvas.width = 260; canvas.height = 260;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              } catch (e) { console.error('drawImage failed:', e); drawPlaceholder(); }
+            };
+            img.onerror = function(){ console.error('Image load failed for DataURL'); drawPlaceholder(); fetchServerSvgFallback(); };
+            img.src = url;
+          });
+        }
+
+      // If library already loaded, generate now
+      if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
+        doGenerate();
+        return;
+      }
+
+      // Try to find an existing script tag
+      const existing = document.querySelector('script[data-qrcode]');
+      if (existing) {
+        if (existing.readyState === 'complete' || existing.loaded) {
+          doGenerate();
+        } else {
+          existing.addEventListener('load', doGenerate);
+          existing.addEventListener('error', drawPlaceholder);
+        }
+        return;
+      }
+
+      // Insert script tag dynamically and generate after load
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js';
+      script.async = true;
+      script.dataset.qrcode = 'true';
+      script.onload = doGenerate;
+      script.onerror = function() { drawPlaceholder(); try { fetchServerSvgFallback(); } catch (e) {} };
+      document.head.appendChild(script);
     }
 
-    setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
+    const showWelcomeBack = document.body.dataset.showWelcomeBack === '1';
+    if (showWelcomeBack) {
+      setTimeout(()=>showToast('Welcome back!','👋','#b9c4ff'), 600);
+    }
 
     // Theme switching via localStorage (matches admin/professor behavior)
     (function() {
       const themeKey = 'qr_attendance_theme';
       const themeNames = ['light','ash','dark','onyx'];
-      const defaultTheme = 'light';
-      const current = themeNames.includes(localStorage.getItem(themeKey)) ? localStorage.getItem(themeKey) : defaultTheme;
+      const serverTheme = document.body.dataset.serverTheme || null;
+      const stored = localStorage.getItem(themeKey);
+      const current = themeNames.includes(serverTheme)
+        ? serverTheme
+        : themeNames.includes(stored)
+          ? stored
+          : 'light';
+      if (serverTheme && themeNames.includes(serverTheme)) {
+        try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
+      }
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);
     })();
   </script>
+  <style>
+    /* Final override: keep active nav tab purple on hover */
+    .nav a.active:hover, .nav button.active:hover,
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+    body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+    body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
+    .nav a.active:hover .nav-icon, .nav button.active:hover .nav-icon,
+    body.theme-light .nav a.active:hover .nav-icon, body.theme-light .nav button.active:hover .nav-icon,
+    body.theme-ash .nav a.active:hover .nav-icon, body.theme-ash .nav button.active:hover .nav-icon,
+    body.theme-dark .nav a.active:hover .nav-icon, body.theme-dark .nav button.active:hover .nav-icon,
+    body.theme-onyx .nav a.active:hover .nav-icon, body.theme-onyx .nav button.active:hover .nav-icon {
+      background: rgba(255,255,255,.2) !important;
+      color: #fff !important;
+      border-color: rgba(255,255,255,.25) !important;
+    }
+  </style>
 </body>
 </html>

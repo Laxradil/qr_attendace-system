@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Classe;
 use App\Models\AttendanceRecord;
-use App\Models\DropRequest;
 use App\Models\Schedule;
 use App\Models\SystemLog;
 use App\Models\User;
@@ -130,6 +129,11 @@ class ProfessorController extends Controller
             abort(403);
         }
 
+        $request->merge([
+            'start_time' => $request->input('start_time') ? substr($request->input('start_time'), 0, 5) : null,
+            'end_time' => $request->input('end_time') ? substr($request->input('end_time'), 0, 5) : null,
+        ]);
+
         $validated = $request->validate([
             'code' => 'required|string|unique:classes,code,' . $classe->id . '|max:20',
             'name' => 'required|string|max:255',
@@ -145,7 +149,7 @@ class ProfessorController extends Controller
         $classe->update([
             'code' => $validated['code'],
             'name' => $validated['name'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
         ]);
 
         $schedule = null;
@@ -193,6 +197,33 @@ class ProfessorController extends Controller
         return redirect()->route('professor.classes')->with('success', 'Class updated successfully.');
     }
 
+    public function deleteClass(Classe $classe): RedirectResponse|JsonResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user->assignedClasses()->whereKey($classe->id)->exists()) {
+            abort(403);
+        }
+
+        $name = $classe->name;
+        $classe->delete();
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'delete_class',
+            'description' => 'Professor deleted class: ' . $name,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Class deleted successfully']);
+        }
+
+        return redirect()->route('professor.classes')->with('success', 'Class deleted successfully');
+    }
+
     public function showClass(Classe $classe): View
     {
         $this->authorize('view', $classe);
@@ -202,12 +233,12 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function scanQR(): View
+    public function scanQR(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
         $classes = $user->assignedClasses()->with(['students', 'schedules'])->get();
-        $selectedClassId = request()->query('class_id');
+        $selectedClassId = $request->query('class_id');
 
         return view('professor.scan-qr', [
             'classes' => $classes,
@@ -317,11 +348,30 @@ class ProfessorController extends Controller
                 $sessionStart = Carbon::parse($schedule->start_time, 'Asia/Manila')
                     ->setDate($recordedAtManila->year, $recordedAtManila->month, $recordedAtManila->day);
                 $lateThreshold = $sessionStart->copy()->addMinutes(15);
-                $absentThreshold = $sessionStart->copy()->addMinutes(20);
 
-                if ($recordedAtManila->greaterThanOrEqualTo($absentThreshold)) {
+                // Determine session end for absent logic. If schedule end_time is set use it, otherwise fall back
+                $sessionEnd = $sessionStart->copy();
+                if (!empty($schedule->end_time)) {
+                    try {
+                        $formatEnd = strlen($schedule->end_time) > 5 ? 'H:i:s' : 'H:i';
+                        $sessionEnd = Carbon::createFromFormat($formatEnd, $schedule->end_time, 'Asia/Manila')
+                            ->setDate($sessionStart->year, $sessionStart->month, $sessionStart->day);
+                    } catch (\Exception $e) {
+                        // keep original sessionEnd as sessionStart if parsing fails
+                        $sessionEnd = $sessionStart->copy()->addMinutes(60);
+                    }
+                } else {
+                    // fallback: assume 60-minute class if no end_time provided
+                    $sessionEnd = $sessionStart->copy()->addMinutes(60);
+                }
+
+                // Attendance rules:
+                // - Present: recorded_at <= sessionStart + 15 minutes (inclusive)
+                // - Late: recorded_at > sessionStart + 15 minutes AND recorded_at <= sessionEnd
+                // - Absent: recorded_at > sessionEnd
+                if ($recordedAtManila->greaterThan($sessionEnd)) {
                     $attendanceStatus = 'absent';
-                } elseif ($recordedAtManila->greaterThanOrEqualTo($lateThreshold)) {
+                } elseif ($recordedAtManila->greaterThan($lateThreshold)) {
                     $attendanceStatus = 'late';
                     $minutesLate = (int) $recordedAtManila->diffInMinutes($sessionStart);
                 }
@@ -364,6 +414,7 @@ class ProfessorController extends Controller
 
     private function inferClassForStudentAttendance(int $studentId): ?int
     {
+        /** @var User $user */
         $user = Auth::user();
         $classes = $user->assignedClasses()
             ->with(['students', 'schedules'])
@@ -481,13 +532,27 @@ class ProfessorController extends Controller
             }
 
             $scheduleStart = $startTime->setDate($now->year, $now->month, $now->day);
-            $absentThreshold = $scheduleStart->copy()->addMinutes(20);
-            if ($absentThreshold->greaterThan($now)) {
-                continue;
-            }
+                // Determine session end to decide when to mark absences. Prefer schedule end_time when available.
+                $sessionEnd = $scheduleStart->copy();
+                if (!empty($schedule->end_time)) {
+                    try {
+                        $formatEnd = strlen($schedule->end_time) > 5 ? 'H:i:s' : 'H:i';
+                        $sessionEnd = Carbon::createFromFormat($formatEnd, $schedule->end_time, 'Asia/Manila')
+                            ->setDate($now->year, $now->month, $now->day);
+                    } catch (\Exception $e) {
+                        $sessionEnd = $scheduleStart->copy()->addMinutes(60);
+                    }
+                } else {
+                    $sessionEnd = $scheduleStart->copy()->addMinutes(60);
+                }
 
-            if (!isset($classAbsentTimes[$schedule->class_id]) || $absentThreshold->greaterThan($classAbsentTimes[$schedule->class_id])) {
-                $classAbsentTimes[$schedule->class_id] = $absentThreshold;
+                // Only mark absent after the session end has passed
+                if ($sessionEnd->greaterThan($now)) {
+                    continue;
+                }
+
+            if (!isset($classAbsentTimes[$schedule->class_id]) || $sessionEnd->greaterThan($classAbsentTimes[$schedule->class_id])) {
+                $classAbsentTimes[$schedule->class_id] = $sessionEnd;
             }
         }
 
@@ -618,13 +683,13 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function reports(): View
+    public function reports(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
         $classes = $user->assignedClasses()->with('students')->get();
         $this->markMissingAttendanceAbsent($classes);
-        $classId = request()->query('class_id');
+        $classId = $request->query('class_id');
 
         if ($classId) {
             $classe = $classes->find($classId);
@@ -636,13 +701,13 @@ class ProfessorController extends Controller
             $attendanceSource = AttendanceRecord::whereIn('class_id', $classes->pluck('id'));
         }
 
-        $date = request('date');
+        $date = (string) $request->input('date', '');
         if ($date) {
             [$startUtc, $endUtc] = $this->getManilaDateRange($date);
             $attendanceSource->whereBetween('recorded_at', [$startUtc, $endUtc]);
         }
 
-        $search = trim(strtolower(request('search', '')));
+        $search = trim(strtolower((string) $request->input('search', '')));
         if ($search !== '') {
             $students = $students->filter(function ($student) use ($search) {
                 return str_contains(strtolower($student->name ?? ''), $search)
@@ -651,7 +716,7 @@ class ProfessorController extends Controller
             })->values();
         }
 
-        $date = request('date');
+        $date = (string) $request->input('date', '');
         if ($date) {
             $attendanceSource->whereDate('recorded_at', $date);
         }
@@ -683,7 +748,7 @@ class ProfessorController extends Controller
             ];
         });
 
-        $rangeEnd = request('date') ? Carbon::parse(request('date'), 'Asia/Manila')->endOfDay() : Carbon::now('Asia/Manila')->endOfDay();
+        $rangeEnd = $date !== '' ? Carbon::parse($date, 'Asia/Manila')->endOfDay() : Carbon::now('Asia/Manila')->endOfDay();
         $rangeStart = $rangeEnd->copy()->subDays(6)->startOfDay();
 
         $trendRecords = AttendanceRecord::whereIn('class_id', $classes->pluck('id'))
@@ -726,7 +791,7 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function students(): View
+    public function students(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
@@ -734,20 +799,169 @@ class ProfessorController extends Controller
             ->with('students')
             ->get();
 
-        $pendingRequests = [];
-        try {
-            $pendingRequests = DropRequest::whereIn('class_id', $classes->pluck('id'))
-                ->where('status', 'pending')
-                ->get()
-                ->mapWithKeys(fn (DropRequest $request) => ["{$request->class_id}_{$request->student_id}" => $request]);
-        } catch (\Exception) {
-            // Table doesn't exist yet - migration hasn't been run
-        }
+        // Provide available students list for modal "Add Student" UI
+        $availableStudents = User::where('role', 'student')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
+        // Optional class to open/scroll to when landing on the students page
+        $openClassId = $request->query('class_id');
+
+        // Drop approval flow removed: professors now perform drops directly.
         return view('professor.students', [
             'classes' => $classes,
-            'pendingRequests' => $pendingRequests,
+            'availableStudents' => $availableStudents,
+            'openClassId' => $openClassId,
         ]);
+    }
+
+    // Show create-student form for professors
+    public function createStudent(): View
+    {
+        return view('professor.create-student');
+    }
+
+    // Store a new student created by a professor. Role is enforced to 'student'.
+    public function storeStudent(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'username' => 'required|string|unique:users,username|max:255',
+            'password' => 'required|min:8|confirmed',
+            'student_id' => 'nullable|string|max:100',
+            'section' => 'required|string|max:255',
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'username' => $validated['username'],
+            'password' => bcrypt($validated['password']),
+            'role' => 'student',
+            'student_id' => $validated['student_id'] ?? null,
+            'section' => $validated['section'],
+        ]);
+
+        SystemLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'add_student',
+            'description' => 'Professor created student account: ' . $user->name,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return redirect()->route('professor.students')->with('success', 'Student account created successfully.');
+    }
+
+    // QR Code Management for Professors (moved from admin)
+    public function qrCodes(): View
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $classIds = $user->assignedClasses()->pluck('classes.id');
+
+        $students = User::where('role', 'student')
+            ->whereHas('enrolledClasses', function ($query) use ($classIds) {
+                $query->whereIn('classes.id', $classIds);
+            })
+            ->with(['enrolledClasses', 'studentQrCode'])
+            ->orderBy('name')
+            ->paginate(20, ['*'], 'students_page');
+
+        return view('professor.qr-codes-new', compact('students'));
+    }
+
+    public function downloadAllQrCodesZip()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $classIds = $user->assignedClasses()->pluck('classes.id');
+
+        $students = User::where('role', 'student')
+            ->whereHas('enrolledClasses', function ($query) use ($classIds) {
+                $query->whereIn('classes.id', $classIds);
+            })
+            ->with(['enrolledClasses', 'studentQrCode'])
+            ->orderBy('name')
+            ->get();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'qr_codes_zip_');
+
+        if ($zipPath === false) {
+            abort(500, 'Unable to create temporary archive.');
+        }
+
+        $zipFile = $zipPath . '.zip';
+        @unlink($zipPath);
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Unable to create QR code archive.');
+        }
+
+        foreach ($students as $student) {
+            $fileName = preg_replace('/[^A-Za-z0-9_-]+/', '_', trim($student->name)) ?: 'student';
+            $qrPng = $this->buildStudentQrPng($student);
+            $zip->addFromString($fileName . '-qr.png', $qrPng);
+        }
+
+        $zip->close();
+
+        return response()->download($zipFile, 'student-qr-codes.zip')->deleteFileAfterSend(true);
+    }
+
+    public function studentQrCode(User $student)
+    {
+        abort_if(!$student->isStudent(), 404);
+
+        $svg = $this->buildStudentQrSvg($student);
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
+    }
+
+    private function buildStudentQrSvg(User $student): string
+    {
+        $qrCode = \App\Models\QRCode::where('student_id', $student->id)->first();
+
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'student_email' => $student->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
+
+        return \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+            ->size(180)
+            ->margin(1)
+            ->encoding('UTF-8')
+            ->generate($qrData);
+    }
+
+    private function buildStudentQrPng(User $student): string
+    {
+        $qrCode = \App\Models\QRCode::where('student_id', $student->id)->first();
+
+        $qrData = json_encode([
+            'type' => 'student_attendance',
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'student_email' => $student->email,
+            'uuid' => $qrCode?->uuid ?? \Illuminate\Support\Str::uuid()->toString(),
+            'generated_at' => now()->toIso8601String(),
+        ]);
+
+        return \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+            ->size(300)
+            ->margin(1)
+            ->encoding('UTF-8')
+            ->generate($qrData);
     }
 
     public function submitDropRequest(Request $request): RedirectResponse
@@ -759,7 +973,7 @@ class ProfessorController extends Controller
             'class_id' => 'required|exists:classes,id',
             'student_id' => 'required|exists:users,id',
             'reason' => [
-                'required',
+                'nullable',
                 'string',
                 'max:500',
                 Rule::in([
@@ -781,40 +995,31 @@ class ProfessorController extends Controller
             return back()->with('error', 'This student is not enrolled in the selected class.');
         }
 
-        $existingRequest = DropRequest::where('class_id', $classe->id)
-            ->where('student_id', $student->id)
-            ->where('professor_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
-            ->first();
+        // Perform the drop immediately — no admin approval required.
+        DB::transaction(function () use ($classe, $student, $user, $request, $validated) {
+            $classe->students()->detach($student->id);
 
-        if ($existingRequest) {
-            return back()->with('error', 'A pending or approved drop request already exists for this student in the selected class.');
-        }
+            SystemLog::create([
+                'user_id' => $user->id,
+                'action' => 'remove_student',
+                'description' => 'Dropped ' . $student->name . ' from ' . $classe->code . ' - ' . $classe->name . ' by professor',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        });
 
-        DropRequest::create([
-            'professor_id' => $user->id,
-            'student_id' => $student->id,
-            'class_id' => $classe->id,
-            'reason' => $validated['reason'] ?? null,
-            'status' => 'pending',
-        ]);
-
-        SystemLog::create([
-            'user_id' => $user->id,
-            'action' => 'other',
-            'description' => 'Requested to drop ' . $student->name . ' from ' . $classe->code . ' - ' . $classe->name,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        return back()->with('success', 'Drop request submitted and is pending admin approval.');
+        return back()->with('success', 'Student removed from the class successfully.');
     }
 
     public function logs(): View
     {
         /** @var User $user */
         $user = Auth::user();
-        $logs = $user->logs()
+        $logs = SystemLog::with('user')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhere('action', 'add_student');
+            })
             ->latest()
             ->paginate(20);
 
@@ -842,7 +1047,7 @@ class ProfessorController extends Controller
         ]);
     }
 
-    public function updateAttendanceRecord(Request $request, AttendanceRecord $attendanceRecord): RedirectResponse
+    public function updateAttendanceRecord(Request $request, AttendanceRecord $attendanceRecord): Response|RedirectResponse|JsonResponse
     {
         /** @var User $user */
         $user = Auth::user();
@@ -872,63 +1077,180 @@ class ProfessorController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Attendance updated successfully',
+                'status' => $attendanceRecord->status,
+                'minutes_late' => $attendanceRecord->minutes_late,
+            ]);
+        }
+
         return redirect()->route('professor.attendance-records', ['class_id' => $attendanceRecord->class_id])
             ->with('success', 'Attendance updated successfully');
     }
 
     public function updateSettings(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . Auth::id(),
-            'password' => 'nullable|min:8|confirmed',
-        ]);
-
         /** @var User $user */
         $user = Auth::user();
+
+        // If only theme is being updated, validate and save theme
+        if ($request->has('theme') && !$request->has('name') && !$request->has('email')) {
+            $request->validate([
+                'theme' => 'required|in:light,ash,dark,onyx',
+            ]);
+            $user->theme = $request->input('theme');
+            $user->save();
+            return back()->with('success', 'Theme updated successfully.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:8|confirmed',
+            'theme' => 'nullable|in:light,ash,dark,onyx',
+        ]);
+
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
+            'password' => isset($validated['password']) && $validated['password'] ? bcrypt($validated['password']) : $user->password,
+            'theme' => $validated['theme'] ?? $user->theme,
         ]);
 
         return back()->with('success', 'Settings updated successfully');
     }
 
+    // Classes Management for Professors: show create form
+    public function createClass(): View
+    {
+        $professors = User::where('role', 'professor')->get();
+        return view('professor.create-class', ['professors' => $professors]);
+    }
+
+    // Store class created by professor
+    public function storeClass(Request $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'code' => 'required|string|unique:classes|max:20',
+            'room_code' => 'required|string',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'days' => 'required|array|min:1',
+            'days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'professors' => 'nullable|array|min:1',
+            'professors.*' => 'required|exists:users,id',
+        ]);
+
+        $professors = $validated['professors'] ?? [];
+
+        // Ensure current professor is primary and included
+        if (!in_array($user->id, $professors, true)) {
+            array_unshift($professors, $user->id);
+        }
+
+        $primaryProfessorId = $professors[0];
+
+        $classe = Classe::create([
+            'code' => $validated['code'],
+            'room_code' => $validated['room_code'],
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'professor_id' => $primaryProfessorId,
+        ]);
+
+        $primaryProfessor = User::findOrFail($primaryProfessorId);
+
+        $daysValue = implode(', ', $validated['days']);
+
+        Schedule::create([
+            'class_id' => $classe->id,
+            'subject_code' => $validated['code'],
+            'subject_name' => $validated['name'],
+            'professor_id' => $primaryProfessor->id,
+            'professor' => $primaryProfessor->name,
+            'days' => $daysValue,
+            'time' => \Carbon\Carbon::createFromFormat('H:i', $validated['start_time'])->format('g:i A') . ' - ' . \Carbon\Carbon::createFromFormat('H:i', $validated['end_time'])->format('g:i A'),
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'room' => $validated['room_code'],
+        ]);
+
+        // Attach professors (ensure unique)
+        $classe->professors()->attach(array_values(array_unique($professors)));
+
+        SystemLog::create([
+            'user_id' => $user->id,
+            'action' => 'create_class',
+            'description' => 'Professor created class: ' . $validated['name'] . ' with ' . count($professors) . ' professor(s)',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('professor.classes')->with('success', 'Class created successfully');
+    }
     public function addStudent(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'class_id' => 'required|exists:classes,id',
-            'student_id' => 'required|exists:users,id',
+            'student_id' => 'nullable|exists:users,id',
+            'student_ids' => 'nullable|array',
+            'student_ids.*' => 'exists:users,id',
         ]);
 
         $classe = Classe::findOrFail($validated['class_id']);
-        $student = User::findOrFail($validated['student_id']);
 
         // Verify the professor is assigned to this class
         if (!$classe->professors()->wherePivot('professor_id', Auth::id())->exists()) {
             return back()->with('error', 'You do not have permission to add students to this class');
         }
 
-        // Verify the user is a student
-        if ($student->role !== 'student') {
-            return back()->with('error', 'The provided email belongs to a user who is not a student');
+        $toAttach = [];
+
+        if (!empty($validated['student_ids']) && is_array($validated['student_ids'])) {
+            $toAttach = array_values(array_unique($validated['student_ids']));
+        } elseif (!empty($validated['student_id'])) {
+            $toAttach = [$validated['student_id']];
         }
 
-        // Check if the student is already enrolled in the class using DB
-        $exists = DB::table('class_student')
-            ->where('class_id', $classe->id)
-            ->where('student_id', $student->id)
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'The student is already enrolled in this class');
+        if (empty($toAttach)) {
+            return back()->with('error', 'No students selected');
         }
 
-        // Enroll the student
-        $classe->students()->attach($student->id);
+        $attached = 0;
+        $skipped = 0;
 
-        return back()->with('success', 'Student added to class successfully');
+        foreach ($toAttach as $studentId) {
+            $student = User::find($studentId);
+            if (!$student || $student->role !== 'student') {
+                $skipped++;
+                continue;
+            }
+
+            $exists = DB::table('class_student')
+                ->where('class_id', $classe->id)
+                ->where('student_id', $student->id)
+                ->exists();
+
+            if ($exists) {
+                $skipped++;
+                continue;
+            }
+
+            $classe->students()->attach($student->id);
+            $attached++;
+        }
+
+        $message = [];
+        if ($attached > 0) $message[] = "Added {$attached} student" . ($attached > 1 ? 's' : '') . ' successfully';
+        if ($skipped > 0) $message[] = "Skipped {$skipped} already-enrolled or invalid user";
+
+        return back()->with('success', implode('. ', $message));
     }
 
     public function updatePassword(Request $request): RedirectResponse

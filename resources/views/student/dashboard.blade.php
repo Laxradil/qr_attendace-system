@@ -7,38 +7,38 @@
 @php
   $attendanceRate = $totalRecords > 0 ? round(($totalPresent / $totalRecords) * 100) : 0;
 @endphp
-<section class="page" id="dashboard" style="display: flex; flex-direction: column; height: calc(100vh - 100px); overflow: hidden;" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
+<section class="page" id="dashboard" style="display: flex; flex-direction: column; min-height: 100%; padding-bottom: 24px;" data-student-id="{{ Auth::user()->id }}" data-student-name="{{ Auth::user()->name }}" data-student-email="{{ Auth::user()->email }}">
 
-  <div class="stats" style="margin-bottom: 20px; flex-shrink: 0;">
-    <div class="stat glass">
+  <div class="stats" style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; flex-shrink: 0;">
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
       <div class="stat-icon blue">▤</div>
       <div class="stat-body">
         <strong>{{ $classes->count() }}</strong>
         <span class="stat-label">Enrolled Classes</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
       <div class="stat-icon green">✓</div>
       <div class="stat-body">
         <strong>{{ $totalPresent }}</strong>
         <span class="stat-label">Present</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
       <div class="stat-icon yellow">◷</div>
       <div class="stat-body">
         <strong>{{ $totalLate }}</strong>
         <span class="stat-label">Late</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
       <div class="stat-icon red">✕</div>
       <div class="stat-body">
         <strong>{{ $totalAbsent }}</strong>
         <span class="stat-label">Absent</span>
       </div>
     </div>
-    <div class="stat glass">
+    <div class="stat glass" style="flex: 1 1 180px; min-width: 180px;">
       <div class="stat-icon purple">✉</div>
       <div class="stat-body">
         <strong>{{ $totalExcused ?? 0 }}</strong>
@@ -179,7 +179,7 @@
       link.click();
     }
   // Generate QR code for dashboard
-  setTimeout(function() {
+  function initStudentQR() {
     const dashboard = document.getElementById('dashboard');
     if (!dashboard) return;
 
@@ -197,9 +197,23 @@
       rateFill.style.width = `${rate}%`;
     }
 
-    generateQR('qrDashboard', qrData);
-    generateQR('qrModalCanvas', qrData);
-  }, 100);
+    const attemptGenerate = function() {
+      if (typeof generateQR === 'function') {
+        generateQR('qrDashboard', qrData);
+        generateQR('qrModalCanvas', qrData);
+      } else {
+        setTimeout(attemptGenerate, 100);
+      }
+    };
+
+    attemptGenerate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStudentQR);
+  } else {
+    initStudentQR();
+  }
 
   function openQRModal() {
     document.getElementById('qrModal').classList.add('active');

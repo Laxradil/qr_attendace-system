@@ -54,6 +54,7 @@ class User extends Authenticatable
         'student_id',
         'section',
         'is_active',
+        'theme',
     ];
 
     /**

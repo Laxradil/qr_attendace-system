@@ -23,16 +23,35 @@ class StudentController extends Controller
         /**
          * Update student profile settings.
          */
-        public function updateSettings(): \Illuminate\Http\RedirectResponse
+        public function updateSettings(\Illuminate\Http\Request $request): \Illuminate\Http\RedirectResponse
         {
+            /** @var \App\Models\User $user */
             $user = Auth::user();
-            request()->validate([
+
+            // If only theme is being updated, validate and save theme
+            if ($request->has('theme') && !$request->has('name') && !$request->has('email')) {
+                $request->validate([
+                    'theme' => 'required|in:light,dark,onyx',
+                ]);
+                $user->theme = $request->input('theme');
+                $user->save();
+                return back()->with('success', 'Theme updated successfully.');
+            }
+
+            // Otherwise update profile and optionally theme fields
+            $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+                'theme' => 'nullable|in:light,dark,onyx',
             ]);
-            $user->name = request('name');
-            $user->email = request('email');
+
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            if ($request->filled('theme')) {
+                $user->theme = $request->input('theme');
+            }
             $user->save();
+
             return back()->with('success', 'Profile updated successfully.');
         }
 

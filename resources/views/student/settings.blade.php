@@ -42,12 +42,37 @@
   .theme-option:hover { transform:translateY(-1px); border-color:rgba(255,255,255,.22); }
   .theme-option.selected { border-color:#6b73ff; box-shadow:0 0 0 2px rgba(107,115,255,.12); background:rgba(107,115,255,.12); }
   .theme-option.selected .theme-swatch { border-color:rgba(255,255,255,.95); box-shadow:0 0 0 1px rgba(255,255,255,.5); }
+  .theme-option.disabled { opacity:.45; cursor:not-allowed; position:relative; }
+  .theme-option.disabled:hover { transform:none; border-color:rgba(255,255,255,.12); }
+  .theme-option.disabled::after {
+    content:'Coming soon';
+    position:absolute;
+    right:12px;
+    top:12px;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#9ca3af;
+  }
   .theme-swatch { width:34px; height:34px; border-radius:14px; flex-shrink:0; border:1px solid rgba(148,163,184,.45); box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); }
   .theme-label { font-size:13px; font-weight:700; }
   .theme-light { background:#ffffff; }
   .theme-ash { background:#9ca3af; }
   .theme-dark { background:#1f2937; }
   .theme-onyx { background:#0f172a; }
+  .theme-side-note {
+    margin-top:12px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    color:var(--muted);
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .theme-side-note strong { color:var(--text); }
   .button-group { display: flex; gap: 10px; margin-top: 16px; }
   .settings-btn { padding: 11px 20px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: var(--text); font-size: 13px; font-family: var(--font); font-weight: 600; outline: none; cursor: pointer; transition: .2s ease; flex: 1; }
   .settings-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.24); }
@@ -59,13 +84,201 @@
   .info-value { font-weight: 700; letter-spacing: .02em; }
   .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid rgba(255,255,255,.14); }
   .pill.green { color: #4dffa0; background: rgba(24,240,139,.11); border-color: rgba(24,240,139,.2); }
+
+  .unsaved-notice,
+  body.theme-light .unsaved-notice,
+  body.theme-ash .unsaved-notice {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 2200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    max-width: 520px;
+    min-width: 360px;
+    width: auto;
+    transform: translate(-50%, 20px) scale(0.985);
+    padding: 14px 18px;
+    border-radius: 22px;
+    background: rgba(18, 20, 42, 0.95) !important;
+    border: 1px solid rgba(124,107,255,0.18) !important;
+    color: #e6eef8 !important;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 24px 60px rgba(6, 8, 22, 0.45) !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s cubic-bezier(.2,.9,.2,1), transform .22s cubic-bezier(.2,.9,.2,1);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  .unsaved-notice.show,
+  body.theme-light .unsaved-notice.show,
+  body.theme-ash .unsaved-notice.show {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    pointer-events: auto;
+  }
+
+  .unsaved-notice.success,
+  body.theme-light .unsaved-notice.success,
+  body.theme-ash .unsaved-notice.success {
+    background: rgba(24, 240, 139, 0.1) !important;
+    border: 1px solid rgba(77, 255, 160, 0.3) !important;
+  }
+
+  .unsaved-notice.success .message {
+    color: #4dffa0 !important;
+  }
+
+  .unsaved-notice.success .icon {
+    background: rgba(77, 255, 160, 0.15) !important;
+    color: #4dffa0 !important;
+  }
+
+  .unsaved-notice .notice-copy,
+  body.theme-light .unsaved-notice .notice-copy,
+  body.theme-ash .unsaved-notice .notice-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .unsaved-notice .message,
+  body.theme-light .unsaved-notice .message,
+  body.theme-ash .unsaved-notice .message {
+    color: #e6eef8 !important;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    display: block;
+  }
+
+  .unsaved-notice .icon,
+  body.theme-light .unsaved-notice .icon,
+  body.theme-ash .unsaved-notice .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .unsaved-notice button,
+  body.theme-light .unsaved-notice button,
+  body.theme-ash .unsaved-notice button {
+    all: unset;
+    appearance: none;
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    background: linear-gradient(180deg, #7c6bff, #5d4bf2) !important;
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 34px rgba(92,76,255,0.22);
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    text-align: center;
+  }
+
+  .unsaved-notice button:hover,
+  body.theme-light .unsaved-notice button:hover,
+  body.theme-ash .unsaved-notice button:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 16px 38px rgba(92,76,255,0.26);
+  }
+
+  .unsaved-notice .btn-reset,
+  body.theme-light .unsaved-notice .btn-reset,
+  body.theme-ash .unsaved-notice .btn-reset {
+    all: unset;
+    appearance: none;
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    background: rgba(255,255,255,0.08) !important;
+    color: #e6eef8 !important;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: transform .12s ease, background .12s ease;
+    text-align: center;
+  }
+
+  .unsaved-notice .btn-reset:hover,
+  body.theme-light .unsaved-notice .btn-reset:hover,
+  body.theme-ash .unsaved-notice .btn-reset:hover {
+    background: rgba(255,255,255,0.14) !important;
+  }
+
+  .unsaved-notice .actions,
+  body.theme-light .unsaved-notice .actions,
+  body.theme-ash .unsaved-notice .actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .unsaved-notice.success .actions {
+    display: none;
+  }
+
+  .unsaved-notice button::after,
+  body.theme-light .unsaved-notice button::after,
+  body.theme-ash .unsaved-notice button::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border-radius: 999px;
+    border: 2px solid rgba(124,107,255,0.14);
+    pointer-events: none;
+    opacity: 0.92;
+  }
+
+  .unsaved-notice .actions { display: inline-flex; align-items: center; }
+  .unsaved-notice .message { display: inline-block; }
 </style>
+
+<div class="unsaved-notice" id="settings-warning" role="alert" aria-live="assertive" hidden>
+  <div class="notice-copy">
+    <span class="message">Careful — you have unsaved changes!</span>
+  </div>
+  <div class="actions">
+    <button type="button" id="unsaved-save-action">Save changes</button>
+    <button type="button" id="unsaved-reset-action" class="btn-reset">Discard</button>
+  </div>
+</div>
 
 <div class="settings-container">
   <!-- Profile Settings -->
   <div class="settings-section">
     <h3>Profile Settings</h3>
-    <form action="{{ route('student.settings.update') ?? '#' }}" method="POST" class="form-group">
+    <form id="profile-settings-form" action="{{ route('student.settings.update') ?? '#' }}" method="POST" class="form-group">
       @csrf
       @method('PUT')
       <!-- Full Name -->
@@ -92,6 +305,7 @@
       </div>
 
       @php $theme = old('theme', $user->theme ?? 'light'); @endphp
+      @php $theme = $theme === 'ash' ? 'light' : $theme; @endphp
       <div>
         <label class="label">Theme</label>
         <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
@@ -100,7 +314,7 @@
             <span class="theme-swatch theme-light"></span>
             <span class="theme-label">Light</span>
           </button>
-          <button type="button" class="theme-option {{ $theme === 'ash' ? 'selected' : '' }}" data-theme="ash">
+          <button type="button" class="theme-option disabled" data-theme="ash" disabled aria-disabled="true" title="Theme coming soon - bayad muna">
             <span class="theme-swatch theme-ash"></span>
             <span class="theme-label">Ash</span>
           </button>
@@ -113,15 +327,178 @@
             <span class="theme-label">Onyx</span>
           </button>
         </div>
-        <div class="form-note">Choose between Light, Ash, Dark and Onyx.</div>
+        <div class="theme-side-note">
+          <span>ℹ️</span>
+          <div><strong>Theme coming soon</strong> - bayad muna</div>
+        </div>
+        <div class="form-note">Choose between Light, Dark and Onyx. Ash is not available yet.</div>
       </div>
     </form>
+
+    <form id="theme-save-form" action="{{ route('student.settings.update') }}" method="POST" style="display:none;margin-top:12px">
+      @csrf
+      @method('PUT')
+      <input type="hidden" name="theme" id="theme-only-input" value="{{ $theme }}">
+      <button type="submit" id="theme-save-btn" class="settings-btn primary">Save Theme</button>
+    </form>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const themeKey = 'qr_attendance_theme';
+      const themeInput = document.getElementById('theme-input');
+      const themeOnlyInput = document.getElementById('theme-only-input');
+      const themeButtons = document.querySelectorAll('.theme-option');
+      const themeSaveForm = document.getElementById('theme-save-form');
+      const profileSettingsForm = document.getElementById('profile-settings-form');
+      const passwordSettingsForm = document.getElementById('password-settings-form');
+      const warningBox = document.getElementById('settings-warning');
+      let unsavedSettings = false;
+      let warningTimeout = null;
+      let activeForm = null;
+      let themeChanged = false;
+
+      if (!themeInput || !themeButtons.length) return;
+
+      const applyTheme = function (theme) {
+        const validThemes = ['light','dark','onyx'];
+        const activeTheme = validThemes.includes(theme) ? theme : 'dark';
+        document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
+        document.body.classList.add('theme-' + activeTheme);
+        themeInput.value = activeTheme;
+        if (themeOnlyInput) themeOnlyInput.value = activeTheme;
+        themeButtons.forEach(function (option) {
+          option.classList.toggle('selected', option.dataset.theme === activeTheme);
+        });
+        return activeTheme;
+      };
+
+      const savedTheme = localStorage.getItem(themeKey) || themeInput.value;
+      const currentTheme = applyTheme(savedTheme);
+      localStorage.setItem(themeKey, currentTheme);
+
+      const showUnsavedWarning = function (message) {
+        if (!warningBox) return;
+        warningBox.hidden = false;
+        warningBox.classList.add('show');
+        warningBox.querySelector('.message').textContent = message;
+        clearTimeout(warningTimeout);
+        warningTimeout = setTimeout(function () {
+          if (!unsavedSettings) {
+            warningBox.classList.remove('show');
+          }
+        }, 4200);
+        bindWarningActions();
+      };
+
+      const hideUnsavedWarning = function () {
+        if (!warningBox) return;
+        warningBox.classList.remove('show');
+      };
+
+      const bindWarningActions = function () {
+        const saveButton = document.getElementById('unsaved-save-action');
+        if (saveButton && !saveButton.dataset.bound) {
+          saveButton.dataset.bound = 'true';
+          saveButton.addEventListener('click', function () {
+            if (!warningBox) return;
+            warningBox.classList.remove('show');
+            warningBox.classList.add('success');
+            warningBox.querySelector('.message').textContent = 'Saving changes...';
+            warningBox.classList.add('show');
+            unsavedSettings = false;
+            localStorage.setItem('settings_saved', 'true');
+            if (activeForm) {
+              activeForm.submit();
+            } else if (profileSettingsForm) {
+              profileSettingsForm.submit();
+            }
+          });
+        }
+
+        const resetButton = document.getElementById('unsaved-reset-action');
+        if (resetButton && !resetButton.dataset.bound) {
+          resetButton.dataset.bound = 'true';
+          resetButton.addEventListener('click', function () {
+            if (activeForm && activeForm !== themeSaveForm) {
+              activeForm.reset();
+            }
+            if (themeSaveForm) {
+              themeSaveForm.style.display = 'none';
+            }
+            if (themeChanged) {
+              applyTheme(savedTheme);
+              localStorage.setItem(themeKey, savedTheme);
+            }
+            unsavedSettings = false;
+            activeForm = null;
+            themeChanged = false;
+            hideUnsavedWarning();
+          });
+        }
+      };
+
+      if (localStorage.getItem('settings_saved') === 'true') {
+        localStorage.removeItem('settings_saved');
+        if (warningBox) {
+          warningBox.classList.add('success', 'show');
+          warningBox.querySelector('.message').textContent = 'Changes saved successfully! ✓';
+          setTimeout(function () {
+            warningBox.classList.remove('show', 'success');
+          }, 2500);
+        }
+      }
+
+      const markUnsaved = function (form, themeOnly = false) {
+        unsavedSettings = true;
+        activeForm = form;
+        themeChanged = themeOnly;
+        if (themeSaveForm) {
+          themeSaveForm.style.display = themeOnly ? '' : 'none';
+        }
+        showUnsavedWarning('Careful — you have unsaved changes!');
+      };
+
+      themeButtons.forEach(function (button) {
+        if (button.disabled) {
+          return;
+        }
+        button.addEventListener('click', function () {
+          const theme = button.dataset.theme;
+          const selectedTheme = applyTheme(theme);
+          localStorage.setItem(themeKey, selectedTheme);
+          if (themeSaveForm) {
+            themeSaveForm.style.display = '';
+          }
+          markUnsaved(themeSaveForm, true);
+        });
+      });
+
+      [profileSettingsForm, passwordSettingsForm].filter(Boolean).forEach(function (form) {
+        form.addEventListener('input', function () {
+          markUnsaved(form);
+        });
+        form.addEventListener('change', function () {
+          markUnsaved(form);
+        });
+        form.addEventListener('submit', function () {
+          unsavedSettings = false;
+          hideUnsavedWarning();
+          if (themeSaveForm) {
+            themeSaveForm.style.display = 'none';
+          }
+          activeForm = null;
+          themeChanged = false;
+        });
+      });
+    });
+  </script>
+
   <div class="settings-divider"></div>
   <!-- Change Password Section -->
   <div class="settings-section">
     <h3>Change Password</h3>
-    <form action="{{ route('student.settings.password') ?? '#' }}" method="POST" class="form-group">
+    <form id="password-settings-form" action="{{ route('student.settings.password') ?? '#' }}" method="POST" class="form-group">
       @csrf
       @method('PUT')
       <!-- New Password -->
@@ -299,7 +676,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     const themeKey = 'qr_attendance_theme';
     const themeInput = document.getElementById('theme-input');
+    const themeOnlyInput = document.getElementById('theme-only-input');
     const themeButtons = document.querySelectorAll('.theme-option');
+    const themeSaveForm = document.getElementById('theme-save-form');
     if (!themeInput || !themeButtons.length) return;
 
     const applyTheme = function (theme) {
@@ -308,13 +687,14 @@
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + activeTheme);
       themeInput.value = activeTheme;
+      if (themeOnlyInput) themeOnlyInput.value = activeTheme;
       themeButtons.forEach(function (option) {
         option.classList.toggle('selected', option.dataset.theme === activeTheme);
       });
       return activeTheme;
     };
 
-    const savedTheme = localStorage.getItem(themeKey);
+    const savedTheme = localStorage.getItem(themeKey) || themeInput.value;
     const currentTheme = applyTheme(savedTheme);
     localStorage.setItem(themeKey, currentTheme);
 
@@ -323,6 +703,8 @@
         const theme = button.dataset.theme;
         const selectedTheme = applyTheme(theme);
         localStorage.setItem(themeKey, selectedTheme);
+        // show save button/form
+        if (themeSaveForm) themeSaveForm.style.display = '';
       });
     });
   });

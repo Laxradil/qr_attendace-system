@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'QR Attendance System')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+        <script src="{{ asset('js/app.js') }}" defer></script>
+    @endif
     <style>
         :root {
             --navy: #0d0c1d;
@@ -312,12 +317,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M12 4.354L9 8.269M12 4.354l3 3.915M9 12a4 4 0 118 0m-8 4h8m-4-8v8"></path>
                         </svg>
                         <span>Users</span>
-                    </a>
-                    <a href="{{ route('admin.professors') }}" class="sidebar-item {{ request()->routeIs('admin.professors') ? 'active' : '' }}">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.14 3.14a6 6 0 00-8.488 8.488l-3.14 3.14M9 9a6 6 0 018.488 8.488l3.14 3.14M9 9l3 3m-3-3l-3 3"></path>
-                        </svg>
-                        <span>Professors</span>
                     </a>
                     <a href="{{ route('admin.students') }}" class="sidebar-item {{ request()->routeIs('admin.students') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

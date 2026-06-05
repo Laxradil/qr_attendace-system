@@ -39,7 +39,6 @@
                 <label class="fl" for="status">Status</label>
                 <select id="status" name="status" class="fi">
                     <option value="present" {{ old('status', $record->status) === 'present' ? 'selected' : '' }}>Present</option>
-                    <option value="late" {{ old('status', $record->status) === 'late' ? 'selected' : '' }}>Late</option>
                     <option value="absent" {{ old('status', $record->status) === 'absent' ? 'selected' : '' }}>Absent</option>
                     <option value="excused" {{ old('status', $record->status) === 'excused' ? 'selected' : '' }}>Excused</option>
                 </select>
@@ -48,11 +47,6 @@
             <div>
                 <label class="fl" for="recorded_at">Time Stamp</label>
                 <input id="recorded_at" type="datetime-local" name="recorded_at" value="{{ old('recorded_at', optional($record->recorded_at)->tz('UTC')->setTimezone('Asia/Manila')->format('Y-m-d\\TH:i')) }}" class="fi">
-            </div>
-
-            <div>
-                <label class="fl" for="minutes_late">Minutes Late</label>
-                <input id="minutes_late" type="number" min="0" name="minutes_late" value="{{ old('minutes_late', $record->minutes_late) }}" class="fi">
             </div>
 
             <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">

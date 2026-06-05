@@ -7,6 +7,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
+      /* Final override: keep active nav tab purple on hover */
+      .nav a.active:hover, .nav button.active:hover,
+      body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+      body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+      body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+      body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+        background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+        color: #fff !important;
+        transform: none !important;
+      }
+      .nav a.active:hover .nav-icon, .nav button.active:hover .nav-icon,
+      body.theme-light .nav a.active:hover .nav-icon, body.theme-light .nav button.active:hover .nav-icon,
+      body.theme-ash .nav a.active:hover .nav-icon, body.theme-ash .nav button.active:hover .nav-icon,
+      body.theme-dark .nav a.active:hover .nav-icon, body.theme-dark .nav button.active:hover .nav-icon,
+      body.theme-onyx .nav a.active:hover .nav-icon, body.theme-onyx .nav button.active:hover .nav-icon {
+        background: rgba(255,255,255,.2) !important;
+        color: #fff !important;
+        border-color: rgba(255,255,255,.25) !important;
+      }
     :root{
       --bg:#090818;
       --panel:#13122a;
@@ -168,6 +187,21 @@
     body.theme-light .section-head h3 {
       color: #7c3aed !important;
     }
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
+    /* Stronger selector to prevent generic :hover from overriding active tab styles */
+    .nav a.active:hover, .nav button.active:hover,
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+    body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+    body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
 
     body.theme-ash{
       --bg:#e2e8f0;
@@ -241,13 +275,13 @@
 
     html, body{
       height:100%;
-      overflow:hidden;
+      overflow-x:hidden;
     }
     body{
-      height:100vh;
+      min-height:100vh;
       font-family:var(--font);
       color:var(--text);
-      overflow:hidden;
+      overflow-x:hidden;
       background:
         radial-gradient(ellipse at 14% 12%, rgba(108,92,231,.16) 0%, transparent 38%),
         radial-gradient(ellipse at 85% 8%, rgba(9,132,227,.12) 0%, transparent 32%),
@@ -783,10 +817,6 @@
           <span class="nav-icon">👥</span>
           <span>Users</span>
         </a>
-        <a href="{{ route('admin.professors') }}" class="nav-link {{ request()->routeIs('admin.professors') ? 'active' : '' }}">
-          <span class="nav-icon">🎓</span>
-          <span>Professors</span>
-        </a>
         <a href="{{ route('admin.students') }}" class="nav-link {{ request()->routeIs('admin.students') ? 'active' : '' }}">
           <span class="nav-icon">🧑‍🎓</span>
           <span>Students</span>
@@ -803,11 +833,7 @@
           <span class="nav-icon">📋</span>
           <span>Attendance</span>
         </a>
-        <a href="{{ route('admin.drop-requests') }}" class="nav-link {{ request()->routeIs('admin.drop-requests*') ? 'active' : '' }}">
-          <span class="nav-icon">⇩</span>
-          <span>Drop Requests</span>
-          <span class="nav-badge">{{ App\Models\DropRequest::where('status', 'pending')->count() }}</span>
-        </a>
+        <!-- Drop Requests removed: professors handle drops directly -->
         <a href="{{ route('admin.logs') }}" class="nav-link {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
           <span class="nav-icon">☷</span>
           <span>System Logs</span>
@@ -911,10 +937,40 @@
     (function() {
       const themeKey = 'qr_attendance_theme';
       const themeNames = ['light','ash','dark','onyx'];
-      const defaultTheme = 'dark';
-      const current = themeNames.includes(localStorage.getItem(themeKey)) ? localStorage.getItem(themeKey) : defaultTheme;
+      const serverTheme = @json(Auth::check() ? Auth::user()->theme : null);
+      const stored = localStorage.getItem(themeKey);
+      const current = themeNames.includes(serverTheme)
+        ? serverTheme
+        : themeNames.includes(stored)
+          ? stored
+          : 'dark';
+      if (serverTheme && themeNames.includes(serverTheme)) {
+        try { localStorage.setItem(themeKey, serverTheme); } catch (e) {}
+      }
       document.body.classList.remove('theme-light','theme-ash','theme-dark','theme-onyx');
       document.body.classList.add('theme-' + current);
-    })();  </script>
+    })();
+  </script>
+  <style>
+    /* Final override: keep active nav tab purple on hover */
+    .nav a.active:hover, .nav button.active:hover,
+    body.theme-light .nav a.active:hover, body.theme-light .nav button.active:hover,
+    body.theme-ash .nav a.active:hover, body.theme-ash .nav button.active:hover,
+    body.theme-dark .nav a.active:hover, body.theme-dark .nav button.active:hover,
+    body.theme-onyx .nav a.active:hover, body.theme-onyx .nav button.active:hover {
+      background: linear-gradient(135deg,#7c3aed,.8,#2563eb) !important;
+      color: #fff !important;
+      transform: none !important;
+    }
+    .nav a.active:hover .nav-icon, .nav button.active:hover .nav-icon,
+    body.theme-light .nav a.active:hover .nav-icon, body.theme-light .nav button.active:hover .nav-icon,
+    body.theme-ash .nav a.active:hover .nav-icon, body.theme-ash .nav button.active:hover .nav-icon,
+    body.theme-dark .nav a.active:hover .nav-icon, body.theme-dark .nav button.active:hover .nav-icon,
+    body.theme-onyx .nav a.active:hover .nav-icon, body.theme-onyx .nav button.active:hover .nav-icon {
+      background: rgba(255,255,255,.2) !important;
+      color: #fff !important;
+      border-color: rgba(255,255,255,.25) !important;
+    }
+  </style>
 </body>
 </html>

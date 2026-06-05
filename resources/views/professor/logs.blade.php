@@ -15,8 +15,8 @@
         align-items:center;
         gap:8px;
         border:1px solid rgba(139,92,255,.45);
-        background:rgba(139,92,255,.08);
-        color:#0f172a;
+        background:rgba(139,92,255,.16);
+        color:#f8fafc;
         border-radius:999px;
         padding:10px 18px;
         font-weight:700;
@@ -28,7 +28,7 @@
     }
     .chip:hover{
         transform:translateY(-1px);
-        background:rgba(139,92,255,.16);
+        background:rgba(139,92,255,.24);
         border-color:rgba(139,92,255,.7);
     }
     .chip.active{
@@ -40,19 +40,21 @@
     .logs-actions{display:flex;gap:9px;margin-left:auto;flex-wrap:wrap}
     .action-btn{
         display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.15);
-        background:rgba(255,255,255,.08);color:#fff;border-radius:13px;padding:9px 14px;
+        background:rgba(255,255,255,.12);color:#fff;border-radius:13px;padding:9px 14px;
         font-weight:700;cursor:pointer;transition:.2s ease;font-size:13px;font-family:var(--font);
     }
-    .action-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.24)}
+    .action-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.28)}
     .search-bar{display:flex !important;}
     
     .logs-table-wrap{
-        background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);
+        background:linear-gradient(180deg, rgba(19, 25, 44, .92), rgba(16, 22, 40, .88));
+        border:1px solid rgba(255,255,255,.12);
         border-radius:22px;overflow:hidden;margin-bottom:14px;
+        box-shadow:0 18px 50px rgba(0,0,0,.28);
     }
     .logs-table-wrap table{width:100%;border-collapse:collapse}
     .logs-table-wrap th{
-        background:rgba(255,255,255,.05);color:var(--faint);font-size:11px;letter-spacing:.12em;
+        background:rgba(255,255,255,.085);color:#f8fafc;font-size:11px;letter-spacing:.12em;
         text-transform:uppercase;font-weight:700;position:sticky;top:0;backdrop-filter:blur(8px);
         padding:14px 15px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle;
     }
@@ -92,6 +94,14 @@
     .td-mono{font-family:var(--mono);font-size:12px;color:var(--muted)}
     .log-desc{font-size:13px;color:#e8eeff}
     .log-desc.muted{color:var(--muted)}
+
+    .logs-toolbar{
+        padding:12px 14px;
+        border:1px solid rgba(255,255,255,.10);
+        border-radius:18px;
+        background:linear-gradient(180deg, rgba(20,26,44,.70), rgba(17,22,38,.60));
+        box-shadow:0 12px 30px rgba(0,0,0,.18);
+    }
 </style>
 
 <style>
@@ -223,6 +233,7 @@
                         @php
                             $actionLower = strtolower($log->action ?? 'event');
                             if (str_contains($actionLower, 'student')) $badgeClass = 'add-student';
+                            elseif (str_contains($actionLower, 'add') || str_contains($actionLower, 'create')) $badgeClass = 'add-user';
                             elseif (str_contains($actionLower, 'update')) $badgeClass = 'update-user';
                             elseif (str_contains($actionLower, 'scan')) $badgeClass = 'scan-qr';
                             elseif (str_contains($actionLower, 'attendance')) $badgeClass = 'attendance-record';
@@ -247,9 +258,6 @@
 
 <div class="logs-footer">
     <span>Showing {{ $logs->firstItem() ?? 0 }} to {{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }} logs</span>
-    <div class="pager">
-        {{ $logs->links() }}
-    </div>
 </div>
 
 <script>
