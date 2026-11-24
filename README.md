@@ -1,91 +1,108 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# QR Attendance System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+QR Attendance System is a Laravel application for managing classes, student enrollment, QR-based check-ins, attendance records, schedules, and role-based administration.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Separate dashboards for administrators, professors, and students
+- Class and student management
+- Personal QR codes for student attendance
+- Attendance recording and report views
+- Class schedules and professor assignments
+- Role-based authorization and account settings
+- PostgreSQL/Supabase and SQLite database support
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Technology
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Laravel 12
+- PostgreSQL or SQLite
+- Vite 7
+- Tailwind CSS 4
+- PHP GD extension for QR image generation
 
-## Supabase Setup
+## Quick start
 
-This project is configured to use **Supabase PostgreSQL Session Pooler** as the shared database for the team.
+### Windows / Laragon / XAMPP
 
-### For Team Members
-
-1. Pull the latest code from `branch_pelep`
-2. Copy `.env.example` to `.env`
-3. Get the Supabase Session Pooler credentials from your team lead and fill in:
-   - `DB_HOST`: Your pooler host (e.g., `region.pooler.supabase.com`)
-   - `DB_PORT`: `5432`
-   - `DB_DATABASE`: `postgres`
-   - `DB_USERNAME`: `postgres.your-project-id` (full username with project ID suffix)
-   - `DB_PASSWORD`: Your Supabase database password
-4. Run migrations (one time only, shared database):
-   ```bash
-   php artisan config:clear
-   php artisan migrate --force
+1. Install PHP 8.2+, Composer, Node.js 20+, and a database driver.
+2. Create the environment file:
+   ```powershell
+   Copy-Item .env.example .env
    ```
-5. Ensure you have PostgreSQL PHP driver enabled: `php --ri pdo_pgsql`
+3. Create and configure SQLite:
+   ```powershell
+   New-Item -ItemType File database/database.sqlite -Force
+   php artisan key:generate
+   php artisan migrate --seed
+   ```
+4. Install dependencies and build assets:
+   ```powershell
+   composer install
+   npm install
+   npm run build
+   ```
+5. Start the application:
+   ```powershell
+   php artisan serve
+   ```
 
-> If you are running this app locally with XAMPP or a non-Supabase database, make sure `DB_CONNECTION` matches your local driver (for example `mysql`) and that the corresponding PHP extension is enabled.
+Open `http://127.0.0.1:8000`.
 
-### Connection Details
+### PostgreSQL or Supabase
 
-Use the **Session Pooler** connection from Supabase (not the direct host):
-- Location: Supabase Project Settings > Database > Connection Pooling > Session mode
-- Pooler hostname format: `region.pooler.supabase.com`
-- Note: Username must include the full format: `postgres.project-id`
+Set `DB_CONNECTION=pgsql` and provide `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, and `DB_SSLMODE` in `.env`, then run:
 
-The configuration uses individual connection fields (no DB_URL) to work with the pooler correctly.
-> PHP 8.5 note: This project currently patches `nesbot/carbon` to maintain compatibility with `DatePeriod::getIterator(): Iterator`. If you update dependencies later, verify that Carbon remains compatible with PHP 8.5.
-## Learning Laravel
+```powershell
+php artisan config:clear
+php artisan migrate --seed
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+For Supabase, use the Session Pooler credentials supplied by the project owner.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Development
 
-## Laravel Sponsors
+Run the application and frontend watcher:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```powershell
+composer run dev
+```
 
-### Premium Partners
+Run tests:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```powershell
+php artisan test
+```
 
-## Contributing
+Build production assets:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```powershell
+npm run build
+```
 
-## Code of Conduct
+## Demo accounts
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The database seeder creates development accounts. Change or remove these credentials before deploying to any shared or production environment.
 
-## Security Vulnerabilities
+| Role | Email | Password |
+|---|---|---|
+| Administrator | `admin@example.com` | `admin123` |
+| Professor | `steven@gmail.com` | `steven123` |
+| Student | `student@example.com` | `student123` |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Project structure
 
-## License
+- `app/` - models, controllers, middleware, and console commands
+- `routes/` - web, API, and role-specific routes
+- `resources/views/` - Blade interfaces
+- `resources/js/` - JavaScript entry points
+- `database/migrations/` - database schema
+- `database/seeders/` - development seed data
+- `tests/` - PHPUnit application tests
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Security
+
+- Never commit `.env`, database credentials, or production backups.
+- Change all demo passwords and remove demo accounts before deployment.
+- Use strong `APP_KEY` and database secrets.
+- Run behind HTTPS in production.
