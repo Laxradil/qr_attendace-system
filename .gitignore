@@ -21,6 +21,10 @@
 /storage/framework/cache/
 /storage/framework/views/
 /vendor
+/storage/debugbar/
+/storage/framework/New folder/
+*.tmp
+/database/*.sqlite
 Homestead.json
 Homestead.yaml
 Thumbs.db
